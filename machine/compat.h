@@ -36,67 +36,6 @@
 
 #include <sys/types.h>
 
-/*
- * For Borland C++ Compiler and VC++ Compiler.
- */
-#if defined(_WIN32) && !defined(__CYGWIN__)
-typedef unsigned char	u_char;
-typedef unsigned int	u_int;
-typedef unsigned long	u_long;
-typedef unsigned short	u_short;
-typedef	signed char		  int8_t;
-typedef	unsigned char		u_int8_t;
-typedef	short			  int16_t;
-typedef	unsigned short		u_int16_t;
-typedef	int			  int32_t;
-typedef	unsigned int		u_int32_t;
-#endif
-
-/*
- * For Solaris.
- */
-#if defined(sun) && defined(__SVR4)
-typedef	unsigned char		 u_int8_t;
-typedef	unsigned short		u_int16_t;
-typedef	unsigned int		u_int32_t;
-#endif
-
-/* If your system doesn't typedef size_t, change the 0 to a 1. */
-#if 0
-typedef unsigned int	size_t;		/* POSIX, 4.[34]BSD names. */
-#endif
-
-/* If your system doesn't typedef ssize_t, change the 0 to a 1. */
-#if 0 || (defined(_WIN32) && !defined(__CYGWIN__))
-typedef	int		ssize_t;	/* POSIX names. */
-typedef char *		caddr_t;
-#endif
-
-/*
- * If your system doesn't have the POSIX type for a signal mask,
- * change the 0 to a 1.
- */
-#if 0 || (defined(_WIN32) && !defined(__CYGWIN__))
-typedef unsigned int	sigset_t;
-#endif
-
-/*
- * If your system's vsprintf returns a char *, not an int,
- * change the 0 to a 1.
- */
-#if 0
-#define	VSPRINTF_CHARSTAR
-#endif
-
-/*
- * If you don't have POSIX 1003.1 signals, the signal code surrounding the 
- * temporary file creation is intended to block all of the possible signals
- * long enough to create the file and unlink it.  All of this stuff is
- * intended to use old-style BSD calls to fake POSIX 1003.1 calls.
- */
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#define NO_POSIX_SIGNALS
-#endif
 #ifdef	NO_POSIX_SIGNALS
 #define	sigemptyset(set)	(*(set) = 0)
 #define	sigfillset(set)		(*(set) = ~(sigset_t)0, 0)
@@ -128,9 +67,13 @@ static int __sigtemp;		/* For the use of sigprocmask */
  * byte order set, make sure you specify the correct one.
  */
 #ifndef BYTE_ORDER
-#define	LITTLE_ENDIAN	1234		/* LSB first: i386, vax */
-#define	BIG_ENDIAN	4321		/* MSB first: 68000, ibm, net */
-#define	BYTE_ORDER	LITTLE_ENDIAN	/* Set for your system. */
+#define LITTLE_ENDIAN   1234
+#define BIG_ENDIAN      4321
+#ifdef WORDS_BIGENDIAN
+#define BYTE_ORDER BIG_ENDIAN
+#else
+#define BYTE_ORDER LITTLE_ENDIAN
+#endif
 #endif
 
 #if defined(SYSV) || defined(SYSTEM5)
@@ -154,11 +97,6 @@ static int __sigtemp;		/* For the use of sigprocmask */
  * ever actually tried it.  At a minimum, change the following #define's
  * if you are trying to compile on a different type of system.
  */
-#ifndef USHRT_MAX
-#define	USHRT_MAX		0xFFFF
-#define	ULONG_MAX		0xFFFFFFFF
-#endif
-
 #ifndef O_ACCMODE			/* POSIX 1003.1 access mode mask. */
 #define	O_ACCMODE	(O_RDONLY|O_WRONLY|O_RDWR)
 #endif
@@ -191,28 +129,10 @@ static int __sigtemp;		/* For the use of sigprocmask */
 #define	EFTYPE		EINVAL		/* POSIX 1003.1 format errno. */
 #endif
 
-#ifndef	WCOREDUMP			/* 4.4BSD extension */
-#define	WCOREDUMP(a)	0
-#endif
-
-#ifndef	STDERR_FILENO
-#define	STDIN_FILENO	0		/* ANSI C #defines */
-#define	STDOUT_FILENO	1
-#define	STDERR_FILENO	2
-#endif
-
 #ifndef SEEK_END
 #define	SEEK_SET	0		/* POSIX 1003.1 seek values */
 #define	SEEK_CUR	1
 #define	SEEK_END	2
-#endif
-
-#ifndef _POSIX_VDISABLE			/* POSIX 1003.1 disabling char. */
-#define	_POSIX_VDISABLE	0		/* Some systems used 0. */
-#endif
-
-#ifndef	TCSASOFT			/* 4.4BSD extension. */
-#define	TCSASOFT	0
 #endif
 
 #ifndef _POSIX2_RE_DUP_MAX		/* POSIX 1003.2 values. */
@@ -230,11 +150,6 @@ static int __sigtemp;		/* For the use of sigprocmask */
 #define	MIN(_a,_b)	((_a)<(_b)?(_a):(_b))
 #endif
 
-/* Default file permissions. */
-#ifndef DEFFILEMODE			/* 4.4BSD extension. */
-#define	DEFFILEMODE	(S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)
-#endif
-
 #ifndef S_ISDIR				/* POSIX 1003.1 file type tests. */
 #define	S_ISDIR(m)	((m & 0170000) == 0040000)	/* directory */
 #define	S_ISCHR(m)	((m & 0170000) == 0020000)	/* char special */
@@ -242,13 +157,12 @@ static int __sigtemp;		/* For the use of sigprocmask */
 #define	S_ISREG(m)	((m & 0170000) == 0100000)	/* regular file */
 #define	S_ISFIFO(m)	((m & 0170000) == 0010000)	/* fifo */
 #endif
-#ifndef S_ISLNK				/* BSD POSIX 1003.1 extensions */
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#define S_ISLNK(m)	(0)
-#else
-#define	S_ISLNK(m)	((m & 0170000) == 0120000)	/* symbolic link */
-#define	S_ISSOCK(m)	((m & 0170000) == 0140000)	/* socket */
+
+#ifndef HAVE_LSTAT
+#define lstat	stat
 #endif
+#ifndef HAVE_GETCWD
+#define getcwd(buf, max) getwd (buf)
 #endif
 
 #endif /* !_COMPAT_H_ */

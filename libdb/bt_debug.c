@@ -38,14 +38,22 @@
 static char sccsid[] = "@(#)bt_debug.c	8.5 (Berkeley) 8/17/94";
 #endif /* LIBC_SCCS and not lint */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <stdio.h>
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "db.h"
 #include "btree.h"
 
-#ifdef DEBUG
 /*
  * BT_DUMP -- Dump the tree
  *
@@ -238,9 +246,7 @@ __bt_dpage(h)
 		(void)fprintf(stderr, "\n");
 	}
 }
-#endif
 
-#ifdef STATISTICS
 /*
  * BT_STAT -- Gather/print the tree statistics
  *
@@ -324,4 +330,3 @@ __bt_stat(dbp)
 		(void)fprintf(stderr, "prefix checking removed %lu bytes.\n",
 		    bt_pfxsaved);
 }
-#endif

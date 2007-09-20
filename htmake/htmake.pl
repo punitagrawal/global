@@ -1,15 +1,10 @@
 #!/usr/bin/perl
 #
-# Copyright (c) 1999
-#		Ron Lee <ron@microtronics.com.au> All rights reserved.
+# Copyright (c) 1999, 2000
+#		Ron Lee <ron@debian.org> All rights reserved.
 #
-#  Permission to use, copy, modify, distribute, and sell this software and
-#  its documentation for any purpose is hereby granted without fee, provided
-#  that the above copyright notice appear in all copies and that both that
-#  copyright notice and this permission notice appear in supporting documen-
-#  tation.  No representations are made about the suitability of this soft-
-#  ware for any purpose.  It is provided "as is" without express or implied
-#  warranty.  If it or anything else breaks, You get to keep all the pieces.
+#  You may distribute this software under the terms of the GNU GPL version 2
+#  or later.
 #
 #	htmake.pl					25-Mar-99
 #
@@ -90,11 +85,11 @@ while ($ARGV[0] =~ /^-/) {
 		$$1 = $2 || $longoption{$1};
 		next;
 	}
-	&usage if ($opt =~ /[^-acCdhlntv]/);
+	&usage if ($opt =~ /[^-acCdFlntv]/);
 	if ($opt =~ /a/) { $htagsflags .= 'a'; }
 	if ($opt =~ /c/) { $htagsflags .= 'c'; }
 	if ($opt =~ /C/) { $htagsflags .= 'C'; }
-	if ($opt =~ /h/) { $htagsflags .= 'h'; }
+	if ($opt =~ /F/) { $htagsflags .= 'F'; }
 	if ($opt =~ /l/) { $htagsflags .= 'l'; }
 	if ($opt =~ /n/) { $htagsflags .= 'n'; }
 	if ($opt =~ /v/) { $verbose = 1; }

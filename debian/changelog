@@ -1,3 +1,12 @@
+global (4.0.1-1) unstable; urgency=low
+
+  * New upstream version.
+  * change of licence, GLOBAL 4.x is now GPL :-)
+  * repackaged with dh_*, updated for current policy.
+  * install gtags.el in line with debian-emacs-policy - Closes: #56122
+
+ -- Ron Lee <ron@debian.org>  Fri, 29 Sep 2000 03:17:41 +0930
+
 global (3.55-1) unstable; urgency=medium
 
   * New upstream version.

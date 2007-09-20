@@ -1,79 +1,108 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
- *            Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999
- *            Tama Communications Corporation. All rights reserved.
+ *             Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999, 2000
+ *             Tama Communications Corporation. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Tama Communications
- *      Corporation and its contributors.
- * 4. Neither the name of the author nor the names of any co-contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * This file is part of GNU GLOBAL.
  *
- *	strbuf.h					12-Jul-99
+ * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
+ * GNU GLOBAL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 #ifndef _STRBUF_H
 #define _STRBUF_H
 
+#include <stdio.h>
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
+
+/* #define STRBUF_LINK */
+
 #define INITIALSIZE 80
 #define EXPANDSIZE 80
 
-typedef struct {
+/* for strbuf_fgets() */
+#define STRBUF_APPEND	1
+#define STRBUF_NOCRLF	2
+
+typedef struct _strbuf {
+#ifdef STRBUF_LINK
+	struct _strbuf *next;
+	struct _strbuf *prev;
+#endif
+	char	*name;
 	char	*sbuf;
 	char	*endp;
 	char	*curp;
 	int	sbufsize;
+	int	alloc_failed;
 } STRBUF;
 
-#define strputc(sb,c)	do {\
-	if (sb->curp + 1 > sb->endp)\
-		expandbuf(sb, 0);\
-	*sb->curp++ = c;\
+#define strbuf_putc(sb, c)	do {\
+	if (!sb->alloc_failed) {\
+		if (sb->curp >= sb->endp)\
+			__strbuf_expandbuf(sb, 0);\
+		*sb->curp++ = c;\
+	}\
 } while (0)
-#define strunputc(sb,c)	do {\
-	if (sb->curp > sb->sbuf && *(sb->curp - 1) == c)\
-		sb->curp--;\
-} while (0)
-#define strnputs(sb, s, len) do {\
+#define strbuf_nputs(sb, s, len) do {\
 	unsigned int _length = len;\
-	if (sb->curp + _length > sb->endp)\
-		expandbuf(sb, _length);\
-	strncpy(sb->curp, s, _length);\
-	sb->curp += _length;\
+	if (!sb->alloc_failed) {\
+		if (sb->curp + _length > sb->endp)\
+			__strbuf_expandbuf(sb, _length);\
+		strncpy(sb->curp, s, _length);\
+		sb->curp += _length;\
+	}\
 } while (0)
-#define strputs(sb, s) strnputs(sb, s, strlen(s))
+#define strbuf_puts(sb, s) strbuf_nputs(sb, s, strlen(s))
+#define strbuf_puts0(sb, s) strbuf_nputs(sb, s, strlen(s) + 1)
 
-void	expandbuf(STRBUF *, int);
-STRBUF	*stropen(void);
-void	strstart(STRBUF *);
-int	strbuflen(STRBUF *);
-char	*strvalue(STRBUF *);
-void	strpushback(STRBUF *, int);
-void	strclose(STRBUF *);
+#define strbuf_reset(sb) do {\
+	sb->curp = sb->sbuf;\
+	sb->alloc_failed = 0;\
+} while (0)
+
+#define strbuf_getlen(sb) (sb->curp - sb->sbuf)
+#define strbuf_setlen(sb, len) do {\
+	unsigned int _length = len;\
+	if (!sb->alloc_failed) {\
+		if (_length < strbuf_getlen(sb))\
+			sb->curp = sb->sbuf + _length;\
+		else if (_length > strbuf_getlen(sb))\
+			__strbuf_expandbuf(sb, _length - strbuf_getlen(sb));\
+	}\
+} while (0)
+#define strbuf_lastchar(sb) (*(sb->curp - 1))
+
+#ifdef DEBUG
+void	strbuf_dump(char *);
+#endif
+void	__strbuf_expandbuf(STRBUF *, int);
+STRBUF	*strbuf_open(int);
+char	*strbuf_value(STRBUF *);
+void	strbuf_trim(STRBUF *);
+int	strbuf_unputc(STRBUF *, int);
+void	strbuf_close(STRBUF *);
+char    *strbuf_fgets(STRBUF *, FILE *, int);
+#ifdef STRBUF_LINK
+void	strbuf_setname(STRBUF *, char *);
+STRBUF	*strbuf_getbuf(char *);
+void	strbuf_closeall();
+#endif
 
 #endif /* ! _STRBUF_H */

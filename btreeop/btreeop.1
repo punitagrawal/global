@@ -1,40 +1,28 @@
 .\"
 .\" Copyright (c) 1996, 1997, 1998, 1999
-.\"            Shigio Yamaguchi. All rights reserved.
-.\" Copyright (c) 1999
-.\"            Tama Communications Corporation. All rights reserved.
+.\"             Shigio Yamaguchi. All rights reserved.
+.\" Copyright (c) 1999, 2000
+.\"             Tama Communications Corporation. All rights reserved.
 .\"
-.\" Redistribution and use in source and binary forms, with or without
-.\" modification, are permitted provided that the following conditions
-.\" are met:
-.\" 1. Redistributions of source code must retain the above copyright
-.\"    notice, this list of conditions and the following disclaimer.
-.\" 2. Redistributions in binary form must reproduce the above copyright
-.\"    notice, this list of conditions and the following disclaimer in the
-.\"    documentation and/or other materials provided with the distribution.
-.\" 3. All advertising materials mentioning features or use of this software
-.\"    must display the following acknowledgement:
-.\"      This product includes software developed by Tama Communications
-.\"      Corporation and its contributors.
-.\" 4. Neither the name of the author nor the names of any co-contributors
-.\"    may be used to endorse or promote products derived from this software
-.\"    without specific prior written permission.
-.\" 
-.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
-.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
-.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-.\" SUCH DAMAGE.
+.\" This file is part of GNU GLOBAL.
+.\"
+.\" GNU GLOBAL is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2, or (at your option)
+.\" any later version.
+.\"
+.\" GNU GLOBAL is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 .\"
 .Dd Nov 3, 1998
 .Dt BTREEOP 1
-.Os BSD 4
+.Os FreeBSD
 .Sh NAME
 .Nm btreeop
 .Nd btree database maintenance tool
@@ -63,20 +51,21 @@ A capital letter means a command. If no command specified
 then it assume sequential read operation.
 .Bl -tag -width Ds
 .It Fl A
-append records. If database doesn't exist, btreeop creates it.
+Append records. If database doesn't exist, btreeop creates it.
 .It Fl C
-create database and write records to it.
+Create database and write records to it.
 .It Fl D[keyno] Ar key
-delete records by the key. By default, keyno is 0 (primary key).
+Delete records by the key. By default, keyno is 0 (primary key).
 .It Fl K[keyno] Ar key
-search records by the key. By default, keyno is 0 (primary key).
+Search records by the key. By default, keyno is 0 (primary key).
 .It Fl L[2]
-list all primary keys. If '2' is specified, list all the key and data pairs.
+List all primary keys. If '2' is specified, list all the key and data pairs.
 .It Fl k Ar prefix
-scan records which have the prefix as a primary key.
+Scan records which have the prefix as a primary key.
 This option is valid only with sequential read operation (-L command or non command).
 .It Ar dbname
-database name. default is 'btree'.
+Database name. default is 'btree'.
+.El
 .Sh DATA FORMAT
 To creat (or append) database,
 .Nm btreeop
@@ -91,8 +80,6 @@ The format of the data is the following.
   .
   .
   .
-
-.El
 
 .Bl -enum -offset indent
 .It

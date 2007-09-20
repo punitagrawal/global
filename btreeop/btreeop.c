@@ -1,57 +1,55 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
- *            Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999
- *            Tama Communications Corporation. All rights reserved.
+ *             Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999, 2000
+ *             Tama Communications Corporation. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Tama Communications
- *      Corporation and its contributors.
- * 4. Neither the name of the author nor the names of any co-contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * This file is part of GNU GLOBAL.
  *
- *      btreeop.c                               12-Dec-99
+ * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
  *
+ * GNU GLOBAL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <ctype.h>
 #include <signal.h>
 #include <stdio.h>
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
+
 
 #include "gparam.h"
 #include "die.h"
 #include "dbop.h"
-#include "mgets.h"
+#include "strbuf.h"
 #include "tab.h"
+#include "version.h"
 
 const char *dbdefault = "btree";   	/* default database name */
 const char *progname  = "btreeop";		/* command name */
+int statistics;
 
 static void	usage(void);
 void	signal_setup(void);
@@ -71,7 +69,7 @@ usage()
 {
 	fprintf(stderr, "%s\n",
 		"usage: btreeop [-A][-C][-D[n] key][-K[n] key][-L[2]][-k prefix][dbname]");
-	exit(1);
+	exit(2);
 }
 
 /*
@@ -83,6 +81,7 @@ void
 onintr(signo)
 int	signo;
 {
+	signo = 0;	/* to satisfy compiler */
 	exitflag = 1;
 }
 
@@ -115,6 +114,18 @@ char	*argv[];
 	char	*prefix = NULL;
 
 	for (i = 1; i < argc && argv[i][0] == '-'; ++i) {
+		if (!strcmp(argv[i], "--version"))
+			version(NULL, 0);
+#ifdef STATISTICS
+		else if (!strcmp(argv[i], "--dump")) {
+			command = 'P';
+			continue;
+		}
+		else if (!strcmp(argv[i], "--stat")) {
+			statistics = 1;
+			continue;
+		}
+#endif
 		switch (c = argv[i][1]) {
 		case 'D':
 		case 'K':
@@ -159,6 +170,7 @@ char	*argv[];
 		break;
 	case 'K':
 	case 'L':
+	case 'P':
 	case 'R':
 		mode = 0;
 		break;
@@ -168,10 +180,10 @@ char	*argv[];
 		switch (mode) {
 		case 0:
 		case 2:
-			die1("cannot open '%s'.", db_name);
+			die("cannot open '%s'.", db_name);
 			break;
 		case 1:
-			die1("cannot create '%s'.", db_name);
+			die("cannot create '%s'.", db_name);
 			break;
 		}
 	}
@@ -190,11 +202,19 @@ char	*argv[];
 	case 'L':			/* primary key List */
 		dbscan(dbop, prefix, keylist);
 		break;
+#ifdef STATISTICS
+	case 'P':
+		dbop_dump(dbop);
+		break;
+#endif
 	}
+#ifdef STATISTICS
+	if (statistics)
+		dbop_stat(dbop);
+#endif
 	dbop_close(dbop);
-	if (exitflag)
-		exit(1);
-	exit(0);
+
+	return exitflag;
 }
 /*
  * dbwrite: write to database
@@ -205,9 +225,9 @@ void
 dbwrite(dbop)
 DBOP	*dbop;
 {
-	char	*p;
+	char	*p, *c;
 	char	keybuf[MAXKEYLEN+1];
-	char	*c;
+	STRBUF	*ib = strbuf_open(MAXBUFLEN);
 
 	signal_setup();
 	/*
@@ -229,7 +249,7 @@ DBOP	*dbop;
 	 * +------------------
 	 * | __.VERSION 2
 	 */
-	while ((p = mgets(stdin, NULL, 0)) != NULL) {
+	while ((p = strbuf_fgets(ib, stdin, STRBUF_NOCRLF)) != NULL) {
 		if (exitflag)
 			break;
 		c = p;
@@ -249,9 +269,9 @@ DBOP	*dbop;
 			;
 		if (*c == 0)
 			die("data part is null.");
-		entab(p);
 		dbop_put(dbop, keybuf, p);
 	}
+	strbuf_close(ib);
 }
 
 /*
@@ -271,7 +291,7 @@ int	secondkey;
 
 	if (!secondkey) {
 		for (p = dbop_first(dbop, skey, NULL, 0); p; p = dbop_next(dbop))
-			detab(stdout, p);
+			fprintf(stdout, "%s\n", p);
 		return;
 	}
 	dbbysecondkey(dbop, F_KEY, skey, secondkey);

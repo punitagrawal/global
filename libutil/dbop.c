@@ -1,55 +1,53 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
- *            Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999
- *            Tama Communications Corporation. All rights reserved.
+ *             Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999, 2000
+ *             Tama Communications Corporation. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Tama Communications
- *      Corporation and its contributors.
- * 4. Neither the name of the author nor the names of any co-contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * This file is part of GNU GLOBAL.
  *
- *      dbop.c                                  12-Dec-98
+ * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
  *
+ * GNU GLOBAL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <assert.h>
 #include <fcntl.h>
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "dbop.h"
 #include "die.h"
+#include "strmake.h"
 #include "test.h"
 
-static DBT	key;				/* key of record	*/
-static DBT	dat;				/* data of record	*/
+int print_statistics = 0;
+
 /*
  * dbop_open: open db database.
  *
@@ -127,6 +125,7 @@ DBOP	*dbop;
 const char *name;
 {
 	DB	*db = dbop->db;
+	DBT	key, dat;
 	int	status;
 
 	key.data = (char *)name;
@@ -159,6 +158,7 @@ const char *name;
 const char *data;
 {
 	DB	*db = dbop->db;
+	DBT	key, dat;
 	int	status;
 	int	len = strlen(name);
 
@@ -192,6 +192,7 @@ DBOP	*dbop;
 const char *name;
 {
 	DB	*db = dbop->db;
+	DBT	key;
 	int	status;
 
 	if (name) {
@@ -225,6 +226,7 @@ regex_t *preg;
 int	flags;
 {
 	DB	*db = dbop->db;
+	DBT	key, dat;
 	int	status;
 
 	dbop->preg = preg;
@@ -300,6 +302,7 @@ DBOP	*dbop;
 {
 	DB	*db = dbop->db;
 	int	flags = dbop->ioflags;
+	DBT	key, dat;
 	int	status;
 
 	while ((status = (*db->seq)(db, &key, &dat, R_NEXT)) == RET_SUCCESS) {
@@ -350,3 +353,17 @@ DBOP	*dbop;
 		die("cannot change file mode.");
 	(void)free(dbop);
 }
+#ifdef STATISTICS
+void
+dbop_dump(dbop)
+DBOP	*dbop;
+{
+	__bt_dump(dbop->db);
+}
+void
+dbop_stat(dbop)
+DBOP	*dbop;
+{
+	__bt_stat(dbop->db);
+}
+#endif

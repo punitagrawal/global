@@ -1,13 +1,14 @@
 Source: global
 Section: devel
 Priority: optional
-Maintainer: Ron C. Lee <ron@microtronics.com.au>
-Standards-Version: 3.0.1.1
+Build-Depends: debhelper
+Maintainer: Ron Lee <ron@debian.org>
+Standards-Version: 3.2.1
 
 Package: global
 Architecture: any
 Depends: ${shlibs:Depends}
-Suggests: lynx | www-browser, apache | httpd
+Suggests: lynx | www-browser, apache | httpd, id-utils
 Description: Source code search and browse.
  GLOBAL is a source code tag system that works the same way across
  diverse environments. Currently, it supports the following:
@@ -23,9 +24,6 @@ Description: Source code search and browse.
  there easily. It is especially useful for hacking large projects
  containing many subdirectories, many '#ifdef' and many main()
  functions, like X or kernel source.
- .
- GLOBAL consists of global(1), gtags(1), htags(1),
- an extended nvi(1), gtags.el and gozilla(1).
  .
  This package include the htmake(1) extension which allows GLOBAL's
  hypertext search function to be implemented from a single central

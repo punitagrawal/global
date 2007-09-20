@@ -1,5 +1,5 @@
 .TH HTMAKE 1 "27 March 1999" "Linux" "GLOBAL cgi Utilities"
-.\" Copyright (c) 1999  Ron Lee.  All rights reserved.
+.\" Copyright (c) 1999, 2000  Ron Lee.  All rights reserved.
 .\" This text may be distributed under the same terms as the htmake source.
 .\" All copies of this manual must acknowledge the author and include the
 .\" above copyright statement.
@@ -42,8 +42,8 @@ Compress html. Use gzip(1) with .html.gz suffix.
 .B -d \fItagdir\fP, --tags=gtagsdbpath
 Specifies the directory in which GTAGS and GRTAGS exist. The default is the current directory.
 .TP
-.B -h
-Add title header frame.
+.B -F
+Use frames for definition index, file index and main view.
 .TP
 .B -l
 Make a name tag for each line of hypertext created.
@@ -101,7 +101,7 @@ This is \fIalpha\fP software \- expect anything!
 .SH "SEE ALSO"
 .BR htconfig (1), " htags" (1), " gtags" (1), " global" (1).
 .SH AUTHOR
-Ron Lee <ron@microtronics.com.au>
+Ron Lee <ron@debian.org>
 .SH CREDITS
 Thanks to Shigio Yamaguchi <shigio@wafu.netgate.net> for creating
 \fBGLOBAL\fP and releasing it as free software.

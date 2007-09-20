@@ -13,3 +13,4 @@ install:
 		chmod 644 $(MANDIR)/man1/$$file.1;\
 	done
 clean:
+

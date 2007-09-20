@@ -35,6 +35,7 @@ install files as root, then by default only root can write to this file.
 
 Comments, patches, praise, and blathering flames can
 be sent along with suggestions for improvement to
-Ron Lee <ron@microtronics.com.au>
+Ron Lee <ron@debian.org>
 
 See the included file 'COPYING' or 'copyright' for licence information.
+
