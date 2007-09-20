@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifndef _PATH_H_
@@ -39,10 +37,10 @@
 
 #define isdrivechar(x) (((x) >= 'A' && (x) <= 'Z') || ((x) >= 'a' && (x) <= 'z'))
 
-int	isabspath(char *);
-char	*canonpath(char *);
-#ifdef __DJGPP__
-char    *realpath(char *, char *);
+int isabspath(const char *);
+char *canonpath(char *);
+#if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
+char *realpath(const char *, char *);
 #endif
 
 #endif /* ! _PATH_H_ */

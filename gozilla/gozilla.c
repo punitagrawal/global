@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2002, 2003, 2004
+ *	Tama Communications Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -27,51 +25,55 @@
 #include <string.h>
 #include <ctype.h>
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <shellapi.h>
 #endif
 
 #include "global.h"
 #include "regex.h"
 #include "const.h"
 
-static void     usage(void);
-static void     help(void);
+static void usage(void);
+static void help(void);
 
 const char *gozillarc = ".gozillarc";
+#ifdef __DJGPP__
+const char *dos_gozillarc = "_gozillarc";
+#endif
 
-static char *alias(char *);
-int	main(int, char **);
-void	getdefinitionURL(char *, STRBUF *);
-void	getURL(char *, STRBUF *);
-int	isprotocol(char *);
-int	issource(char *);
-int	convertpath(char *, char *, char *, STRBUF *);
-void	sendbrowser(char *, char *);
-#ifndef _WIN32
-int	sendcommand(char *);
+static const char *alias(const char *);
+int main(int, char **);
+void getdefinitionURL(const char *, STRBUF *);
+void getURL(const char *, STRBUF *);
+int isprotocol(const char *);
+int issource(const char *);
+int convertpath(const char *, const char *, const char *, STRBUF *);
+#if !defined(_WIN32) && !defined(__DJGPP__)
+void sendbrowser(const char *, const char *);
 #endif
 
 #ifndef isblank
 #define isblank(c)	((c) == ' ' || (c) == '\t')
 #endif
-int	bflag;
-int	pflag;
-int	qflag;
-int	Cflag;
-int	vflag;
-int	show_version;
-int	linenumber = 0;
-int	debug;
+int bflag;
+int pflag;
+int qflag;
+int Cflag;
+int vflag;
+int show_version;
+int linenumber = 0;
+int debug;
 
 static void
-usage()
+usage(void)
 {
 	if (!qflag)
 		fputs(usage_const, stderr);
 	exit(2);
 }
 static void
-help()
+help(void)
 {
 	fputs(usage_const, stdout);
 	fputs(help_const, stdout);
@@ -90,21 +92,28 @@ help()
  * |f = file:/usr/share/xxx.html
  * |www	http://www.xxx.yyy/
  */
-static char *
+static const char *
 alias(alias_name)
-char	*alias_name;
+	const char *alias_name;
 {
 	FILE *ip;
 	STRBUF *sb = strbuf_open(0);
-	char *p, *alias = NULL;
+	char *p;
+	const char *alias = NULL;
 	int flag = STRBUF_NOCRLF;
 
-	if (!(p = getenv("HOME")))
+	if (!(p = get_home_directory()))
 		goto end;
 	if (!test("r", makepath(p, gozillarc, NULL)))
-		goto end;
+#ifdef __DJGPP__
+		if (!test("r", makepath(p, dos_gozillarc, NULL)))
+#endif
+			goto end;
 	if (!(ip = fopen(makepath(p, gozillarc, NULL), "r")))
-		goto end;
+#ifdef __DJGPP__
+		if (!(ip = fopen(makepath(p, dos_gozillarc, NULL), "r")))
+#endif
+			goto end;
 	while ((p = strbuf_fgets(sb, ip, flag)) != NULL) {
 		char *name, *value;
 
@@ -145,14 +154,13 @@ end:
 
 int
 main(argc, argv)
-int	argc;
-char	*argv[];
+	int argc;
+	char *argv[];
 {
-	char	c, *p;
-	char	*browser = NULL;
-	char	*definition = NULL;
-	STRBUF	*arg = strbuf_open(0);
-	STRBUF	*URL = strbuf_open(0);
+	char c;
+	const char *p, *browser = NULL, *definition = NULL;
+	STRBUF *arg = strbuf_open(0);
+	STRBUF *URL = strbuf_open(0);
 
 	while (--argc > 0 && ((c = (++argv)[0][0]) == '-' || c == '+')) {
 		if (argv[0][1] == '-') {
@@ -231,6 +239,11 @@ char	*argv[];
 			fprintf(stdout, "using browser '%s'.\n", browser);
 		exit(0);
 	}
+#ifdef _WIN32
+	if (ShellExecute(NULL, NULL, browser, strbuf_value(URL), NULL, SW_SHOWNORMAL) <= (HINSTANCE)32)
+		die("Cannot load %s (error = 0x%04x).", browser, GetLastError());
+#else
+#ifndef __DJGPP__
 	/*
 	 * send a command to browser.
 	 */
@@ -243,12 +256,33 @@ char	*argv[];
 	/*
 	 * execute generic browser.
 	 */
-	else {
-		char	com[MAXFILLEN+1];
+	else
+#endif /* !__DJGPP__ */
+	{
+		char com[MAXFILLEN+1];
 
+#ifdef __DJGPP__
+		char *path;
+		/*
+		 * assume a Windows browser if it's not on the path.
+		 */
+		if (!(path = usable(browser)))
+		{
+			/*
+			 * START is an internal command in XP, external in 9X.
+			 */
+			if (!(path = usable("start")))
+				path = "cmd /c start";
+			snprintf(com, sizeof(com), "%s %s \"%s\"", path, browser, strbuf_value(URL));
+		}
+		else
+			snprintf(com, sizeof(com), "%s \"%s\"", path, strbuf_value(URL));
+#else
 		snprintf(com, sizeof(com), "%s \"%s\"", browser, strbuf_value(URL));
+#endif /* !__DJGPP__ */
 		system(com);
 	}
+#endif /* _WIN32 */
 	exit(0);
 }
 
@@ -260,17 +294,18 @@ char	*argv[];
  */
 void
 getdefinitionURL(arg, URL)
-char *arg;
-STRBUF *URL;
+	const char *arg;
+	STRBUF *URL;
 {
-	char	cwd[MAXPATHLEN+1];
-	char	root[MAXPATHLEN+1];
-	char	dbpath[MAXPATHLEN+1];
-	char	htmldir[MAXPATHLEN+1];
-	char	*path, *p;
-	DBOP	*dbop = NULL;
-	char	*args[2];
-	int	status = -1;
+	char cwd[MAXPATHLEN+1];
+	char root[MAXPATHLEN+1];
+	char dbpath[MAXPATHLEN+1];
+	char htmldir[MAXPATHLEN+1];
+	char *path, *p;
+	STRBUF *sb = NULL;
+	DBOP *dbop = NULL;
+	SPLIT ptable;
+	int status = -1;
 
 	/*
 	 * get current, root and dbpath directory.
@@ -293,37 +328,45 @@ STRBUF *URL;
 		dbop = dbop_open(path, 0, 0, 0);
 	}
 	if (dbop) {
-		if ((p = dbop_get(dbop, arg)) != NULL) {
-			if (split(p, '\t', 2, args) != 2)
+		if ((p = (char *)dbop_get(dbop, arg)) != NULL) {
+			if (split(p, 2, &ptable) != 2)
 				die("illegal format.");
 			status = 0;
 		}
 		dbop_close(dbop);
 	} else {
-		STRBUF *sb = strbuf_open(0);
 		FILE *fp;
 
+		sb = strbuf_open(0);
 		fp = fopen(path, "r");
 		if (fp) {
 			while ((p = strbuf_fgets(sb, fp, STRBUF_NOCRLF)) != NULL) {
-				if (split(p, '\t', 2, args) != 2)
+				if (split(p, 2, &ptable) != 2)
 					die("illegal format.");
-				if (!strcmp(arg, args[0])) {
+				if (!strcmp(arg, ptable.part[0].start)) {
 					status = 0;
 					break;
 				}
 			}
 			fclose(fp);
 		}
-		strbuf_close(sb);
 	}
 	if (status == -1)
 		die("definition %s not found.", arg);
 	strbuf_reset(URL);
-	strbuf_puts(URL, "file:");
-	strbuf_puts(URL, htmldir);
-	strbuf_putc(URL, '/');
-	strbuf_puts(URL, args[1]);
+	/*
+	 * Make URL.
+	 *
+	 * c:/dir/a.html => file://c|/dir/a.html
+	 */
+#if _WIN32 || __DJGPP__
+	if (htmldir[1] == ':')
+		htmldir[1] = '|';
+#endif
+	strbuf_sprintf(URL, "file://%s/%s", htmldir, ptable.part[1].start);
+	recover(&ptable);
+	if (sb != NULL)
+		strbuf_close(sb);
 }
 /*
  * getURL: get specified URL.
@@ -333,15 +376,15 @@ STRBUF *URL;
  */
 void
 getURL(arg, URL)
-char *arg;
-STRBUF *URL;
+	const char *arg;
+	STRBUF *URL;
 {
-	char	cwd[MAXPATHLEN+1];
-	char	root[MAXPATHLEN+1];
-	char	dbpath[MAXPATHLEN+1];
-	char	htmldir[MAXPATHLEN+1];
-	char	*abspath, *p;
-	char	buf[MAXPATHLEN+1];
+	char cwd[MAXPATHLEN+1];
+	char root[MAXPATHLEN+1];
+	char dbpath[MAXPATHLEN+1];
+	char htmldir[MAXPATHLEN+1];
+	char *abspath, *p;
+	char buf[MAXPATHLEN+1];
 
 	if (!test("f", arg) && !test("d", NULL))
 		die("path '%s' not found.", arg);
@@ -368,18 +411,31 @@ STRBUF *URL;
 		p = abspath + strlen(root);
 		if (convertpath(dbpath, htmldir, p, sb) == -1)
 			die("cannot find the hypertext.");
-		if (linenumber) {
-			strbuf_puts(URL, "file:");
-			strbuf_puts(URL, strbuf_value(sb));
-			strbuf_putc(URL, '#');
-			strbuf_putn(URL, linenumber);
-		} else {
-			strbuf_puts(URL, "file:");
-			strbuf_puts(URL, strbuf_value(sb));
-		}
+		p = strbuf_value(sb);
+		/*
+		 * Make URL.
+		 *
+		 * c:/dir/a.html => file://c|/dir/a.html
+		 */
+#if _WIN32 || __DJGPP__
+		if (p[1] == ':')
+			p[1] = '|';
+#endif
+		strbuf_sprintf(URL, "file://%s", p);
+		if (linenumber)
+			strbuf_sprintf(URL, "#%d", linenumber);
+		strbuf_close(sb);
 	} else {
-		strbuf_puts(URL, "file:");
-		strbuf_puts(URL, abspath);
+		/*
+		 * Make URL.
+		 *
+		 * c:/dir/a.html => file://c|/dir/a.html
+		 */
+#if _WIN32 || __DJGPP__
+		if (abspath[1] == ':')
+			abspath[1] = '|';
+#endif
+		strbuf_sprintf(URL, "file://%s", abspath);
 	}
 }
 /*
@@ -390,9 +446,9 @@ STRBUF *URL;
  */
 int
 isprotocol(url)
-char	*url;
+	const char *url;
 {
-	char	*p;
+	const char *p;
 
 	if (!strncmp(url, "file:", 5))
 		return 1;
@@ -416,12 +472,12 @@ char	*url;
  */
 int
 issource(path)
-char	*path;
+	const char *path;
 {
-	STRBUF	*sb = strbuf_open(0);
-	char	*p;
-	char	suff[MAXPATHLEN+1];
-	int	retval = 0;
+	STRBUF *sb = strbuf_open(0);
+	char *p;
+	char suff[MAXPATHLEN+1];
+	int retval = 0;
 
 	if (!getconfs("suffixes", sb)) {
 		strbuf_close(sb);
@@ -429,7 +485,7 @@ char	*path;
 	}
 	suff[0] = '.';
 	for (p = strbuf_value(sb); p; ) {
-		char    *unit = p;
+		char *unit = p;
 		if ((p = locatestring(p, ",", MATCH_FIRST)) != NULL)
 			*p++ = 0;
 		strlimcpy(&suff[1], unit, sizeof(suff) - 1);
@@ -453,15 +509,15 @@ char	*path;
  */
 int
 convertpath(dbpath, htmldir, path, sb)
-char	*dbpath;
-char	*htmldir;
-char	*path;
-STRBUF	*sb;
+	const char *dbpath;
+	const char *htmldir;
+	const char *path;
+	STRBUF *sb;
 {
 	static const char *suffix[] = {".html", ".htm"};
 	static const char *gz = ".gz";
 	int i, lim = sizeof(suffix)/sizeof(char *);
-	char *p;
+	const char *p;
 
 	strbuf_reset(sb);
 	strbuf_puts(sb, htmldir);
@@ -512,6 +568,7 @@ STRBUF	*sb;
 	}
 	return -1;
 }
+#if !defined(_WIN32) && !defined(__DJGPP__)
 /*
  * sendbrowser: send message to mozilla.
  *
@@ -519,35 +576,13 @@ STRBUF	*sb;
  *	i)	url	URL
  *
  */
-#ifdef _WIN32
 void
 sendbrowser(browser, url)
-char	*browser;
-char	*url;
+	const char *browser;
+	const char *url;
 {
-	char	com[1024], *path;
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	if (!(path = usable(browser)))
-		die("%s not found in your path.", browser);
-	ZeroMemory(&si, sizeof(STARTUPINFO));
-	ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
-	si.cb = sizeof(STARTUPINFO);
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_SHOWNORMAL;
-	snprintf(com, sizeof(com), "%s -remote \"openURL(%s)\"", browser, url);
-	if (!CreateProcess(path, com, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
-		die("Cannot load %s.(error = 0x%04x)\n", browser, GetLastError());
-}
-#else
-void
-sendbrowser(browser, url)
-char	*browser;
-char	*url;
-{
-	int	pid;
-	char	com[1024], *path;
+	int pid;
+	char com[1024], *path;
 
 	if (!(path = usable(browser)))
 		die("%s not found in your path.", browser);
@@ -560,4 +595,4 @@ char	*url;
 		die("cannot load %s (execlp).", browser);
 	}
 }
-#endif /* !_WIN32 */
+#endif /* !_WIN32 and !__DJGPP__ */

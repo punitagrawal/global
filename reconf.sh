@@ -1,7 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2001
-#             Tama Communications Corporation. All rights reserved.
+# Copyright (c) 2001, 2003 Tama Communications Corporation
 #
 # This file is part of GNU GLOBAL.
 #
@@ -17,10 +16,18 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 #
-prog='autoconf automake aclocal autoheader'	# required programs
-file='convert.pl configure.in Makefile.am'	# required files
+# Usage:
+#
+#	% sh reconf.sh [--configure|--make|--install]
+#
+case $1 in
+--help)	echo "Usage: sh reconf.sh [--configure|--make|--install]"
+	exit 0;;
+esac
+prog='autoreconf flex gperf perl bison'	# required programs
+file='convert.pl configure.ac Makefile.am gtags-parser/reserved.pl'	# required files
 
 echo "- File existent checking..."
 for f in `echo $file`; do
@@ -51,30 +58,69 @@ for p in `echo $prog`; do
 	esac
 done
 
+#
+# We should do this before packaging so that user can build it without
+# flex, bison and gperf.
+#
+echo "- Preparing parser source ..."
+(cd gtags-parser; set -x
+for lang in c cpp java php asm; do
+	name=${lang}_res
+	perl ./reserved.pl --prefix=$lang ${lang}_res.in > ${name}.gpf
+	option=`perl ./reserved.pl --prefix=$lang --option`
+	gperf $option < ${name}.gpf > ${name}.h
+	if [ -f $lang.l ]; then
+		flex -o$lang.c $lang.l
+	fi
+	if [ -f ${lang}_scan.l ]; then
+		flex -o${lang}_scan.c ${lang}_scan.l
+	fi
+	if [ -f ${lang}_parse.y ]; then
+		bison -d -o ${lang}_parse.c ${lang}_parse.y
+	fi
+done
+)
+(cd htags; set -x
+for lang in c cpp java php asm; do
+	flex -o$lang.c $lang.l
+done
+)
+
 echo "- Collecting reference manuals ..."
-commands="global gtags htags gctags gozilla btreeop";
-perl ./convert.pl --menu $commands > doc/reference.texi
+commands="global gtags htags gtags-parser gozilla";
+perl ./convert.pl --menu $commands > doc/reference.txi
 for d in `echo $commands`; do
 	perl ./convert.pl --info $d/manual.in > doc/$d.ref
 	echo "+ doc/$d.ref"
 	perl ./convert.pl --man  $d/manual.in > $d/$d.1
 	echo "+ $d/$d.1"
-	if [ $d = 'htags' ]; then
-		perl ./convert.pl --perl $d/manual.in > $d/const.pl
-		echo "+ $d/const.pl"
-	else
-		perl ./convert.pl --c $d/manual.in > $d/const.h
-		echo "+ $d/const.h"
-	fi
+	perl ./convert.pl --c $d/manual.in > $d/const.h
+	echo "+ $d/const.h"
 done
 
 echo "- Clean up config.cache..."
 rm -f config.cache
 
 echo "- Generating configure items..."
-(set -x; aclocal && autoheader && automake --add-missing && automake && autoconf) &&
-if [ "$1" = "-c" ]; then
+(set -x; autoreconf --symlink --verbose --install) &&
+case $1 in
+'')	echo "You are ready to execute ./configure"
+	;;
+--debug)
+	./configure CFLAGS='-g -p -Wall -DDEBUG'
+	make -s
+	;;
+--warn)
+	./configure CFLAGS='-g -O2 -Wall'
+	make -s
+	;;
+-c|--configure|--make|--install)
 	./configure
-else
-	echo "You are ready to execute ./configure."
-fi
+	;;
+esac && case $1 in
+--make)	make
+	;;
+--install)
+	make install
+	;;
+esac

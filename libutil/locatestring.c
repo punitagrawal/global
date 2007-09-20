@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2004
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -30,6 +28,10 @@
 #else
 #include <strings.h>
 #endif
+#ifdef DEBUG
+#include <stdio.h>
+extern int debug;
+#endif
 
 #include "locatestring.h"
 
@@ -40,9 +42,9 @@
  */
 static int
 strincmp(string, pattern, len)
-const char *string;
-const char *pattern;
-size_t len;
+	const char *string;
+	const char *pattern;
+	size_t len;
 {
 	unsigned char s, p;
 
@@ -69,28 +71,35 @@ size_t len;
  *			MATCH_COMPLETE	match completely
  *			IGNORE_CASE:	Ignore case
  *	r)		pointer or NULL
+ *			If the flag == MATCH_AT_FIRST then the pointer
+ *			points the following character of the matched
+ *			string, else points at the head of it.
  *
  * This function is made to avoid compatibility problems.
  */
 int	(*cmpfunc)(char *, char*, int);
 
-char	*
+char *
 locatestring(string, pattern, flag)
-const char *string;
-const char *pattern;
-int	flag;
+	const char *string;
+	const char *pattern;
+	int flag;
 {
-	int	c = *pattern;
-	int	plen = strlen(pattern);
+	int c = *pattern;
+	int plen = strlen(pattern);
 	const char *p = NULL;
-	int	slen;
-	int	(*cmpfunc) ();
+	int slen;
+	int (*cmpfunc) ();
+#ifdef DEBUG
+	FILE *dbg = stderr;
+	const char *pre = string;
+#endif
 
 	cmpfunc = (flag & IGNORE_CASE) ? strincmp : strncmp;
 	flag &= ~IGNORE_CASE;
 
 	if (flag == MATCH_COMPLETE) {
-		if (strlen(string) == slen && !(*cmpfunc)(string, pattern, plen))
+		if (strlen(string) == plen && !(*cmpfunc)(string, pattern, plen))
 			return (char *)string;
 		else
 			return NULL;
@@ -107,5 +116,28 @@ int	flag;
 		if (flag == MATCH_AT_FIRST || flag == MATCH_AT_LAST)
 			break;
 	}
+#ifdef DEBUG
+	if (debug) {
+		fprintf(dbg, "locatestring: ");
+		if (p == NULL)
+			fprintf(dbg, "%s", pre);
+		else {
+			const char *pp = p;
+			const char *post = pp + strlen(pattern);
+
+			for (; *pre && pre < pp; pre++)
+				fputc(*pre, dbg);
+			fputc('[', dbg);
+			for (; *pp && pp < post; pp++)
+				fputc(*pp, dbg);
+			fputc(']', dbg);
+			for (; *post; post++)
+				fputc(*post, dbg);
+		}
+		fputc('\n', dbg);
+	}
+#endif
+	if (p && flag == MATCH_AT_FIRST)
+		p += plen;
 	return (char *)p;
 }

@@ -66,9 +66,7 @@ static PAGE	*bt_root(BTREE *, PAGE *, PAGE **, PAGE **, indx_t *, size_t);
 static int	 bt_rroot(BTREE *, PAGE *, PAGE *, PAGE *);
 static recno_t	 rec_total(PAGE *);
 
-#ifdef STATISTICS
 u_long	bt_rootsplit, bt_split, bt_sortsplit, bt_pfxsaved;
-#endif
 
 /*
  * __BT_SPLIT -- Split the tree.
@@ -94,14 +92,14 @@ __bt_split(t, sp, key, data, flags, ilen, argskip)
 	size_t ilen;
 	u_int32_t argskip;
 {
-	BINTERNAL *bi;
-	BLEAF *bl, *tbl;
+	BINTERNAL *bi = NULL;
+	BLEAF *bl = NULL, *tbl;
 	DBT a, b;
 	EPGNO *parent;
 	PAGE *h, *l, *r, *lchild, *rchild;
 	indx_t nxtindex;
 	u_int16_t skip;
-	u_int32_t n, nbytes, nksize;
+	u_int32_t n, nbytes, nksize = 0;
 	int parentsplit;
 	char *dest;
 
@@ -628,7 +626,7 @@ bt_psplit(t, h, l, r, pskip, ilen)
 	CURSOR *c;
 	RLEAF *rl;
 	PAGE *rval;
-	void *src;
+	void *src = NULL;
 	indx_t full, half, nxt, off, skip, top, used;
 	u_int32_t nbytes;
 	int bigkeycnt, isbigkey;
@@ -680,8 +678,8 @@ bt_psplit(t, h, l, r, pskip, ilen)
 		 * where we decide to try and copy too much onto the left page.
 		 * Make sure that doesn't happen.
 		 */
-		if (skip <= off &&
-		    used + nbytes + sizeof(indx_t) >= full || nxt == top - 1) {
+		if ((skip <= off &&
+		    used + nbytes + sizeof(indx_t) >= full) || nxt == top - 1) {
 			--off;
 			break;
 		}

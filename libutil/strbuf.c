@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2002, 2005
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -83,7 +81,7 @@ static void print_and_abort (void);
 void (*strbuf_alloc_failed_handler) (void) = print_and_abort;
 
 static void
-print_and_abort()
+print_and_abort(void)
 {
 	die("short of memory.");
 }
@@ -95,22 +93,22 @@ STRBUF	top;
  */
 void
 strbuf_dump(msg)
-char	*msg;
+	const char *msg;
 {
-	STRBUF	*sb;
+	STRBUF *sb;
 	int i = 0;
 
 	fprintf(stderr, "[%s/%s]\n", progname, msg);
 	for (sb = top.next; sb && sb != &top; sb = sb->next) {
-		char	*p = strbuf_value(sb);
-		char	*end = p + strbuf_getlen(sb);
+		char *p = strbuf_value(sb);
+		char *end = p + strbuf_getlen(sb);
 
 		*sb->curp = 0;
 		fprintf(stderr, "%d\tsize=%d", strbuf_getlen(sb));
 		if (strbuf_getlen(sb) <= strlen(p))
 			fprintf(stderr, ", value=|%s|\n", p);
 		else {
-			fprintf(stderr, "\n");
+			fputc('\n', stderr);
 			for (; p < end; p += strlen(p) + 1)
 				fprintf(stderr, "\t|%s|", p);
 		}
@@ -125,8 +123,8 @@ char	*msg;
  */
 void
 __strbuf_expandbuf(sb, length)
-STRBUF	*sb;
-int	length;
+	STRBUF *sb;
+	int length;
 {
 	int count = sb->curp - sb->sbuf;
 	int newsize = sb->sbufsize + (length > EXPANDSIZE ? length : EXPANDSIZE);
@@ -155,9 +153,9 @@ int	length;
  */
 STRBUF *
 strbuf_open(init)
-int	init;
+	int init;
 {
-	STRBUF	*sb = (STRBUF *)calloc(sizeof(STRBUF), 1);
+	STRBUF *sb = (STRBUF *)calloc(sizeof(STRBUF), 1);
 
 	if (sb == NULL) {
 		(*strbuf_alloc_failed_handler)();
@@ -186,6 +184,93 @@ int	init;
 	return sb;
 }
 /*
+ * strbuf_clear: clear static string buffer.
+ *
+ *	i)	sb	statically defined string buffer
+ *
+ * This function is used for the initializing of static string buffer.
+ * For the detail, see 'STATIC_STRBUF(sb)' macro in strbuf.h.
+ */
+void
+strbuf_clear(sb)
+	STRBUF *sb;
+{
+	if (sb == NULL)
+		die("NULL string buffer. (strbuf_clear)");
+	if (strbuf_empty(sb)) {
+		sb->sbufsize = INITIALSIZE;
+		if (!(sb->sbuf = (char *)malloc(sb->sbufsize + 1))) {
+			(*strbuf_alloc_failed_handler)();
+			return;
+		}
+		sb->curp = sb->sbuf;
+		sb->endp = sb->sbuf + sb->sbufsize;
+	} else {
+		strbuf_reset(sb);
+	}
+}
+/*
+ * strbuf_nputs: Put string with length
+ *
+ *	i)	sb	statically defined string buffer
+ *	i)	s	string
+ *	i)	len	length of string
+ */
+void
+strbuf_nputs(sb, s, len)
+	STRBUF *sb;
+	const char *s;
+	int len;
+{
+	if (!sb->alloc_failed && len > 0) {
+		if (sb->curp + len > sb->endp)
+			__strbuf_expandbuf(sb, len);
+		while (len-- > 0)
+			*sb->curp++ = *s++;
+	}
+}
+/*
+ * strbuf_puts: Put string
+ *
+ *	i)	sb	statically defined string buffer
+ *	i)	s	string
+ */
+void
+strbuf_puts(sb, s)
+	STRBUF *sb;
+	const char *s;
+{
+	if (!sb->alloc_failed) {
+		while (*s) {
+			if (sb->curp >= sb->endp)
+				__strbuf_expandbuf(sb, 0);
+			*sb->curp++ = *s++;
+		}
+	}
+}
+/*
+ * strbuf_puts_nl: Put string with a new line
+ *
+ *	i)	sb	statically defined string buffer
+ *	i)	s	string
+ */
+void
+strbuf_puts_nl(sb, s)
+	STRBUF *sb;
+	const char *s;
+{
+	if (!sb->alloc_failed) {
+		while (*s) {
+			if (sb->curp >= sb->endp)
+				__strbuf_expandbuf(sb, 0);
+			*sb->curp++ = *s++;
+		}
+		if (sb->curp >= sb->endp)
+			__strbuf_expandbuf(sb, 0);
+		*sb->curp++ = '\n';
+	}
+}
+/*
  * strbuf_putn: put digit string at the last of buffer.
  *
  *	i)	sb	STRBUF structure
@@ -193,26 +278,36 @@ int	init;
  */
 void
 strbuf_putn(sb, n)
-STRBUF	*sb;
-int	n;
+	STRBUF *sb;
+	int n;
 {
-	char num[128];
+	if (n == 0) {
+		strbuf_putc(sb, '0');
+	} else {
+		char num[128];
+		int i = 0;
 
-	snprintf(num, sizeof(num), "%d", n);
-	num[sizeof(num) - 1] = '\0';
-	strbuf_puts(sb, num);
+		while (n) {
+			if (i >= sizeof(num))
+				die("Too big integer value.");
+			num[i++] = n % 10 + '0';
+			n = n / 10;
+		}
+		while (--i >= 0)
+			strbuf_putc(sb, num[i]);
+	}
 }
 /*
  * strbuf_unputc: remove specified char from the last of buffer
  *
  *	i)	sb	STRBUF structure
- *	i)	c	charactor
+ *	i)	c	character
  *	r)		0: do nothing, 1: removed
  */
 int
 strbuf_unputc(sb, c)
-STRBUF	*sb;
-int	c;
+	STRBUF *sb;
+	int c;
 {
 	if (sb->curp > sb->sbuf && *(sb->curp - 1) == c) {
 		sb->curp--;
@@ -226,9 +321,9 @@ int	c;
  *	i)	sb	STRBUF structure
  *	r)		string
  */
-char	*
+char *
 strbuf_value(sb)
-STRBUF	*sb;
+	STRBUF *sb;
 {
 	*sb->curp = 0;
 	return sb->sbuf;
@@ -240,7 +335,7 @@ STRBUF	*sb;
  */
 void
 strbuf_trim(sb)
-STRBUF	*sb;
+	STRBUF *sb;
 {
 	char *p = sb->curp;
 
@@ -262,11 +357,11 @@ STRBUF	*sb;
  * The buffer end with '\0'.If STRBUF_NOCRLF is set then buffer doesn't
  * include '\r' and '\n'.
  */
-char	*
+char *
 strbuf_fgets(sb, ip, flags)
-STRBUF	*sb;
-FILE	*ip;
-int	flags;
+	STRBUF *sb;
+	FILE *ip;
+	int flags;
 {
 	if (!(flags & STRBUF_APPEND))
 		strbuf_reset(sb);
@@ -301,13 +396,96 @@ int	flags;
 	return sb->sbuf;
 }
 /*
+ * strbuf_sprintf: do sprintf into string buffer.
+ *
+ *	i)	sb	STRBUF structure
+ *	i)	s	similar to sprintf()
+ *			Currently the following format is supported.
+ *			%s, %d, %<number>d, %<number>s
+ */
+void
+#ifdef HAVE_STDARG_H
+strbuf_sprintf(STRBUF *sb, const char *s, ...)
+#else
+strbuf_sprintf(sb, s, va_alist)
+	STRBUF *sb;
+	const char *s;
+	va_dcl
+#endif
+{
+	va_list ap;
+
+#ifdef HAVE_STDARG_H
+	va_start(ap, s);
+#else
+	va_start(ap);
+#endif
+	if (sb->alloc_failed)
+		return;
+	for (; *s; s++) {
+		/*
+		 * Put the before part of '%'.
+		 */
+		{
+			const char *p;
+			for (p = s; *p && *p != '%'; p++)
+				;
+			if (p > s) {
+				strbuf_nputs(sb, s, p - s);
+				s = p;
+			}
+		}
+		if (*s == '\0')
+			break;
+		if (*s == '%') {
+			int c = *++s;
+			/*
+			 * '%%' means '%'.
+			 */
+			if (c == '%') {
+				strbuf_putc(sb, c);
+			}
+			/*
+			 * If the optional number is specified then
+			 * we forward the job to snprintf(3).
+			 * o %<number>d
+			 * o %<number>s
+			 */
+			else if (isdigit(c)) {
+				char format[32], buf[1024];
+				int i = 0;
+
+				format[i++] = '%';
+				while (isdigit(*s))
+					format[i++] = *s++;
+				format[i++] = c = *s;
+				format[i] = '\0';
+				if (c == 'd' || c == 'x')
+					snprintf(buf, sizeof(buf), format, va_arg(ap, int));
+				else if (c == 's')
+					snprintf(buf, sizeof(buf), format, va_arg(ap, char *));
+				else
+					die("Unsupported control character '%c'.", c);
+				strbuf_puts(sb, buf);
+			} else if (c == 's') {
+				strbuf_puts(sb, va_arg(ap, char *));
+			} else if (c == 'd') {
+				strbuf_putn(sb, va_arg(ap, int));
+			} else {
+				die("Unsupported control character '%c'.", c);
+			}
+		}
+	}
+	va_end(ap);
+}
+/*
  * strbuf_close: close string buffer.
  *
  *	i)	sb	STRBUF structure
  */
 void
 strbuf_close(sb)
-STRBUF	*sb;
+	STRBUF	*sb;
 {
 #ifdef STRBUF_LINK
 	sb->prev->next = sb->next;
@@ -318,6 +496,36 @@ STRBUF	*sb;
 	(void)free(sb->sbuf);
 	(void)free(sb);
 }
+/*
+ * Temporary string buffer for general purpose.
+ *
+ * Usage:
+ *
+ *	STRBUF *sbt = strbuf_open_tempbuf();
+ *	....
+ *	strbuf_puts(sbtemp, "xxx");
+ *	...
+ *	strbuf_release_tempbuf(sbt);
+ *
+ */
+int used = 0;
+
+STRBUF *
+strbuf_open_tempbuf(void)
+{
+	STATIC_STRBUF(sb);
+	if (used)
+		die("Internal error: temporary string buffer is already used.");
+	used = 1;
+	strbuf_clear(sb);
+	return sb;
+}
+void
+strbuf_release_tempbuf(sb)
+	STRBUF *sb;
+{
+	used = 0;
+}
 #ifdef STRBUF_LINK
 /*
  * strbuf_setname: set name to specified string buffer.
@@ -327,8 +535,8 @@ STRBUF	*sb;
  */
 void
 strbuf_setname(sb, name)
-STRBUF  *sb;
-char	*name;
+	STRBUF  *sb;
+	const char *name;
 {
 	char *p = strdup(name);
 	if (p == NULL) {
@@ -348,7 +556,7 @@ char	*name;
  */
 STRBUF *
 strbuf_getbuf(name)
-char	*name;
+	const char *name;
 {
 	STRBUF *sb;
 
@@ -361,7 +569,7 @@ char	*name;
  * strbuf_closeall: close all string buffer.
  */
 void
-strbuf_closeall()
+strbuf_closeall(void)
 {
 	while (top.next != &top)
 		strbuf_close(top.next);

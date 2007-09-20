@@ -1,7 +1,6 @@
 ## Process this file with automake to create Makefile.in
 #
-# Copyright (c) 2000, 2001
-#        Tama Communications Corporation. All rights reserved.
+# Copyright (c) 2000, 2001 Tama Communications Corporation
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -17,14 +16,16 @@ noinst_HEADERS = \
 conf.h dbop.h defined.h die.h find.h getdbpath.h global.h gparam.h \
 gtagsop.h locatestring.h makepath.h path.h gpathop.h strbuf.h \
 strmake.h tab.h test.h token.h usable.h version.h is_unixy.h abs2rel.h \
-split.h strlimcpy.h
+split.h strlimcpy.h linetable.h env.h char.h vfind.h date.h langmap.h \
+varray.h
 
 libgloutil_a_SOURCES = \
 conf.c dbop.c defined.c die.c find.c getdbpath.c gtagsop.c locatestring.c \
 makepath.c path.c gpathop.c strbuf.c strmake.c tab.c test.c \
-token.c usable.c version.c is_unixy.c abs2rel.c split.c strlimcpy.c
+token.c usable.c version.c is_unixy.c abs2rel.c split.c strlimcpy.c linetable.c \
+env.c char.c vfind.c date.c langmap.c varray.c
 
-AM_CFLAGS = -DBINDIR='"$(bindir)"'
+AM_CFLAGS = -DBINDIR='"$(bindir)"' -DDATADIR='"$(datadir)"'
 
 INCLUDES = @INCLUDES@
 

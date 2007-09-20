@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1999, 2000, 2001
- *             Tama Communications Corporation. All rights reserved.
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -23,21 +23,28 @@
 #include <config.h>
 #endif
 #include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif
 
 #include "version.h"
 
-extern int vflag;
-
 const char *copy = "\
-Copyright (c) 1996, 1997, 1998, 1999 Shigio Yamaguchi.\n\
-Copyright (c) 1999, 2000, 2001, 2002 Tama Communications Corporation.\n\
-GNU GLOBAL comes with NO WARRANTY,\n\
-to the extent permitted by law.\n\
-You may redistribute copies of GNU GLOBAL\n\
-under the terms of the GNU General Public License.\n\
-For more information about these matters,\n\
+Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005\n\
+	Tama Communications Corporation\n\
+GNU GLOBAL comes with NO WARRANTY, to the extent permitted by law.\n\
+You may redistribute copies of GNU GLOBAL under the terms of the\n\
+GNU General Public License. For more information about these matters,\n\
 see the files named COPYING.\n\
 ";
+/*
+ * get_version: get version string.
+ */
+char *
+get_version(void)
+{
+	return VERSION;
+}
 /*
  * version: print version information.
  */
@@ -49,7 +56,7 @@ version(name, verbose)
 	if (name == NULL)
 		name = progname;
 	if (verbose) {
-		fprintf(stdout, "%s - GNU GLOBAL %s\n", name, VERSION);
+		fprintf(stdout, "%s - %s\n", name, PACKAGE_STRING);
 		fprintf(stdout, "%s", copy);
 	} else {
 		fprintf(stdout, "%s\n", VERSION);

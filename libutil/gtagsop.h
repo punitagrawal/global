@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifndef _GTOP_H_
@@ -48,7 +46,6 @@
 #define GTAGS_STANDARD		0	/* standard format */
 #define GTAGS_COMPACT		1	/* compact format */
 #define GTAGS_PATHINDEX		2	/* use path index */
-#define GTAGS_POSTGRES		4	/* use postgres database */
 /* gtags_add() */
 #define GTAGS_UNIQUE		1	/* compress duplicate lines */
 #define GTAGS_EXTRACTMETHOD	2	/* extract method from class definition */
@@ -59,48 +56,44 @@
 #define GTOP_NOSOURCE		4	/* don't read source file */
 #define GTOP_NOREGEX		8	/* don't use regular expression */
 #define GTOP_IGNORECASE		16	/* ignore case distinction */
-
-#define isregexchar(c)	(regexchar[c])
+#define GTOP_BASICREGEX		32	/* use basic regular expression */
 
 typedef struct {
-	DBOP	*dbop;			/* descripter of DBOP */
-	int	format_version;		/* format version */
-	int	format;			/* GTAGS_STANDARD, GTAGS_COMPACT */
-	int	mode;			/* mode */
-	int	db;			/* 0:GTAGS, 1:GRTAGS, 2:GSYMS */
-	int	openflags;		/* flags value of gtags_open() */
-	int	flags;			/* flags */
-	char	root[MAXPATHLEN+1];	/* root directory of source tree */
+	DBOP *dbop;			/* descripter of DBOP */
+	int format_version;		/* format version */
+	int format;			/* GTAGS_STANDARD, GTAGS_COMPACT */
+	int mode;			/* mode */
+	int db;				/* 0:GTAGS, 1:GRTAGS, 2:GSYMS */
+	int openflags;			/* flags value of gtags_open() */
+	int flags;			/* flags */
+	char root[MAXPATHLEN+1];	/* root directory of source tree */
 	/*
 	 * Stuff for compact format
 	 */
-	int	opened;			/* whether or not file opened */
-	char	*line;			/* current record */
-	char	tag[IDENTLEN+1];	/* current tag */
-	char	prev_tag[IDENTLEN+1];	/* previous tag */
-	char	path[MAXPATHLEN+1];	/* current path */
-	char	prev_path[MAXPATHLEN+1];/* previous path */
-	char	prev_fid[32];		/* previous fid (postgres) */
-	STRBUF	*sb;			/* string buffer */
-	STRBUF	*ib;			/* input buffer */
-	FILE	*fp;			/* descriptor of 'path' */
-	char	*lnop;			/* current line number */
-	int	lno;			/* integer value of 'lnop' */
+	int opened;			/* whether or not file opened */
+	char *line;			/* current record */
+	char tag[IDENTLEN+1];		/* current tag */
+	char prev_tag[IDENTLEN+1];	/* previous tag */
+	char path[MAXPATHLEN+1];	/* current path */
+	char prev_path[MAXPATHLEN+1];	/* previous path */
+	STRBUF *sb;			/* string buffer */
+	STRBUF *ib;			/* input buffer */
+	FILE *fp;			/* descriptor of 'path' */
+	const char *lnop;		/* current line number */
+	int lno;			/* integer value of 'lnop' */
 } GTOP;
 
 const char *dbname(int);
-void	makecommand(char *, char *, STRBUF *);
-int	formatcheck(char *, int);
-int	notnamechar(char *);
-int	isregex(char *);
-void	gtags_setinfo(char *);
-GTOP	*gtags_open(char *, char *, int, int, int);
-void	gtags_put(GTOP *, char *, char *, char *);
-char	*gtags_get(GTOP *, char *);
-void    gtags_add(GTOP *, char *, char *, int);
-void	gtags_delete(GTOP *, char *);
-char	*gtags_first(GTOP *, char *, int);
-char	*gtags_next(GTOP *);
-void	gtags_close(GTOP *);
+void makecommand(const char *, const char *, STRBUF *);
+void formatcheck(const char *, int);
+int notnamechar(const char *);
+GTOP *gtags_open(const char *, const char *, int, int, int);
+void gtags_put(GTOP *, const char *, const char *);
+const char *gtags_get(GTOP *, const char *);
+void gtags_add(GTOP *, const char *, const char *, int);
+void gtags_delete(GTOP *, const char *);
+const char *gtags_first(GTOP *, const char *, int);
+const char *gtags_next(GTOP *);
+void gtags_close(GTOP *);
 
 #endif /* ! _GTOP_H_ */

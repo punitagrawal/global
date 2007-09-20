@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1998, 1999, 2000, 2001, 2002, 2005
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -38,26 +36,29 @@
 #include "gparam.h"
 #include "conf.h"
 #include "die.h"
+#include "env.h"
+#include "langmap.h"
 #include "locatestring.h"
 #include "makepath.h"
+#include "path.h"
 #include "strbuf.h"
 #include "strlimcpy.h"
 #include "strmake.h"
 #include "test.h"
 #include "usable.h"
 
-static FILE	*fp;
-static STRBUF	*ib;
-static char	*confline;
+static FILE *fp;
+static STRBUF *ib;
+static char *confline;
 /*
  * 8 level nested tc= or include= is allowed.
  */
-static int	allowed_nest_level = 8;
-static int	opened;
+static int allowed_nest_level = 8;
+static int opened;
 
-static void	trim(char *);
-static char	*readrecord(const char *);
-static void	includelabel(STRBUF *, const char *, int);
+static void trim(char *);
+static const char *readrecord(const char *);
+static void includelabel(STRBUF *, const char *, int);
 
 #ifndef isblank
 #define isblank(c)	((c) == ' ' || (c) == '\t')
@@ -73,10 +74,10 @@ static void	includelabel(STRBUF *, const char *, int);
  */
 static void
 trim(l)
-char	*l;
+	char *l;
 {
-	char	*f, *b;
-	int	colon = 0;
+	char *f, *b;
+	int colon = 0;
 
 	/*
 	 * delete blanks.
@@ -111,13 +112,13 @@ char	*l;
  * o append following line.
  * o format check.
  */
-static char	*
+static const char *
 readrecord(label)
-const char *label;
+	const char *label;
 {
-	char	*p;
-	int	flag = STRBUF_NOCRLF;
-	int	count = 0;
+	char *p;
+	int flag = STRBUF_NOCRLF;
+	int count = 0;
 
 	rewind(fp);
 	while ((p = strbuf_fgets(ib, fp, flag)) != NULL) {
@@ -134,7 +135,7 @@ const char *label;
 		}
 		trim(p);
 		for (;;) {
-			char *candidate;
+			const char *candidate;
 			/*
 			 * pick up candidate.
 			 */
@@ -142,7 +143,7 @@ const char *label;
 				die("invalid config file format (line %d).", count);
 			if (!strcmp(label, candidate)) {
 				if (!(p = locatestring(p, ":", MATCH_FIRST)))
-					die("invalid config file format (line %d).", strbuf_value(ib));
+					die("invalid config file format (line %d).", count);
 				p = strdup(p);
 				if (!p)
 					die("short of memory.");
@@ -172,13 +173,13 @@ const char *label;
  *	i)	label	record label
  *	i)	level	nest level for check
  */
-static	void
+static void
 includelabel(sb, label, level)
-STRBUF	*sb;
-const char *label;
-int	level;
+	STRBUF	*sb;
+	const char *label;
+	int	level;
 {
-	char	*savep, *p, *q;
+	const char *savep, *p, *q;
 
 	if (++level > allowed_nest_level)
 		die("nested include= (or tc=) over flow.");
@@ -196,37 +197,43 @@ int	level;
 		strbuf_close(inc);
 	}
 	strbuf_puts(sb, p);
-	free(savep);
+	free((void *)savep);
 }
 /*
  * configpath: get path of configuration file.
  */
 static char *
-configpath() {
-	static char config[MAXPATHLEN+1];
-	char *p;
+configpath(void)
+{
+	STATIC_STRBUF(sb);
+	const char *p;
 
+	strbuf_clear(sb);
 	/*
 	 * at first, check environment variable GTAGSCONF.
 	 */
 	if (getenv("GTAGSCONF") != NULL)
-		strlimcpy(config, getenv("GTAGSCONF"), sizeof(config));
+		strbuf_puts(sb, getenv("GTAGSCONF"));
 	/*
 	 * if GTAGSCONF not set then check standard config files.
 	 */
-	else if ((p = getenv("HOME")) && test("r", makepath(p, GTAGSRC, NULL)))
-		strlimcpy(config, makepath(p, GTAGSRC, NULL), sizeof(config));
+	else if ((p = get_home_directory()) && test("r", makepath(p, GTAGSRC, NULL)))
+		strbuf_puts(sb, makepath(p, GTAGSRC, NULL));
+#ifdef __DJGPP__
+	else if ((p = get_home_directory()) && test("r", makepath(p, DOS_GTAGSRC, NULL)))
+		strbuf_puts(sb, makepath(p, DOS_GTAGSRC, NULL));
+#endif
 	else if (test("r", GTAGSCONF))
-		strlimcpy(config, GTAGSCONF, sizeof(config));
+		strbuf_puts(sb, GTAGSCONF);
 	else if (test("r", OLD_GTAGSCONF))
-		strlimcpy(config, OLD_GTAGSCONF, sizeof(config));
+		strbuf_puts(sb, OLD_GTAGSCONF);
 	else if (test("r", DEBIANCONF))
-		strlimcpy(config, DEBIANCONF, sizeof(config));
+		strbuf_puts(sb, DEBIANCONF);
 	else if (test("r", OLD_DEBIANCONF))
-		strlimcpy(config, OLD_DEBIANCONF, sizeof(config));
+		strbuf_puts(sb, OLD_DEBIANCONF);
 	else
 		return NULL;
-	return config;
+	return strbuf_value(sb);
 }
 /*
  * openconf: load configuration file.
@@ -234,10 +241,10 @@ configpath() {
  *	go)	line	specified entry
  */
 void
-openconf()
+openconf(void)
 {
 	STRBUF *sb;
-	char *config;
+	const char *config;
 	extern int vflag;
 
 	assert(opened == 0);
@@ -254,9 +261,9 @@ openconf()
 			die("short of memory.");
 	}
 	/*
-	 * if it doesn't start with '/' then assumed config value itself.
+	 * if it is not an absolute path then assumed config value itself.
 	 */
-	else if (*config != '/') {
+	else if (!isabspath(config)) {
 		confline = strdup(config);
 		if (!confline)
 			die("short of memory.");
@@ -298,9 +305,22 @@ openconf()
 	sb = strbuf_open(0);
 	strbuf_puts(sb, confline);
 	strbuf_unputc(sb, ':');
+
 	if (!getconfs("suffixes", NULL)) {
+		STRBUF *tmp = strbuf_open(0);
+		const char *langmap = NULL;
+
+		/*
+		 * Variable 'suffixes' is obsoleted. But it is generated
+		 * internally from the value of variable 'langmap'.
+		 */
+		if (getconfs("langmap", tmp))
+			langmap = strbuf_value(tmp);
+		else
+			langmap = DEFAULTLANGMAP;
 		strbuf_puts(sb, ":suffixes=");
-		strbuf_puts(sb, DEFAULTSUFFIXES);
+		make_suffixes(langmap, sb);
+		strbuf_close(tmp);
 	}
 	if (!getconfs("skip", NULL)) {
 		strbuf_puts(sb, ":skip=");
@@ -312,19 +332,19 @@ openconf()
 	 * (Otherwise, nothing to do for gtags.)
 	 */
 	if (!getconfs("GTAGS", NULL) && !getconfs("GRTAGS", NULL) && !getconfs("GSYMS", NULL)) {
-		char *path;
+		const char *path;
 
 		/*
-		 * Some GNU/Linux has gctags as '/usr/bin/gctags', that is
-		 * different from GLOBAL's one.
 		 * usable search in BINDIR at first.
 		 */
-#if defined(_WIN32) || defined(__DJGPP__)
-		path = "gctags.exe";
+#if defined(_WIN32)
+		path = "gtags-parser.exe";
+#elif defined(__DJGPP__)
+		path = usable("gtags-parser") ? "gtags-parser.exe" : "gtags-~1.exe";
 #else
-		path = usable("gctags");
+		path = usable("gtags-parser");
 		if (!path)
-			path = "gctags";
+			path = "gtags-parser";
 #endif /* _WIN32 */
 		strbuf_puts(sb, ":GTAGS=");
 		strbuf_puts(sb, path);
@@ -336,10 +356,6 @@ openconf()
 		strbuf_puts(sb, path);
 		strbuf_puts(sb, " -dts %s");
 	}
-	if (!getconfs("sort_command", NULL))
-		strbuf_puts(sb, ":sort_command=sort");
-	if (!getconfs("sed_command", NULL))
-		strbuf_puts(sb, ":sed_command=sed");
 	strbuf_unputc(sb, ':');
 	strbuf_putc(sb, ':');
 	confline = strdup(strbuf_value(sb));
@@ -358,11 +374,11 @@ openconf()
  */
 int
 getconfn(name, num)
-const char *name;
-int	*num;
+	const char *name;
+	int *num;
 {
-	char	*p;
-	char	buf[MAXPROPLEN+1];
+	const char *p;
+	char buf[MAXPROPLEN+1];
 
 	if (!opened)
 		openconf();
@@ -384,13 +400,13 @@ int	*num;
  */
 int
 getconfs(name, sb)
-const char *name;
-STRBUF	*sb;
+	const char *name;
+	STRBUF *sb;
 {
-	char	*p;
-	char	buf[MAXPROPLEN+1];
-	int	all = 0;
-	int	exist = 0;
+	const char *p;
+	char buf[MAXPROPLEN+1];
+	int all = 0;
+	int exist = 0;
 
 	if (!opened)
 		openconf();
@@ -403,13 +419,26 @@ STRBUF	*sb;
 			strbuf_putc(sb, ',');		
 		exist = 1;
 		for (p += strlen(buf); *p && *p != ':'; p++) {
-			if (*p == '\\')	/* quoted charactor */
+			if (*p == '\\')	/* quoted character */
 				p++;
 			if (sb)
 				strbuf_putc(sb, *p);
 		}
 		if (!all)
 			break;
+	}
+	/*
+	 * If 'bindir' and 'datadir' are not defined then
+	 * return system configuration value.
+	 */
+	if (!exist) {
+		if (!strcmp(name, "bindir")) {
+			strbuf_puts(sb, BINDIR);
+			exist = 1;
+		} else if (!strcmp(name, "datadir")) {
+			strbuf_puts(sb, DATADIR);
+			exist = 1;
+		}
 	}
 	return exist;
 }
@@ -421,9 +450,9 @@ STRBUF	*sb;
  */
 int
 getconfb(name)
-const char *name;
+	const char *name;
 {
-	char	buf[MAXPROPLEN+1];
+	char buf[MAXPROPLEN+1];
 
 	if (!opened)
 		openconf();
@@ -435,15 +464,15 @@ const char *name;
 /*
  * getconfline: print loaded config entry.
  */
-char *
-getconfline()
+const char *
+getconfline(void)
 {
 	if (!opened)
 		openconf();
 	return confline;
 }
 void
-closeconf()
+closeconf(void)
 {
 	if (!opened)
 		return;

@@ -1,7 +1,6 @@
 ## Process this file with automake to create Makefile.in
 #
-# Copyright (c) 2000, 2001
-#        Tama Communications Corporation. All rights reserved.
+# Copyright (c) 2000, 2001, 2003, 2004 Tama Communications Corporation
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -11,21 +10,23 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-if DJGPP
-bin_SCRIPTS = htags htags.bat
-else
-bin_SCRIPTS = htags
-endif
+bin_PROGRAMS= htags
 
-PERL = @PERL@
+htags_SOURCES = htags.c defineindex.c dupindex.c fileindex.c src2html.c \
+		anchor.c cache.c common.c incop.c assoc.c path2url.c \
+		c.c cpp.c java.c php.c asm.c
 
-htags: $(srcdir)/htags.in $(srcdir)/const.pl
-	echo "#! @PERL@" | cat - $(srcdir)/const.pl $(srcdir)/htags.in | \
-	sed -e 's,@''PERL''@,$(PERL),g' >htags.tmp && \
-	chmod +x htags.tmp && mv htags.tmp htags
+noinst_HEADERS = htags.h anchor.h cache.h common.h incop.h assoc.h path2url.h \
+		lexcommon.h
+
+INCLUDES = @INCLUDES@ -I$(srcdir)
+
+LDADD = @LDADD@
+
+htags_DEPENDENCIES = $(LDADD)
 
 man_MANS = htags.1
 
-EXTRA_DIST = $(man_MANS) htags.in manual.in const.pl htags.bat
-
-CLEANFILES = htags
+EXTRA_DIST = $(man_MANS) manual.in \
+		const.h global.cgi.tmpl.in bless.sh.tmpl style.css \
+		c.l cpp.l java.l php.l asm.l

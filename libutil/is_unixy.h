@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2001
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 2001 Tama Communications Corporation
  *
  * Contributed by Jason Hood <jadoxa@yahoo.com.au>, 2001.
  *
@@ -18,12 +17,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifndef _IS_UNIXY_H_
 #define _IS_UNIXY_H_
 
-int	is_unixy(void);
+int is_unixy(void);
 
 #endif /* ! _IS_UNIXY_H_ */

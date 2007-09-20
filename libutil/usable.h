@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1998, 1999, 2000
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -24,6 +22,6 @@
 #ifndef _USABLE_H_
 #define _USABLE_H_
 
-char	*usable(char *);
+char *usable(const char *);
 
 #endif /* ! _USABLE_H_ */

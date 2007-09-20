@@ -1,0 +1,188 @@
+#! @PERL@
+#
+# Copyright (c) 1997, 2004 Tama Communications Corporation
+#
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+#------------------------------------------------------------------
+# SORRY TO HAVE SURPRISED YOU!
+# IF YOU SEE THIS UNREASONABLE FILE WHILE BROUSING, FORGET PLEASE.
+# IF YOU ARE A ADMINISTRATOR OF THIS SITE, PLEASE SETUP HTTP SERVER
+# SO THAT THIS SCRIPT CAN BE EXECUTED AS A CGI COMMAND. THANK YOU.
+#------------------------------------------------------------------
+print "Content-type: text/html\n\n";
+print "@page_begin@\n";
+print "@body_begin@\n";
+$htmlbase = $ENV{'HTTP_REFERER'};
+if (!$htmlbase) {
+	print "@error_begin@Error@error_end@\n";
+	print "@message_begin@Your browser doesn't send HTTP_REFERER.@message_end@\n";
+	print "@body_end@\n";
+	print "@page_end@\n";
+	exit 0;
+}
+$htmlbase =~ s!/[^\/]+$!!;		# remove file name.
+$htmlbase =~ s!/defines$!!;
+$htmlbase =~ s!/S$!!;
+$htmlbase =~ s!/$!!;
+if (! -x '@globalpath@' || ! -x '@gtagspath@') {
+	print "@error_begin@Error@error_end@\n";
+	print "@message_begin@Server side command not found. <a href='$htmlbase/mains.@normal_suffix@'>[return]</a>@message_end@\n";
+	print "@body_end@\n";
+	print "@page_end@\n";
+	exit 0;
+}
+@pairs = split (/&/, $ENV{'QUERY_STRING'});
+foreach $p (@pairs) {
+	($name, $value) = split(/=/, $p);
+	$value =~ tr/+/ /;
+	$value =~ s/%([\dA-Fa-f][\dA-Fa-f])/pack("C", hex($1))/eg;
+	$form{$name} = $value;
+}
+if ($form{'pattern'} eq '') {
+	print "@error_begin@Error@error_end@\n";
+	print "@message_begin@Pattern not specified. <a href='$htmlbase/mains.@normal_suffix@'>[return]</a>@message_end@\n";
+	print "@body_end@\n";
+	print "@page_end@\n";
+	exit 0;
+}
+$pattern = $form{'pattern'};
+$flag = '';
+$words = 'definitions';
+if ($form{'type'} eq 'reference') {
+	$flag = 'r';
+	$words = 'references';
+} elsif ($form{'type'} eq 'symbol') {
+	$flag = 's';
+	$words = 'symbols';
+} elsif ($form{'type'} eq 'path') {
+	$flag = 'P';
+	$words = 'paths';
+} elsif ($form{'type'} eq 'grep') {
+	$flag = 'g';
+	$words = 'patterns';
+} elsif ($form{'type'} eq 'idutils') {
+	$flag = 'I';
+	$words = 'patterns';
+}
+$iflag = '';
+if ($form{'icase'}) {
+	$iflag = 'i';
+}
+$oflag = '';
+if ($form{'other'} && ($flag eq 'g' || $flag eq 'P')) {
+	$oflag = 'o';
+}
+if ($form{'id'}) {
+	chdir("$form{'id'}/cgi-bin");
+	if ($?) {	
+		print "@error_begin@Error@error_end@\n";
+		print "@message_begin@Couldn't find tag directory in secure mode. <a href='$htmlbase/mains.@normal_suffix@'>[return]</a>@message_end@\n";
+		print "@body_end@\n";
+		print "@page_end@\n";
+		exit 0;
+	}
+}
+if ($flag eq 'g' || $flag eq 'I' || $form{'type'} eq 'source' || ($flag eq 'P' && $oflag)) {
+	if (($flag eq 'g' && ! -f "../../GTAGS")
+	 || ($flag eq 'I' && ! -f "../../ID")
+	 || ($form{'type'} eq 'source' && ! -f "../../GTAGS")
+	 || ($flag eq 'P' && $oflag && ! -f "../../GTAGS")) {
+		print "@error_begin@Error@error_end@\n";
+		print "@message_begin@Couldn't execute command. <a href='$htmlbase/mains.@normal_suffix@'>[return]</a>@message_end@\n";
+		print "@body_end@\n";
+		print "@page_end@\n";
+		exit 0;
+	}
+	chdir("../..");
+	if ($?) {	
+		print "@error_begin@Error@error_end@\n";
+		print "@message_begin@Couldn't change directory for $form{'type'} search. <a href='$htmlbase/mains.@normal_suffix@'>[return]</a>@message_end@\n";
+		print "@body_end@\n";
+		print "@page_end@\n";
+		exit 0;
+	}
+} else {
+	if (-f "../../GTAGS" &&
+	(($flag eq '') || ($flag eq 'r' && -f "../../GRTAGS") || $flag eq 's' && -f "../../GSYMS")) {
+		chdir("../..");
+	}
+}
+local(%ctab) = ('&', '&amp;', '<', '&lt;', '>', '&gt;');
+if ($form{'type'} eq 'source') {
+	open(PIPE, "-|") || exec '@gtagspath@', '--secure', '--expand', '-@tabs@', './'.$pattern;
+	if ($?) {	
+		print "@error_begin@Error@error_end@\n";
+		print "@message_begin@Cannot execute gtags. <a href='$htmlbase/mains.@normal_suffix@'>[return]</a>@message_end@\n";
+		print "@body_end@\n";
+		print "@page_end@\n";
+		exit 0;
+	}
+	print "@verbatim_begin@\n";
+	while (<PIPE>) {
+		s/([&<>])/$ctab{$1}/ge;
+		print "@lineno_anchor@";
+		print;
+	}
+	close(PIPE);
+	print "@verbatim_end@\n";
+	print "@body_end@\n";
+	print "@page_end@\n";
+	exit 0;
+}
+#
+# fork and exec global(1) to avoid command substitutions in $pattern.
+#
+open(PIPE, "-|") || exec '@globalpath@', '-x'.$flag.$iflag.$oflag, '-e', $pattern;
+if ($?) {	
+	print "@error_begin@Error@error_end@\n";
+	print "@message_begin@Cannot execute global. <a href='$htmlbase/mains.@normal_suffix@'>[return]</a>@message_end@\n";
+	print "@body_end@\n";
+	print "@page_end@\n";
+	exit 0;
+}
+$pattern =~ s/([&<>])/$ctab{$1}/ge;
+print "@title_begin@" . $pattern . "@title_end@\n";
+print "Following $words are matched to above pattern.@hr@\n";
+$cnt = 0;
+local($tag, $lno, $filename);
+print "@verbatim_begin@\n";
+open(PIPEOUT, "| @gtagspath@ --convert");
+if ($?) {	
+	print "@error_begin@Error@error_end@\n";
+	print "@message_begin@Cannot execute gtags --convert. <a href='$htmlbase/mains.@normal_suffix@'>[return]</a>@message_end@\n";
+	print "@body_end@\n";
+	print "@page_end@\n";
+	exit 0;
+}
+$| = 1;	# flush buffer
+while (<PIPE>) {
+	$cnt++;
+	($tag, $lno, $filename) = split;
+	s/([&<>])/$ctab{$1}/ge;
+	# " ./$filename " is replaced with file number by gtags --convert.
+	s!(^[^ \t]+)!<a href='$htmlbase/S/ ./$filename .@HTML@#L$lno'>$1<\/a>!;
+	print PIPEOUT;
+}
+$| = 1;	# flush buffer
+close(PIPE);
+close(PIPEOUT);
+print "@verbatim_end@\n";
+if ($cnt == 0) {
+	print "@message_begin@Pattern not found. <a href='$htmlbase/mains.@normal_suffix@'>[return]</a>@message_end@\n";
+}
+print "@body_end@\n";
+print "@page_end@\n";
+exit 0;
+#------------------------------------------------------------------
+# SORRY TO HAVE SURPRISED YOU!
+# IF YOU SEE THIS UNREASONABLE FILE WHILE BROUSING, FORGET PLEASE.
+# IF YOU ARE A ADMINISTRATOR OF THIS SITE, PLEASE SETUP HTTP SERVER
+# SO THAT THIS SCRIPT CAN BE EXECUTED AS A CGI COMMAND. THANK YOU.
+#------------------------------------------------------------------

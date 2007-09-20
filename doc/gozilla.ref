@@ -70,19 +70,20 @@ browser to use. By default, it is assumed mozilla.
 @end table
 @unnumberedsubsec EXAMPLES
 @example
-	% gtags
-	% htags
-	% mozilla &
-	% global -x main
+	$ gtags
+	$ htags
+	$ mozilla &
+	$ global -x main
 	main              82 ctags.c          main(argc, argv)
-	% gozilla +82 ctags.c
+	$ gozilla +82 ctags.c
 @end example
 @unnumberedsubsec DIAGNOSTICS
 Gozilla exits with a non 0 value if an error occurred, 0 otherwise.
 @unnumberedsubsec SEE ALSO
 global(1),
 gtags(1),
-htags(1).
+htags(1),
+mozilla(1).
 
 GNU GLOBAL source code tag system@*
 (http://www.gnu.org/software/global/).
@@ -95,7 +96,7 @@ directory, HTML file and even URL, because it is omnivorous.
 I don't know whether or not gozilla works well in Windows32
 environment.
 @unnumberedsubsec AUTHORS
-Shigio Yamaguchi
+Tama Communications Corporation.
 @unnumberedsubsec HISTORY
 The gozilla command appeared in FreeBSD 2.2.2 but did not
 installed by default.

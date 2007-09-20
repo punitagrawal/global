@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1998, 1999, 2000, 2001
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -38,7 +36,7 @@
 #include "defined.h"
 #include "makepath.h"
 
-static DBOP	*dbop = NULL;
+static DBOP *dbop = NULL;
 
 /*
  * Tag command that supports referenced tag must call this function
@@ -46,10 +44,8 @@ static DBOP	*dbop = NULL;
  */
 int
 defined(name)
-const char *name;
+	const char *name;
 {
-	char *path;
-
 	if (dbop == NULL) {
 		const char *dbpath;
 
@@ -58,13 +54,9 @@ const char *name;
 		 */
 		if (!(dbpath = getenv("GTAGSDBPATH")))
 			dbpath = ".";
-		path = strdup(makepath(dbpath, "GTAGS", NULL));
-		if (path == NULL)
-			die("short of memory.");
-		dbop = dbop_open(path, 0, 0, 0);
-		free(path);
+		dbop = dbop_open(makepath(dbpath, "GTAGS", NULL), 0, 0, 0);
 		if (dbop == NULL)
-			die("'%s' not found.", path);
+			die("'GTAGS' not found.");
 	}
 	if (dbop_get(dbop, name))
 		return 1;

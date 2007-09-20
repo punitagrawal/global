@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999, 2000
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -28,7 +26,7 @@
 
 #include "tab.h"
 
-static	int	tabs = 8;
+static int tabs = 8;
 
 #define TABPOS(i)	((i)%tabs == 0)
 /*
@@ -38,7 +36,7 @@ static	int	tabs = 8;
  */
 void
 settabs(n)
-int	n;
+	int n;
 {
 	if (n < 1 || n > 32)
 		return;
@@ -52,11 +50,11 @@ int	n;
  */
 void
 detab(op, buf)
-FILE	*op;
-char	*buf;
+	FILE *op;
+	const char *buf;
 {
-	int	src, dst;
-	char	c;
+	int src, dst;
+	char c;
 
 	src = dst = 0;
 	while ((c = buf[src++]) != 0) {
@@ -79,11 +77,11 @@ char	*buf;
  */
 void
 entab(buf)
-char	*buf;
+	char *buf;
 {
-	int	blanks = 0;
-	int	pos, src, dst;
-	char	c;
+	int blanks = 0;
+	int pos, src, dst;
+	char c;
 
 	pos = src = dst = 0;
 	while ((c = buf[src++]) != 0) {
