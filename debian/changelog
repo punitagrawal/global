@@ -1,3 +1,10 @@
+global (4.8.6-2) unstable; urgency=low
+
+  * Don't touch config.status unconditionally, some of the buildd's
+    seem to choke on that.
+
+ -- Ron Lee <ron@debian.org>  Sat,  6 Aug 2005 05:38:39 +0930
+
 global (4.8.6-1) unstable; urgency=low
 
   * New upstream release.  Closes: #262250, #318848

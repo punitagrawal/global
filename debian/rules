@@ -29,8 +29,11 @@ clean:
               aclocal.m4        \
               configure.ac      \
               config-h.in       \
-              configure         \
-              config.status
+              configure
+
+	# Don't touch this unconditionally, the mips and mipsel
+	# buildd at least seem to crap out trying to chmod it later.
+	if test -e config.status; then touch config.status; fi
 
 	-$(MAKE) distclean
 	dh_clean
