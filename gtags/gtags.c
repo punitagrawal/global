@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
+ * Copyright (c) 1999, 2000, 2001
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 
 #include <ctype.h>
+#include <utime.h>
 #include <signal.h>
 #include <stdio.h>
 #include <time.h>
@@ -42,6 +43,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "getopt.h"
 
 #include "global.h"
 
@@ -68,6 +70,7 @@ int     show_help;
 int	show_config;
 int	do_find;
 int	do_expand;
+int	gtagsconf;
 int	debug;
 char	*extra_options;
 
@@ -80,6 +83,8 @@ Options:\n\
              make tag files with compact format.\n\
      -i, --incremental\n\
              update tag files incrementally.\n\
+     --gtagsconf file\n\
+             load configuration file.\n\
      -I, --idutils\n\
              make index files for idutils(1).\n\
      -o, --omit-gsyms\n\
@@ -116,6 +121,7 @@ static struct option const long_options[] = {
 	{"debug", no_argument, &debug, 1},
 	{"expand", required_argument, &do_expand, 1},
 	{"find", no_argument, &do_find, 1},
+	{"gtagsconf", required_argument, &gtagsconf, 1},
 	{"idutils", optional_argument, &Iflag, 1},
 	{"version", no_argument, &show_version, 1},
 	{"help", no_argument, &show_help, 1},
@@ -153,9 +159,9 @@ main(argc, argv)
 int	argc;
 char	*argv[];
 {
+	char    root[MAXPATHLEN+1];
 	char	dbpath[MAXPATHLEN+1];
 	char	cwd[MAXPATHLEN+1];
-	char	env[MAXENVLEN+1];
 	STRBUF	*sb = strbuf_open(0);
 	const char *p;
 	int	db;
@@ -170,6 +176,25 @@ char	*argv[];
 				settabs(atoi(optarg + 1));
 			else if (!strcmp(p, "idutils"))
 				extra_options = optarg;
+			else if (gtagsconf) {
+				gtagsconf = 0;
+				if (!optarg)
+					usage();
+				else
+#ifdef HAVE_PUTENV
+				{
+					char *env = (char *)malloc(strlen("GTAGSCONF=")+strlen(optarg)+1);
+
+					if (!env)	
+						die("short of memory.");
+					strcpy(env, "GTAGSCONF=");
+					strcat(env, optarg);
+					putenv(env);
+				}
+#else
+				setenv("GTAGSCONF", optarg, 1);
+#endif /* HAVE_PUTENV */
+			}
 			break;
 		case 'c':
 			cflag++;
@@ -221,14 +246,11 @@ char	*argv[];
 		if (debug)
 			fprintf(stdout, "getconfline: %s\n", getconfline());
 		if (argc == 0)
-			fprintf(stdout, "%s\n", configpath());
+			fprintf(stdout, "%s\n", getconfline());
 		else if (!printconf(argv[0]))
 				exit(1);
 		exit(0);
 	} else if (do_find) {
-		char    cwd[MAXPATHLEN+1];
-		char    root[MAXPATHLEN+1];
-		char    dbpath[MAXPATHLEN+1];
 		char	*local;
 		char	*p;
 
@@ -246,15 +268,36 @@ char	*argv[];
 	if (!getcwd(cwd, MAXPATHLEN))
 		die("cannot get current directory.");
 	canonpath(cwd);
-	if (argc > 0) {
-		realpath(*argv, dbpath) ;
+	/*
+	 * Decide directory (dbpath) in which gtags make tag files.
+	 *
+	 * Gtags create tag files at current directory by default.
+	 * If dbpath is specified as an argument then use it.
+	 * If the -i option specified and both GTAGS and GRTAGS exists
+	 * at one of the candedite directories then gtags use existing
+	 * tag files.
+	 */
+	if (iflag) {
+		if (argc > 0)
+			realpath(*argv, dbpath);
+		else if (!gtagsexist(cwd, dbpath, MAXPATHLEN, vflag))
+			strcpy(dbpath, cwd);
 	} else {
-		strcpy(dbpath, cwd);
+		if (argc > 0)
+			realpath(*argv, dbpath);
+		else
+			strcpy(dbpath, cwd);
+	}
+	if (iflag && (!test("f", makepath(dbpath, dbname(GTAGS), NULL)) ||
+		!test("f", makepath(dbpath, dbname(GPATH), NULL)))) {
+		if (wflag)
+			fprintf(stderr, "Warning: GTAGS or GPATH not found. -i option ignored.\n");
+		iflag = 0;
 	}
 	if (!test("d", dbpath))
 		die("directory '%s' not found.", dbpath);
 	if (vflag)
-		fprintf(stderr, "[%s] Gtags started\n", now());
+		fprintf(stderr, "[%s] Gtags started.\n", now());
 	/*
 	 * load .gtagsrc or /etc/gtags.conf
 	 */
@@ -265,38 +308,49 @@ char	*argv[];
 	if (getconfs("format", sb) && !strcmp(strbuf_value(sb), "compact"))
 		cflag++;
 	/*
-	 * teach gctags(1) where is dbpath.
+	 * teach gctags(1) where is dbpath by environment variable.
 	 */
 #ifdef HAVE_PUTENV
-        snprintf(env, sizeof(env), "GTAGSDBPATH=%s", dbpath);
-        putenv(env);
+	{
+		char *env = (char *)malloc(strlen("GTAGSDBPATH=")+strlen(dbpath)+1);
+
+		if (!env)	
+			die("short of memory.");
+		strcpy(env, "GTAGSDBPATH=");
+		strcat(env, dbpath);
+		putenv(env);
+	}
 #else
-        setenv("GTAGSDBPATH", dbpath, 1);
-#endif
+	setenv("GTAGSDBPATH", dbpath, 1);
+#endif /* HAVE_PUTENV */
+
 	if (wflag) {
 #ifdef HAVE_PUTENV
-		snprintf(env, sizeof(env), "GTAGSWARNING=1");
-		putenv(env);
+		putenv("GTAGSWARNING=1");
 #else
-        	setenv("GTAGSWARNING", "1", 1);
-#endif
+		setenv("GTAGSWARNING", "1", 1);
+#endif /* HAVE_PUTENV */
 	}
 	/*
 	 * incremental update.
 	 */
-	if (iflag && test("f", makepath(dbpath, dbname(GTAGS), NULL)) &&
-		test("f", makepath(dbpath, dbname(GRTAGS), NULL)))
-	{
-		/* open for version check */
+	if (iflag) {
+		/*
+		 * Version check. If existing tag files are old enough
+		 * gtagsopen() abort with error message.
+		 */
 		GTOP *gtop = gtagsopen(dbpath, cwd, GTAGS, GTAGS_MODIFY, 0);
 		gtagsclose(gtop);
+		/*
+		 * GPATH is needed for incremental updating.
+		 * Gtags check whether or not GPATH exist, since it may be
+		 * removed by mistake.
+		 */
 		if (!test("f", makepath(dbpath, dbname(GPATH), NULL)))
 			die("Old version tag file found. Please remake it.");
 		(void)incremental(dbpath, cwd);
 		exit(0);
 	}
-	if (iflag && vflag)
-		fprintf(stderr, " GTAGS and GRTAGS not found. -i option ignored.\n");
 	/*
  	 * create GTAGS, GRTAGS and GSYMS
 	 */
@@ -408,8 +462,11 @@ char	*root;
 	 * make add list and update list.
 	 */
 	for (ffindopen(); (path = ffindread(NULL)) != NULL; ) {
-		if (locatestring(path, " ", MATCH_FIRST))
-			die("cannot treat blanks in a path '%s'.", path);
+		if (locatestring(path, " ", MATCH_FIRST)) {
+			if (wflag)
+				fprintf(stderr, "Warning: '%s' ignored, because it includes blank in the path.\n", path);
+			continue;
+		}
 		if (stat(path, &statp) < 0)
 			die("stat failed '%s'.", path);
 		if (!pathget(path))
@@ -484,6 +541,19 @@ char	*root;
 	}
 	if (exitflag)
 		exit(1);
+	if (updated) {
+		int	db;
+		/*
+		 * Update modification time of tag files
+		 * because they may have no definitions.
+		 */
+		for (db = GTAGS; db < GTAGLIM; db++)
+#ifdef HAVE_UTIMES
+			utimes(makepath(dbpath, dbname(db), NULL), NULL);
+#else
+			utime(makepath(dbpath, dbname(db), NULL), NULL);
+#endif /* HAVE_UTIMES */
+	}
 	if (vflag) {
 		if (updated)
 			fprintf(stderr, " Global databases have been modified.\n");
@@ -528,8 +598,16 @@ int	type;
 
 		if (exitflag)
 			break;
-		if (db == GSYMS && !test("f", makepath(dbpath, dbname(db), NULL)))
+		/*
+		 * GTAGS needed at least.
+		 */
+		if ((db == GRTAGS || db == GSYMS) && !test("f", makepath(dbpath, dbname(db), NULL)))
 			continue;
+		/*
+		 * GTAGS needed to make GRTAGS.
+		 */
+		if (db == GRTAGS && !test("f", makepath(dbpath, dbname(GTAGS), NULL)))
+			die("GTAGS needed to create GRTAGS.");
 		if (vflag)
 			fprintf(stderr, "%s", dbname(db));
 		/*
@@ -539,11 +617,6 @@ int	type;
 		if (!getconfs(dbname(db), sb))
 			die("cannot get tag command. (%s)", dbname(db));
 		gtop = gtagsopen(dbpath, root, db, GTAGS_MODIFY, 0);
-		/*
-		 * GTAGS needed to make GRTAGS.
-		 */
-		if (db == GRTAGS && !test("f", makepath(dbpath, dbname(GTAGS), NULL)))
-			die("GTAGS needed to create GRTAGS.");
 		if (type != 1)
 			gtagsdelete(gtop, path);
 		if (vflag)
@@ -615,6 +688,11 @@ int	db;
 
 		if (exitflag)
 			break;
+		if (locatestring(path, " ", MATCH_FIRST)) {
+			if (wflag)
+				fprintf(stderr, "Warning: '%s' ignored, because it includes blank in the path.\n", path);
+			continue;
+		}
 		count++;
 		/*
 		 * GSYMS doesn't treat asembler.
@@ -636,8 +714,6 @@ int	db;
 		}
 		if (skip)
 			continue;
-		if (locatestring(path, " ", MATCH_FIRST))
-			die("cannot treat blanks in a path '%s'.", path);
 		if (db == GSYMS)
 			gflags |= GTAGS_UNIQUE;
 		if (extractmethod)

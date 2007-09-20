@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
+ * Copyright (c) 1999, 2000, 2001
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -72,6 +72,7 @@
 #define CP_LINE		2013
 #define CP_WARNING	2014
 #define CP_IDENT	2015
+#define CP_ASSERT	2016
 #define YACC_SEP	3001
 #define YACC_BEGIN	3002
 #define YACC_END	3003

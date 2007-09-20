@@ -4,8 +4,20 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Copyright (c) 2000
+        Tama Communications Corporation. All rights reserved.
 
-Installation of GNU GLOBAL under Windows 32
+ This file is free software; as a special exception the author gives
+ unlimited permission to copy and/or distribute it, with or without
+ modifications, as long as this notice is preserved.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+ implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+                ----------------------------------
+
+Installation of GNU GLOBAL under Windows 32.
 
 1. Required programs.
 
@@ -29,6 +41,8 @@ o perl for Windows 32.
 Setup above programs and path for them then try this:
 
 C:\global>xcopy /s w32\*.* .
+
+(Edit makefile.inc if you need.)
 
 C:\global>make		<- Invoke make.bat
 
@@ -54,5 +68,5 @@ to be the DOS-style ';' instead of the UNIX-style ':'.
 
 Global 4.0 has been tested under Windows NT 4.0 with Borland C++ 5.5.
 
-Dan Fandrich <dan@fch.wimsey.bc.ca>
-Shigio Yamaguchi <shigio@tamacom.com>
+Dan Fandrich
+Shigio Yamaguchi

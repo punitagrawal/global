@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
+ * Copyright (c) 1999, 2000, 2001
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -57,8 +57,9 @@
 #define GTOP_PREFIX		2	/* prefixed read */
 #define GTOP_NOSOURCE		4	/* don't read source file */
 #define GTOP_NOREGEX		8	/* don't use regular expression */
+#define GTOP_IGNORECASE		16	/* ignore case distinction */
 
-#define isnamechar(c)	(isalpha(c) || isdigit(c) || c == '_' || c == '-')
+#define isregexchar(c)	(regexchar[c])
 
 typedef struct {
 	DBOP	*dbop;			/* descripter of DBOP */
@@ -71,7 +72,7 @@ typedef struct {
 	/*
 	 * Stuff for compact format
 	 */
-	int	opened;			/* wether or not file opened */
+	int	opened;			/* whether or not file opened */
 	char	*line;			/* current record */
 	char	tag[IDENTLEN+1];	/* current tag */
 	char	prev_tag[IDENTLEN+1];	/* previous tag */
@@ -88,6 +89,7 @@ const char *dbname(int);
 void	makecommand(char *, char *, STRBUF *);
 int	formatcheck(char *, int);
 int	notnamechar(char *);
+int	isregex(char *);
 GTOP	*gtagsopen(char *, char *, int, int, int);
 void	gtagsput(GTOP *, char *, char *);
 char	*gtagsget(GTOP *, char *);

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
+ * Copyright (c) 1999, 2000, 2001
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -438,20 +438,31 @@ condition_macro(cc)
 		level = cur->start;
 		cur->if0only = 0;
 	} else if (cc == CP_ENDIF) {
-		if (cur->if0only)
-			level = cur->start;
-		else if (cur->end != -1) {
-			if (cur->end != level && wflag)
-				fprintf(stderr, "Warning: uneven level. [+%d %s]\n", lineno, curfile);
-			level = cur->end;
-		}
+		int	minus = 0;
+
 		--piflevel;
+		if (piflevel < 0) {
+			minus = 1;
+			piflevel = 0;
+		}
 		DBG_PRINT(piflevel, "#endif");
+		if (minus) {
+			fprintf(stderr, "Warning: #if block unmatched. reseted. [+%d %s]\n", lineno, curfile);
+		} else {
+			if (cur->if0only)
+				level = cur->start;
+			else if (cur->end != -1) {
+				if (cur->end != level && wflag)
+					fprintf(stderr, "Warning: uneven level. [+%d %s]\n", lineno, curfile);
+				level = cur->end;
+			}
+		}
 	}
 }
 		/* sorted by alphabet */
 static struct words words[] = {
 	{"##",		CP_SHARP},
+	{"#assert",	CP_ASSERT},
 	{"#define",	CP_DEFINE},
 	{"#elif",	CP_ELIF},
 	{"#else",	CP_ELSE},

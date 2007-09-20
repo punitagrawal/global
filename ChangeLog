@@ -4,8 +4,44 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Copyright (c) 2000, 2001
+        Tama Communications Corporation. All rights reserved.
+
+ This file is free software; as a special exception the author gives
+ unlimited permission to copy and/or distribute it, with or without
+ modifications, as long as this notice is preserved.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+ implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+		----------------------------------
 
 ChangeLog about GNU GLOBAL
+
+July 31 2001, Shigio Yamaguchi  <shigio@tamacom.com>
+
+	* VERSION: removed.
+	* compat.h: moved to libdb/.
+	* machine/: removed.
+	* htags: WWW link in hypertext was modified.
+	* gtags.c, global.c: rewrite code for putenv(3) using malloc(3).
+
+July 12 2001, Shigio Yamaguchi  <shigio@tamacom.com>
+
+	* config variable HAVE_SNPRINTF and AC_FUNC_ALLOCA added.
+	* stop using MAXENVLEN because it brings buffer overflow.
+	* htags.pl: the value of id changed from src directory
+	  to HTML directory.
+	* libutil/conf.c: error check added.
+	* libutil/gtagsop.c: replace notnamechar() with isregex().
+	* put '#assert' into reserved word.
+	* reconf.sh: command for generating configure added.
+	* Copyright notice added for short files that are not important
+	  enough to worry about copylefting.
+	* libdb/db.h: typdefs pgno_t, indx_t and recno_t changed into macros.
+	* gctags/{C.c,Cpp.c}: memory violation fixed.
+	* libutil/getopt* and libregex/* moved to new libglibc/ directory.
 
 September 26 2000, Shigio Yamaguchi  <shigio@tamacom.com>
 
@@ -24,7 +60,7 @@ September 3 2000, Shigio Yamaguchi  <shigio@tamacom.com>
 	* htags.pl: most code which depend on javascript are removed
 	  because most of browsers don't support the language.
 	* mgets.c: now belongs strbuf.c as strbuf_fgets().
-	* strbuf.c: new argment 'initial buffer size' of strbuf_open().
+	* strbuf.c: new argument 'initial buffer size' of strbuf_open().
 	* global.conf: one line script for ctags-exuberant fixed.
 	* Cpp.h, java.h: MAXCLASSSTACK changed from 10 to 100.
 	* use snprintf(3) instead of sprintf(3). 

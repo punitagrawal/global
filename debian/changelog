@@ -1,3 +1,15 @@
+global (4.1.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Lots of bugfixes (possibly not all of these, but I'm sure
+    Yann will reopen them if any still do exist :)
+    Closes: #51837, #58210, #58238, #77198, #78509, #58233
+    Closes: #58234, #58307, #76629, #77207, #77892, #78515
+  * Fix info heading. Closes: #76988
+  * Fixed emacsen support files install.  Closes: #90429
+
+ -- Ron Lee <ron@debian.org>  Thu, 11 Oct 2001 07:28:10 -0700
+
 global (4.0.1-2) unstable; urgency=medium
 
   * actually install gtags.el in the correct place this time,
@@ -5,7 +17,7 @@ global (4.0.1-2) unstable; urgency=medium
     debian-emacs-policy which I stupidly trusted to be basically
     sound - Closes: #74036
 
- -- Ron C. Lee <ron@debian.org>  Thu,  5 Oct 2000 22:18:52 +0930
+ -- Ron Lee <ron@debian.org>  Thu,  5 Oct 2000 22:18:52 +0930
 
 global (4.0.1-1) unstable; urgency=low
 

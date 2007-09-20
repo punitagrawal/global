@@ -9,7 +9,7 @@ GNU GLOBAL source code tag system is covered by the followings:
 
     Copyright (c) 1996, 1997, 1998, 1999
                 Shigio Yamaguchi. All rights reserved.
-    Copyright (c) 1999, 2000
+    Copyright (c) 1999, 2000, 2001
                 Tama Communications Corporation. All rights reserved.
 
     GNU GLOBAL is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ GNU GLOBAL source code tag system is covered by the followings:
 nvi-1.79-gtags.diff
 
      This file is placed into the public domain by the author,
-     Shigio Yamaguchi <shigio@tamacom.com>
+     Shigio Yamaguchi
 
 Getopt for GNU (getopt.c getopt.h getopt1.c):
 
