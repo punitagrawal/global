@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	defined.c				12-Nov-98
+ *	defined.c				3-Aug-99
  *
  */
 #include <stdlib.h>
@@ -56,9 +60,9 @@ const char *name;
 		 */
 		if (!(dbpath = getenv("GTAGSDBPATH")))
 			dbpath = ".";
-		dbop = dbop_open(makepath(dbpath, "GTAGS"), 0, 0, 0);
+		dbop = dbop_open(makepath(dbpath, "GTAGS", NULL), 0, 0, 0);
 		if (dbop == NULL)
-			die1("GTAGS not found. (%s)", makepath(dbpath, "GTAGS"));
+			die1("GTAGS not found. (%s)", makepath(dbpath, "GTAGS", NULL));
 	}
 	if (dbop_get(dbop, name))
 		return 1;

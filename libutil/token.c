@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1998, 1999 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by Shigio Yamaguchi.
- * 4. Neither the name of the author nor the names of its contributors
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
+ * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,14 +32,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	token.c						2-Feb-99
+ *	token.c					3-Nov-99
  */
 
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/param.h>
 
+#include "gparam.h"
 #include "mgets.h"
 #include "token.h"
 
@@ -43,19 +47,19 @@
  * File input method.
  */
 int	lineno;
-char	*sp, *cp, *lp;
+unsigned char *sp, *cp, *lp;
 int	crflag;			/* 1: return '\n', 0: doesn't return */
 int	cmode;			/* allow token which start with '#' */
 int	cppmode;		/* allow token '::' */
 int	ymode;			/* allow token which start with '%' */
-char	token[MAXTOKEN];
-char	curfile[MAXPATHLEN];
+unsigned char	token[MAXTOKEN];
+unsigned char	curfile[MAXPATHLEN];
 
-static	char ptok[MAXTOKEN];
+static	unsigned char ptok[MAXTOKEN];
 static	int lasttok;
 static	FILE *ip;
 
-static	void pushbackchar __P((void));
+static	void pushbackchar(void);
 
 /*
  * opentoken:
@@ -64,7 +68,10 @@ int
 opentoken(file)
 	char	*file;
 {
-	if ((ip = fopen(file, "r")) == NULL)
+	/*
+	 * b flag is needed for WIN32 environment. Almost unix ignore it.
+	 */
+	if ((ip = fopen(file, "rb")) == NULL)
 		return 0;
 	strcpy(curfile, file);
 	sp = cp = lp = NULL; ptok[0] = 0; lineno = 0;

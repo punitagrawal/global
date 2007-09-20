@@ -1,5 +1,8 @@
 .\"
-.\" Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+.\" Copyright (c) 1996, 1997, 1998, 1999
+.\"            Shigio Yamaguchi. All rights reserved.
+.\" Copyright (c) 1999
+.\"            Tama Communications Corporation. All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
 .\"    documentation and/or other materials provided with the distribution.
 .\" 3. All advertising materials mentioning features or use of this software
 .\"    must display the following acknowledgement:
-.\"	This product includes software developed by Shigio Yamaguchi.
+.\"      This product includes software developed by Tama Communications
+.\"      Corporation and its contributors.
 .\" 4. Neither the name of the author nor the names of any co-contributors
 .\"    may be used to endorse or promote products derived from this software
 .\"    without specific prior written permission.
-.\"
+.\" 
 .\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
 .\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 .\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,12 +32,12 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd Oct 11, 1998
+.Dd Aug 27, 1999
 .Dt HTAGS 1
 .Os BSD 4
 .Sh NAME
 .Nm htags
-.Nd generate hypertext from C, Yacc and Java source code
+.Nd generate hypertext from C, C++, Yacc, Java and assembler source code
 .Sh SYNOPSIS
 .Nm htags
 .Op Fl a
@@ -83,7 +87,7 @@ Add title header frame. By default, doesn't add this.
 .It Fl l
 Make a name tag(<A NAME=line number>) for each line, so that other hypertext
 can link to any line of this hypertext.
-By default, htags makes it only for lines that are referred to by an object.
+By default, htags makes it only for lines that are referred to.
 .It Fl n
 Print the line numbers. By default, doesn't print that.
 .It Fl v
@@ -94,14 +98,14 @@ Print a warning message.
 Specifies the directory in which GTAGS and GRTAGS exist. The default is the
 current directory.
 .It Fl t Ar title
-The title of this hypertext. Defaults to the last component of the current
-path.
+The title of this hypertext. The default is the last component of the
+current directory.
 .It Ar dir
 The directory in which hypertext is generated. The default is the current
 directory.
 .Sh EXAMPLES
   % cd /usr/src/sys
-  # gtags -o
+  # gtags
   # htags -fnvat 'Welcom to FreeBSD kernel source tour!'
   % lynx HTML/index.html
 .Sh FILES
@@ -130,7 +134,7 @@ exits with a non 0 value if an error occurred, 0 otherwise.
 .Sh BUG
 Generated hypertext is VERY LARGE. In advance, check the space of your disk.
 .Sh AUTHORS
-Shigio Yamaguchi (shigio@wafu.netgate.net)
+Shigio Yamaguchi (shigio@tamacom.com)
 .Sh HISTORY
 The
 .Nm

@@ -1,7 +1,10 @@
 ;;; gtags.el --- gtags facility for Emacs
 
 ;;
-;; Copyright (c) 1997, 1998, 1999 Shigio Yamaguchi. All rights reserved.
+;; Copyright (c) 1996, 1997, 1998, 1999
+;;            Shigio Yamaguchi. All rights reserved.
+;; Copyright (c) 1999
+;;            Tama Communications Corporation. All rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
 ;; modification, are permitted provided that the following conditions
@@ -13,11 +16,12 @@
 ;;    documentation and/or other materials provided with the distribution.
 ;; 3. All advertising materials mentioning features or use of this software
 ;;    must display the following acknowledgement:
-;;       This product includes software developed by Shigio Yamaguchi.
+;;      This product includes software developed by Tama Communications
+;;      Corporation and its contributors.
 ;; 4. Neither the name of the author nor the names of any co-contributors
 ;;    may be used to endorse or promote products derived from this software
 ;;    without specific prior written permission.
-;;
+;; 
 ;; THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
 ;; ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ;; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -30,12 +34,13 @@
 ;; OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ;; SUCH DAMAGE.
 ;;
-;;	gtags.el	10-Jan-99
+;;	gtags.el	17-Sep-99
 ;;
 
 ;; This file is part of GLOBAL.
-;; Author: Shigio Yamaguchi <shigio@wafu.netgate.net>
-;; Version: 1.51
+;; GLOBAL home page is at: http://www.tamacom.com/global/
+;; Author: Shigio Yamaguchi <shigio@tamacom.com>
+;; Version: 1.53
 ;; Keywords: tools
 
 ;;; Code
@@ -46,6 +51,8 @@
   "Stack for tag browsing.")
 (defvar gtags-complete-list nil
   "Gtags complete list.")
+(defvar gtags-history-list nil
+  "Gtags history list.")
 (defconst symbol-regexp "[A-Za-z_][A-Za-z_0-9]*"
   "Regexp matching tag name.")
 (defconst definition-regexp "#[ \t]*define[ \t]+\\|ENTRY(\\|ALTENTRY("
@@ -54,17 +61,24 @@
   "Gtags read only mode")
 (defvar gtags-mode-map (make-sparse-keymap)
   "Keymap used in gtags mode.")
+(defvar running-xemacs (string-match "XEmacs\\|Lucid" emacs-version)
+  "Whether we are running XEmacs/Lucid Emacs")
 (define-key gtags-mode-map "\et" 'gtags-find-tag)
 (define-key gtags-mode-map "\er" 'gtags-find-rtag)
 (define-key gtags-mode-map "\es" 'gtags-find-symbol)
 (define-key gtags-mode-map "\eg" 'gtags-find-pattern)
+(define-key gtags-mode-map "\el" 'gtags-find-file)
 (define-key gtags-mode-map "\ec" 'gtags-make-complete-list)
 (define-key gtags-mode-map "\C-]" 'gtags-find-tag-from-here)
 (define-key gtags-mode-map "\eh" 'gtags-display-browser)
 (define-key gtags-mode-map "\C-t" 'gtags-pop-stack)
 (define-key gtags-mode-map "\e." 'etags-style-find-tag)
-(define-key gtags-mode-map [mouse-2] 'gtags-find-tag-by-event)
-(define-key gtags-mode-map [mouse-3] 'gtags-pop-stack)
+(if (not running-xemacs) nil
+ (define-key gtags-mode-map 'button2 'gtags-find-tag-by-event)
+ (define-key gtags-mode-map 'button3 'gtags-pop-stack))
+(if running-xemacs nil
+ (define-key gtags-mode-map [mouse-2] 'gtags-find-tag-by-event)
+ (define-key gtags-mode-map [mouse-3] 'gtags-pop-stack))
 
 (defvar gtags-select-mode-map (make-sparse-keymap)
   "Keymap used in gtags select mode.")
@@ -79,8 +93,12 @@
 (define-key gtags-select-mode-map "p" 'previous-line)
 (define-key gtags-select-mode-map "j" 'next-line)
 (define-key gtags-select-mode-map "k" 'previous-line)
-(define-key gtags-select-mode-map [mouse-2] 'gtags-select-tag-by-event)
-(define-key gtags-select-mode-map [mouse-3] 'gtags-pop-stack)
+(if (not running-xemacs) nil
+ (define-key gtags-select-mode-map 'button2 'gtags-select-tag-by-event)
+ (define-key gtags-select-mode-map 'button3 'gtags-pop-stack))
+(if running-xemacs nil
+ (define-key gtags-select-mode-map [mouse-2] 'gtags-select-tag-by-event)
+ (define-key gtags-select-mode-map [mouse-3] 'gtags-pop-stack))
 
 ;;
 ;; utility
@@ -155,8 +173,15 @@
 (defun gtags-find-tag ()
   "Input tag name and move to the definition."
   (interactive)
-  (let (tagname)
-    (setq tagname (completing-read ":tag " gtags-complete-list))
+  (let (tagname prompt input)
+    (setq tagname (gtags-current-token))
+    (if tagname
+      (setq prompt (concat ":tag (default " tagname ") "))
+     (setq prompt ":tag "))
+    (setq input (completing-read prompt gtags-complete-list
+                  nil nil nil gtags-history-list))
+    (if (not (equal "" input))
+      (setq tagname input))
     (push-context)
     (gtags-goto-tag tagname "")))
 
@@ -199,11 +224,28 @@
     (push-context)
     (gtags-goto-tag tagname "g")))
 
+(defun gtags-find-file ()
+  "Input pattern and move to the top of the file."
+  (interactive)
+  (let (tagname prompt input)
+    (setq prompt "Find files: ")
+    (setq input (read-string prompt))
+    (if (not (equal "" input)) (setq tagname input))
+    (push-context)
+    (gtags-goto-tag tagname "P")))
+
 (defun gtags-find-rtag ()
   "Input tag name and move to the referenced point."
   (interactive)
-  (let (tagname)
-    (setq tagname (completing-read ":rtag " gtags-complete-list))
+  (let (tagname prompt input)
+   (setq tagname (gtags-current-token))
+   (if tagname
+     (setq prompt (concat ":rtag (default " tagname ") "))
+    (setq prompt ":rtag "))
+   (setq input (completing-read prompt gtags-complete-list
+                 nil nil nil gtags-history-list))
+   (if (not (equal "" input))
+     (setq tagname input))
     (push-context)
     (gtags-goto-tag tagname "r")))
 
@@ -224,23 +266,25 @@
   "Display current screen on hypertext browser."
   (interactive)
   (let (lno)
+    (if (= 0 (count-lines (point-min) (point-max))) nil
     (save-excursion
       (end-of-line)
       (if (equal (point-min) (point))
           (setq lno 1)
         (setq lno (count-lines (point-min) (point)))))
-    (message (number-to-string lno))
-    (call-process "gozilla"  nil t nil (concat "+" (number-to-string lno)) buffer-file-name)))
+;    (message (number-to-string lno))
+    (call-process "gozilla"  nil t nil (concat "+" (number-to-string lno)) buffer-file-name))))
 
 (defun gtags-find-tag-by-event (event)
   "Get the expression as a tagname around here and move there."
   (interactive "e")
-  (select-window (posn-window (event-end event)))
-  (set-buffer (window-buffer (posn-window (event-end event))))
-  (goto-char (posn-point (event-end event)))
   (let (tagname flag)
     (if (= 0 (count-lines (point-min) (point-max)))
         (progn (setq tagname "main") (setq flag ""))
+      (if running-xemacs (goto-char (event-point event))
+       (select-window (posn-window (event-end event)))
+        (set-buffer (window-buffer (posn-window (event-end event))))
+        (goto-char (posn-point (event-end event))))
       (setq tagname (gtags-current-token))
       (if (is-function)
           (if (is-definition) (setq flag "r") (setq flag ""))
@@ -259,9 +303,10 @@
 (defun gtags-select-tag-by-event (event)
   "Select a tagname in [GTAGS SELECT MODE] and move there."
   (interactive "e")
-  (select-window (posn-window (event-end event)))
-  (set-buffer (window-buffer (posn-window (event-end event))))
-  (goto-char (posn-point (event-end event)))
+  (if running-xemacs (goto-char (event-point event))
+    (select-window (posn-window (event-end event)))
+    (set-buffer (window-buffer (posn-window (event-end event))))
+    (goto-char (posn-point (event-end event))))
   (push-context)
   (gtags-select-it nil))
 
@@ -288,6 +333,8 @@
   (let (save prefix buffer lines)
     (setq save (current-buffer))
     (cond
+     ((equal flag "P")
+      (setq prefix "(P)"))
      ((equal flag "g")
       (setq prefix "(G)"))
      ((equal flag "s")
@@ -298,6 +345,7 @@
     ;; load tag
     (setq buffer (generate-new-buffer (generate-new-buffer-name (concat prefix tagname))))
     (set-buffer buffer)
+    (if (equal flag "g") (message "Searching...%s" tagname))
     (if (not (= 0 (call-process "global" nil t nil (concat "-ax" flag) tagname)))
 	(progn (message (buffer-substring (point-min)(1- (point-max))))
                (pop-context))
@@ -305,7 +353,15 @@
       (setq lines (count-lines (point-min) (point-max)))
       (cond
        ((= 0 lines)
-	(message "%s: tag not found" tagname)
+         (cond
+          ((equal flag "P")
+           (message "%s: path not found" tagname))
+          ((equal flag "g")
+           (message "%s: pattern not found" tagname))
+          ((equal flag "s")
+           (message "%s: symbol not found" tagname))
+          (t
+           (message "%s: tag not found" tagname)))
 	(pop-context)
 	(kill-buffer buffer)
 	(set-buffer save))

@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1998, 1999 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
- * 4. Neither the name of the author nor the names of its contributors
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
+ * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	gctags.c				18-Mar-99
+ *	gctags.c				17-Aug-99
  */
 
 #include <limits.h>
@@ -52,8 +56,8 @@ int	yaccfile;		/* yacc file */
 const char *progname = "gctags";	/* program name */
 char	*notfunction;
 
-int	main __P((int, char **));
-static	void usage __P((void));
+int	main(int, char **);
+static	void usage(void);
 
 struct words *words;
 static int tablesize;
@@ -94,6 +98,7 @@ main(argc, argv)
 				break;
 			default:
 				usage();
+				/* NOTREACHED */
 			}
 		}
 	}
@@ -124,6 +129,10 @@ main(argc, argv)
 	for (; argc > 0; argv++, argc--) {
 		if (!opentoken(argv[0]))
 			die1("'%s' cannot open.", argv[0]);
+#ifdef _WIN32
+		/* Lower case the file name since names are case insensitive */
+		strlwr(argv[0]);
+#endif
 		/*
 		 * yacc
 		 */
@@ -140,7 +149,6 @@ main(argc, argv)
 		 */
 		else if (locatestring(argv[0], ".java", MATCH_AT_LAST))
 			java();
-#ifdef GTAGSCPP
 		/*
 		 * C++
 		 */
@@ -152,7 +160,6 @@ main(argc, argv)
 			locatestring(argv[0], ".C", MATCH_AT_LAST)	||
 			locatestring(argv[0], ".H", MATCH_AT_LAST))
 			Cpp();
-#endif
 		/*
 		 * C
 		 */
@@ -162,11 +169,9 @@ main(argc, argv)
 		 * C or C++
 		 */
 		else if (locatestring(argv[0], ".h", MATCH_AT_LAST)) {
-#ifdef GTAGSCPP
 			if (isCpp())
 				Cpp();
 			else
-#endif
 				C(0);
 		}
 		closetoken();

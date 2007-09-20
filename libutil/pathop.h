@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,32 +32,25 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	pathop.h					14-May-98
+ *	pathop.h				12-Jul-99
  *
  */
 
 #ifndef _PATHOP_H_
 #define _PATHOP_H_
 #include <stdio.h>
-#include "dbop.h"
+
 #include "gparam.h"
+#include "dbop.h"
 
 #define NEXTKEY		" __.NEXTKEY"
 
-#ifndef __P
-#if defined(__STDC__)
-#define __P(protos)     protos
-#else
-#define __P(protos)     ()
-#endif
-#endif
-
-int	pathopen __P((const char *, int));
-char	*pathget __P((const char *));
-char	*pathiget __P((int));
-void	pathput __P((const char *));
-void	pathdel __P((const char *));
-void	pathclose __P((void));
-int	nextkey __P((void));
+int	pathopen(const char *, int);
+char	*pathget(const char *);
+char	*pathiget(int);
+void	pathput(const char *);
+void	pathdel(const char *);
+void	pathclose(void);
+int	nextkey(void);
 
 #endif /* ! _PATHOP_H_ */

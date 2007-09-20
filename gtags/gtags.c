@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,13 +32,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	gtags.c					8-Oct-98
+ *	gtags.c					17-Aug-99
  *
  */
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <ctype.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,15 +50,18 @@
 
 const char *progname  = "gtags";		/* command name */
 
-static void	usage __P((void));
-int	main __P((int, char **));
-int	incremental __P((char *, char *));
-void	updatetags __P((char *, char *, char *, int));
-void	createtags __P((char *, char *, int));
-int	printconf __P((char *));
-char	*now __P((void));
+static void	usage(void);
+void	signal_setup(void);
+void	onintr(int);
+int	main(int, char **);
+int	incremental(char *, char *);
+void	updatetags(char *, char *, char *, int);
+void	createtags(char *, char *, int);
+int	printconf(char *);
+char	*now(void);
 
 int	cflag;					/* compact format */
+int	dflag;					/* DEBUG */
 int	iflag;					/* incremental update */
 int	oflag;					/* suppress making GSYMS */
 int	wflag;					/* warning message */
@@ -66,6 +74,30 @@ usage()
 {
 	fprintf(stderr, "usage:\t%s [-c][-i][-l][-o][-w][-v][dbpath]\n", progname);
 	exit(1);
+}
+/*
+ * Gtags catch signal even if the parent ignore it.
+ */
+int	exitflag = 0;
+
+void
+onintr(signo)
+int     signo;
+{
+	exitflag = 1;
+}
+
+void
+signal_setup()
+{
+	signal(SIGINT, onintr);
+	signal(SIGTERM, onintr);
+#ifdef SIGHUP
+	signal(SIGHUP, onintr);
+#endif
+#ifdef SIGQUIT
+	signal(SIGQUIT, onintr);
+#endif
 }
 
 int
@@ -111,6 +143,12 @@ char	*argv[];
 			while ((p = mgets(ip, NULL, 0)) != NULL)
 				detab(stdout, p);
 			exit(0);
+		} else if (!strcmp(argv[0], "--debug")) {
+			dflag = 1;
+			continue;
+		} else if (!strcmp(argv[0], "--version")) {
+			fprintf(stdout, "%s\n", VERSION);
+			exit(0);
 		}
 
 		for (p = argv[0] + 1; *p; p++) {
@@ -136,17 +174,21 @@ char	*argv[];
 				break;
 			default:
 				usage();
+				break;
 			}
 		}
 	}
 	if (!getcwd(cwd, MAXPATHLEN))
 		die("cannot get current directory.");
+	canonpath(cwd);
 	if (argc > 0)
 		realpath(*argv,dbpath) ;
 	else
 		strcpy(dbpath, cwd);
+#ifndef _WIN32
 	if (!strcmp(dbpath, "/"))
 		die("It's root directory! What are you doing?");
+#endif
 	if (!test("d", dbpath))
 		die1("directory '%s' not found.", dbpath);
 	if (vflag)
@@ -172,13 +214,13 @@ char	*argv[];
 	/*
 	 * incremental update.
 	 */
-	if (iflag && test("f", makepath(dbpath, dbname(GTAGS))) &&
-		test("f", makepath(dbpath, dbname(GRTAGS))))
+	if (iflag && test("f", makepath(dbpath, dbname(GTAGS), NULL)) &&
+		test("f", makepath(dbpath, dbname(GRTAGS), NULL)))
 	{
 		/* open for version check */
 		GTOP *gtop = gtagsopen(dbpath, cwd, GTAGS, GTAGS_MODIFY, 0);
 		gtagsclose(gtop);
-		if (!test("f", makepath(dbpath, "GPATH")))
+		if (!test("f", makepath(dbpath, "GPATH", NULL)))
 			die("Old version tag file found. Please remake it.");
 		(void)incremental(dbpath, cwd);
 		exit(0);
@@ -188,6 +230,7 @@ char	*argv[];
 	/*
  	 * create GTAGS, GRTAGS and GSYMS
 	 */
+	signal_setup();
 	for (db = GTAGS; db < GTAGLIM; db++) {
 
 		if (oflag && db == GSYMS)
@@ -200,8 +243,9 @@ char	*argv[];
 		if (vflag)
 			fprintf(stderr, "[%s] Creating '%s'.\n", now(), dbname(db));
 		createtags(dbpath, cwd, db);
+		if (exitflag)
+			exit(1);
 	}
-
 	if (vflag)
 		fprintf(stderr, "[%s] Done.\n", now());
 	closeconf();
@@ -234,7 +278,7 @@ char	*root;
 	/*
 	 * get modified time of GTAGS.
 	 */
-	path = makepath(dbpath, dbname(GTAGS));
+	path = makepath(dbpath, dbname(GTAGS), NULL);
 	if (stat(path, &statp) < 0)
 		die1("stat failed '%s'.", path);
 	gtags_mtime = statp.st_mtime;
@@ -274,13 +318,17 @@ char	*root;
 	/*
 	 * execute updating.
 	 */
+	signal_setup();
 	if (strbuflen(updatelist) > 0) {
 		char	*start = strvalue(updatelist);
 		char	*end = start + strbuflen(updatelist);
 		char	*p;
 
-		for (p = start; p < end; p += strlen(p) + 1)
+		for (p = start; p < end; p += strlen(p) + 1) {
 			updatetags(dbpath, root, p, 0);
+			if (exitflag)
+				exit(1);
+		}
 		updated = 1;
 	}
 	if (strbuflen(addlist) > 0) {
@@ -288,8 +336,11 @@ char	*root;
 		char	*end = start + strbuflen(addlist);
 		char	*p;
 
-		for (p = start; p < end; p += strlen(p) + 1)
+		for (p = start; p < end; p += strlen(p) + 1) {
 			updatetags(dbpath, root, p, 1);
+			if (exitflag)
+				exit(1);
+		}
 		updated = 1;
 	}
 	if (strbuflen(deletelist) > 0) {
@@ -297,15 +348,23 @@ char	*root;
 		char	*end = start + strbuflen(deletelist);
 		char	*p;
 
-		for (p = start; p < end; p += strlen(p) + 1)
+		for (p = start; p < end; p += strlen(p) + 1) {
 			updatetags(dbpath, root, p, 2);
+			if (exitflag)
+				exit(1);
+		}
 
 		pathopen(dbpath, 2);
-		for (p = start; p < end; p += strlen(p) + 1)
+		for (p = start; p < end; p += strlen(p) + 1) {
+			if (exitflag)
+				break;
 			pathdel(p);
+		}
 		pathclose();
 		updated = 1;
 	}
+	if (exitflag)
+		exit(1);
 	if (vflag) {
 		if (updated)
 			fprintf(stderr, " Global databases have been modified.\n");
@@ -346,9 +405,11 @@ int	type;
 	if (vflag)
 		fprintf(stderr, " %s tags of '%s' ...", msg, path + 2);
 	for (db = GTAGS; db < GTAGLIM; db++) {
-		int	flags = 0;
+		int	gflags = 0;
 
-		if (db == GSYMS && !test("f", makepath(dbpath, dbname(db))))
+		if (exitflag)
+			break;
+		if (db == GSYMS && !test("f", makepath(dbpath, dbname(db), NULL)))
 			continue;
 		if (vflag)
 			fprintf(stderr, "%s", dbname(db));
@@ -362,7 +423,7 @@ int	type;
 		/*
 		 * GTAGS needed to make GRTAGS.
 		 */
-		if (db == GRTAGS && !test("f", makepath(dbpath, "GTAGS")))
+		if (db == GRTAGS && !test("f", makepath(dbpath, "GTAGS", NULL)))
 			die("GTAGS needed to create GRTAGS.");
 		if (type != 1)
 			gtagsdelete(gtop, path);
@@ -370,16 +431,20 @@ int	type;
 			fprintf(stderr, "..");
 		if (type != 2) {
 			if (db == GSYMS)
-				flags |= GTAGS_UNIQUE;
+				gflags |= GTAGS_UNIQUE;
 			if (extractmethod)
-				flags |= GTAGS_EXTRACTMETHOD;
-			gtagsadd(gtop, strvalue(sb), path, flags);
+				gflags |= GTAGS_EXTRACTMETHOD;
+			if (dflag)
+				gflags |= GTAGS_DEBUG;
+			gtagsadd(gtop, strvalue(sb), path, gflags);
 		}
 		gtagsclose(gtop);
 	}
+	strclose(sb);
+	if (exitflag)
+		return;
 	if (vflag)
 		fprintf(stderr, " Done.\n");
-	strclose(sb);
 }
 /*
  * createtags: create tags file
@@ -411,7 +476,7 @@ int	db;
 	/*
 	 * GTAGS needed to make GRTAGS.
 	 */
-	if (db == GRTAGS && !test("f", makepath(dbpath, "GTAGS")))
+	if (db == GRTAGS && !test("f", makepath(dbpath, "GTAGS", NULL)))
 		die("GTAGS needed to create GRTAGS.");
 	flags = 0;
 	strstart(sb);
@@ -425,6 +490,9 @@ int	db;
 	gtop = gtagsopen(dbpath, root, db, GTAGS_CREATE, flags);
 	for (findopen(); (path = findread(NULL)) != NULL; ) {
 		int	gflags = 0;
+
+		if (exitflag)
+			break;
 		/*
 		 * GSYMS doesn't treat asembler.
 		 */
@@ -440,6 +508,8 @@ int	db;
 			gflags |= GTAGS_UNIQUE;
 		if (extractmethod)
 			gflags |= GTAGS_EXTRACTMETHOD;
+		if (dflag)
+			gflags |= GTAGS_DEBUG;
 		gtagsadd(gtop, comline, path, gflags);
 	}
 	findclose();

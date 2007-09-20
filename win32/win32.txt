@@ -1,0 +1,30 @@
+Global under Windows
+
+Global requires the GNU programs sed.exe, sort.exe, uniq.exe be the path.
+Note that the sort that comes with Windows does not support multikey sorting
+which is required by global. To avoid using that version of sort, the directory
+containing the GNU version must be first in your PATH.
+
+The GNU utilities listed above may be downloaded from:
+<http://www.edv.agrar.tu-muenchen.de/~syring/win32/UnxUtils.html>
+
+All paths are expected to use the UNIX directory separator '/' instead of
+the DOS/Windows '\'. This includes the Global-specific environment variables
+as well as paths given on command lines.  However, the path separators
+expected for the PATH and GTAGSLIBPATH environment variables are expected
+to be the DOS-style ';' instead of the UNIX-style ':'.
+
+The included file win32\global.conf must also be copied to a convenient
+location and the GTAGSCONF environment variable must be set to its name
+(e.g. set GTAGCONF=c:/global/global.conf)
+
+To compile Global under Windows, manually change to each directory
+in turn and in each type 'make -N -fmakefile.w32' (the libutil and libdb
+directories must be done first). The result will be an executable file
+or a library in each directory. Copy the executables into a directory on
+yoru PATH.
+
+Global 3.44 has been tested under Windows NT 4.0 with Borland C++ 4.5
+
+Dan Fandrich <dan@fch.wimsey.bc.ca>
+July 29, 1999

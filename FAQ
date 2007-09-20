@@ -58,3 +58,23 @@ A3. Emacs's ctags cannot locate function referencies. So, gtags cannot make
     GRTAGS tag file with it. With the result that you cannot use htags and
     global's -r option.
 ----------------------------------------------------------------------------
+Q4. Everything seems to be ok except the man page, the man program on my
+    machine does not understand the manual files in GLOBAL
+
+A4. Online manuals in GLOBAL are written with 'mandoc' macro which is a part
+    of GNU groff package. You can format these manuals by following command
+    line manually.
+
+        % groff -Wall -Tascii -mandoc global.1
+
+    If you replace your system's nroff(1) with GNU's one(nroff.sh) then
+    you can use man(1) to see GLOBAL's online manuals.
+
+----------------------------------------------------------------------------
+Q5. I have built GLOBAL in WIN32 environment. But gtags(1) failed by sort
+    command error.
+
+A5. It seems that MS sort is executed. Please set your path so that unix
+    sort will be executed.
+
+----------------------------------------------------------------------------

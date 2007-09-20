@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by Shigio Yamaguchi.
- * 4. Neither the name of the author nor the names of its contributors
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
+ * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	java.c					2-Sep-98
+ *	java.c					12-Jul-99
  */
 
 #include <ctype.h>
@@ -42,7 +46,7 @@
 #include "java.h"
 #include "token.h"
 
-static int	reserved __P((char *));
+static int	reserved(char *);
 
 /*
  * java: read java file and pickup tag entries.
@@ -167,6 +171,7 @@ java()
 				pushbacktoken();
 			break;
 		default:
+			break;
 		}
 	}
 }

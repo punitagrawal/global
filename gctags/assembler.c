@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
- * 4. Neither the name of the author nor the names of its contributors
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
+ * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	assembler.c				20-Feb-99
+ *	assembler.c				12-Aug-99
  */
 
 #include <ctype.h>
@@ -39,7 +43,7 @@
 #include "defined.h"
 #include "token.h"
 
-static int      reserved __P((char *));
+static int      reserved(char *);
 
 #define A_CALL		1001
 #define A_DEFINE	1002
@@ -47,6 +51,8 @@ static int      reserved __P((char *));
 #define A_EXT		1004
 #define A_ALTENTRY	1005
 #define A_NENTRY	1006
+#define A_SYMBOL_NAME	1007
+#define A_C_LABEL	1008
 
 void
 assembler()
@@ -74,7 +80,7 @@ assembler()
 		case A_CALL:
 			if (!startline || target != REF)
 				break;
-			if ((c = nexttoken(interested, reserved)) == A_EXT) {
+			if ((c = nexttoken(interested, reserved)) == A_EXT || c == A_SYMBOL_NAME || c == A_C_LABEL) {
 				if ((c = nexttoken(interested, reserved)) == '('/* ) */)
 					if ((c = nexttoken(interested, reserved)) == SYMBOL)
 						if (defined(token))
@@ -107,6 +113,7 @@ assembler()
 				}
 			}
 		default:
+			break;
 		}
 		startline = 0;
 	}
@@ -124,6 +131,10 @@ reserved(word)
 		if (!strcmp(word, "ALTENTRY"))
 			return A_ALTENTRY;
 		break;
+	case 'C':
+		if (!strcmp(word, "C_LABEL"))
+			return A_C_LABEL;
+		break;
 	case 'E':
 		if (!strcmp(word, "ENTRY"))
 			return A_ENTRY;
@@ -134,9 +145,15 @@ reserved(word)
 		if (!strcmp(word, "NENTRY"))
 			return A_NENTRY;
 		break;
+	case 'S':
+		if (!strcmp(word, "SYMBOL_NAME"))
+			return A_SYMBOL_NAME;
+		break;
 	case 'c':
 		if (!strcmp(word, "call"))
 			return A_CALL;
+		break;
+	default:
 		break;
 	}
 	return SYMBOL;

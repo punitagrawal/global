@@ -1,7 +1,9 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # Copyright (c) 1996, 1997, 1998, 1999
-#				Shigio Yamaguchi. All rights reserved.
+#            Shigio Yamaguchi. All rights reserved.
+# Copyright (c) 1999
+#            Tama Communications Corporation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -13,11 +15,12 @@
 #    documentation and/or other materials provided with the distribution.
 # 3. All advertising materials mentioning features or use of this software
 #    must display the following acknowledgement:
-#	This product includes software developed by Shigio Yamaguchi.
+#      This product includes software developed by Tama Communications
+#      Corporation and its contributors.
 # 4. Neither the name of the author nor the names of any co-contributors
 #    may be used to endorse or promote products derived from this software
 #    without specific prior written permission.
-#
+# 
 # THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -30,11 +33,13 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-#	htags.pl				29-Mar-99
+#	htags.pl				3-Nov-99
 #
 $com = $0;
 $com =~ s/.*\///;
-$usage = "usage: $com [-a][-c][-f][-h][-l][-n][-v][-w][-t title][-d tagdir][--action=url][--id=id][dir]\n";
+$usage = "usage: $com [-a][-c][-f][-h][-l][-n][-v][-w][-t title][-d tagdir][dir]\n";
+$'win32 = ($^O =~ /^ms(dos|win(32|nt))/i) ? 1 : 0;
+$'pathsep = ($'win32) ? ';' : ':';
 #-------------------------------------------------------------------------
 # COMMAND EXISTENCE CHECK
 #-------------------------------------------------------------------------
@@ -50,6 +55,9 @@ foreach $c ('sort', 'gtags', 'global', 'btreeop') {
 $'tmp = '/tmp';
 if (defined($ENV{'TMPDIR'}) && -d $ENV{'TMPDIR'}) {
 	$tmp = $ENV{'TMPDIR'};
+}
+if (! -d $tmp || ! -w $tmp) {
+	&'error("temporary directory '$tmp' not exist or not writable.");
 }
 $'ncol = 4;					# columns of line number
 $'tabs = 8;					# tab skip
@@ -160,6 +168,7 @@ if ($config) {
 $'begin_html  = "<HTML>";
 $'end_html    = "</HTML>";
 $'meta_robots = "<META NAME='ROBOTS' CONTENT='NOINDEX,NOFOLLOW'>";
+$'meta_generator = "<META NAME='GENERATOR' CONTENT='GLOBAL'>";
 $'begin_body  = '<BODY';
 $'begin_body .= " BGCOLOR=$body_bgcolor" if ($body_bgcolor);
 $'begin_body .= " TEXT=$body_text" if ($body_text);
@@ -204,7 +213,7 @@ $'rewrite_href_files =
 	"}\n";
 sub set_header {
 	local($display, $title, $script) = @_;
-	local($head) = "<HEAD><TITLE>$title</TITLE>\n$'meta_robots";
+	local($head) = "<HEAD><TITLE>$title</TITLE>\n$'meta_robots\n$'meta_generator";
 	if ($script || ($'hflag && $display)) {
 		$head .= "\n";
 		$head .= $'begin_script;
@@ -228,7 +237,7 @@ sub set_header {
 # UTILITIES
 #-------------------------------------------------------------------------
 sub getcwd {
-        local($dir) = `/bin/pwd`;
+        local($dir) = `pwd`;
         chop($dir);
         $dir;
 }
@@ -260,17 +269,24 @@ sub escape {
 }
 sub usable {
 	local($command) = @_;
-	foreach (split(/:/, $ENV{'PATH'})) {
-		return 1 if (-x "$_/$command");
+	foreach (split(/$'pathsep/, $ENV{'PATH'})) {
+		if ($win32) {
+			return 1 if (-f "$_/$command.com");
+			return 1 if (-f "$_/$command.exe");
+		} else {
+			return 1 if (-x "$_/$command");
+		}
 	}
 	return 0;
 }
 sub copy {
 	local($from, $to) = @_;
-	local($ret) = system("cp $from $to");
-	$ret = $ret / 256;
-	$ret = ($ret == 0) ? 1 : 0;
-	$ret;
+	open(FROM, $from) || return 0;
+	open(TO, ">$to") || return 0;
+	print TO <FROM>;
+	close(TO);
+	close(FROM);
+	return 1;
 }
 sub getconf {
 	local($name) = @_;
@@ -302,6 +318,9 @@ while ($ARGV[0] =~ /^-/) {
 		$'id = $1;
 	} elsif ($opt =~ /^--nocgi$/) {
 		$'cgi = 0;
+	} elsif ($opt =~ /^--version$/) {
+		system("gtags --version");
+		exit 0;
 	} elsif ($opt =~ /[^-acfhlnvwtd]/) {
 		print STDERR $usage;
 		exit 1;
@@ -336,6 +355,9 @@ if (!$title) {
 $dbpath = '.' if (!$dbpath);
 unless (-r "$dbpath/GTAGS" && -r "$dbpath/GRTAGS") {
 	&'error("GTAGS and GRTAGS not found. Please make them.");
+}
+if ($'fflag && ! -r "$dbpath/GSYMS") {
+	&'error("-f option needs GSYMS. Please make it.");
 }
 $dbpath = &'realpath($dbpath);
 #
@@ -381,7 +403,7 @@ if ($?) { &'error("cannot traverse directory."); }
 #	HTML/cgi-bin/ghtml.cgi	... unzip script (1)
 #	HTML/.htaccess.skel	... skelton of .htaccess (1)
 #	HTML/help.html		... help file (2)
-#	HTML/$REFS/*		... referencies (3)
+#	HTML/$REFS/*		... references (3)
 #	HTML/$DEFS/*		... definitions (3)
 #	HTML/funcs.html		... function index (4)
 #	HTML/funcs/*		... function index (4)
@@ -413,9 +435,10 @@ if ($'cgi && $'fflag) {
 	print STDERR "[", &'date, "] ", "(1) making CGI program ...\n" if ($'vflag);
 	&makeprogram("$dist/cgi-bin/global.cgi") || &'error("cannot make CGI program.");
 	chmod(0755, "$dist/cgi-bin/global.cgi") || &'error("cannot chmod CGI program.");
-	unlink("$dist/cgi-bin/GTAGS", "$dist/cgi-bin/GRTAGS", "$dist/cgi-bin/GPATH");
+	unlink("$dist/cgi-bin/GTAGS", "$dist/cgi-bin/GRTAGS", "$dist/cgi-bin/GSYMS", "$dist/cgi-bin/GPATH");
 	link("$dbpath/GTAGS", "$dist/cgi-bin/GTAGS") || &'copy("$dbpath/GTAGS", "$dist/cgi-bin/GTAGS") || &'error("cannot copy GTAGS.");
 	link("$dbpath/GRTAGS", "$dist/cgi-bin/GRTAGS") || &'copy("$dbpath/GRTAGS", "$dist/cgi-bin/GRTAGS") || &'error("cannot copy GRTAGS.");
+	link("$dbpath/GSYMS", "$dist/cgi-bin/GSYMS") || &'copy("$dbpath/GSYMS", "$dist/cgi-bin/GSYMS") || &'error("cannot copy GSYMS.");
 	link("$dbpath/GPATH", "$dist/cgi-bin/GPATH") || &'copy("$dbpath/GPATH", "$dist/cgi-bin/GPATH") || &'error("cannot copy GPATH.");
 }
 if ($'cgi && $'cflag) {
@@ -455,7 +478,7 @@ sub suddenly { &'clean(); exit 1}
 $SIG{'INT'} = 'suddenly';
 $SIG{'QUIT'} = 'suddenly';
 $SIG{'TERM'} = 'suddenly';
-&cache'open(100000);
+&cache'open();
 $func_total = &makedupindex($dist);
 print STDERR "Total $func_total functions.\n" if ($'vflag);
 #
@@ -507,8 +530,10 @@ if ($'vflag && $'cgi && ($'cflag || $'fflag)) {
 	print STDERR "[Information]\n";
 	print STDERR "\n";
 	if ($'cflag) {
-		print STDERR " You need to setup http server so that '*.$'gzipped_suffix' are treated\n";
-		print STDERR " as gzipped files. Please see 'HTML/.htaccess.skel'.\n";
+		print STDERR " Your system may need to be setup to decompress *.$'gzipped_suffix files.\n";
+		print STDERR " This can be done by having your browser compiled with the relevant\n";
+		print STDERR " options, or by configuring your http server to treat these as\n";
+		print STDERR " gzipped files. (Please see 'HTML/.htaccess.skel')\n";
 		print STDERR "\n";
 	}
 	if ($'fflag) {
@@ -550,18 +575,25 @@ foreach \$p (\@pairs) {
 }
 if (\$form{'pattern'} eq '') {
 	print "<H3>Pattern not specified. <A HREF=../mains.$'normal_suffix>[return]</A></H3>\\n";
-	print "$'end_body$'end_html";
+	print "$'end_body$'end_html\n";
 	exit 0;
 }
 \$pattern = \$form{'pattern'};
-\$flag = (\$form{'type'} eq 'definition') ? '' : 'r';
-\$words = (\$form{'type'} eq 'definition') ? 'definitions' : 'referencies';
+\$flag = '';
+\$words = 'definitions';
+if (\$form{'type'} eq 'reference') {
+	\$flag = 'r';
+	\$words = 'references';
+} elsif (\$form{'type'} eq 'symbol') {
+	\$flag = 's';
+	\$words = 'symbols';
+}
 print "<H1><FONT COLOR=#cc0000>\" . \$pattern . \"</FONT></H1>\\n";
 print "Following \$words are matched to above pattern.<HR>\\n";
 \$pattern =~ s/'//g;			# to shut security hole
-unless (open(PIPE, "/usr/bin/global -x\$flag '\$pattern' |")) {
+unless (open(PIPE, "/usr/bin/global -x\$flag \\"\$pattern\\" |")) {
 	print "<H3>Cannot execute global. <A HREF=../mains.$'normal_suffix>[return]</A></H3>\\n";
-	print "$'end_body$'end_html";
+	print "$'end_body$'end_html\n";
 	exit 0;
 }
 \$cnt = 0;
@@ -579,7 +611,7 @@ print "</PRE>\\n";
 if (\$cnt == 0) {
 	print "<H3>Pattern not found. <A HREF=../mains.$'normal_suffix>[return]</A></H3>\\n";
 }
-print "$'end_body$'end_html";
+print "$'end_body$'end_html\n";
 exit 0;
 #------------------------------------------------------------------
 # SORRY TO HAVE SURPRISED YOU!
@@ -619,8 +651,8 @@ sub makehtaccess {
 # Skelton file for .htaccess -- This file was generated by htags(1).
 #
 # Htags have made gzipped hypertext because you specified -c option.
-# You need to setup http server so that these hypertext can be treated
-# as gzipped files.
+# If your browser doesn't decompress gzipped hypertext, you will need to
+# setup your http server to treat this hypertext as gzipped files first.
 # There are many way to do it, but one of the method is to put .htaccess
 # file in 'HTML' directory.
 #
@@ -657,6 +689,7 @@ sub makehelp {
 	print HELP "</DL>\n";
 	print HELP $'end_body;
 	print HELP $'end_html;
+	print HELP "\n";
 	close(HELP);
 }
 #
@@ -686,7 +719,7 @@ sub makedupindex {
 		local($writing) = 0;
 
 		$count = 0;
-		local($command) = "global -nx$option '.*' | sort +0 -1 +2 -3 +1n -2";
+		local($command) = "global -nx$option \".*\" | sort +0 -1 +2 -3 +1n -2";
 		open(LIST, "$command |") || &'error("cannot fork.");
 		while (<LIST>) {
 			chop;
@@ -698,6 +731,7 @@ sub makedupindex {
 					print FILE "</PRE>\n";
 					print FILE $'end_body;
 					print FILE $'end_html;
+					print FILE "\n";
 					close(FILE);
 					$writing = 0;
 				}
@@ -736,6 +770,7 @@ sub makedupindex {
 			print FILE "</PRE>\n";
 			print FILE $'end_body;
 			print FILE $'end_html;
+			print FILE "\n";
 			close(FILE);
 		}
 		if ($first_line) {
@@ -781,6 +816,7 @@ sub makefuncindex {
 				print ALPHA "$'begin_script$'rewrite_href_funcs$'end_script";
 				print ALPHA $'end_body;
 				print ALPHA $'end_html;
+				print ALPHA "\n";
 				close(ALPHA);
 			}
 			# for multi-byte code
@@ -830,6 +866,7 @@ sub makefuncindex {
 		print ALPHA "$'begin_script$'rewrite_href_funcs$'end_script";
 		print ALPHA $'end_body;
 		print ALPHA $'end_html;
+		print ALPHA "\n";
 		close(ALPHA);
 
 		print FUNCTIONS @funcs;
@@ -837,6 +874,7 @@ sub makefuncindex {
 	print FUNCTIONS "</OL>\n" if (!$'aflag);
 	print FUNCTIONS $'end_body;
 	print FUNCTIONS $'end_html;
+	print FUNCTIONS "\n";
 	close(FUNCTIONS);
 	$count;
 }
@@ -854,7 +892,7 @@ sub makefileindex {
 	local($count) = 0;
 	local($indexlink) = "../mains.$'normal_suffix";
 	local(@dirstack, @fdstack);
-	local($command) = "gtags --find | sort";
+	local($command) = "$'findcom | sort";
 	open(FIND, "$command |") || &'error("cannot fork.");
 	open(FILES, ">$file") || &'error("cannot make file '$file'.");
 	print FILES $'begin_html;
@@ -887,6 +925,7 @@ sub makefileindex {
 				print "$'begin_script$'rewrite_href_files$'end_script" if (@dirstack == 0);
 				print $'end_body;
 				print $'end_html;
+				print "\n";
 				$path = pop(@fdstack);
 				close($path);
 				select($fdstack[$#fdstack]) if (@fdstack);
@@ -908,7 +947,7 @@ sub makefileindex {
 					print $li;
 				}
 				if ($'cflag) {
-					open($cur, "| gzip -c >'$cur'") || &'error("cannot make directory index.");
+					open($cur, "| gzip -c >\"$cur\"") || &'error("cannot make directory index.");
 				} else {
 					open($cur, ">$cur") || &'error("cannot make directory index.");
 				}
@@ -953,6 +992,7 @@ sub makefileindex {
 		print "$'begin_script$'rewrite_href_files$'end_script" if (@dirstack == 0);
 		print $'end_body;
 		print $'end_html;
+		print "\n";
 		$path = pop(@fdstack);
 		close($path);
 		select($fdstack[$#fdstack]) if (@fdstack);
@@ -961,6 +1001,7 @@ sub makefileindex {
 	print FILES "</OL>\n";
 	print FILES $'end_body;
 	print FILES $'end_html;
+	print FILES "\n";
         close(FILES);
 
 	select($org);
@@ -984,6 +1025,7 @@ sub makefileindex {
 			print INCLUDE "</PRE>\n";
 			print INCLUDE $'end_body;
 			print INCLUDE $'end_html;
+			print INCLUDE "\n";
 			close(INCLUDE);
 			# '' means that information already written to file.
 			$includes{$last} = $no;
@@ -1004,14 +1046,14 @@ sub makecommonpart {
 	$index .= "<H1>$'title_begin$'title$'title_end</H1>\n";
 	$index .= "<P ALIGN=right>";
 	$index .= "Last updated " . &'date . "<BR>\n";
-	$index .= "This hypertext was generated by <A HREF=http://wafu.netgate.net/tama/unix/global.html TARGET=_top>GLOBAL</A>.<BR>\n";
+	$index .= "This hypertext was generated by <A HREF=http://www.tamacom.com/global/ TARGET=_top>GLOBAL</A>.<BR>\n";
 	$index .= $'begin_script;
 	$index .= "if (parent.frames.length && parent.mains == self)\n";
 	$index .= "	document.write($'langle+'A HREF=mains.$'normal_suffix TARGET=_top'+$'rangle+'[No frame version is here.]'+$'langle+'/A'+$'rangle)\n";
 	$index .= $'end_script;
 	$index .= "</P>\n<HR>\n";
 	if ($'fflag) {
-		$index .= "<H2>FUNCTION SEARCH</H2>\n";
+		$index .= "<H2>OBJECT SEARCH</H2>\n";
 		$index .= "Please input function name and select [Search]. POSIX's regular expression is allowed.<P>\n"; 
 		$index .= "<FORM METHOD=GET ACTION=$'action>\n";
 		$index .= "<INPUT NAME=pattern>\n";
@@ -1020,6 +1062,7 @@ sub makecommonpart {
 		$index .= "<INPUT TYPE=reset VALUE=Reset><BR>\n";
 		$index .= "<INPUT TYPE=radio NAME=type VALUE=definition CHECKED>Definition\n";
 		$index .= "<INPUT TYPE=radio NAME=type VALUE=reference>Reference\n";
+		$index .= "<INPUT TYPE=radio NAME=type VALUE=symbol>Other symbol\n";
 		$index .= "</FORM>\n<HR>\n";
 	}
 	$index .= "<H2>MAINS</H2>\n";
@@ -1064,7 +1107,7 @@ sub makeindex {
 
 	open(FRAME, ">$file") || &'error("cannot open file '$file'.");
 	print FRAME $'begin_html;
-	print FRAME "<HEAD><TITLE>$title</TITLE>$'meta_robots</HEAD>\n";
+	print FRAME "<HEAD><TITLE>$title</TITLE>$'meta_robots\n$'meta_generator</HEAD>\n";
 	print FRAME "<FRAMESET COLS='200,*'>\n";
 	print FRAME "<FRAMESET ROWS='50%,50%'>\n";
 	print FRAME "<FRAME NAME=funcs SRC=funcs.$'normal_suffix>\n";
@@ -1081,6 +1124,7 @@ sub makeindex {
 	print FRAME "<NOFRAMES>\n$index</NOFRAMES>\n";
 	print FRAME "</FRAMESET>\n";
 	print FRAME $'end_html;
+	print FRAME "\n";
 	close(FRAME);
 }
 #
@@ -1099,6 +1143,7 @@ sub makemainindex {
 	print INDEX $index;
 	print INDEX $'end_body;
 	print INDEX $'end_html;
+	print INDEX "\n";
 	close(INDEX);
 }
 #
@@ -1110,7 +1155,7 @@ sub makenullhtml {
 	local($file) = @_;
 
 	open(NULL, ">$file") || &'error("cannot create file '$file'.");
-	print NULL "$'begin_html$'begin_body$'end_body$'end_html";
+	print NULL "$'begin_html$'begin_body$'end_body$'end_html\n";
 	close(NULL);
 }
 #
@@ -1152,12 +1197,11 @@ sub src2html {
 	local($ncol) = $'ncol;
 	local($tabs) = $'tabs;
 	local(%ctab) = ('&', '&amp;', '<', '&lt;', '>', '&gt;');
-	local($expand) = &'usable('expand') ? 'expand' : 'gtags --expand';
 	local($isjava) = ($file =~ /\.java$/) ? 1 : 0;
 	local($iscpp) = ($file =~ /\.(h|c\+\+|cc|cpp|cxx|hxx|C|H)$/) ? 1 : 0;
 
 	if ($'cflag) {
-		open(HTML, "| gzip -c >'$hfile'") || &'error("cannot create file '$hfile'.");
+		open(HTML, "| gzip -c >\"$hfile\"") || &'error("cannot create file '$hfile'.");
 	} else {
 		open(HTML, ">$hfile") || &'error("cannot create file '$hfile'.");
 	}
@@ -1166,7 +1210,7 @@ sub src2html {
 	# load tags belonging to this file.
 	#
 	&anchor'load($file);
-	open(SRC, "$expand -$tabs '$file' |") || &'error("cannot fork.");
+	open(SRC, "gtags --expand -$tabs \"$file\" |") || &'error("cannot fork.");
 	#
 	# print the header
 	#
@@ -1305,6 +1349,7 @@ sub src2html {
 	print "\n";
 	print $'end_body;
 	print $'end_html;
+	print "\n";
 	close(SRC);
 	if ($?) { &'error("cannot open file '$file'."); }
 	close(HTML);
@@ -1438,7 +1483,7 @@ sub create {
 	foreach $db ('GTAGS', 'GRTAGS') {
 		local($type) = ($db eq 'GTAGS') ? 'D' : 'R';
 		local($option) = ($db eq 'GTAGS') ? '' : 'r';
-		local($command) = "global -nx$option '.*'";
+		local($command) = "global -nx$option \".*\"";
 		open(PIPE, "$command |") || &'error("cannot fork.");
 		while (<PIPE>) {
 			local($tag, $lno, $filename) = split;
@@ -1612,13 +1657,8 @@ package cache;
 #			other: sized cache
 #
 sub open {
-	($cachesize) = @_;
-
-	if ($cachesize == -1) {
-		return;
-	}
-	undef %CACH if defined(%CACH);
-	$cachecount = 0;
+	$CACH  = "$'tmp/CACH$$";
+	dbmopen(%CACH, $CACH, 0600) || &'error("cannot make cache database.");
 }
 #
 # put: put tag into cache
@@ -1631,12 +1671,6 @@ sub put {
 	local($db, $tag, $line) = @_;
 	local($label) = ($db eq 'GTAGS') ? 'D' : 'R';
 
-	$cachecount++;
-	if ($cachesize >= 0 && $cachecount > $cachesize) {
-		$CACH  = "$'tmp/CACH$$";
-		dbmopen(%CACH, $CACH, 0600) || &'error("make cache database.");
-		$cachesize = -1;
-	}
 	$CACH{$label.$tag} = $line;
 }
 #
@@ -1656,6 +1690,9 @@ sub get {
 # close: close cache
 #
 sub close {
-	#dbmclose(%CACH);
-	unlink("$CACH.db") if (defined($CACH));
+	local($dbm);
+
+	dbmclose(%CACH);
+	chop($dbm = `echo $CACH*`);
+	unlink($dbm);
 }

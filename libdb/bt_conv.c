@@ -38,14 +38,12 @@
 static char sccsid[] = "@(#)bt_conv.c	8.5 (Berkeley) 8/17/94";
 #endif /* LIBC_SCCS and not lint */
 
-#include <sys/param.h>
-
 #include <stdio.h>
 
 #include "db.h"
 #include "btree.h"
 
-static void mswap __P((PAGE *));
+static void mswap(PAGE *);
 
 /*
  * __BT_BPGIN, __BT_BPGOUT --
@@ -217,5 +215,7 @@ mswap(pg)
 	P_32_SWAP(p);		/* nrecs */
 	p += sizeof(u_int32_t);
 	P_32_SWAP(p);		/* flags */
+#if 0	/* To satisfy compiler */
 	p += sizeof(u_int32_t);
+#endif
 }

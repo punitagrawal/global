@@ -46,7 +46,6 @@ static char sccsid[] = "@(#)bt_open.c	8.10 (Berkeley) 8/17/94";
  * is wholly independent of the Postgres code.
  */
 
-#include <sys/param.h>
 #include <sys/stat.h>
 
 #include <errno.h>
@@ -66,9 +65,9 @@ static char sccsid[] = "@(#)bt_open.c	8.10 (Berkeley) 8/17/94";
 #define	MINPSIZE	128
 #endif
 
-static int byteorder __P((void));
-static int nroot __P((BTREE *));
-static int tmp __P((void));
+static int byteorder(void);
+static int nroot(BTREE *);
+static int tmp(void);
 
 /*
  * __BT_OPEN -- Open a btree.
@@ -212,8 +211,10 @@ __bt_open(fname, flags, mode, openinfo, dflags)
 		F_SET(t, B_INMEM);
 	}
 
+#ifndef _WIN32
 	if (fcntl(t->bt_fd, F_SETFD, 1) == -1)
 		goto err;
+#endif
 
 	if (fstat(t->bt_fd, &sb))
 		goto err;
@@ -259,11 +260,15 @@ __bt_open(fname, flags, mode, openinfo, dflags)
 		 * Don't overflow the page offset type.
 		 */
 		if (b.psize == 0) {
+#ifndef _WIN32
 			b.psize = sb.st_blksize;
 			if (b.psize < MINPSIZE)
 				b.psize = MINPSIZE;
 			if (b.psize > MAX_PAGE_OFFSET + 1)
 				b.psize = MAX_PAGE_OFFSET + 1;
+#else
+			b.psize = MINPSIZE;
+#endif
 		}
 
 		/* Set flag if duplicates permitted. */
@@ -389,17 +394,23 @@ tmp()
 	sigset_t set, oset;
 	int fd;
 	char *envtmp;
-	char path[MAXPATHLEN];
+#define MAXTEMPLEN	128
+	char path[MAXTEMPLEN];
 
 	envtmp = getenv("TMPDIR");
-	(void)snprintf(path,
-	    sizeof(path), "%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
+	if (envtmp && strlen(envtmp) + strlen("/bt.XXXXXX") >= MAXTEMPLEN)
+		return -1;
+	(void)sprintf(path, "%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
 
+#ifndef _WIN32
 	(void)sigfillset(&set);
 	(void)sigprocmask(SIG_BLOCK, &set, &oset);
+#endif
 	if ((fd = mkstemp(path)) != -1)
 		(void)unlink(path);
+#ifndef _WIN32
 	(void)sigprocmask(SIG_SETMASK, &oset, NULL);
+#endif
 	return(fd);
 }
 

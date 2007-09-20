@@ -9,13 +9,15 @@
          @=)))    @=))@=)))@=))) @=)@=)))@=@=)))@=))@=)))
           @@@@@@@@=)))@@@@=)@@@@@=)@@@@@@=@@@=)@@@@=)@@@@@@=)))
 
-					Shigio Yamaguchi	20-Mar-99
+					Shigio Yamaguchi	24-Aug-99
 
-	Copyright 1996, 1997, 1998, 1999
-				Shigio Yamaguchi All right resereved.
+     Copyright (c) 1996, 1997, 1998, 1999
+                Shigio Yamaguchi. All rights reserved.
+     Copyright (c) 1999
+                Tama Communications Corporation. All rights reserved.
 
 GLOBAL is a source code tag system that works the same way across diverse
-environments. It supports C, Yacc and Java source code.
+environments. It supports C, C++, Yacc and Java source code.
 
 It brings benefits to all hackers.  Enjoy!
 
@@ -79,7 +81,7 @@ environments. Currently, it supports the following:
    o Web browser(see '4. Hypertext generator')
    o Elvis editor(see '5. Elvis using global')
 
-Supported languages are C, Yacc and Java.
+Supported languages are C, C++, Yacc and Java.
 You can locate a specified function in the source files and move there easily.
 It is useful for hacking a large project containing many subdirectories,
 many '#ifdef' and many main() functions, like MH, X or BSD kernel.
@@ -125,8 +127,8 @@ About installation, please see 'INSTALL'.
 	% cd /usr/src/usr.bin/vi
 	% gtags
 
-   Gtags traverse subdirectories and makes
-   three databases at the root of the source tree.
+   Gtags traverse subdirectories and makes four databases at the root of
+   the source tree.
 
 	% ls G*
 	GPATH   GRTAGS  GSYMS   GTAGS
@@ -141,7 +143,7 @@ About installation, please see 'INSTALL'.
 
    Consider the following source tree:
 
-	ROOT/		<- the root of source tree (GTAGS,GRTAGS)
+	ROOT/		<- the root of source tree (GTAGS,GRTAGS,...)
 	|
 	|- DIR1/
 	|  |
@@ -230,15 +232,15 @@ About installation, please see 'INSTALL'.
    You can make multiple tag files.
    For example, you can execute gtags at ROOT/, version1.0/ and version2.0/.
 
-	ROOT/			<- the root of source tree	(GTAGS,GRTAGS)
+	ROOT/			<- the root of source tree	(GTAGS,...)
 	|
-	|- version1.0/		<- the root of version1.0	(GTAGS,GRTAGS)
+	|- version1.0/		<- the root of version1.0	(GTAGS,...)
 	|  |
 	|  |- file.c	.....	+---------------+
 	|			|func1(){ i++; }|
 	|			+---------------+
 	|
-	|- version2.0/		<- the root of version2.0	(GTAGS,GRTAGS)
+	|- version2.0/		<- the root of version2.0	(GTAGS,...)
 	   |
 	   |- file.c	.....	+---------------+
 	 			|func1(){ i--; }|
@@ -626,7 +628,6 @@ About installation, please see 'INSTALL'.
    o Mouse command is avalable.
 
      If you use X version emacs, try the following
-     (but it doesn't work well in xemacs; I don't know why).
 
      Move the mouse cursor to a function name and click the middle button.
      You will then go to the function's definition, or to its references,
@@ -639,7 +640,7 @@ About installation, please see 'INSTALL'.
 
 4.1. Features
 
-   o Htags makes hypertext from C, Yacc and Java source files.
+   o Htags makes hypertext from C, C++, Yacc and Java source files.
    o Once the hypertext is generated, you need nothing other than a WWW browser.
    o You can move the hypertext to anywhere. It is independent of the source code.
    o You can use all of your browser's functions, such as search,
@@ -964,13 +965,13 @@ A.4. Plans for the furture
 
    Please see GLOBAL home page.
 
-	<http://wafu.netgate.net/tama/unix/global.html>
+	<http://www.tamacom.com/global/>
 
 Thank you for your reading.
 And of course, I'm also grateful to all excellent tools (vi, ctags, emacs,
 perl, C, db, mozilla ...) and its authors.
 ----------------------------------------------------------------------------
-E-Mail: <shigio@wafu.netgate.net>
-WWW: <http://wafu.netgate.net/tama/unix/indexe.html>
+E-Mail: <shigio@tamacom.com>
+WWW: <http://www.tamacom.com/global/>
 	(You can find the latest version here.)
 ----------------------------------------------------------------------------

@@ -1,2 +1,2 @@
 Btree library derived from db(3) 1.85 with patch 2, 3, 4 applied.
-Modified not to use system's db.h and btree.h.
+Some code was modified for compatibility.

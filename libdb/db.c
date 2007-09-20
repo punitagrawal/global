@@ -60,14 +60,14 @@ dbopen(fname, flags, mode, type, openinfo)
 	if ((flags & ~(USE_OPEN_FLAGS | DB_FLAGS)) == 0)
 		switch (type) {
 		case DB_BTREE:
-			return (__bt_open(fname, flags & USE_OPEN_FLAGS,
+			return (__bt_open(fname, (flags & USE_OPEN_FLAGS) | O_BINARY,
 			    mode, openinfo, flags & DB_FLAGS));
 		/*
 		case DB_HASH:
-			return (__hash_open(fname, flags & USE_OPEN_FLAGS,
+			return (__hash_open(fname, (flags & USE_OPEN_FLAGS) | O_BINARY,
 			    mode, openinfo, flags & DB_FLAGS));
 		case DB_RECNO:
-			return (__rec_open(fname, flags & USE_OPEN_FLAGS,
+			return (__rec_open(fname, (flags & USE_OPEN_FLAGS) | O_BINARY,
 			    mode, openinfo, flags & DB_FLAGS));
 		*/
 		}

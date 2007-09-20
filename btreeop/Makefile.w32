@@ -1,0 +1,19 @@
+PROG   = btreeop.exe
+CC     = bcc32
+LIBS   = ../libutil/libgloutil.lib ../libdb/libglodb.lib ../libregex/libgloregex.lib
+CFLAGS = -I../libutil -I../libdb -I../libregex -I../machine -I../win32
+OBJS   = btreeop.obj
+WILDOBJ = /bc5/lib/32bit/wildargs.obj
+BINDIR = \usr\bin
+MANDIR = \usr\man
+
+all: $(PROG)
+
+$(PROG): $(OBJS) $(LIBS)
+	$(CC) -e$(PROG) $(OBJS) $(WILDOBJ) @..\win32\libs
+install:
+	copy $(PROG) $(BINDIR)
+	copy $(PROG).1 $(MANDIR)/man1
+clean:
+	del $(PROG)
+	del $(OBJS)

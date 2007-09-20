@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,18 +32,21 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	getdbpath.c				20-Oct-97
+ *	getdbpath.c				19-Aug-99
  *
  */
-#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
+#include "gparam.h"
 #include "die.h"
 #include "getdbpath.h"
+#include "makepath.h"
+#include "path.h"
 #include "test.h"
 
 static const char *makeobjdirprefix;	/* obj partition		*/
@@ -99,12 +106,14 @@ char	*dbpath;
 
 	if (!getcwd(cwd, MAXPATHLEN))
 		die("cannot get current directory.");
+	canonpath(cwd);
+#ifndef _WIN32
 	/*
 	 * GLOBAL never think '/' is the root of source tree.
 	 */
 	if (!strcmp(cwd, "/"))
 		die("It's root directory! What are you doing?");
-
+#endif
 	if ((p = getenv("MAKEOBJDIRPREFIX")) != NULL)
 		makeobjdirprefix = p;
 	else
@@ -115,7 +124,7 @@ char	*dbpath;
 		makeobjdir = "obj";
 
 	if ((p = getenv("GTAGSROOT")) != NULL) {
-		if (*p != '/')
+		if (!isabspath(p))
 			die("GTAGSROOT must be an absolute path.");
 		if (stat(p, &sb) || !S_ISDIR(sb.st_mode))
 			die1("directory '%s' not found.", p);
@@ -125,7 +134,7 @@ char	*dbpath;
 		 * GTAGSDBPATH is meaningful only when GTAGSROOT exist.
 		 */
 		if ((p = getenv("GTAGSDBPATH")) != NULL) {
-			if (*p != '/')
+			if (!isabspath(p))
 				die("GTAGSDBPATH must be an absolute path.");
 			if (stat(p, &sb) || !S_ISDIR(sb.st_mode))
 				die1("directory '%s' not found.", p);
@@ -141,7 +150,7 @@ char	*dbpath;
 		strcpy(root, cwd);
 		p = root + strlen(root);
 		while (!gtagsexist(root, dbpath)) {
-			while (*--p != '/')
+			while (*--p != '/' && p > root)
 				;
 			*p = 0;
 			if (root == p)	/* reached root directory */
