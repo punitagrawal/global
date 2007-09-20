@@ -4,8 +4,61 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Copyright (c) 2000, 2001
+        Tama Communications Corporation. All rights reserved.
+
+ This file is free software; as a special exception the author gives
+ unlimited permission to copy and/or distribute it, with or without
+ modifications, as long as this notice is preserved.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+ implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+		----------------------------------
 
 GLOBAL NEWS - User visible changes.
+At least, you had better search '[INCOMPATIBLE CHANGES]' for each version.
+
+Version 4.1.1 - July 31, 2001, by Shigio Yamaguchi
+
+* htags: bug fixed. bless.sh removed 'TARGET=mains'.
+* htags: bug fixed. bless.sh didn't work without config file.
+* configure: bug fixed. --srcdir option didn't work.
+  now you can build project at any directory other than source directory.
+* htags: generates rebuild.sh to redo the job with the previous context.
+* globash.rc: when GTAGSROOT specified, prompt is changed to "[$root]!$cwd"
+  instead of "[$root]/...".
+* globash.rc: bug fixed. number was ignored in 'next <no>' and 'prev <no>'.
+* globash.rc: The -e option of show use emacsclient instead of emacs.
+
+Version 4.1 - July 12, 2001, by Shigio Yamaguchi
+
+[INCOMPATIBLE CHANGES]
+
+* global: rename the -i(incremental) option to -u(update) and the new
+  -i(--ignore-case) option added because -i options is generally used
+  for this purpose (see grep(1)).
+* gtags.conf: rename global.conf into gtags.conf because the old name was
+  too generic. (GLOBAL also accepts old name for compatibility.)
+
+[OTHER CHANGES]
+
+* Some bugs are fixed.
+* globash.rc: GloBash --- Global facility for Bash added.
+* htags: create bless.sh when the -S option specified.
+* htags: config variables prolog_script, epilog_script, show_position,
+  position_begin, position_end and icase_path added.
+* htags: path name search facility added.
+* htags: locate dbpath like global(1) does.
+* htags: show addtional information on status bar.
+* gtags: the -i option also locate tag files among cadedite directories.
+* global, gtags: make icase_path allways enable in Windows32 environment.
+* global: the -T(--through) option added.
+* gtags, htags: --gtagsconf option added.
+* gtags.conf: 'htags_options' added.
+* globa.texi: the method to use vim with GLOBAL and the description
+  about GloBash added.
 
 Version 4.0.1 - September 26, 2000, by Shigio Yamaguchi
 
@@ -13,7 +66,7 @@ Version 4.0.1 - September 26, 2000, by Shigio Yamaguchi
 
 Version 4.0 - September 3, 2000, by Shigio Yamaguchi
 
-incompatible changes
+[INCOMPATIBLE CHANGES]
 
 * htags: doesn't make frame tags(<FRAME>...</FRAME>) by default to reduce
   dependency on javascript.
@@ -47,7 +100,7 @@ incompatible changes
         (define-key gtags-mode-map "\e." 'etags-style-find-tag)
 ))
 
-other changes
+[OTHER CHANGES]
 
 * Some bugs are fixed.
 * Support long name options.

@@ -74,6 +74,7 @@ CC = @CC@
 DEPDIR = @DEPDIR@
 FIND = @FIND@
 GREP = @GREP@
+INCLUDES = @INCLUDES@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDADD = @LDADD@
 PACKAGE = @PACKAGE@
@@ -87,40 +88,26 @@ _am_include = @_am_include@
 _am_quote = @_am_quote@
 install_sh = @install_sh@
 
-INCLUDES = @INCLUDES@
+noinst_LIBRARIES = libgloglibc.a
 
-noinst_LIBRARIES = libgloutil.a
+noinst_HEADERS = regex.h getopt.h
 
-noinst_HEADERS = \
-conf.h dbop.h defined.h die.h find.h getdbpath.h global.h gparam.h \
-gtagsop.h locatestring.h makepath.h path.h pathop.h strbuf.h \
-strmake.h tab.h test.h token.h usable.h version.h
+libgloglibc_a_SOURCES = regex.c getopt.c getopt1.c
 
-
-libgloutil_a_SOURCES = \
-conf.c dbop.c defined.c die.c find.c getdbpath.c gtagsop.c locatestring.c \
-makepath.c path.c pathop.c strbuf.c strmake.c tab.c test.c \
-token.c usable.c version.c
-
-
-libgloutil_a_DEPENDENCIES = $(libgloutil_a_LIBADD)
+libgloglibc_a_DEPENDENCIES = $(libgloglibc_a_LIBADD)
 EXEEXT =
 OBJEXT = o
-subdir = libutil
+subdir = libglibc
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
-libgloutil_a_AR = $(AR) cru
-libgloutil_a_LIBADD =
-am_libgloutil_a_OBJECTS = conf.$(OBJEXT) dbop.$(OBJEXT) \
-	defined.$(OBJEXT) die.$(OBJEXT) find.$(OBJEXT) \
-	getdbpath.$(OBJEXT) gtagsop.$(OBJEXT) locatestring.$(OBJEXT) \
-	makepath.$(OBJEXT) path.$(OBJEXT) pathop.$(OBJEXT) \
-	strbuf.$(OBJEXT) strmake.$(OBJEXT) tab.$(OBJEXT) test.$(OBJEXT) \
-	token.$(OBJEXT) usable.$(OBJEXT) version.$(OBJEXT)
-libgloutil_a_OBJECTS = $(am_libgloutil_a_OBJECTS)
+libgloglibc_a_AR = $(AR) cru
+libgloglibc_a_LIBADD =
+am_libgloglibc_a_OBJECTS = regex.$(OBJEXT) getopt.$(OBJEXT) \
+	getopt1.$(OBJEXT)
+libgloglibc_a_OBJECTS = $(am_libgloglibc_a_OBJECTS)
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -128,25 +115,18 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/conf.Po $(DEPDIR)/dbop.Po \
-@AMDEP_TRUE@	$(DEPDIR)/defined.Po $(DEPDIR)/die.Po \
-@AMDEP_TRUE@	$(DEPDIR)/find.Po $(DEPDIR)/getdbpath.Po \
-@AMDEP_TRUE@	$(DEPDIR)/gtagsop.Po $(DEPDIR)/locatestring.Po \
-@AMDEP_TRUE@	$(DEPDIR)/makepath.Po $(DEPDIR)/path.Po \
-@AMDEP_TRUE@	$(DEPDIR)/pathop.Po $(DEPDIR)/strbuf.Po \
-@AMDEP_TRUE@	$(DEPDIR)/strmake.Po $(DEPDIR)/tab.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test.Po $(DEPDIR)/token.Po \
-@AMDEP_TRUE@	$(DEPDIR)/usable.Po $(DEPDIR)/version.Po
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/getopt.Po $(DEPDIR)/getopt1.Po \
+@AMDEP_TRUE@	$(DEPDIR)/regex.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
-DIST_SOURCES = $(libgloutil_a_SOURCES)
+DIST_SOURCES = $(libgloglibc_a_SOURCES)
 HEADERS = $(noinst_HEADERS)
 
 DIST_COMMON = $(noinst_HEADERS) Makefile.am Makefile.in
-SOURCES = $(libgloutil_a_SOURCES)
+SOURCES = $(libgloglibc_a_SOURCES)
 
 all: all-am
 
@@ -154,7 +134,7 @@ all: all-am
 .SUFFIXES: .c .o .obj
 $(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  libutil/Makefile
+	  $(AUTOMAKE) --gnu  libglibc/Makefile
 Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
@@ -164,10 +144,10 @@ AR = ar
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libgloutil.a: $(libgloutil_a_OBJECTS) $(libgloutil_a_DEPENDENCIES)
-	-rm -f libgloutil.a
-	$(libgloutil_a_AR) libgloutil.a $(libgloutil_a_OBJECTS) $(libgloutil_a_LIBADD)
-	$(RANLIB) libgloutil.a
+libgloglibc.a: $(libgloglibc_a_OBJECTS) $(libgloglibc_a_DEPENDENCIES)
+	-rm -f libgloglibc.a
+	$(libgloglibc_a_AR) libgloglibc.a $(libgloglibc_a_OBJECTS) $(libgloglibc_a_LIBADD)
+	$(RANLIB) libgloglibc.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -175,24 +155,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/conf.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/dbop.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/defined.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/die.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/find.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/getdbpath.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/gtagsop.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/locatestring.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/makepath.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/path.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/pathop.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/strbuf.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/strmake.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/tab.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/test.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/token.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/usable.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/version.Po@_am_quote@
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/getopt.Po@_am_quote@
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/getopt1.Po@_am_quote@
+@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/regex.Po@_am_quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)

@@ -1,3 +1,4 @@
+## Process this file with automake to create Makefile.in
 #
 # Copyright (c) 2000
 #        Tama Communications Corporation. All rights reserved.
@@ -10,18 +11,10 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-LIB    = libglodb.lib
-OBJS=	bt_close.obj bt_conv.obj bt_debug.obj bt_delete.obj bt_get.obj \
-	bt_open.obj bt_overflow.obj bt_page.obj bt_put.obj bt_search.obj \
-	bt_seq.obj bt_split.obj bt_utils.obj mpool.obj db.obj
-!include ..\makefile.inc
+noinst_LIBRARIES = libgloglibc.a
 
-all: $(LIB)
+noinst_HEADERS = regex.h getopt.h
 
-$(LIB): $(OBJS)
-	$(AR) $(LIB) @objs
-install:
-	@echo -n
-clean:
-	del *.lib
-	del *.obj
+libgloglibc_a_SOURCES = regex.c getopt.c getopt1.c
+
+libgloglibc_a_DEPENDENCIES = $(libgloglibc_a_LIBADD)

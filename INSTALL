@@ -4,6 +4,18 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Copyright (c) 2000
+        Tama Communications Corporation. All rights reserved.
+
+ This file is free software; as a special exception the author gives
+ unlimited permission to copy and/or distribute it, with or without
+ modifications, as long as this notice is preserved.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+ implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+		----------------------------------
 
 Installation of GNU GLOBAL under UNIX.
 
@@ -30,7 +42,7 @@ o Groff is needed for formatting online manuals.
    If you replace your system's nroff(1) with GNU's one(nroff.sh) then
    you can use man(1) to see GLOBAL's online manuals.
 
-o Id-utils(1) is needed for -I option of global(1).
+o If you want to use the -I option of global(1) then id-utils(1) is needed.
 
    You can get id-utils at:
 
@@ -58,11 +70,13 @@ o Nvi
 
 	% tar xzvf nvi-1.79.tar.gz
 	% cd nvi-1.79
-	% patch -p < ../nvi/nvi-1.79-gtags.diff
+	% patch -p < nvi-1.79-gtags.diff
 	% cd build
 	% ./configure
 	% make
 	# make install
+
+   ('nvi-1.79-gtags.diff' is included in GLOBAL package.)
 
 o Emacs
 
@@ -93,4 +107,4 @@ o Elvis
 
 Good luck!
 
-Shigio Yamaguchi <shigio@tamacom.com>
+Shigio Yamaguchi

@@ -2,7 +2,7 @@
 cd libdb
 make %1
 cd ..
-cd libregex
+cd libglibc
 make %1
 cd ..
 cd libutil

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
+ * Copyright (c) 1999, 2000, 2001
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -72,6 +72,8 @@ static regex_t reg;
  */
 static int	support_version = 2;	/* acceptable format version   */
 static const char *tagslist[] = {"GPATH", "GTAGS", "GRTAGS", "GSYMS"};
+static int init;
+static char regexchar[256];
 /*
  * dbname: return db name
  *
@@ -116,19 +118,19 @@ STRBUF	*sb;
 	}
 }
 /*
- * notnamechar: test whether or not no name char included.
+ * isregex: test whether or not regular expression
  *
  *	i)	s	string
- *	r)		0: not included, 1: included
+ *	r)		1: is regex, 0: not regex
  */
 int
-notnamechar(s)
+isregex(s)
 char	*s;
 {
 	int	c;
 
 	while ((c = *s++) != '\0')
-		if (!isnamechar(c))
+		if (isregexchar(c))
 			return 1;
 	return 0;
 }
@@ -221,6 +223,13 @@ int	flags;
 	GTOP	*gtop;
 	int	dbmode = 0;
 
+	/* initialize for isregex() */
+	if (!init) {
+		regexchar['^'] = regexchar['$'] = regexchar['{'] =
+		regexchar['}'] = regexchar['('] = regexchar[')'] =
+		regexchar['.'] = regexchar['*'] = regexchar['+'] =
+		regexchar['?'] = regexchar['\\'] = init = 1;
+	}
 	if ((gtop = (GTOP *)calloc(sizeof(GTOP), 1)) == NULL)
 		die("short of memory.");
 	gtop->db = db;
@@ -264,7 +273,11 @@ int	flags;
 			char	buf[80];
 
 			gtop->format_version = 2;
+#ifdef HAVE_SNPRINTF
 			snprintf(buf, sizeof(buf), "%s %d", VERSIONKEY, gtop->format_version);
+#else
+			sprintf(buf, "%s %d", VERSIONKEY, gtop->format_version);
+#endif /* HAVE_SNPRINTF */
 			dbop_put(gtop->dbop, VERSIONKEY, buf);
 			gtop->format |= GTAGS_COMPACT;
 			dbop_put(gtop->dbop, COMPACTKEY, COMPACTKEY);
@@ -462,7 +475,7 @@ int	flags;
 
 		strbuf_trim(ib);
 		if (formatcheck(tagline, gtop->format) < 0)
-			die("illegal parser output.\n'%s'", tagline);
+			die("invalid parser output.\n'%s'", tagline);
 		tag = strmake(tagline, " \t");		 /* tag = $1 */
 		/*
 		 * extract method when class method definition.
@@ -509,13 +522,13 @@ char	*p;
 		for (q = p; *q && !isspace(*q); q++)
 			;
 		if (*q == 0)
-			die("illegal tag format. '%s'", p);
+			die("invalid tag format. '%s'", p);
 		for (; *q && isspace(*q); q++)
 			;
 	} else
 		q = locatestring(p, "./", MATCH_FIRST);
 	if (*q == 0)
-		die("illegal tag format. '%s'", p);
+		die("invalid tag format. '%s'", p);
 	if (!strncmp(q, path, length) && isspace(*(q + length)))
 		return 1;
 	return 0;
@@ -561,6 +574,7 @@ char	*path;
  *			GTOP_KEY	read key only
  *			GTOP_NOSOURCE	don't read source file(compact format)
  *			GTOP_NOREGEX	don't use regular expression.
+ *			GTOP_IGNORECASE	ignore case distinction.
  *	r)		record
  */
 char *
@@ -574,12 +588,15 @@ int	flags;
 	char    buf[IDENTLEN+1], *p;
 	regex_t *preg = &reg;
 	char	*key;
+	int	regflags = REG_EXTENDED;
 
 	gtop->flags = flags;
 	if (flags & GTOP_PREFIX && pattern != NULL)
 		dbflags |= DBOP_PREFIX;
 	if (flags & GTOP_KEY)
 		dbflags |= DBOP_KEY;
+	if (flags & GTOP_IGNORECASE)
+		regflags |= REG_ICASE;
 
 	if (flags & GTOP_NOREGEX) {
 		key = pattern;
@@ -587,12 +604,12 @@ int	flags;
 	} else if (pattern == NULL || !strcmp(pattern, ".*")) {
 		key = NULL;
 		preg = NULL;
-	} else if (notnamechar(pattern) && regcomp(preg, pattern, REG_EXTENDED) == 0) {
-		if (*pattern == '^' && *(p = pattern + 1) && (isalpha(*p) || *p == '_')) {
+	} else if (isregex(pattern) && regcomp(preg, pattern, regflags) == 0) {
+		if (!(flags & GTOP_IGNORECASE) && *pattern == '^' && *(p = pattern + 1) && !isregexchar(*p)) {
 			char    *prefix = buf;
 
 			*prefix++ = *p++;
-			while (*p && isnamechar(*p))
+			while (*p && !isregexchar(*p))
 				*prefix++ = *p++;
 			*prefix = 0;
 			key = buf;
@@ -711,9 +728,17 @@ GTOP	*gtop;
 		gtop->lnop = p;			/* gtop->lnop = $3 */
 
 		if (gtop->root)
+#ifdef HAVE_SNPRINTF
 			snprintf(path, sizeof(path), "%s/%s", gtop->root, &gtop->path[2]);
+#else
+			sprintf(path, "%s/%s", gtop->root, &gtop->path[2]);
+#endif /* HAVE_SNPRINTF */
 		else
+#ifdef HAVE_SNPRINTF
 			snprintf(path, sizeof(path), "%s", &gtop->path[2]);
+#else
+			sprintf(path, "%s", &gtop->path[2]);
+#endif /* HAVE_SNPRINTF */
 		if (!(gtop->flags & GTOP_NOSOURCE)) {
 			if ((gtop->fp = fopen(path, "r")) != NULL)
 				gtop->lno = 0;
@@ -738,12 +763,13 @@ GTOP	*gtop;
 				gtop->lno++;
 			}
 		}
-		if (strlen(gtop->tag) >= 16 && tagline >= 1000)
-			snprintf(output, sizeof(output), "%-16s %4d %-16s %s",
-					gtop->tag, tagline, gtop->path, buffer);
-		else
-			snprintf(output, sizeof(output), "%-16s%4d %-16s %s",
-					gtop->tag, tagline, gtop->path, buffer);
+#ifdef HAVE_SNPRINTF
+		snprintf(output, sizeof(output), "%-16s %3d %-16s %s",
+				gtop->tag, tagline, gtop->path, buffer);
+#else
+		sprintf(output, "%-16s %3d %-16s %s",
+				gtop->tag, tagline, gtop->path, buffer);
+#endif /* HAVE_SNPRINTF */
 		return output;
 	}
 	if (gtop->opened && gtop->fp != NULL) {

@@ -4,11 +4,18 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Copyright (c) 2000, 2001
+        Tama Communications Corporation. All rights reserved.
 
-Copyright (c) 1996, 1997, 1998, 1999
-           Shigio Yamaguchi. All rights reserved.
-Copyright (c) 1999, 2000
-           Tama Communications Corporation. All rights reserved.
+ This file is free software; as a special exception the author gives
+ unlimited permission to copy and/or distribute it, with or without
+ modifications, as long as this notice is preserved.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+ implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+		----------------------------------
 
 GNU GLOBAL is a source code tag system that works the same way across diverse
 environments. It supports C, C++, Yacc and Java source code.
@@ -23,6 +30,8 @@ environments. It supports C, C++, Yacc and Java source code.
 
 	Please see 'doc/global.texi'(texinfo format) to know how to use GLOBAL.
 	The real GLOBAL documentation is incomplete, and will be revised.
+	The descriptions about new facilities are added to 'NEWS'.  At least,
+	you had better read '[INCOMPATIBLE CHANGES]' for each version.
 
 * License
 
@@ -32,10 +41,18 @@ environments. It supports C, C++, Yacc and Java source code.
 
 * Latest information
 
-	You can see the latest information on GLOBAL's home page.
+	You can see the latest information on GLOBAL's WWW.
+
+	http://www.tamacom.com/global/
+
+* Mailing list
+
+	If you think you have found a bug or a suggestion for improvements
+	in GLOBAL or you need help about GLOBAL, then some mailing lists are
+	available. Please see GLOBAL's WWW.
 
 	http://www.tamacom.com/global/
 
 Enjoy!
 
-Shigio Yamaguchi <shigio@tamacom.com>
+Shigio Yamaguchi

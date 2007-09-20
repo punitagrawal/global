@@ -1,7 +1,7 @@
 .\"
 .\" Copyright (c) 1996, 1997, 1998, 1999
 .\"             Shigio Yamaguchi. All rights reserved.
-.\" Copyright (c) 1999, 2000
+.\" Copyright (c) 1999, 2000, 2001
 .\"             Tama Communications Corporation. All rights reserved.
 .\"
 .\" This file is part of GNU GLOBAL.
@@ -20,7 +20,7 @@
 .\" along with this program; if not, write to the Free Software
 .\" Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 .\"
-.Dd Dec 6, 1999
+.Dd Jun 7, 2001
 .Dt GLOBAL 1
 .Os FreeBSD
 .Sh NAME
@@ -28,7 +28,7 @@
 .Nd print the locations of specified object.
 .Sh SYNOPSIS
 .Nm global
-.Op Fl alnrstvx
+.Op Fl ailnrstTvx
 .Ar pattern
 .Nm global
 .Fl c[sv]
@@ -37,18 +37,18 @@
 .Fl f[anrstvx]
 .Ar files
 .Nm global
-.Fl g[alntvx]
+.Fl g[ailntvx]
 .Ar pattern
 .Nm global
-.Fl i[v]
-.Nm global
-.Fl I[alntvx]
+.Fl I[ailntvx]
 .Ar pattern
 .Nm global
 .Fl p[rv]
 .Nm global
-.Fl P[alntvx]
+.Fl P[ailntvx]
 .Op Ar pattern
+.Nm global
+.Fl u[v]
 .Sh DESCRIPTION
 .Nm Global
 find the locations of specified object in C, C++, Yacc, Java and assembler
@@ -93,9 +93,6 @@ This option implies -x option.
 Print all lines which match to the
 .Ar pattern .
 This function use grep(1) as a search engine.
-.It Fl i
-.It Fl -incremental
-Locate tag files and reconstruct them incrementally.
 .It Fl I
 .It Fl -idutils Ar pattern
 Print all lines which match to the
@@ -113,11 +110,9 @@ Print the location of GTAGS.
 Print the path which match to the
 .Ar pattern .
 If no pattern specified, print all.
-.It Fl s
-.It Fl -symbol Ar pattern
-Print the locations of specified symbol other than function names.
-You need GSYMS tags file. See
-.Xr gtags 1 .
+.It Fl u
+.It Fl -update
+Locate tag files and update them incrementally.
 .It Fl -version
 Show version number.
 .It Fl -help
@@ -130,6 +125,9 @@ The following options are available:
 .It Fl a
 .It Fl -absolute
 Print absolute path name. By default, print relative path name.
+.It Fl i
+.It Fl -ignore-case
+ignore case distinctions in pattern.
 .It Fl l
 .It Fl -local
 Print just objects which exist under the current directory.
@@ -141,9 +139,19 @@ Suppress sort filter and path conversion filter.
 .It Fl -rootdir
 Print the locations of object references. By default, print object
 definitions. With the -p option, print the root directory of source tree.
+.It Fl s
+.It Fl -symbol Ar pattern
+Print the locations of specified symbol other than function names.
+You need GSYMS tags file. See
+.Xr gtags 1 .
 .It Fl t
 .It Fl -tags
 Print with standard ctags format.
+.It Fl T
+.It Fl -through
+Go through all the tag files listed in GTAGSLIBPATH.
+By default, stop searching when tag is found.
+This option is ignored when either -s, -r or -l option is specified.
 .It Fl v
 .It Fl -verbose
 Verbose mode.
@@ -162,6 +170,8 @@ Tag file for function references.
 Tag file for symbols other then functions.
 .It Pa GPATH
 Tag file for path of source files.
+.It Pa /etc/gtags.conf $HOME/.globalrc
+Configuration file.
 .El
 .Sh ENVIRONMENT
 The following environment variables affect the execution of global.
@@ -173,10 +183,39 @@ The directory which is the root of source tree.
 The directory on which gtags database exist. This value is ignored
 when GTAGSROOT is not defined.
 .It Ev GTAGSLIBPATH
-If this variable is set, its value is used as the path to search for library
-functions. If specified function is not found in a source tree,
-global search in these path too.
+If this variable is set, it is used as the path to search for library
+functions. If the specified function is not found in a source tree,
+global also search in these paths.
 .El
+.Sh EXAMPLES
+  % ls -F
+  Makefile      src/    lib/
+  % gtags
+  % global main
+  src/main.c
+  % global -x main
+  main              10 src/main.c  main (argc, argv) {
+  % global -x '^[sg]et'
+  set_num           20 lib/util.c  set_num(values)
+  get_num           30 lib/util.c  get_num() {
+  % global -rx '^[sg]et'
+  set_num          113 src/op.c            set_num(32);
+  set_num          225 src/opop.c               if (set_num(0) > 0) {
+  get_num           90 src/op.c            while (get_num() > 0) {
+  % cd lib
+  % global -rx '^[sg]et'
+  set_num          113 ../src/op.c            set_num(32);
+  set_num          225 ../src/opop.c               if (set_num(0) > 0) {
+  get_num           90 ../src/op.c            while (get_num() > 0) {
+  % global strlen
+  % (cd /usr/src/sys; gtags)
+  % setenv GTAGSLIBPATH /usr/src/sys
+  % global strlen
+  ../../../usr/src/sys/libkern/strlen.c
+  % (cd /usr/src/lib; gtags)
+  % setenv GTAGSLIBPATH /usr/src/lib:/usr/src/sys
+  % global strlen
+  ../../../usr/src/lib/libc/string/strlen.c
 .Sh DIAGNOSTICS
 .Nm Global
 exits with a non 0 value if an error occurred, 0 otherwise.
@@ -188,7 +227,7 @@ exits with a non 0 value if an error occurred, 0 otherwise.
 .Xr htags 1 ,
 .Xr vi 1 .
 .Sh AUTHORS
-Shigio Yamaguchi (shigio@tamacom.com)
+Shigio Yamaguchi
 .Sh HISTORY
 The
 .Nm

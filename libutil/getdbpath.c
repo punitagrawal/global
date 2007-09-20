@@ -50,6 +50,30 @@ static const char *makeobjdirprefix;	/* obj partition		*/
 static const char *makeobjdir;		/* obj directory		*/
 
 /*
+ * setupvariables: load variables regard to BSD OBJ directory.
+ */
+static void
+setupvariables(verbose)
+int verbose;
+{
+	char *p;
+
+	if ((p = getenv("MAKEOBJDIRPREFIX")) != NULL) {
+		makeobjdirprefix = p;
+		if (verbose)
+			fprintf(stderr, "MAKEOBJDIRPREFIX is set to '%s'.\n", p);
+	} else {
+		makeobjdirprefix = "/usr/obj";
+	}
+	if ((p = getenv("MAKEOBJDIR")) != NULL) {
+		makeobjdir = p;
+		if (verbose)
+			fprintf(stderr, "MAKEOBJDIR is set to '%s'.\n", p);
+	} else {
+		makeobjdir = "obj";
+	}
+}
+/*
  * gtagsexist: test whether GTAGS's existence.
  *
  *	i)	candidate candidate root directory
@@ -67,34 +91,65 @@ gtagsexist(candidate, dbpath, size, verbose)
 char	*candidate;
 char	*dbpath;
 int	size;
+int	verbose;
 {
 	char	path[MAXPATHLEN+1];
 
+	/*
+	 * setup makeobjdir and makeobjdirprefix (only first time).
+	 */
+	if (makeobjdir == NULL)
+		setupvariables(verbose);
+
+#ifdef HAVE_SNPRINTF
 	snprintf(path, sizeof(path), "%s/%s", candidate, dbname(GTAGS));
+#else
+	sprintf(path, "%s/%s", candidate, dbname(GTAGS));
+#endif /* HAVE_SNPRINTF */
 	if (verbose)
 		fprintf(stderr, "checking %s\n", path);
 	if (test("fr", path)) {
 		if (verbose)
 			fprintf(stderr, "GTAGS found at '%s'.\n", path);
+#ifdef HAVE_SNPRINTF
 		snprintf(dbpath, size, "%s", candidate);
+#else
+		sprintf(dbpath, "%s", candidate);
+#endif /* HAVE_SNPRINTF */
 		return 1;
 	}
+#ifdef HAVE_SNPRINTF
 	snprintf(path, sizeof(path), "%s/%s/%s", candidate, makeobjdir, dbname(GTAGS));
+#else
+	sprintf(path, "%s/%s/%s", candidate, makeobjdir, dbname(GTAGS));
+#endif /* HAVE_SNPRINTF */
 	if (verbose)
 		fprintf(stderr, "checking %s\n", path);
 	if (test("fr", path)) {
 		if (verbose)
 			fprintf(stderr, "GTAGS found at '%s'.\n", path);
+#ifdef HAVE_SNPRINTF
 		snprintf(dbpath, size, "%s/%s", candidate, makeobjdir);
+#else
+		sprintf(dbpath, "%s/%s", candidate, makeobjdir);
+#endif /* HAVE_SNPRINTF */
 		return 1;
 	}
+#ifdef HAVE_SNPRINTF
 	snprintf(path, sizeof(path), "%s%s/%s", makeobjdirprefix, candidate, dbname(GTAGS));
+#else
+	sprintf(path, "%s%s/%s", makeobjdirprefix, candidate, dbname(GTAGS));
+#endif /* HAVE_SNPRINTF */
 	if (verbose)
 		fprintf(stderr, "checking %s\n", path);
 	if (test("fr", path)) {
 		if (verbose)
 			fprintf(stderr, "GTAGS found at '%s'.\n", path);
+#ifdef HAVE_SNPRINTF
 		snprintf(dbpath, size, "%s%s", makeobjdirprefix, candidate);
+#else
+		sprintf(dbpath, "%s%s", makeobjdirprefix, candidate);
+#endif /* HAVE_SNPRINTF */
 		return 1;
 	}
 	return 0;
@@ -131,20 +186,6 @@ int	verbose;
 	if (!getcwd(cwd, MAXPATHLEN))
 		die("cannot get current directory.");
 	canonpath(cwd);
-	if ((p = getenv("MAKEOBJDIRPREFIX")) != NULL) {
-		makeobjdirprefix = p;
-		if (verbose)
-			fprintf(stderr, "MAKEOBJDIRPREFIX is set to '%s'.\n", p);
-	} else {
-		makeobjdirprefix = "/usr/obj";
-	}
-	if ((p = getenv("MAKEOBJDIR")) != NULL) {
-		makeobjdir = p;
-		if (verbose)
-			fprintf(stderr, "MAKEOBJDIR is set to '%s'.\n", p);
-	} else {
-		makeobjdir = "obj";
-	}
 
 	if ((p = getenv("GTAGSROOT")) != NULL) {
 		if (verbose)

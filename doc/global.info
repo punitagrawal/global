@@ -1,5 +1,4 @@
-This is Info file global.info, produced by Makeinfo version 1.68 from
-the input file global.texi.
+This is global.info, produced by makeinfo version 4.0 from global.texi.
 
 INFO-DIR-SECTION Miscellaneous
 START-INFO-DIR-ENTRY
@@ -8,7 +7,7 @@ END-INFO-DIR-ENTRY
 
    This file documents the `GLOBAL' source code tag system.
 
-   Copyright (c) 2000 Tama Communications Corporation. All rights
+   Copyright (c) 2000, 2001 Tama Communications Corporation. All rights
 reserved.
 
    Permission is granted to copy, distribute and/or modify this document
@@ -24,17 +23,19 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GLOBAL source code tag system
 *****************************
 
-   This manual documents version 4.0.1 of the GLOBAL source code tag
+   This manual documents version 4.1.1 of the GLOBAL source code tag
 system.
 
 * Menu:
 
 * Introduction::                        Overview of the tools.
-* Global::                              Shell using GLOBAL.
+* Global::                              Command line GLOBAL.
+* GloBash::                             Global facility for Bash.
 * Nvi editor::                          Extended nvi using GLOBAL.
+* Elvis editor::                        Elvis using GLOBAL.
+* Vim editor::                          Vim using GLOBAL.
 * Emacs editor::                        Extended emacs using GLOBAL.
 * Web browser::                         Hypertext generator.
-* Elvis editor::                        Elvis using GLOBAL.
 * Other topics::                        Other topics.
 * GNU Free Documentation License::	GNU Free Documentation License.
 * Index::                               Option index.
@@ -51,6 +52,7 @@ the source files and move there easily.  It is useful for hacking a
 large project containing many subdirectories, many `#ifdef' and many
 `main()' functions.
 
+
    GNU GLOBAL has following features:
 
    * support C, C++, Yacc and Java.
@@ -61,11 +63,13 @@ large project containing many subdirectories, many `#ifdef' and many
 
         - Shell command line 	
 
-        - Nvi editor (vi clone) 	
+        - Bash shell.  	
 
-        - Elvis editor (vi clone) 	
+        - Vi editor clone (nvi, elvis, vim) 	
 
-        - Emacs editor 	
+        - Less viewer 	
+
+        - Emacs editor (emacs, mule, xemacs) 	
 
         - Web browser 	
 
@@ -97,15 +101,15 @@ large project containing many subdirectories, many `#ifdef' and many
 
    * support incremental updating of tag files.
 
-   * support customizing with global.conf.
+   * support customizing with gtags.conf.
 
    * generate completion list for completing input method.
 
 
-File: global.info,  Node: Global,  Next: Nvi editor,  Prev: Introduction,  Up: Top
+File: global.info,  Node: Global,  Next: GloBash,  Prev: Introduction,  Up: Top
 
-Shell using GLOBAL
-******************
+Command line GLOBAL
+*******************
 
    You can use tag facilities from shell command line.  It is a big
 merit of GLOBAL compared with any other tag system.
@@ -261,6 +265,7 @@ Basic usage.
               func2              4 DIR2/fileC.c   func2(){ i--; }
               func3              6 DIR2/fileC.c   func3(){
 
+
 
 File: global.info,  Node: Applied usage,  Prev: Basic usage,  Up: Global
 
@@ -311,6 +316,7 @@ at ROOT/, version1.0/ and version2.0/.
               % global -x func1
               func1              1 version1.0/file.c  func1(){ i++; }
               func1              1 version2.0/file.c  func1(){ i--; }
+
 
    There is another usage of `GTAGSROOT'.
 
@@ -403,8 +409,183 @@ at ROOT/, version1.0/ and version2.0/.
               view +351 ../kern/init_main.c
               % !! | sh            # from now on, go to next tag with 'ZZ'.
 
+
 
-File: global.info,  Node: Nvi editor,  Next: Emacs editor,  Prev: Global,  Up: Top
+File: global.info,  Node: GloBash,  Next: Nvi editor,  Prev: Global,  Up: Top
+
+Global facility for Bash
+************************
+
+   Special support for bash is available.
+
+* Menu:
+
+* Features(globash)::			Features.
+* Preparation(globash)::		Preparation.
+* Basic usage(globash)::		Basic usage.
+* Applied usage(globash)::		Applied usage.
+
+
+File: global.info,  Node: Features(globash),  Next: Preparation(globash),  Up: GloBash
+
+Features.
+=========
+
+   * Vi-like tag stack is available.
+
+   * Editor or viewer is automatically invoked.
+
+   * Tag name completion is available.
+
+   * Tag mark facility is available.
+
+   * Yor can manage directory list by cookie facility.
+
+
+File: global.info,  Node: Preparation(globash),  Next: Basic usage(globash),  Prev: Features(globash),  Up: GloBash
+
+Preparation.
+============
+
+   First, do the preparation of global. (Please see *Note
+Preparation::.).  And you can invoke bash(1) with --rcfile option.
+
+         % bash --rcfile globash.rc
+
+   You will see a prompt like this:
+
+         [/usr/src/sys]/kern _
+
+   This prompt means that the current directory is '/usr/src/sys/kern'
+and the root of the source tree is '/usr/src/sys'.  Tag and marker are
+valid only in a project.
+
+   When you get out of the project, globash warns like:
+
+         [/usr/src/sys] cd ..
+         You are going to get out of current project.
+         Tag stack and marker will be removed. Sure? ([y]/n)_
+
+   If you answer 'y' and `RET' or just `RET' in above example then tag
+stack and marker will be removed.
+
+   If you need help then please type 'ghelp'.
+
+
+File: global.info,  Node: Basic usage(globash),  Next: Applied usage(globash),  Prev: Preparation(globash),  Up: GloBash
+
+Basic usage.
+============
+
+   * Almost global(1)'s command character is available as a command.
+
+              [/usr/src/sys] x fork               <- (global -x fork)
+              >    1  fork              94 kern/kern_fork.c fork(p, uap)
+              [/usr/src/sys] r                    <- (global -xr fork)
+              >    1  fork              85 alpha/linux/linux_machdep.c
+                   2  fork             184 i386/linux/linux_machdep.c
+              [/usr/src/sys] s lbolt              <- (global -xs lbolt)
+              >    1  lbolt            1210 i386/isa/wd_cd.c     tsleep((cad
+                   2  lbolt            1211 i386/isa/wd_cd.c     tsleep((cad
+                   3  lbolt            709 i386/isa/wfd.c     tsleep ((caddr
+              ...
+              [/usr/src/sys] g                    <- (global -xg lbolt)
+              >    1  lbolt            1210 i386/isa/wd_cd.c     tsleep((cad
+              ...
+              [/usr/src/sys] P init               <- (global -xP init)
+              >    1  path    1 dev/hea/eni_init.c
+                   2  path    1 dev/hfa/fore_init.c
+                   3  path    1 i386/i386/initcpu.c
+                   4  path    1 kern/init_main.c
+                   5  path    1 kern/init_sysent.c
+                   6  path    1 kern/vfs_init.c
+                   7  path    1 vm/vm_init.c
+              [/usr/src/sys] _
+
+     If no tag name is specified then it is assumed the latest tag name.
+
+   * You can select a tag by show command.
+
+              [/usr/src/sys] x main
+              >    1  main              70 alpha/alpha/gensetdefs.c main(in
+                   2  main             1500 alpha/alpha/ieee_float.c main(i
+                   3  main             227 boot/alpha/boot1/boot1.c main()
+              ....
+              [/usr/src/sys] show 3
+              (Load editor and show boot/alpha/boot1/boot1.c at line 227.)
+
+     The default editor is vi(1) but you can specify it statically by
+     `EDITOR' environment variable or temporarily by option.
+
+
+              [/usr/src/sys] show -e 3
+              (Load emacs and show boot/alpha/boot1/boot1.c at line 227.)
+              [/usr/src/sys] show -l 3
+              (Load less and show boot/alpha/boot1/boot1.c at line 227.)
+
+   * You can use vi-like tag stack. You can return previous tag list by
+     pop command.
+
+              [/usr/src/sys] x main
+              >    1  main              70 alpha/alpha/gensetdefs.c main(in
+                   2  main             1500 alpha/alpha/ieee_float.c main(i
+                   3  main             227 boot/alpha/boot1/boot1.c main()
+              ....
+              [/usr/src/sys] show 3
+              (Load editor and show boot/alpha/boot1/boot1.c at line 227.)
+              [/usr/src/sys] x fork          <- push new tag on tag stack.
+              >    1  fork              94 kern/kern_fork.c fork(p, uap)
+              [/usr/src/sys] pop             <- pop tag stack.
+              [/usr/src/sys] show
+              (Load editor and show boot/alpha/boot1/boot1.c at line 227.)
+
+
+
+File: global.info,  Node: Applied usage(globash),  Prev: Basic usage(globash),  Up: GloBash
+
+Applied usage.
+==============
+
+   * You can memory tags using 'mark' command.
+
+              [/usr/src/sys] x fork
+              >    1  fork              94 kern/kern_fork.c fork(p, uap)
+              [/usr/src/sys] mark
+              [/usr/src/sys] x main
+              >    1  main              70 alpha/alpha/gensetdefs.c main(in
+                   2  main             1500 alpha/alpha/ieee_float.c main(i
+                   3  main             227 boot/alpha/boot1/boot1.c main()
+              ....
+              [/usr/src/sys] mark -l              <- show marker list.
+                   1  fork              94 kern/kern_fork.c fork(p, uap)
+              [/usr/src/sys] mark 1               <- select a marker.
+              (Load editor and show kern/kern_fork.c at line 227.)
+              [/usr/src/sys] list
+              >    1  main              70 alpha/alpha/gensetdefs.c main(in
+                   2  main             1500 alpha/alpha/ieee_float.c main(i
+                   3  main             227 boot/alpha/boot1/boot1.c main()
+              ....
+
+     Marked tags are valid until you get out of current project or quit
+     current bash session.
+
+   * You can memory directories using 'cookie' command.
+
+              [/usr/src/sys] cookie               <- drop cookie.
+              [/usr/src/sys] cd kern
+              [/usr/src/sys]/kern cookie          <- drop cookie again.
+              [/usr/src/sys]/kern cd ../i386
+              [/usr/src/sys]/i386 cookie -l       <- show cookie list.
+                   1  /usr/src/sys/kern
+                   2  /usr/src/sys
+              [/usr/src/sys]/i386 warp 2          <- warp to selected cookie.
+              [/usr/src/sys] _
+
+     Cookie directories are valid until you delete them.
+
+
+
+File: global.info,  Node: Nvi editor,  Next: Elvis editor,  Prev: GloBash,  Up: Top
 
 Extended nvi using global
 *************************
@@ -424,7 +605,9 @@ File: global.info,  Node: Features(nvi),  Next: Preparation(nvi),  Up: Nvi edito
 Features.
 =========
 
-   * You can use most of GLOBAL's facilities from nvi editor.
+   * You can use most of GLOBAL's facilities from the editor.
+
+   * Recognition of the current token and its type.
 
    * Extended nvi is completely backward-compatible with the original
      nvi.  You can use GLOBAL's facilities only in 'gtags mode'.
@@ -575,7 +758,294 @@ Applied usage.
      were using hypertext.
 
 
-File: global.info,  Node: Emacs editor,  Next: Web browser,  Prev: Nvi editor,  Up: Top
+File: global.info,  Node: Elvis editor,  Next: Vim editor,  Prev: Nvi editor,  Up: Top
+
+Elvis using global
+******************
+
+   Elvis 2.1 has new `tagprg' and `tagprgonce' variables for running an
+external tag search program. You can use them with GLOBAL.
+
+* Menu:
+
+* Features(elvis)::                     Features.
+* Preparation(elvis)::                  Preparation.
+* Basic usage(elvis)::                  Basic usage.
+* Applied usage(elvis)::                Applied usage.
+
+
+File: global.info,  Node: Features(elvis),  Next: Preparation(elvis),  Up: Elvis editor
+
+Features.
+=========
+
+   * You can use most of GLOBAL's facilities from the editor.
+
+   * No source level patch is needed.
+
+   * Mouse events are supported.
+
+
+File: global.info,  Node: Preparation(elvis),  Next: Basic usage(elvis),  Prev: Features(elvis),  Up: Elvis editor
+
+Preparation.
+============
+
+   First, do the preparation of global. (Please see *Note
+Preparation::.).
+
+   Second, start elvis and execute `set tagprg="global -t $1"' like
+this.
+
+
+         % elvis
+         ~
+         ~
+         ~
+         ~
+         ~
+         ~
+         :set tagprg="global -t $1"
+
+
+File: global.info,  Node: Basic usage(elvis),  Next: Applied usage(elvis),  Prev: Preparation(elvis),  Up: Elvis editor
+
+Basic usage.
+============
+
+   * To go to func1, you can say
+
+              :tag func1
+
+     It seemes the same as original elvis, but elvis execute `global -t
+     func1' internally and read it instead of tags file.
+
+   * To go to the referenced point of func1, add `-r' option.
+
+              :tag -r func1
+
+     Elvis executes command like `global -t -r func1' internally.
+
+   * To go to any symbols other than function, try this.
+
+              :tag -s lbolt
+
+   * To go to any strings other than symbols, try this.
+
+              :tag -g Copyright
+
+   * When using -r, -s or -g, you had better to use browse command.
+
+              :browse -r fork
+
+     It brings a following selection list. You can select tag and go to
+     the point.
+
+
+              Browse -r fork (2 matches)
+              +----------------+----------------+--------------------
+              | TAG NAME       | SOURCE FILE    | SOURCE LINE
+              +----------------+----------------+--------------------
+              |fork            |ux/linux_misc.c | (line 565)
+              |fork            |ern/init_main.c | (line 191)
+              +----------------+----------------+--------------------
+
+   * To get list of functions in a file, use -f command.
+
+              :browse -f main.c               <- locate functions in main.c
+
+   * Other tag commands are also available:
+
+    `CTL-]'
+          go to the definition of current token.
+
+    `CTL-T'
+          return to the most recent tag context.
+
+    `:tag'
+          without argument, go to the next tag.
+
+    `:pop'
+          return to the most recent tag context.
+
+    `:stack'
+          display the tags stack.
+
+    `:stag'
+          creates a new window and moves its cursor to the tag's
+          definition point.
+
+    `:sbrowse'
+          same with 'browse' but show in a new window.
+
+
+File: global.info,  Node: Applied usage(elvis),  Prev: Basic usage(elvis),  Up: Elvis editor
+
+Applied usage.
+==============
+
+   * You can use POSIX regular expressions.
+
+              :tag ^put_                  <- locate functions start with 'put_'
+          
+              :browse -g 'fseek(.*L_SET)' <- locate fseek() using L_SET argument
+
+   * You can browse functions list of many files.
+
+              :browse -f *.c              <- locate functions in *.c
+
+   * You can browse project files whose path includs specified pattern.
+
+              :browse -P /vm/             <- under vm/ directory
+              :browse -P \.h$             <- all include files
+              :browse -P init             <- path including 'init'
+
+   * You can use mouse to select tag.
+
+              +----------------+----------------+--------------------
+              | TAG NAME       | SOURCE FILE    | SOURCE LINE
+              +----------------+----------------+--------------------
+              |fork            |ux/linux_misc.c | (line 565)
+              |fork            |ern/init_main.c | (line 191)
+              +----------------+----------------+--------------------
+
+     Please select tag name with mouse cursor and double click on the
+     left button and you go to the tag's point.  In source screen, also
+     select function name and double click on the left button and you
+     can go to the point that the function is defined.  To come back,
+     double click on the right button.
+
+
+File: global.info,  Node: Vim editor,  Next: Emacs editor,  Prev: Elvis editor,  Up: Top
+
+Vim using global
+****************
+
+   Vim 5.2 or later has `grepprg' and `grepformat' variables for
+running an external grep like search program. You can use them with
+GLOBAL.
+
+* Menu:
+
+* Features(vim)::                       Features.
+* Preparation(vim)::                    Preparation.
+* Basic usage(vim)::                    Basic usage.
+* Applied usage(vim)::                  Applied usage.
+
+
+File: global.info,  Node: Features(vim),  Next: Preparation(vim),  Up: Vim editor
+
+Features.
+=========
+
+   * You can use most of GLOBAL's facilities from the editor.
+
+   * No source level patch is needed.
+
+   * (But tag stack cannot be available.)
+
+
+File: global.info,  Node: Preparation(vim),  Next: Basic usage(vim),  Prev: Features(vim),  Up: Vim editor
+
+Preparation.
+============
+
+   First, do the preparation of global. (Please see *Note
+Preparation::.).
+
+   Second, write the following set command to the `.vimrc' and start
+vim.
+
+
+         $HOME/.vimrc
+         +----------------------------
+         |set grepprg=global\ -t
+         |set grepformat=%m\TAB%f\TAB%l
+     
+         TAB means CTL-I
+
+
+File: global.info,  Node: Basic usage(vim),  Next: Applied usage(vim),  Prev: Preparation(vim),  Up: Vim editor
+
+Basic usage.
+============
+
+   * To go to func1, you can say
+
+              :grep func1
+
+     Vim execute `global -t func1', parse the output and list located
+     objects. You can go to the first entry with `RET'.
+
+   * To go to the referenced point of func1, add `-r' option.
+
+              :grep -r func1
+
+     vim executes command like `global -t -r func1' internally.
+
+   * To go to any symbols other than function, try this.
+
+              :grep -s lbolt
+
+   * To go to any strings other than symbols, try this.
+
+              :grep -g Copyright
+
+     If many objects are located, vim list all of the them.
+
+
+          main    /usr/src/sys/i386/linux/linux_genassym.c        14
+          main    /usr/src/sys/kern/init_main.c   183
+          main    /usr/src/sys/pc98/boot/netboot/main.c   37
+          main    /usr/src/sys/pc98/boot/netboot/makerom.c        14
+          
+          Hit ENTER or type command to continue
+
+     You can go to any entry with `cc'n command.
+
+   * To get list of functions in a file, use -f command.
+
+              :grep -f main.c               <- locate functions in main.c
+
+   * Other grep related commands are also available:
+
+    `:cn'
+          go to the next entry.
+
+    `:cp'
+          go to the previous entry.
+
+    `:ccN'
+          go to the N'th entry.
+
+    `:cl'
+          list all entries.
+
+
+File: global.info,  Node: Applied usage(vim),  Prev: Basic usage(vim),  Up: Vim editor
+
+Applied usage.
+==============
+
+   * You can use POSIX regular expressions.
+
+              :grep ^put_                  <- locate functions start with 'put_'
+          
+              :grep -g 'fseek(.*L_SET)' <- locate fseek() using L_SET argument
+
+   * You can browse functions list of many files.
+
+              :grep -f *.c              <- locate functions in *.c
+
+   * You can browse project files whose path includs specified pattern.
+
+              :grep -P /vm/             <- under vm/ directory
+              :grep -P \.h$             <- all include files
+              :grep -P init             <- path including 'init'
+
+
+
+File: global.info,  Node: Emacs editor,  Next: Web browser,  Prev: Vim editor,  Up: Top
 
 Extended emacs using global
 ***************************
@@ -595,7 +1065,7 @@ File: global.info,  Node: Features(emacs),  Next: Preparation(emacs),  Up: Emacs
 Features.
 =========
 
-   Addition to the extended vi,
+   * You can use most of GLOBAL's facilities from the editor.
 
    * More intelligent recognition of the current token and its type.
 
@@ -750,7 +1220,7 @@ Applied usage.
      To return to the previous position, click the right button.
 
 
-File: global.info,  Node: Web browser,  Next: Elvis editor,  Prev: Emacs editor,  Up: Top
+File: global.info,  Node: Web browser,  Next: Other topics,  Prev: Emacs editor,  Up: Top
 
 Hypertext generator
 *******************
@@ -826,165 +1296,7 @@ Usage.
 source code.
 
 
-File: global.info,  Node: Elvis editor,  Next: Other topics,  Prev: Web browser,  Up: Top
-
-Elvis using global
-******************
-
-   Elvis 2.1 has new `tagprg' and `tagprgonce' variables for running an
-external tag search program. You can use them with GLOBAL.
-
-* Menu:
-
-* Features(elvis)::                     Features.
-* Preparation(elvis)::                  Preparation.
-* Basic usage(elvis)::                  Basic usage.
-* Applied usage(elvis)::                Applied usage.
-
-
-File: global.info,  Node: Features(elvis),  Next: Preparation(elvis),  Up: Elvis editor
-
-Features.
-=========
-
-   Addition to the extended vi,
-
-   * No source level patch is needed.
-
-   * Mouse events are supported.
-
-
-File: global.info,  Node: Preparation(elvis),  Next: Basic usage(elvis),  Prev: Features(elvis),  Up: Elvis editor
-
-Preparation.
-============
-
-   First, do the preparation of global. (Please see *Note
-Preparation::.).
-
-   Second, start elvis and execute `set tagprg="global -t $1"' like
-this.
-
-
-         % elvis
-         ~
-         ~
-         ~
-         ~
-         ~
-         ~
-         :set tagprg="global -t $1"
-
-
-File: global.info,  Node: Basic usage(elvis),  Next: Applied usage(elvis),  Prev: Preparation(elvis),  Up: Elvis editor
-
-Basic usage.
-============
-
-   * To go to func1, you can say
-
-              :tag func1
-
-     It seemes the same as original elvis, but elvis execute `global -t
-     func1' internally and read it instead of tags file.
-
-   * To go to the referenced point of func1, add `-r' option.
-
-              :tag -r func1
-
-     Elvis executes command like `global -t -r func1' internally.
-
-   * To go to any symbols other than function, try this.
-
-              :tag -s lbolt
-
-   * To go to any strings other than symbols, try this.
-
-              :tag -g Copyright
-
-   * When using -r, -s or -g, you had better to use browse command.
-
-              :browse -r fork
-
-     It brings a following selection list. You can select tag and go to
-     the point.
-
-
-              Browse -r fork (2 matches)
-              +----------------+----------------+--------------------
-              | TAG NAME       | SOURCE FILE    | SOURCE LINE
-              +----------------+----------------+--------------------
-              |fork            |ux/linux_misc.c | (line 565)
-              |fork            |ern/init_main.c | (line 191)
-              +----------------+----------------+--------------------
-
-   * To get list of functions in a file, use -f command.
-
-              :browse -f main.c               <- locate functions in main.c
-
-   * Other tag commands are also available:
-
-    `CTL-]'
-          go to the definition of current token.
-
-    `CTL-T'
-          return to the most recent tag context.
-
-    `:tag'
-          without argment, go to the next tag.
-
-    `:pop'
-          return to the most recent tag context.
-
-    `:stack'
-          display the tags stack.
-
-    `:stag'
-          creates a new window and moves its cursor to the tag's
-          definition point.
-
-    `:sbrowse'
-          same with 'browse' but show in a new window.
-
-
-File: global.info,  Node: Applied usage(elvis),  Prev: Basic usage(elvis),  Up: Elvis editor
-
-Applied usage.
-==============
-
-   * You can use POSIX regular expressions.
-
-              :tag ^put_                  <- locate functions start with 'put_'
-          
-              :browse -g 'fseek(.*L_SET)' <- locate fseek() using L_SET argment
-
-   * You can browse functions list of many files.
-
-              :browse -f *.c              <- locate functions in *.c
-
-   * You can browse project files whose path includs specified pattern.
-
-              :browse -P /vm/             <- under vm/ directory
-              :browse -P \.h$             <- all include files
-              :browse -P init             <- path including 'init'
-
-   * You can use mouse to select tag.
-
-              +----------------+----------------+--------------------
-              | TAG NAME       | SOURCE FILE    | SOURCE LINE
-              +----------------+----------------+--------------------
-              |fork            |ux/linux_misc.c | (line 565)
-              |fork            |ern/init_main.c | (line 191)
-              +----------------+----------------+--------------------
-
-     Please select tag name with mouse cursor and double click on the
-     left button and you go to the tag's point.  In source screen, also
-     select function name and double click on the left button and you
-     can go to the point that the function is defined.  To come back,
-     double click on the right button.
-
-
-File: global.info,  Node: Other topics,  Next: GNU Free Documentation License,  Prev: Elvis editor,  Up: Top
+File: global.info,  Node: Other topics,  Next: GNU Free Documentation License,  Prev: Web browser,  Up: Top
 
 Other topics
 ************
@@ -1003,7 +1315,7 @@ How to plug in a parser.
 
    You can write new parser and use as a plugged-in parser.
 
-   Copy `global.conf' to `/etc/global.conf' or `$HOME/.globalrc'.
+   Copy `gtags.conf' to `/etc/gtags.conf' or `$HOME/.globalrc'.
 
    For example, if you would like to use ctags based on etags (included
 by Emacs),
@@ -1012,7 +1324,7 @@ by Emacs),
          % cd /EMACS SOURCE DIRECTORY/lib-src
          % make ctags
          # cp ctags /usr/local/bin/ctags-emacs
-         % setenv GTAGSLABEL ctags-emacs         # see global.conf
+         % setenv GTAGSLABEL ctags-emacs         # see gtags.conf
          % gtags
          % ls G*
          GPATH   GTAGS
@@ -1024,7 +1336,7 @@ by Emacs),
          % cp Makefile.unix Makefile
          % make
          # cp ctags /usr/local/bin/ctags-exuberant
-         % setenv GTAGSLABEL ctags-exuberant     # see global.conf
+         % setenv GTAGSLABEL ctags-exuberant     # see gtags.conf
          % gtags
          % ls G*
          GPATH   GTAGS
@@ -1041,10 +1353,10 @@ same style as `ctags -x', ie.:
      
          [1] tag name
          [2] line number the tag appeared
-         [3] path name. It must be equal to argment path name.
+         [3] path name. It must be equal to argument path name.
          [4] line image
 
-   Otherwise, you can make a suitable wrapper for the pug-in parser.
+   Otherwise, you can make a suitable wrapper for the plug-in parser.
 
 
 File: global.info,  Node: Compact format,  Next: Incremental updating,  Prev: Plugin,  Up: Other topics
@@ -1096,21 +1408,21 @@ Incremental updating.
 =====================
 
    Modifying some source files, you need not remake whole tag files.
-Instead, you can use incremental updating facility (`-i' option).
+Instead, you can use incremental updating facility (`-u' option).
 
          % gtags
          % cd kern
          % vi tty.c                              # modify tty.c
          ...
          :wq
-         % global -vi                            # -v means verbose
+         % global -vu                            # -v means verbose
          [Sun Dec  6 16:27:47 JST 1998] Gtags started
           Tag found in '/usr/src/sys'.
           Incremental update.
           Updating tags of 'kern/tty.c' ...GTAGS..GRTAGS..GSYMS.. Done.
           Global databases have been modified.
          [Sun Dec  6 16:28:30 JST 1998] Done.
-         % global -vi                            # try again
+         % global -vu                            # try again
          [Sun Dec  6 16:28:48 JST 1998] Gtags started
           Tag found in '/usr/src/sys'.
           Incremental update.
@@ -1504,59 +1816,76 @@ Option Index
 
 * -a:                                    Basic usage.
 * -c <1>:                                Compact format.
-* -c <2>:                                Applied usage.
-* -c:                                    Compact format.
-* -f <1>:                                Applied usage(elvis).
+* -c:                                    Applied usage.
+* -f <1>:                                Basic usage(elvis).
 * -f <2>:                                Basic usage.
-* -f:                                    Basic usage(elvis).
-* -g <1>:                                Applied usage(elvis).
+* -f <3>:                                Applied usage(vim).
+* -f <4>:                                Basic usage(vim).
+* -f:                                    Applied usage(elvis).
+* -g <1>:                                Basic usage(vim).
 * -g <2>:                                Basic usage.
-* -g:                                    Basic usage(elvis).
-* -i:                                    Incremental updating.
-* -P <1>:                                Basic usage.
+* -g <3>:                                Basic usage(elvis).
+* -g <4>:                                Applied usage(vim).
+* -g:                                    Applied usage(elvis).
+* -P <1>:                                Applied usage(vim).
+* -P <2>:                                Basic usage.
 * -P:                                    Applied usage(elvis).
 * -r <1>:                                Basic usage.
 * -r <2>:                                Plugin.
+* -r <3>:                                Basic usage(vim).
 * -r:                                    Basic usage(elvis).
 * -s <1>:                                Basic usage.
-* -s <2>:                                Basic usage(elvis).
-* -s:                                    Plugin.
-* -t:                                    Preparation(elvis).
+* -s <2>:                                Plugin.
+* -s <3>:                                Basic usage(elvis).
+* -s:                                    Basic usage(vim).
+* -t <1>:                                Preparation(elvis).
+* -t:                                    Preparation(vim).
+* -u:                                    Incremental updating.
 * -x:                                    Basic usage.
 
 
 
 Tag Table:
-Node: Top763
-Node: Introduction1533
-Node: Global3203
-Node: Preparation3620
-Node: Basic usage4251
-Node: Applied usage7911
-Node: Nvi editor12982
-Node: Features(nvi)13393
-Node: Preparation(nvi)13698
-Node: Basic usage(nvi)14487
-Node: Applied usage(nvi)16086
-Node: Emacs editor17682
-Node: Features(emacs)18106
-Node: Preparation(emacs)18409
-Node: Basic usage(emacs)19688
-Node: Applied usage(emacs)21908
-Node: Web browser23484
-Node: Features(browser)23832
-Node: Preparation(browser)24306
-Node: Usage(browser)25248
-Node: Elvis editor25579
-Node: Features(elvis)26064
-Node: Preparation(elvis)26282
-Node: Basic usage(elvis)26699
-Node: Applied usage(elvis)28650
-Node: Other topics30140
-Node: Plugin30472
-Node: Compact format32053
-Node: Incremental updating33469
-Node: GNU Free Documentation License34517
-Node: Index53246
+Node: Top743
+Node: Introduction1638
+Node: Global3356
+Node: Preparation3772
+Node: Basic usage4403
+Node: Applied usage8064
+Node: GloBash13137
+Node: Features(globash)13477
+Node: Preparation(globash)13809
+Node: Basic usage(globash)14712
+Node: Applied usage(globash)17904
+Node: Nvi editor19757
+Node: Features(nvi)20169
+Node: Preparation(nvi)20527
+Node: Basic usage(nvi)21316
+Node: Applied usage(nvi)22915
+Node: Elvis editor24511
+Node: Features(elvis)24993
+Node: Preparation(elvis)25241
+Node: Basic usage(elvis)25658
+Node: Applied usage(elvis)27610
+Node: Vim editor29101
+Node: Features(vim)29591
+Node: Preparation(vim)29842
+Node: Basic usage(vim)30297
+Node: Applied usage(vim)31749
+Node: Emacs editor32470
+Node: Features(emacs)32894
+Node: Preparation(emacs)33227
+Node: Basic usage(emacs)34506
+Node: Applied usage(emacs)36726
+Node: Web browser38302
+Node: Features(browser)38650
+Node: Preparation(browser)39124
+Node: Usage(browser)40066
+Node: Other topics40397
+Node: Plugin40728
+Node: Compact format42307
+Node: Incremental updating43723
+Node: GNU Free Documentation License44771
+Node: Index63500
 
 End Tag Table

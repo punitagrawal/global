@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
+ * Copyright (c) 1999, 2000, 2001
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -26,6 +26,7 @@
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #include <ctype.h>
 #include <stdio.h>
@@ -40,6 +41,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "getopt.h"
 
 #include "global.h"
 #include "regex.h"
@@ -73,7 +75,7 @@ int	aflag;				/* [option]		*/
 int	cflag;				/* command		*/
 int	fflag;				/* command		*/
 int	gflag;				/* command		*/
-int	iflag;				/* command		*/
+int	iflag;				/* [option]		*/
 int	Iflag;				/* command		*/
 int	lflag;				/* [option]		*/
 int	nflag;				/* [option]		*/
@@ -82,6 +84,8 @@ int	Pflag;				/* command		*/
 int	rflag;				/* [option]		*/
 int	sflag;				/* [option]		*/
 int	tflag;				/* [option]		*/
+int	Tflag;				/* [option]		*/
+int	uflag;				/* command		*/
 int	vflag;				/* [option]		*/
 int	xflag;				/* [option]		*/
 int	show_version;
@@ -91,15 +95,14 @@ int	use_tagfiles;
 int	debug;
 char	*extra_options;
 const char *usage_const = "\
-Usage: global [-alnrstvx] pattern\n\
+Usage: global [-ailnrstTvx] pattern\n\
        global -c[sv] [prefix]\n\
        global -f[anrstvx] files\n\
-       global -g[alntvx] pattern\n\
-       global -G[alntvx] pattern\n\
-       global -i[v]\n\
-       global -I[alntvx] pattern\n\
+       global -g[ailntvx] pattern\n\
+       global -I[ailntvx] pattern\n\
        global -p[rv]\n\
-       global -P[alntvx] [pattern]\n";
+       global -P[ailntvx] [pattern]\n\
+       global -u[v]\n";
 const char *help_const = "\
 Pattern accept POSIX 1003.2 regular expression.\n\
 Commands:\n\
@@ -111,8 +114,6 @@ Commands:\n\
              print all functions in the files.\n\
      -g, --grep pattern\n\
              print all lines which match to the pattern.\n\
-     -i, --incremental\n\
-             locate tag files and reconstruct them incrementally.\n\
      -I, --idutils\n\
              print all lines which match to the pattern using idutils.\n\
      -p, --print-dbpath\n\
@@ -121,12 +122,16 @@ Commands:\n\
              print the path which match to the pattern.\n\
      -s, --symbol pattern\n\
              print the locations of specified symbol other than function.\n\
+     -u, --update\n\
+             locate tag files and update them incrementally.\n\
      --version\n\
              show version number.\n\
      --help  show help.\n\
 Options:\n\
      -a, --absolute\n\
              print absolute path name.\n\
+     -i, --ignore-case\n\
+             ignore case distinctions in pattern.\n\
      -l, --local\n\
              print just objects which exist under the current directory.\n\
      -n, --nofilter\n\
@@ -136,6 +141,8 @@ Options:\n\
              with the -p option print the root directory of source tree.\n\
      -t, --tags\n\
              print with standard ctags format.\n\
+     -T, --through\n\
+             go through all the tag files listed in GTAGSLIBPATH.\n\
      -v, --verbose\n\
              verbose mode.\n\
      -x, --cxref\n\
@@ -163,13 +170,15 @@ static struct option const long_options[] = {
 	{"local", no_argument, NULL, 'l'},
 	{"nofilter", no_argument, NULL, 'n'},
 	{"grep", no_argument, NULL, 'g'},
-	{"incremental", no_argument, NULL, 'i'},
+	{"ignore-case", no_argument, NULL, 'i'},
 	{"print-dbpath", no_argument, NULL, 'p'},
 	{"path", no_argument, NULL, 'P'},
 	{"reference", no_argument, NULL, 'r'},
 	{"rootdir", no_argument, NULL, 'r'},
 	{"symbol", no_argument, NULL, 's'},
 	{"tags", no_argument, NULL, 't'},
+	{"through", no_argument, NULL, 'T'},
+	{"update", no_argument, NULL, 'u'},
 	{"verbose", no_argument, NULL, 'v'},
 	{"cxref", no_argument, NULL, 'x'},
 
@@ -206,7 +215,7 @@ char	*argv[];
 	char	root[MAXPATHLEN+1];		/* root of source tree	*/
 	char	dbpath[MAXPATHLEN+1];		/* dbpath directory	*/
 
-	while ((optchar = getopt_long(argc, argv, "acfgGiIlnpPrstvx", long_options, &option_index)) != EOF) {
+	while ((optchar = getopt_long(argc, argv, "acifgGIlnpPrstTuvx", long_options, &option_index)) != EOF) {
 		switch (optchar) {
 		case 0:
 			if (!strcmp("idutils", long_options[option_index].name))
@@ -236,7 +245,6 @@ char	*argv[];
 			break;
 		case 'i':
 			iflag++;
-			setcom(optchar);
 			break;
 		case 'I':
 			Iflag++;
@@ -258,6 +266,13 @@ char	*argv[];
 			break;
 		case 't':
 			tflag++;
+			break;
+		case 'T':
+			Tflag++;
+			break;
+		case 'u':
+			uflag++;
+			setcom(optchar);
 			break;
 		case 'v':
 			vflag++;
@@ -285,12 +300,12 @@ char	*argv[];
 	if (sflag && rflag)
 		die("both of -s and -r are not allowed.");
 	/*
-	 * only -c, -i, -P and -p allows no argment.
+	 * only -c, -i, -P and -p allows no argument.
 	 */
 	if (!av && !show_filter) {
 		switch (command) {
 		case 'c':
-		case 'i':
+		case 'u':
 		case 'p':
 		case 'P':
 			break;
@@ -300,11 +315,11 @@ char	*argv[];
 		}
 	}
 	/*
-	 * -i and -p cannot have any arguments.
+	 * -u and -p cannot have any arguments.
 	 */
 	if (av) {
 		switch (command) {
-		case 'i':
+		case 'u':
 		case 'p':
 			usage();
 		default:
@@ -319,7 +334,7 @@ char	*argv[];
 	if (!Iflag && !gflag && av)
 		for (; *av == ' ' || *av == '\t'; av++)
 			;
-	if (cflag && av && notnamechar(av))
+	if (cflag && av && isregex(av))
 		die("only name char is allowed with -c option.");
 	/*
 	 * get path of following directories.
@@ -330,7 +345,7 @@ char	*argv[];
 	 * if GTAGS not found, getdbpath doesn't return.
 	 */
 	getdbpath(cwd, root, dbpath, (pflag && vflag));
-	if (Iflag && strcmp(root, dbpath))
+	if (Iflag && !test("f", makepath(root, "ID", NULL)))
 		die("You must have idutils's index at the root of source tree.");
 	/*
 	 * print dbpath or rootdir.
@@ -343,7 +358,7 @@ char	*argv[];
 	/*
 	 * incremental update of tag files.
 	 */
-	if (iflag) {
+	if (uflag) {
 		STRBUF	*sb = strbuf_open(0);
 
 		if (chdir(root) < 0)
@@ -493,13 +508,13 @@ char	*argv[];
 	/*
 	 * search in library path.
 	 */
-	if (count == 0 && !lflag && !rflag && !sflag && !notnamechar(av) && getenv("GTAGSLIBPATH")) {
-		char	buf[MAXENVLEN+1];
+	if (getenv("GTAGSLIBPATH") && (count == 0 || Tflag) && !lflag && !rflag && !sflag) {
+		STRBUF  *sb = strbuf_open(0);
 		char	libdbpath[MAXPATHLEN+1];
 		char	*p, *lib;
 
-		strcpy(buf, getenv("GTAGSLIBPATH"));
-		p = buf;
+		strbuf_puts(sb, getenv("GTAGSLIBPATH"));
+		p = strbuf_value(sb);
 		while (p) {
 			lib = p;
 			if ((p = locatestring(p, PATHSEP, MATCH_FIRST)) != NULL)
@@ -520,11 +535,12 @@ char	*argv[];
 				relative_filter(pathfilter, lib, cwd);
 			}
 			count = search(av, lib, libdbpath, db);
-			if (count > 0) {
+			if (count > 0 && !Tflag) {
 				strcpy(dbpath, libdbpath);
 				break;
 			}
 		}
+		strbuf_close(sb);
 	}
 	if (vflag) {
 		if (count) {
@@ -535,7 +551,8 @@ char	*argv[];
 		} else {
 			fprintf(stderr, "'%s' not found", av);
 		}
-		fprintf(stderr, " (using '%s').\n", makepath(dbpath, dbname(db), NULL));
+		if (!Tflag)
+			fprintf(stderr, " (using '%s').\n", makepath(dbpath, dbname(db), NULL));
 	}
 	strbuf_close(sortfilter);
 	strbuf_close(pathfilter);
@@ -718,7 +735,7 @@ char	*bp;
 		char	*p = locatestring(bp, "./", MATCH_FIRST);
 
 		if (p == NULL)
-			die("illegal tag format (path not found).");
+			die("invalid tag format (path not found).");
 		fputs(strmake(p, " \t"), op);
 		(void)putc('\n', op);
 	} else
@@ -755,6 +772,8 @@ char	*dbpath;
 		strbuf_puts(ib, "--result=filenames --key=none ");
 	else
 		strbuf_puts(ib, "--result=grep ");
+	if (iflag)
+		strbuf_puts(ib, "--ignore-case ");
 	if (extra_options) {
 		strbuf_puts(ib, extra_options);
 		strbuf_putc(ib, ' ');
@@ -776,7 +795,7 @@ char	*dbpath;
 		while (*p && *p != ':')
 			p++;
 		if ((xflag || tflag) && !*p)
-			die("illegal gid(idutils) output format. '%s'", line);
+			die("invalid gid(idutils) output format. '%s'", line);
 		*p++ = 0;
 		if (lflag) {
 			if (!locatestring(path, localprefix + 2, MATCH_AT_FIRST))
@@ -794,11 +813,11 @@ char	*dbpath;
 		while (*p && isdigit(*p))
 			p++;
 		if (*p != ':')
-			die("illegal grep output format. '%s'", line);
+			die("invalid grep output format. '%s'", line);
 		*p++ = 0;
 		linenum = atoi(lno);
 		if (linenum <= 0)
-			die("illegal grep output format. '%s'", line);
+			die("invalid grep output format. '%s'", line);
 		/*
 		 * print out.
 		 */
@@ -807,12 +826,12 @@ char	*dbpath;
 		else {
 			char	buf[MAXPATHLEN+1];
 
+#ifdef HAVE_SNPRINTF
 			snprintf(buf, sizeof(buf), "./%s", path);
-			if (editlen >= 16 && linenum >= 1000)
-				fprintf(op, "%-16s %4d %-16s %s\n",
-					edit, linenum, buf, p);
-			else
-				fprintf(op, "%-16s%4d %-16s %s\n",
+#else
+			sprintf(buf, "./%s", path);
+#endif /* HAVE_SNPRINTF */
+			fprintf(op, "%-16s %3d %-16s %s\n",
 					edit, linenum, buf, p);
 		}
 	}
@@ -854,7 +873,7 @@ char	*dbpath;
 	editlen = strlen(edit);
 	/*
 	 * make grep command line.
-	 * (/dev/null needed when single argment specified.)
+	 * (/dev/null needed when single argument specified.)
 	 */
 	strbuf_puts(ib, "gtags --find ");
 	if (lflag)
@@ -864,6 +883,8 @@ char	*dbpath;
 		strbuf_puts(ib, "-l ");
 	else
 		strbuf_puts(ib, "-n ");
+	if (iflag)
+		strbuf_puts(ib, "-i ");
 	strbuf_putc(ib, '\'');
 	strbuf_puts(ib, pattern);
 	strbuf_putc(ib, '\'');
@@ -882,8 +903,9 @@ char	*dbpath;
 		while (*p && *p != ':')
 			p++;
 		if ((xflag || tflag) && !*p)
-			die("illegal grep output format. '%s'", line);
+			die("invalid grep output format. '%s'", line);
 		*p++ = 0;
+		count++;
 		if (!xflag && !tflag) {
 			fprintf(op, "%s\n", path);
 			continue;
@@ -895,25 +917,21 @@ char	*dbpath;
 		while (*p && isdigit(*p))
 			p++;
 		if (*p != ':')
-			die("illegal grep output format. '%s'", line);
+			die("invalid grep output format. '%s'", line);
 		*p++ = 0;
 		linenum = atoi(lno);
 		if (linenum <= 0)
-			die("illegal grep output format. '%s'", line);
+			die("invalid grep output format. '%s'", line);
 		/*
 		 * print out.
 		 */
-		count++;
 		if (tflag)
 			fprintf(op, "%s\t%s\t%d\n",
 				edit, path, linenum);
-		else if (!xflag) {
+		else if (!xflag)
 			fprintf(op, "%s\n", path);
-		} else if (editlen >= 16 && linenum >= 1000)
-			fprintf(op, "%-16s %4d %-16s %s\n",
-				edit, linenum, path, p);
 		else
-			fprintf(op, "%-16s%4d %-16s %s\n",
+			fprintf(op, "%-16s %3d %-16s %s\n",
 				edit, linenum, path, p);
 	}
 	pclose(ip);
@@ -950,7 +968,7 @@ char	*dbpath;
 	editlen = strlen(edit);
 
 	if (regcomp(&preg, pattern, REG_EXTENDED) != 0)
-		die("illegal regular expression.");
+		die("invalid regular expression.");
 	if (!(op = openfilter()))
 		die("cannot open output filter.");
 	count = 0;
@@ -968,12 +986,10 @@ char	*dbpath;
 				else if (!xflag) {
 					fprintf(op, "%s\n", path);
 					break;
-				} else if (editlen >= 16 && linenum >= 1000)
-					fprintf(op, "%-16s %4d %-16s %s\n",
+				} else {
+					fprintf(op, "%-16s %3d %-16s %s\n",
 						edit, linenum, path, buffer);
-				else
-					fprintf(op, "%-16s%4d %-16s %s\n",
-						edit, linenum, path, buffer);
+				}
 			}
 		}
 		fclose(fp);
@@ -991,7 +1007,6 @@ char	*dbpath;
 			fprintf(stderr, "%d objects located", count);
 		fprintf(stderr, " (no index used).\n");
 	}
-	fprintf(stderr, "NO xargs version\n");
 }
 #endif /* HAVE_XARGS && HAVE_GREP */
 /*
@@ -1010,8 +1025,15 @@ char	*av;
 	int	count;
 
 	if (av) {
-		if (regcomp(&preg, av, REG_EXTENDED) != 0)
-			die("illegal regular expression.");
+		int	flags = REG_EXTENDED;
+
+		if (iflag || getconfb("icase_path"))
+			flags |= REG_ICASE;
+#ifdef _WIN32
+		flags |= REG_ICASE;
+#endif /* _WIN32 */
+		if (regcomp(&preg, av, flags) != 0)
+			die("invalid regular expression.");
 	}
 	if (!localprefix)
 		localprefix = "./";
@@ -1067,7 +1089,6 @@ char	*dbpath;
 int	db;
 {
 	char	buf[MAXPATHLEN+1], *path;
-	char	env[MAXPATHLEN+1];
 	char	*p;
 	FILE	*ip, *op;
 	char	*parser, *av;
@@ -1080,11 +1101,18 @@ int	db;
 	 * teach parser where is dbpath.
 	 */
 #ifdef HAVE_PUTENV
-	snprintf(env, sizeof(env), "GTAGSDBPATH=%s", dbpath);
-	putenv(env);
+	{
+		char *env = (char *)malloc(strlen("GTAGSDBPATH=")+strlen(dbpath)+1);
+
+		if (!env)	
+			die("short of memory.");
+		strcpy(env, "GTAGSDBPATH=");
+		strcat(env, dbpath);
+		putenv(env);
+	}
 #else
 	setenv("GTAGSDBPATH", dbpath, 1);
-#endif
+#endif /* HAVE_PUTENV */
 
 	/*
 	 * get parser.
@@ -1100,18 +1128,19 @@ int	db;
 	count = 0;
 	for (; argc > 0; argv++, argc--) {
 		av = argv[0];
-		if (test("d", av)) {
-			fprintf(stderr, "'%s' is a directory.\n", av);
-			continue;
-		}
-		if (!test("f", NULL)) {
-			fprintf(stderr, "'%s' not found.\n", av);
+		if (!test("f", av)) {
+			if (test("d", av))
+				fprintf(stderr, "'%s' is a directory.\n", av);
+			else
+				fprintf(stderr, "'%s' not found.\n", av);
 			continue;
 		}
 		/*
 		 * convert path into relative from root directory of source tree.
 		 */
 		path = realpath(av, buf);
+		if (path == NULL)
+			die("realpath(%s, buf) failed. (errno=%d).", av, errno);
 		if (!isabspath(path))
 			die("realpath(3) is not compatible with BSD version.");
 		if (strncmp(path, root, strlen(root))) {
@@ -1179,6 +1208,7 @@ int	db;
 	FILE	*op;
 	GTOP	*gtop;
 	int	flags = 0;
+	STRBUF	*sb = NULL;
 
 	/*
 	 * open tag file.
@@ -1191,6 +1221,14 @@ int	db;
 	 */
 	if (nflag > 1)
 		flags |= GTOP_NOSOURCE;
+	if (iflag) {
+		sb = strbuf_open(0);
+		strbuf_putc(sb, '^');
+		strbuf_puts(sb, pattern);
+		strbuf_putc(sb, '$');
+		pattern = strbuf_value(sb);
+		flags |= GTOP_IGNORECASE;
+	}
 	for (p = gtagsfirst(gtop, pattern, flags); p; p = gtagsnext(gtop)) {
 		if (lflag) {
 			char	*q;
@@ -1222,7 +1260,7 @@ char	*path;
 	int	length;
 
 	if (!(p = locatestring(line, "./", MATCH_FIRST)))
-		die("illegal tag format (path not found).");
+		die("invalid tag format (path not found).");
 	length = strlen(path);
 	if (strncmp(p, path, length))
 		return 0;
@@ -1250,7 +1288,11 @@ char	*from;
 		if (*p == '%' || *p == ' ' || *p == '\t') {
 			if (size <= 3)
 				break;
+#ifdef HAVE_SNPRINTF
 			snprintf(e, size, "%%%02x", *p);
+#else
+			sprintf(e, "%%%02x", *p);
+#endif /* HAVE_SNPRINTF */
 			e += 3;
 			size -= 3;
 		} else {

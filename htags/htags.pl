@@ -2,7 +2,7 @@
 #
 # Copyright (c) 1996, 1997, 1998, 1999
 #             Shigio Yamaguchi. All rights reserved.
-# Copyright (c) 1999, 2000
+# Copyright (c) 1999, 2000, 2001
 #             Tama Communications Corporation. All rights reserved.
 #
 # This file is part of GNU GLOBAL.
@@ -24,6 +24,7 @@
 $com = $0;
 $com =~ s/.*\///;
 $usage = "Usage: $com [-a][-c][-f][-F][-l][-n][-v][-w][-d tagdir][-S cgidir][-t title][dir]";
+$www = "http://www.gnu.org/software/global/global.html";
 $help = <<END_OF_HELP;
 $usage
 Options:
@@ -49,6 +50,8 @@ Options:
              write cgi script into cgidir to realize a centralised cgi script.
      -t, --title title
              the title of this hypertext.
+     --gtagsconf file
+             load user's configuration from file.
      --version
              print version.
      --help
@@ -70,6 +73,8 @@ foreach $c ('sort', 'gtags', 'global', 'btreeop') {
 #-------------------------------------------------------------------------
 # CONFIGURATION
 #-------------------------------------------------------------------------
+# null device
+$'null_device = $'w32 ? 'NUL' : '/dev/null';
 # temporary directory
 $'tmp = '/tmp';
 if (defined($ENV{'TMPDIR'}) && -d $ENV{'TMPDIR'}) {
@@ -82,6 +87,9 @@ $'ncol = 4;					# columns of line number
 $'tabs = 8;					# tab skip
 $'full_path = 0;				# file index format
 $'icon_list = '';				# use icon for file index
+$'prolog_script = '';				# include script at first
+$'epilog_script = '';				# include script at last
+$'show_position = 0;				# show current position
 $'table_list = 0;				# tag list using table tag
 $'script_alias = '/cgi-bin';			# script alias of WWW server
 $'gzipped_suffix = 'ghtml';			# suffix of gzipped html file
@@ -106,6 +114,8 @@ $'brace_begin    = '<FONT COLOR=blue>';		# { ... }
 $'brace_end      = '</FONT>';
 $'reserved_begin = '<B>';			# if, while, for or so on
 $'reserved_end   = '</B>';
+$'position_begin = '<FONT COLOR=gray>';
+$'position_end   = '</FONT>';
 #
 # Reserved words for C and Java are hard coded.
 # (configuration parameter 'reserved_words' was deleted.)
@@ -128,11 +138,25 @@ $'java_reserved_words  = "abstract,boolean,break,byte,case,catch,char,class," .
 $'c_reserved_words    =~ s/,/|/g;
 $'cpp_reserved_words  =~ s/,/|/g;
 $'java_reserved_words =~ s/,/|/g;
-#
-# read values from global.conf
-#
-chop($config = `gtags --config`);
-if ($config) {
+{
+	#
+	# extract --gtagsconf <config file>.
+	#
+	local(@a);
+	for ($i = 0; $i < @ARGV; $i++) {
+		if ($ARGV[$i] =~ /^--gtagsconf$/) {
+			if (++$i >= @ARGV) {
+				&'error("--gtagsconf needs file name.");
+			} elsif (! -f $ARGV[$i]) {
+				&'error("config file '$ARGV[$i]' not found.");
+			}
+			$ENV{'GTAGSCONF'} = $ARGV[$i];
+		} else {
+			push(@a, $ARGV[$i]);
+		}
+	}
+	@ARGV = @a;
+}
 if ($var1 = &'getconf('ncol')) {
 	if ($var1 < 1 || $var1 > 10) {
 		print STDERR "Warning: parameter 'ncol' ignored becase the value is too large or too small.\n";
@@ -162,8 +186,18 @@ if ($var1 = &'getconf('table_list')) {
 if ($var1 = &'getconf('icon_list')) {
 	$'icon_list = $var1;
 }
+if ($var1 = &'getconf('prolog_script')) {
+	$'prolog_script = $var1;
+}
+if ($var1 = &'getconf('epilog_script')) {
+	$'epilog_script = $var1;
+}
+if ($var1 = &'getconf('show_position')) {
+	$'show_position = $var1;
+}
 if ($var1 = &'getconf('script_alias')) {
 	$'script_alias = $var1;
+	$'script_alias =~ s!/$!!;
 }
 if (($var1 = &'getconf('body_begin')) && ($var2 = &'getconf('body_end'))) {
 	$'body_begin  = $var1;
@@ -193,6 +227,13 @@ if (($var1 = &'getconf('reserved_begin')) && ($var2 = &'getconf('reserved_end'))
 	$'reserved_begin  = $var1;
 	$'reserved_end    = $var2;
 }
+if (($var1 = &'getconf('position_begin')) && ($var2 = &'getconf('position_end'))) {
+	$'position_begin  = $var1;
+	$'position_end    = $var2;
+}
+# insert htags_options into the head of ARGSV array.
+if (($var1 = &'getconf('htags_options'))) {
+	$'htags_options = $var1;
 }
 # HTML tag
 $'html_begin  = '<HTML>';
@@ -222,11 +263,26 @@ $file_icon = 'c.jpg';
 #-------------------------------------------------------------------------
 # JAVASCRIPT PARTS
 #-------------------------------------------------------------------------
+$'begin_script="<SCRIPT LANGUAGE=javascript>\n<!--\n";
+$'end_script="<!-- end of script -->\n</SCRIPT>\n";
 # escaped angle
 $'langle  = sprintf("unescape('%s')", &'escape('<'));
 $'rangle  = sprintf("unescape('%s')", &'escape('>'));
-$'begin_script="<SCRIPT LANGUAGE=javascript>\n<!--\n";
-$'end_script="<!-- end of script -->\n</SCRIPT>\n";
+# staus line
+$'status_line  =
+"function show(type, lno, file) {\n" .
+"	if (lno > 0) {\n" .
+"		msg = (type == 'R') ? 'Defined at' : 'Refered from';\n" .
+"		msg += ' ' + lno;\n" .
+"		if (file != '')\n" .
+"			msg += ' in ' + file;\n" .
+"	} else {\n" .
+"		msg = 'Multiple ';\n" .
+"		msg += (type == 'R') ? 'defined' : 'refered';\n" .
+"	}\n" .
+"	msg += '.';\n" .
+"	self.status = msg;\n" .
+"}\n";
 #-------------------------------------------------------------------------
 # DEFINITION
 #-------------------------------------------------------------------------
@@ -243,6 +299,7 @@ sub set_header {
 	$head .= "$'meta_robots\n$'meta_generator\n";
 	$head .= $'begin_script;
 	$head .= "self.defaultStatus = '$title'\n";
+	$head .= $'status_line;
 	$head .= $'end_script;	
 	$head .= "</HEAD>\n";
 	$head;
@@ -360,6 +417,33 @@ sub list_end {
 #-------------------------------------------------------------------------
 # PROCESS START
 #-------------------------------------------------------------------------
+# include prolog_script if needed.
+require($'prolog_script) if ($'prolog_script && -f $'prolog_script);
+#
+# save config values and option values.
+#
+$save_config = `gtags --config`;
+chop($save_config);
+$save_config =~ s/'/'"'"'/g;			# keep single quote
+$save_argv   = '';
+foreach (@ARGV) {
+	$save_argv .= ' ' if ($save_argv);
+	$save_argv .= (/[ \t]/) ? "'$_'" : $_;	# quote arg include blank.
+}
+if ($'htags_options) {
+	#
+	# insert $'htags_options at the head of ARGV.
+	#
+	local($a) = $'htags_options;
+	local(@a, $skip);
+	while ($a) {
+		$a =~ s/^[ \t]+//;
+		if ($a =~ s/^'([^']*)'// || $a =~ s/^"([^"]*)"// || $a =~ s/^([^ \t]+)//) {
+			push(@a, $1);
+		}
+	}
+	@ARGV = (@a, @ARGV);
+}
 #
 # options check.
 #
@@ -389,6 +473,9 @@ while ($ARGV[0] =~ /^-/) {
 		$'fflag = 'f';
 	} elsif ($opt =~ /^--frame$/) {
 		$'Fflag = 'F';
+	} elsif ($opt =~ /^--gtagsconf$/) {
+		# --gtagsconf is estimated only once.
+		shift;
 	} elsif ($opt =~ /^--each-line-tag$/) {
 		$'lflag = 'l';
 	} elsif ($opt =~ /^--line-number$/) {
@@ -456,34 +543,8 @@ if (!$title) {
 	@cwd = split('/', &'getcwd);
 	$title = $cwd[$#cwd];
 }
-if ($'Sflag) {
-	$script_alias =~ s!/$!!;
-	$'action = "$script_alias/global.cgi";
-	chop($'id = `pwd`);
-}
-# --action, --id overwrite Sflag's value.
-if ($action_value) {
-	$'action = $action_value;
-}
-if ($id_value) {
-	$'id = $id_value;
-}
-$dbpath = '.' if (!$dbpath);
-unless (-r "$dbpath/GTAGS" && -r "$dbpath/GRTAGS") {
-	&'error("GTAGS and/or GRTAGS not found. Htags needs both of them.");
-}
-if ($'fflag && ! -r "$dbpath/GSYMS") {
-	&'error("-f option needs GSYMS. Please make it.");
-}
-$dbpath = &'realpath($dbpath);
 #
-# for global(1)
-#
-$ENV{'GTAGSROOT'} = &'getcwd();
-$ENV{'GTAGSDBPATH'} = $dbpath;
-delete $ENV{'GTAGSLIBPATH'};
-#
-# check directories
+# decide directory in which we make hypertext.
 #
 $dist = &'getcwd() . '/HTML';
 if ($ARGV[0]) {
@@ -495,6 +556,42 @@ if ($ARGV[0]) {
 	$dist = &'getcwd() . '/HTML';
 	chdir($cwd) || &'error("cannot return to original directory.");
 }
+if ($'Sflag) {
+	$'action = "$'script_alias/global.cgi";
+	$'id = $dist;
+}
+# --action, --id overwrite Sflag's value.
+if ($action_value) {
+	$'action = $action_value;
+}
+if ($id_value) {
+	$'id = $id_value;
+}
+# If $dbpath is not specified then listen to global(1).
+if (!$dbpath) {
+	local($cwd) = &'getcwd();
+	local($root) = `global -pr 2>$'null_device`;
+	chop($root);
+	if ($cwd eq $root) {
+		$dbpath = `global -p`;
+		chop($dbpath);
+	} else {
+		$dbpath = '.';
+	}
+}
+unless (-r "$dbpath/GTAGS" && -r "$dbpath/GRTAGS") {
+	&'error("GTAGS and/or GRTAGS not found. Htags needs both of them.");
+}
+$dbpath = &'realpath($dbpath);
+#
+# for global(1)
+#
+$ENV{'GTAGSROOT'} = &'getcwd();
+$ENV{'GTAGSDBPATH'} = $dbpath;
+delete $ENV{'GTAGSLIBPATH'};
+#
+# check directories
+#
 if ($'fflag || $'cflag) {
 	if ($'cgidir && ! -d $'cgidir) {
 		&'error("'$'cgidir' not found.");
@@ -509,19 +606,6 @@ if ($'fflag || $'cflag) {
 # find filter
 #
 $'findcom = "gtags --find";
-#
-# check if GTAGS, GRTAGS is the latest.
-#
-$gtags_ctime = (stat("$dbpath/GTAGS"))[10];
-open(FIND, "$'findcom |") || &'error("cannot fork.");
-while (<FIND>) {
-	chop;
-	if ($gtags_ctime < (stat($_))[10]) {
-		&'error("GTAGS is not the latest one. Please remake it.");
-	}
-}
-close(FIND);
-if ($?) { &'error("cannot traverse directory."); }
 #-------------------------------------------------------------------------
 # MAKE FILES
 #-------------------------------------------------------------------------
@@ -541,9 +625,24 @@ if ($?) { &'error("cannot traverse directory."); }
 #	HTML/$SRCS/		... source files (8)
 #	HTML/$INCS/		... include file index (8)
 #	HTML/search.html	... search index (9)
+#	HTML/rebuild.sh		... rebuild script (10)
 #-------------------------------------------------------------------------
 $'HTML = ($'cflag) ? $'gzipped_suffix : $'normal_suffix;
 print STDERR "[", &'date, "] ", "Htags started\n" if ($'vflag);
+#
+# (#) check if GTAGS, GRTAGS is the latest.
+#
+print STDERR "[", &'date, "] ", "(#) checking tag files ...\n" if ($'vflag);
+$gtags_ctime = (stat("$dbpath/GTAGS"))[10];
+open(FIND, "$'findcom |") || &'error("cannot fork.");
+while (<FIND>) {
+	chop;
+	if ($gtags_ctime < (stat($_))[10]) {
+		&'error("GTAGS is not the latest one. Please remake it.");
+	}
+}
+close(FIND);
+if ($?) { &'error("cannot traverse directory."); }
 #
 # (0) make directories
 #
@@ -564,9 +663,16 @@ if ($'cgi && $'fflag) {
 		&makeprogram("$cgidir/global.cgi") || &'error("cannot make CGI program.");
 		chmod(0755, "$cgidir/global.cgi") || &'error("cannot chmod CGI program.");
 	}
+	# Always make bless.sh.
+	# Don't grant execute permission to bless script.
+	&makebless("$dist/bless.sh") || &'error("cannot make bless script.");
+	chmod(0644, "$dist/bless.sh") || &'error("cannot chmod bless script.");
+
 	foreach $f ('GTAGS', 'GRTAGS', 'GSYMS', 'GPATH') {
-		unlink("$dist/cgi-bin/$f");
-		&duplicatefile($f, $dbpath, "$dist/cgi-bin");
+		if (-f "$dbpath/$f") {
+			unlink("$dist/cgi-bin/$f");
+			&duplicatefile($f, $dbpath, "$dist/cgi-bin");
+		}
 	}
 }
 if ($'cgi && $'cflag) {
@@ -585,7 +691,7 @@ print STDERR "[", &'date, "] ", "(2) making help.html ...\n" if ($'vflag);
 #
 # (#) load GPATH
 #
-local($command) = "btreeop -L2 -k './' $dbpath/GPATH";
+local($command) = "btreeop -L2 -k \"./\" \"$dbpath/GPATH\"";
 open(GPATH, "$command |") || &'error("cannot fork.");
 $nextkey = 0;
 while (<GPATH>) {
@@ -658,6 +764,13 @@ if ($'Fflag && $'fflag) {
 	print STDERR "[", &'date, "] ", "(9) making search index ...\n" if ($'vflag);
 	&makesearchindex("$dist/search.$'normal_suffix");
 }
+#
+# (10) rebuild script. (rebuild.sh)
+#
+# Don't grant execute permission to rebuild script.
+&makerebuild("$dist/rebuild.sh");
+chmod(0644, "$dist/rebuild.sh") || &'error("cannot chmod rebuild script.");
+
 &'clean();
 print STDERR "[", &'date, "] ", "Done.\n" if ($'vflag);
 if ($'vflag && $'cgi && ($'cflag || $'fflag)) {
@@ -684,6 +797,8 @@ if ($'vflag && $'cgi && ($'cflag || $'fflag)) {
 if ($'icon_list && -f $'icon_list) {
 	system("tar xzf $'icon_list -C $dist");
 }
+# include epilog_script if needed.
+require($'epilog_script) if ($'epilog_script && -f $'epilog_script);
 exit 0;
 #-------------------------------------------------------------------------
 # SUBROUTINES
@@ -744,9 +859,12 @@ if ($form{'type'} eq 'reference') {
 } elsif ($form{'type'} eq 'symbol') {
 	$flag = 's';
 	$words = 'symbols';
+} elsif ($form{'type'} eq 'path') {
+	$flag = 'P';
+	$words = 'paths';
 }
 if ($form{'id'}) {
-	chdir("$form{'id'}/HTML/cgi-bin");
+	chdir("$form{'id'}/cgi-bin");
 	if ($?) {	
 		print "<H1><FONT COLOR=#cc0000>Error</FONT></H1>\n";
 		print "<H3>Couldn't find tag directory in secure mode. <A HREF=$htmlbase/mains.@normal_suffix@>[return]</A></H3>\n";
@@ -808,6 +926,49 @@ END_OF_SCRIPT
 	close(PROGRAM);
 }
 #
+# makebless: make bless script
+#
+sub makebless {
+	local($file) = @_;
+	local($action) = "$'script_alias/global.cgi";
+
+	open(SCRIPT, ">$file") || &'error("cannot make bless script.");
+	$script = <<'END_OF_SCRIPT';
+#!/bin/sh
+#
+# Bless.sh: rewrite id's value of html for centralised cgi script.
+#
+# Usage:
+#	% htags -S		<- works well at generated place.
+#	% mv HTML /var/obj	<- move to another place. It doesn't work.
+#	% cd /var/obj/HTML
+#	% sh bless.sh		<- OK. It will work well!
+#
+pattern1='INPUT TYPE=hidden NAME=id VALUE'
+pattern2='FORM METHOD=GET ACTION'
+action=@action@
+case $1 in
+-v)	verbose=1;;
+esac
+id=`pwd`
+for f in mains.html index.html search.html; do
+	if [ -f $f ]; then
+		sed -e "s!<$pattern1=.*>!<$pattern1=$id>!" -e "s!<$pattern2=[^ >]*!<$pattern2=$action!" $f > $f.new;
+		if cmp $f $f.new >@null_device@; then
+			rm -f $f.new
+		else
+			mv $f.new $f
+			[ $verbose ] && echo "$f was blessed."
+		fi
+	fi
+done
+END_OF_SCRIPT
+	$script =~ s/\@null_device\@/$'null_device/g;
+	$script =~ s/\@action\@/$action/g;
+	print SCRIPT $script;
+	close(SCRIPT);
+}
+#
 # makeghtml: make unzip script
 #
 sub makeghtml {
@@ -848,6 +1009,23 @@ END_OF_SCRIPT
 	close(SKELTON);
 }
 #
+# makerebuild: make rebuild script
+#
+sub makerebuild {
+	local($file) = @_;
+	local($cwd) = getcwd;
+	open(FILE, ">$file") || &'error("cannot make rebuild script.");
+	print FILE "#!/bin/sh\n";
+	print FILE "#\n";
+	print FILE "# rebuild.sh: rebuild hypertext with the previous context.\n";
+	print FILE "#\n";
+	print FILE "# Usage:\n";
+	print FILE "#\t% sh rebuild.sh\n";
+	print FILE "#\n";
+	print FILE "cd $cwd && GTAGSCONF='$save_config' htags $save_argv\n";
+	close(FILE);
+}
+#
 # makehelp: make help file
 #
 sub makehelp {
@@ -873,6 +1051,9 @@ sub makehelp {
 			print HELP "\[$label[$n]\]";
 		}
 	}
+	if ($'show_position) {
+		print HELP "[+line file]";
+	}
 	print HELP " */</PRE>\n";
 	print HELP "<DL>\n";
 	foreach $n (0 .. $#label) {
@@ -883,6 +1064,10 @@ sub makehelp {
 			print HELP "[$label[$n]]";
 		}
 		print HELP "<DD>$msg[$n]\n";
+	}
+	if ($'show_position) {
+		print HELP "<DT>[+line file]";
+		print HELP "<DD>Current position (line number and file name).\n";
 	}
 	print HELP "</DL>\n";
 	print HELP $'body_end, "\n";
@@ -919,8 +1104,7 @@ sub makedupindex {
 				if ($writing) {
 					print FILE &'list_end;
 					print FILE $'body_end, "\n";
-					print FILE $'html_end;
-					print FILE "\n";
+					print FILE $'html_end, "\n";
 					close(FILE);
 					$writing = 0;
 				}
@@ -955,9 +1139,8 @@ sub makedupindex {
 		if ($?) { &'error("'$command' failed."); }
 		if ($writing) {
 			print FILE &'list_end;
-			print FILE $'body_end;
-			print FILE $'html_end;
-			print FILE "\n";
+			print FILE $'body_end, "\n";
+			print FILE $'html_end, "\n";
 			close(FILE);
 		}
 		if ($first_line) {
@@ -1010,9 +1193,8 @@ sub makedefineindex {
 				print ALPHA "<A HREF=$indexlink>";
 				print ALPHA $'icon_list ? "<IMG SRC=../icons/$'back_icon ALT='[index]' HSPACE=3 BORDER=0>" : "[index]";
 				print ALPHA "</A>\n";
-				print ALPHA $'body_end;
-				print ALPHA $'html_end;
-				print ALPHA "\n";
+				print ALPHA $'body_end, "\n";
+				print ALPHA $'html_end, "\n";
 				close(ALPHA);
 			}
 			# for multi-byte code
@@ -1125,9 +1307,8 @@ sub makefileindex {
 				print "<A HREF=$parent>" .
 					($'icon_list ? "<IMG SRC=../icons/$'back_icon ALT='[..]' HSPACE=3 BORDER=0>" : "[..]") .
 					"</A>\n";
-				print $'body_end;
-				print $'html_end;
-				print "\n";
+				print $'body_end, "\n";
+				print $'html_end, "\n";
 				$path = pop(@fdstack);
 				close($path);
 				select($fdstack[$#fdstack]) if (@fdstack);
@@ -1211,9 +1392,8 @@ sub makefileindex {
 		print "<A HREF=$parent>" .
 			($'icon_list ? "<IMG SRC=../icons/$'back_icon ALT='[..]' HSPACE=3 BORDER=0>" : "[..]") .
 			"</A>\n";
-		print $'body_end;
-		print $'html_end;
-		print "\n";
+		print $'body_end, "\n";
+		print $'html_end, "\n";
 		$path = pop(@fdstack);
 		close($path);
 		select($fdstack[$#fdstack]) if (@fdstack);
@@ -1276,7 +1456,7 @@ sub makesearchpart {
 	$index .= " TARGET=$target" if ($target);
 	$index .= ">\n";
 	$index .= "<INPUT NAME=pattern>\n";
-	$index .= "<INPUT TYPE=hidden NAME=id VALUE=$id>\n" if ($id);
+	$index .= "<INPUT TYPE=hidden NAME=id VALUE=$id>\n";
 	$index .= "<INPUT TYPE=submit VALUE=Search>\n";
 	$index .= "<INPUT TYPE=reset VALUE=Reset><BR>\n";
 	$index .= "<INPUT TYPE=radio NAME=type VALUE=definition CHECKED>";
@@ -1284,7 +1464,11 @@ sub makesearchpart {
 	$index .= "\n<INPUT TYPE=radio NAME=type VALUE=reference>";
 	$index .= ($target) ? "Ref" : "Reference";
 	$index .= "\n<INPUT TYPE=radio NAME=type VALUE=symbol>";
-	$index .= ($target) ? "Sym" : "Other symbol";
+	if (-f "$dbpath/GSYMS") {
+		$index .= ($target) ? "Sym" : "Other symbol";
+		$index .= "\n<INPUT TYPE=radio NAME=type VALUE=path>";
+	}
+	$index .= ($target) ? "Path" : "Path name";
 	$index .= "\n</FORM>\n";
 	$index;
 }
@@ -1301,7 +1485,7 @@ sub makecommonpart {
 	$index .= "<H1>$'title_begin$'title$'title_end</H1>\n";
 	$index .= "<P ALIGN=right>\n";
 	$index .= "Last updated " . &'date . "<BR>\n";
-	$index .= "This hypertext was generated by <A HREF=http://www.tamacom.com/global/ TARGET=_top>GLOBAL-$'version</A>.<BR>\n";
+	$index .= "This hypertext was generated by <A HREF=$'www TARGET=_top>GLOBAL-$'version</A>.<BR>\n";
 	$index .= "</P>\n<HR>\n";
 	if ($'fflag) {
 		$index .= &makesearchpart($'action, $'id);
@@ -1485,14 +1669,21 @@ sub src2html {
 	print &'set_header($file);
 	print $'body_begin, "\n";
 	print "<A NAME=TOP><H2>$file</H2>\n";
+	print "$'comment_begin/* ";
 	print &link_format(&anchor'getlinks(0));
+	print " */$'comment_end";
+	if ($'show_position) {
+		print $'position_begin;
+		print "[+1 $file]";
+		print $'position_end;
+	}
 	print "\n<HR>\n";
 	print "<H2>$'title_define_index</H2>\n";
 	print "This source file includes following functions.\n";
 	print "<OL>\n";
 	local($lno, $tag, $type);
 	for (($lno, $tag, $type) = &anchor'first(); $lno; ($lno, $tag, $type) = &anchor'next()) {
-		print "<LI><A HREF=#$lno>$tag</A>\n" if ($type eq 'D');
+		print "<LI><A HREF=#$lno onMouseOver=\"show('R',$lno,'')\">$tag</A>\n" if ($type eq 'D');
 	}
 	print "</OL>\n";
 	print "<HR>\n";
@@ -1547,7 +1738,7 @@ sub src2html {
 		local($count) = 0;
 		local($lno_printed) = 0;
 
-		if ($'lflag) {
+		if ($'lflag || $. == 1) {
 			print "<A NAME=$.>";
 			$lno_printed = 1;
 		}
@@ -1563,12 +1754,16 @@ sub src2html {
 				local($href);
 				if ($line =~ /^ (.*)/) {
 					local($type) = ($TYPE eq 'R') ? $'DEFS : $'REFS;
-					$href = "<A HREF=../$type/$1.$'HTML>$TAG</A>";
+					local($msg) = 'Multiple ';
+					$msg .= ($TYPE eq 'R') ? 'defined.' : 'refered.';
+					$href = "<A HREF=../$type/$1.$'HTML onMouseOver=\"show('$TYPE',-1,'')\">$TAG</A>";
 				} else {
 					local($nouse, $lno, $filename) = split(/[ \t]+/, $line);
 					$nouse = '';	# to make perl quiet
-					$filename = &'path2url($filename);
-					$href = "<A HREF=../$'SRCS/$filename#$lno>$TAG</A>";
+					local($url) = &'path2url($filename);
+					$filename =~ s!\./!!; 
+					local($msg) = ($TYPE eq 'R') ? 'Defined at' : 'Refered from';
+					$href = "<A HREF=../$'SRCS/$url#$lno onMouseOver=\"show('$TYPE',$lno,'$filename')\">$TAG</A>";
 				}
 				# set tag marks and save hyperlink into @links
 				if (ord($TAG) > 127) {	# for multi-byte code
@@ -1603,17 +1798,30 @@ sub src2html {
 		# print a line
 		printf "%${ncol}d ", $. if ($'nflag);
 		print;
-		# print hyperlinks
+		# print guide
 		if ($define_line) {
 			print ' ' x ($ncol + 1) if ($'nflag);
+			print "$'comment_begin/* ";
 			print &link_format(&anchor'getlinks($define_line));
-			print "\n";
+			if ($'show_position) {
+				print $'position_begin;
+				print "[+$define_line $file]";
+				print $'position_end;
+			}
+			print " */$'comment_end\n";
 		}
 	}
 	print "</PRE>\n";
 	print "<HR>\n";
 	print "<A NAME=BOTTOM>\n";
+	print "$'comment_begin/* ";
 	print &link_format(&anchor'getlinks(-1));
+	if ($'show_position) {
+		print $'position_begin;
+		print "[+$. $file]";
+		print $'position_end;
+	}
+	print " */$'comment_end";
 	print "\n";
 	print $'body_end, "\n";
 	print $'html_end, "\n";
@@ -1716,8 +1924,8 @@ sub link_format {
 	local(@tag) = @_;
 	local(@label) = ($'icon_list) ? @'anchor_comment : @'anchor_label;
 	local(@icons) = @'anchor_icons;
+	local($line);
 
-	local($line) = "$'comment_begin/* ";
 	for $n (0 .. $#label) {
 		if ($n == 6) {
 			$line .=  "<A HREF=../mains.$'normal_suffix>";
@@ -1737,8 +1945,6 @@ sub link_format {
 			$line .= ' ';
 		}
 	}
-	$line .=  " */$'comment_end";
-
 	$line;
 }
 

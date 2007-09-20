@@ -2,7 +2,7 @@ dnl
 dnl Configuration script for GLOBAL.
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl Copyright (c) 2000
+dnl Copyright (c) 2000, 2001
 dnl             Tama Communications Corporation. All rights reserved.
 dnl
 dnl This file is part of GNU GLOBAL.
@@ -22,11 +22,9 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 dnl
 AC_INIT(global/global.c)
-. ./VERSION
-AM_CONFIG_HEADER(machine/config.h)
-AM_INIT_AUTOMAKE(global, $VERSION)
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(global, 4.1.1)
 AC_PREREQ(2.12)
-AC_ARG_PROGRAM
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -98,14 +96,15 @@ if test ${ac_cv_sizeof_char} != 1; then
 fi
 
 dnl Checks for library functions.
+AC_FUNC_ALLOCA
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
-AC_CHECK_FUNCS(getcwd putenv strdup lstat snprintf)
+AC_CHECK_FUNCS(getcwd putenv strdup lstat snprintf utimes)
 
-INCLUDES='-I$(top_srcdir)/libutil -I$(top_srcdir)/libdb -I$(top_srcdir)/libregex'
+INCLUDES='-I$(top_srcdir)/libutil -I$(top_srcdir)/libdb -I$(top_srcdir)/libglibc'
 AC_SUBST(INCLUDES)
-LDADD='../libutil/libgloutil.a ../libdb/libglodb.a ../libregex/libgloregex.a'
+LDADD='../libutil/libgloutil.a ../libdb/libglodb.a ../libglibc/libgloglibc.a'
 AC_SUBST(LDADD)
 
 AC_ARG_ENABLE(statistics,dnl
@@ -121,7 +120,6 @@ AC_OUTPUT([Makefile
 	libdb/Makefile
 	btreeop/Makefile
 	global/Makefile
-	libregex/Makefile
-	machine/Makefile
+	libglibc/Makefile
 	doc/Makefile
 ])

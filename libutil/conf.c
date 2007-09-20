@@ -80,11 +80,13 @@ const char *label;
 {
 	char	*p, *q;
 	int	flag = STRBUF_NOCRLF;
+	int	line = 0;
 
 	rewind(fp);
 	while ((p = strbuf_fgets(ib, fp, flag)) != NULL) {
+		line++;
 		flag &= ~STRBUF_APPEND;
-		if (*p == '#')
+		if (*p == '#' || *p == '\0')
 			continue;
 		if (strbuf_unputc(ib, '\\')) {
 			flag |= STRBUF_APPEND;
@@ -93,10 +95,10 @@ const char *label;
 		trim(p);
 		for (;;) {
 			if ((q = strmake(p, "|:")) == NULL)
-				die("illegal configuration file format (%s).", p);
+				die("invalid config file format (line %d).", line);
 			if (!strcmp(label, q)) {
 				if (!(p = locatestring(p, ":", MATCH_FIRST)))
-					die("illegal configuration file format.");
+					die("invalid config file format (line %d).", line);
 				p = strdup(p);
 				if (!p)
 					die("short of memory.");
@@ -108,7 +110,7 @@ const char *label;
 			else if (*p == '|')
 				p++;
 			else
-				assert(0);
+				die("invalid config file format (line %d).", line);
 		}
 	}
 	return NULL;
@@ -142,24 +144,23 @@ int	level;
 /*
  * configpath: get path of configuration file.
  */
-char *
+static char *
 configpath() {
 	static char config[MAXPATHLEN+1];
 	char *p;
 
-	if ((p = getenv("GTAGSCONF")) != NULL) {
-		if (!test("r", p))
-			config[0] = 0;
-		else
-			strcpy(config, p);
-	} else if ((p = getenv("HOME")) && test("r", makepath(p, GTAGSRC, NULL)))
+	if ((p = getenv("HOME")) && test("r", makepath(p, GTAGSRC, NULL)))
 		strcpy(config, makepath(p, GTAGSRC, NULL));
 	else if (test("r", GTAGSCONF))
 		strcpy(config, GTAGSCONF);
+	else if (test("r", OLD_GTAGSCONF))
+		strcpy(config, OLD_GTAGSCONF);
 	else if (test("r", DEBIANCONF))
 		strcpy(config, DEBIANCONF);
+	else if (test("r", OLD_DEBIANCONF))
+		strcpy(config, OLD_DEBIANCONF);
 	else
-		config[0] = 0;
+		return NULL;
 	return config;
 }
 /*
@@ -170,17 +171,23 @@ configpath() {
 void
 openconf()
 {
-	const char *label, *config;
-	STRBUF	*sb;
+	STRBUF *sb;
+	char *config;
+	extern int vflag;
 
 	assert(opened == 0);
 
-	config = configpath();
 	/*
-	 * if configuration file is not found, default values are set
-	 * for upper compatibility.
+	 * if GTAGSCONF not set then check standard config files.
 	 */
-	if (*config == 0) {
+	if ((config = getenv("GTAGSCONF")) == NULL)
+		config = configpath();
+	/*
+	 * if config file not found then return default value.
+	 */
+	if (!config) {
+		if (vflag)
+			fprintf(stderr, " Using default configuration.\n");
 		sb = strbuf_open(0);
 		strbuf_putc(sb, ':');
 		strbuf_puts(sb, "suffixes=");
@@ -197,23 +204,43 @@ openconf()
 		strbuf_puts(sb, "sort_command=sort:");
 		strbuf_puts(sb, "sed_command=sed:");
 		line = strdup(strbuf_value(sb));
-		if (!line)
-			die("short of memory.");
 		strbuf_close(sb);
-		opened = 1;
-		return;
 	}
-	if ((label = getenv("GTAGSLABEL")) == NULL)
-		label = "default";
-	if (!(fp = fopen(config, "r")))
-		die("cannot open '%s'.", config);
-	ib = strbuf_open(MAXBUFLEN);
-	sb = strbuf_open(0);
-	includelabel(sb, label, 0);
-	line = strdup(strbuf_value(sb));
-	strbuf_close(ib);
-	strbuf_close(sb);
-	fclose(fp);
+	/*
+	 * if it doesn't start with '/' then assumed config value itself.
+	 */
+	else if (*config != '/') {
+		line = strdup(config);
+	}
+	/*
+	 * else load value from config file.
+	 */
+	else {
+		const char *label;
+
+		if (test("d", config))
+			die("config file '%s' is a directory.", config);
+		if (!test("f", config))
+			die("config file '%s' not found.", config);
+		if (!test("r", config))
+			die("config file '%s' is not readable.", config);
+		if ((label = getenv("GTAGSLABEL")) == NULL)
+			label = "default";
+	
+		if (!(fp = fopen(config, "r")))
+			die("cannot open '%s'.", config);
+		if (vflag)
+			fprintf(stderr, " Using config file '%s'.\n", config);
+		ib = strbuf_open(MAXBUFLEN);
+		sb = strbuf_open(0);
+		includelabel(sb, label, 0);
+		line = strdup(strbuf_value(sb));
+		strbuf_close(ib);
+		strbuf_close(sb);
+		fclose(fp);
+	}
+	if (!line)
+		die("short of memory.");
 	opened = 1;
 	return;
 }
@@ -234,7 +261,11 @@ int	*num;
 
 	if (!opened)
 		openconf();
+#ifdef HAVE_SNPRINTF
 	snprintf(buf, sizeof(buf), ":%s#", name);
+#else
+	sprintf(buf, ":%s#", name);
+#endif /* HAVE_SNPRINTF */
 	if ((p = locatestring(line, buf, MATCH_FIRST)) != NULL) {
 		p += strlen(buf);
 		if (num != NULL)
@@ -264,7 +295,11 @@ STRBUF	*sb;
 		openconf();
 	if (!strcmp(name, "suffixes") || !strcmp(name, "skip"))
 		all = 1;
+#ifdef HAVE_SNPRINTF
 	snprintf(buf, sizeof(buf), ":%s=", name);
+#else
+	sprintf(buf, ":%s=", name);
+#endif /* HAVE_SNPRINTF */
 	p = line;
 	while ((p = locatestring(p, buf, MATCH_FIRST)) != NULL) {
 		if (exist && sb)
@@ -316,7 +351,11 @@ const char *name;
 
 	if (!opened)
 		openconf();
+#ifdef HAVE_SNPRINTF
 	snprintf(buf, sizeof(buf), ":%s:", name);
+#else
+	sprintf(buf, ":%s:", name);
+#endif /* HAVE_SNPRINTF */
 	if (locatestring(line, buf, MATCH_FIRST) != NULL)
 		return 1;
 	return 0;

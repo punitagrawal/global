@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2000
+# Copyright (c) 2000, 2001
 #        Tama Communications Corporation. All rights reserved.
 #
 # This file is free software; as a special exception the author gives
@@ -10,10 +10,8 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-LIB    = libglodb.lib
-OBJS=	bt_close.obj bt_conv.obj bt_debug.obj bt_delete.obj bt_get.obj \
-	bt_open.obj bt_overflow.obj bt_page.obj bt_put.obj bt_search.obj \
-	bt_seq.obj bt_split.obj bt_utils.obj mpool.obj db.obj
+LIB    = libgloglibc.lib
+OBJS   = regex.obj getopt.obj getopt1.obj
 !include ..\makefile.inc
 
 all: $(LIB)
