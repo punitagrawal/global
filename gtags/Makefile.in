@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4i from Makefile.am.
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
 
 # Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
 # Free Software Foundation, Inc.
@@ -72,9 +72,11 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 CC = @CC@
 DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
 FIND = @FIND@
 GREP = @GREP@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 RANLIB = @RANLIB@
@@ -82,8 +84,8 @@ SED = @SED@
 SORT = @SORT@
 VERSION = @VERSION@
 XARGS = @XARGS@
-_am_include = @_am_include@
-_am_quote = @_am_quote@
+am__include = @am__include@
+am__quote = @am__quote@
 install_sh = @install_sh@
 
 INCLUDES = @INCLUDES@
@@ -96,13 +98,12 @@ gtags_DEPENDENCIES = $(LDADD)
 
 man_MANS = gtags.1
 
-EXTRA_DIST = ${man_MANS}
-EXEEXT =
-OBJEXT = o
+EXTRA_DIST = $(man_MANS) const.h manual.in
 subdir = gtags
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
+bin_PROGRAMS = gtags$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 gtags_SOURCES = gtags.c
@@ -144,8 +145,10 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
 	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
 	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
@@ -161,8 +164,8 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-gtags: $(gtags_OBJECTS) $(gtags_DEPENDENCIES)
-	@rm -f gtags
+gtags$(EXEEXT): $(gtags_OBJECTS) $(gtags_DEPENDENCIES) 
+	@rm -f gtags$(EXEEXT)
 	$(LINK) $(gtags_LDFLAGS) $(gtags_OBJECTS) $(gtags_LDADD) $(LIBS)
 
 mostlyclean-compile:
@@ -171,7 +174,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/gtags.Po@_am_quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/gtags.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -256,14 +259,20 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 GTAGS:
 	here=`CDPATH=: && cd $(top_builddir) && pwd` \
 	  && cd $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) $$here
-HTAGS: GTAGS
+	  && gtags -i $(GTAGS_ARGS) $$here \
+	  && case `pwd` in \
+	     $$here);; \
+	     *)	echo $(top_srcdir) >$$here/GTAGSROOT;; \
+	     esac
+
+HTML:
 	here=`CDPATH=: && cd $(top_builddir) && pwd` \
 	  && cd $(top_srcdir) \
 	  && htags $(HTAGS_ARGS) -d $$here $$here
 
 distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH GTAGSROOT
+	-rm -rf HTML
 
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
@@ -355,7 +364,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am uninstall-man
 
 uninstall-man: uninstall-man1
 
-.PHONY: GTAGS HTAGS all all-am check check-am clean clean-binPROGRAMS \
+.PHONY: GTAGS HTML all all-am check check-am clean clean-binPROGRAMS \
 	clean-generic distclean distclean-compile distclean-depend \
 	distclean-generic distclean-tags distdir dvi dvi-am info \
 	info-am install install-am install-binPROGRAMS install-data \

@@ -1,3 +1,9 @@
+global (4.4-1) unstable; urgency=high
+
+  * Security fix for html form exploit.
+
+ -- Ron Lee <ron@debian.org>  Sat, 30 Mar 2002 21:55:27 -0800
+
 global (4.1.1-1) unstable; urgency=low
 
   * New upstream release.

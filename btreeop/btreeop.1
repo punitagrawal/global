@@ -1,163 +1,137 @@
-.\"
-.\" Copyright (c) 1996, 1997, 1998, 1999
-.\"             Shigio Yamaguchi. All rights reserved.
-.\" Copyright (c) 1999, 2000
-.\"             Tama Communications Corporation. All rights reserved.
-.\"
-.\" This file is part of GNU GLOBAL.
-.\"
-.\" GNU GLOBAL is free software; you can redistribute it and/or modify
-.\" it under the terms of the GNU General Public License as published by
-.\" the Free Software Foundation; either version 2, or (at your option)
-.\" any later version.
-.\"
-.\" GNU GLOBAL is distributed in the hope that it will be useful,
-.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
-.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-.\" GNU General Public License for more details.
-.\"
-.\" You should have received a copy of the GNU General Public License
-.\" along with this program; if not, write to the Free Software
-.\" Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-.\"
-.Dd Nov 3, 1998
-.Dt BTREEOP 1
-.Os FreeBSD
-.Sh NAME
-.Nm btreeop
-.Nd btree database maintenance tool
-.Sh SYNOPSIS
-.Nm btreeop
-.Op Fl A
-.Op Fl C
-.Op Fl D[keyno] Ar key
-.Op Fl K[keyno] Ar key
-.Op Fl L[2]
-.Op Fl k Ar prefix
-.Op Ar dbname
-.Sh DESCRIPTION
-.Nm Btreeop
-execute simple operations for
-.Xr btree 3
-database.
-.Nm Btreeop
-can create database, write record, read record (sequential or indexed) and
-delete record from it.
+.\" This file is generated automatically by convert.pl from btreeop/manual.in.
+.TH BTREEOP 1 "December 2001" "GNU Project"
+.SH NAME
+btreeop \- btree database maintenance tool.
+.SH SYNOPSIS
+\fBbtreeop\fP [-A][-C][-D[n] \fIkey\fP][-K[n] \fIkey\fP][-L[2]][-k \fIprefix\fP][\fIdbname\fP]
+.br
+.SH DESCRIPTION
+\fBBtreeop\fP execute simple operations for \fBbtree\fP(3) database.
+\fBBtreeop\fP can create database, write record, read record
+(sequential or indexed) and delete record from it.
 Duplicate entries are allowed.
 Multi-key is available but only primary key can use index of
-.Xr btree 3 .
-.Sh OPTIONS
+\fBbtree\fP(3).
+.SH COMMANDS
 A capital letter means a command. If no command specified
 then it assume sequential read operation.
-.Bl -tag -width Ds
-.It Fl A
+The following commands are available:
+.TP
+none
+Read records sequentially.
+.TP
+\fB-A\fP
 Append records. If database doesn't exist, btreeop creates it.
-.It Fl C
+.TP
+\fB-C\fP
 Create database and write records to it.
-.It Fl D[keyno] Ar key
-Delete records by the key. By default, keyno is 0 (primary key).
-.It Fl K[keyno] Ar key
-Search records by the key. By default, keyno is 0 (primary key).
-.It Fl L[2]
-List all primary keys. If '2' is specified, list all the key and data pairs.
-.It Fl k Ar prefix
-Scan records which have the prefix as a primary key.
-This option is valid only with sequential read operation (-L command or non command).
-.It Ar dbname
-Database name. default is 'btree'.
-.El
-.Sh DATA FORMAT
-To creat (or append) database,
-.Nm btreeop
-read data from stdin.
+.TP
+\fB-D\fP[\fIn\fP] \fIkey\fP
+Delete records by the \fIkey\fP. By default, \fIn\fP is 0 (primary key).
+.TP
+\fB-K\fP[\fIn\fP] \fIkey\fP
+Search records by the \fIkey\fP. By default, \fIn\fP is 0 (primary key).
+.TP
+\fB-L\fP[\fI2\fP]
+List all primary keys.
+If \fI2\fP is specified, list all the key and data pairs.
+.TP
+\fIdbname\fP
+Database name. By default, it assume \'btree\'.
+.SH OPTIONS
+.TP
+\fB-k\fP \fIprefix\fP
+Scan records which have the \fIprefix\fP as a primary key.
+This option is valid only with sequential read operation
+\fB-L\fP command or no command.
+.SH FORMAT
+.nf
+To creat (or append) database, btreeop read data from stdin.
 The format of the data is the following.
-
+.PP
   Primary-key  Secondary-key-1  Secondary-key-2  Data
   (keyno = 0)  (keyno = 1)      (keyno = 2)
   --------------------------------------------------------------
-  main         246              main.c           main (){\\n
-  func         120              library.c        func(a1, a2)\\n
+  main         246              main.c           main () {
+  func         120              library.c        func(a1, a2)
   .
   .
   .
-
-.Bl -enum -offset indent
-.It
-All key and data are separated by blank('\\t' or ' '). 
-.It
-Key cannot include blank.
-.It
-Data can include blank.
-.It
-Null data not allowed.
-.It
-Additionally, META record is available. META record has a key that start with
-a blank. You can read this record only by indexed read operation (-K option).
-Usage is unlimited by btreeop.
-.El
-.Sh EXAMPLES
+.PP
+o All key and data are separated by blank('\\t' or ' '). 
+o Key cannot include blank.
+o Data can include blank.
+o Null data not allowed.
+.PP
+Additionally, META record is available. META record has a key that
+start with a blank. You can read this record only by indexed read
+operation (-K option). Usage is unlimited by btreeop.
+.fi
+.SH EXAMPLES
+.nf
 Create database.
-
+.PP
   % btreeop -C
-  key1	data1
-  key2	data2
-  key3	data3
+  key1  data1
+  key2  data2
+  key3  data3
   ^D
   %
-
+.PP
 Append records.
-
+.PP
   % btreeop -A
    __.VERSION 2
-  key2	data2-2
+  key2  data2-2
   ^D
   %
-
+.PP
 Sequential read.
-
+.PP
   % btreeop
   key1  data1
   key2  data2-2
   key2  data2
   key3  data3
   %
-
+.PP
 Indexed read.
-
+.PP
   % btreeop -K key2
   key2  data2-2
   key2  data2
   % btreeop -K ' __.VERSION'
    __.VERSION 2
   %
-
+.PP
 List primary keys.
-
+.PP
   % btreeop -L
   key1
   key2
   key3
   %
-
+.PP
 Delete record.
-
+.PP
   % btreeop -D ' __.VERSION'
   % btreeop -K ' __.VERSION'
   %
-
-.Sh FILES
-.Bl -tag -width tags -compact
-.It Pa btree
+.PP
+.fi
+.SH FILES
+.TP
+\'btree\'
 default database name.
-.El
-.Sh DIAGNOSTICS
-.Nm Btreeop
-exits with a non 0 value if an error occurred, 0 otherwise.
-.Sh SEE ALSO
-.Xr btree 3
-.Sh AUTHOR
+.SH DIAGNOSTICS
+\fBBtreeop\fP exits with a non 0 value if an error occurred, 0 otherwise.
+.SH "SEE ALSO"
+\fBbtree\fP(3).
+.PP
+GNU GLOBAL source code tag system
+.br
+(http://www.gnu.org/software/global/).
+.SH AUTHOR
 Shigio Yamaguchi
-.Sh HISTORY
-The
-.Nm
-command appeared in FreeBSD 2.2.2.
+.SH HISTORY
+The \fBbtreeop\fP command appeared in FreeBSD 2.2.2.

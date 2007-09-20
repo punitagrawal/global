@@ -46,11 +46,12 @@
 #include "strbuf.h"
 #include "tab.h"
 #include "version.h"
+#include "const.h"
 
 const char *dbdefault = "btree";   	/* default database name */
-const char *progname  = "btreeop";		/* command name */
-int statistics;
 
+int vflag;
+int debug;
 static void	usage(void);
 void	signal_setup(void);
 void	onintr(int);
@@ -67,9 +68,15 @@ void	dbbysecondkey(DBOP *, int, char *, int);
 static void
 usage()
 {
-	fprintf(stderr, "%s\n",
-		"usage: btreeop [-A][-C][-D[n] key][-K[n] key][-L[2]][-k prefix][dbname]");
+	fputs(usage_const, stderr);
 	exit(2);
+}
+static void
+help()
+{
+	fputs(usage_const, stdout);
+	fputs(help_const, stdout);
+	exit(0);
 }
 
 /*
@@ -116,16 +123,8 @@ char	*argv[];
 	for (i = 1; i < argc && argv[i][0] == '-'; ++i) {
 		if (!strcmp(argv[i], "--version"))
 			version(NULL, 0);
-#ifdef STATISTICS
-		else if (!strcmp(argv[i], "--dump")) {
-			command = 'P';
-			continue;
-		}
-		else if (!strcmp(argv[i], "--stat")) {
-			statistics = 1;
-			continue;
-		}
-#endif
+		else if (!strcmp(argv[i], "--help"))
+			help();
 		switch (c = argv[i][1]) {
 		case 'D':
 		case 'K':
@@ -202,16 +201,7 @@ char	*argv[];
 	case 'L':			/* primary key List */
 		dbscan(dbop, prefix, keylist);
 		break;
-#ifdef STATISTICS
-	case 'P':
-		dbop_dump(dbop);
-		break;
-#endif
 	}
-#ifdef STATISTICS
-	if (statistics)
-		dbop_stat(dbop);
-#endif
 	dbop_close(dbop);
 
 	return exitflag;
@@ -269,7 +259,7 @@ DBOP	*dbop;
 			;
 		if (*c == 0)
 			die("data part is null.");
-		dbop_put(dbop, keybuf, p);
+		dbop_put(dbop, keybuf, p, 0);
 	}
 	strbuf_close(ib);
 }
@@ -320,7 +310,7 @@ int	keylist;
 
 	for (p = dbop_first(dbop, prefix, NULL, flags); p; p = dbop_next(dbop)) {
 		if (keylist == 2)
-			fprintf(stdout, "%s %s\n", p, dbop->lastdat);
+			fprintf(stdout, "%s %s\n", p, dbop_lastdat(dbop));
 		else
 			detab(stdout, p);
 	}
@@ -341,7 +331,7 @@ int	secondkey;
 {
 	signal_setup();
 	if (!secondkey) {
-		dbop_del(dbop, skey);
+		dbop_delete(dbop, skey);
 		return;
 	}
 	dbbysecondkey(dbop, F_DEL, skey, secondkey);
@@ -393,7 +383,7 @@ int	secondkey;
 				detab(stdout, p);
 				break;
 			case F_DEL:
-				dbop_del(dbop, NULL);
+				dbop_delete(dbop, NULL);
 				break;
 			}
 		}

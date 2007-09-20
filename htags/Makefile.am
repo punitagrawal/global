@@ -1,6 +1,6 @@
 ## Process this file with automake to create Makefile.in
 #
-# Copyright (c) 2000
+# Copyright (c) 2000, 2001
 #        Tama Communications Corporation. All rights reserved.
 #
 # This file is free software; as a special exception the author gives
@@ -11,19 +11,21 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
+if DJGPP
+bin_SCRIPTS = htags htags.bat
+else
 bin_SCRIPTS = htags
+endif
 
 PERL = @PERL@
-VERSION = @VERSION@
 
-SUFFIXES = .pl
-
-.pl:
-	sed -e 's,@''PERL''@,$(PERL),g' $< >$@.tmp && \
-	chmod +x $@.tmp && mv $@.tmp $@
+htags: $(srcdir)/htags.in $(srcdir)/const.pl
+	echo "#! @PERL@" | cat - $(srcdir)/const.pl $(srcdir)/htags.in | \
+	sed -e 's,@''PERL''@,$(PERL),g' >htags.tmp && \
+	chmod +x htags.tmp && mv htags.tmp htags
 
 man_MANS = htags.1
 
-EXTRA_DIST = ${man_MANS} ${bin_SCRIPTS}${SUFFIXES}
+EXTRA_DIST = $(man_MANS) htags.in manual.in const.pl htags.bat
 
-CLEANFILES = ${bin_SCRIPTS}
+CLEANFILES = htags

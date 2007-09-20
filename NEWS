@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2001
+ Copyright (c) 2000, 2001, 2002
         Tama Communications Corporation. All rights reserved.
 
  This file is free software; as a special exception the author gives
@@ -19,6 +19,49 @@ ___________________________________
 
 GLOBAL NEWS - User visible changes.
 At least, you had better search '[INCOMPATIBLE CHANGES]' for each version.
+
+Version 4.4 - March 30 2002, by Shigio Yamaguchi
+
+* gozilla: gozilla return to GLOBAL.
+* htags: -o(--other) option added. This option list not only source files
+  but also other files like 'README'.
+* global: -o(--other) option added. This option search in not only source
+  files but also other files like 'README'.
+* htags: configuration variable other_files added.
+* htags: configuration variable definition_header={no|after|before} added.
+* htags: configuration variable enable_grep and enable_idutils added.
+* htags: -l(--each-line-tag) option deleted.
+  From now on, htags works as if -l flag is always specified.
+  But -l(--each-line-tag) option is accepted for backward compatibility.
+* global: path conversion optimized and bug fixed.
+* gtags.conf: added documentation about variables.
+* htags: shut another security hole.
+* Some bugs are fixed.
+
+Version 4.3.1 - January 22 2002, by Shigio Yamaguchi
+
+This is bug fix version.
+* htags: global.cgi wasn't generated correctly.
+
+Version 4.3 - January 10 2002, by Shigio Yamaguchi
+
+* Support DJGPP.
+* Support nvi-1.81.5.
+* global.texi: chapter of less viewer, nvi-1.81.5 and reference manuals added.
+* global,gtags: the -q option added.
+* htags: fill anchors into path name.
+* global: GTAGSROOT file supported.
+
+Version 4.2 - November 24 2001, by Shigio Yamaguchi
+
+* postgres support added.
+  You need to configure GLOBAL with --with-postgres option.
+* gtags: when no parser specified in config file, overloaded by default values.
+* gtags: variable 'skip' accept full path name.
+* htags: changed to refer to macros which is defined in other C source.
+* htags: --caution option added.
+* global.texi: reference manual added.
+* gtags, htags: allow relative path name for --gtagsconf.
 
 Version 4.1.1 - July 31, 2001, by Shigio Yamaguchi
 

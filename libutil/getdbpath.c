@@ -101,57 +101,37 @@ int	verbose;
 	if (makeobjdir == NULL)
 		setupvariables(verbose);
 
-#ifdef HAVE_SNPRINTF
 	snprintf(path, sizeof(path), "%s/%s", candidate, dbname(GTAGS));
-#else
-	sprintf(path, "%s/%s", candidate, dbname(GTAGS));
-#endif /* HAVE_SNPRINTF */
 	if (verbose)
 		fprintf(stderr, "checking %s\n", path);
 	if (test("fr", path)) {
 		if (verbose)
 			fprintf(stderr, "GTAGS found at '%s'.\n", path);
-#ifdef HAVE_SNPRINTF
 		snprintf(dbpath, size, "%s", candidate);
-#else
-		sprintf(dbpath, "%s", candidate);
-#endif /* HAVE_SNPRINTF */
 		return 1;
 	}
-#ifdef HAVE_SNPRINTF
-	snprintf(path, sizeof(path), "%s/%s/%s", candidate, makeobjdir, dbname(GTAGS));
-#else
-	sprintf(path, "%s/%s/%s", candidate, makeobjdir, dbname(GTAGS));
-#endif /* HAVE_SNPRINTF */
+	snprintf(path, sizeof(path),
+		"%s/%s/%s", candidate, makeobjdir, dbname(GTAGS));
 	if (verbose)
 		fprintf(stderr, "checking %s\n", path);
 	if (test("fr", path)) {
 		if (verbose)
 			fprintf(stderr, "GTAGS found at '%s'.\n", path);
-#ifdef HAVE_SNPRINTF
 		snprintf(dbpath, size, "%s/%s", candidate, makeobjdir);
-#else
-		sprintf(dbpath, "%s/%s", candidate, makeobjdir);
-#endif /* HAVE_SNPRINTF */
 		return 1;
 	}
-#ifdef HAVE_SNPRINTF
-	snprintf(path, sizeof(path), "%s%s/%s", makeobjdirprefix, candidate, dbname(GTAGS));
-#else
-	sprintf(path, "%s%s/%s", makeobjdirprefix, candidate, dbname(GTAGS));
-#endif /* HAVE_SNPRINTF */
+#if !defined(_WIN32) && !defined(__DJGPP__)
+	snprintf(path, sizeof(path),
+		"%s%s/%s", makeobjdirprefix, candidate, dbname(GTAGS));
 	if (verbose)
 		fprintf(stderr, "checking %s\n", path);
 	if (test("fr", path)) {
 		if (verbose)
 			fprintf(stderr, "GTAGS found at '%s'.\n", path);
-#ifdef HAVE_SNPRINTF
 		snprintf(dbpath, size, "%s%s", makeobjdirprefix, candidate);
-#else
-		sprintf(dbpath, "%s%s", makeobjdirprefix, candidate);
-#endif /* HAVE_SNPRINTF */
 		return 1;
 	}
+#endif
 	return 0;
 }
 /*
@@ -209,7 +189,7 @@ int	verbose;
 			strcpy(dbpath, getenv("GTAGSDBPATH"));
 		} else {
 			if (!gtagsexist(root, dbpath, MAXPATHLEN, verbose))
-				die("GTAGS not found.");
+				die_with_code(3, "GTAGS not found.");
 		}
 	} else {
 		if (verbose && getenv("GTAGSDBPATH"))
@@ -227,6 +207,43 @@ int	verbose;
 				break;
 		}
 		if (*root == 0)
-			die("GTAGS not found.");
+			die_with_code(3, "GTAGS not found.");
+		/*
+		 * If file 'GTAGSROOT' found without environment variable
+		 * GTAGSDBPATH, use the value of it as GTAGSROOT.
+		 */
+		do {
+			FILE *fp;
+			STRBUF *sb;
+			char *s, *path;
+
+			path = makepath(root, "GTAGSROOT", NULL);
+			if (!test("fr", path)) {
+				break;
+			}
+			fp = fopen(path, "r");
+			if (fp == NULL) {
+				if (verbose)
+					fprintf(stderr, "'%s' ignored because it cannot be opened.\n", path);
+				break;
+			}
+			sb = strbuf_open(0);
+			s = strbuf_fgets(sb, fp, STRBUF_NOCRLF);
+			if (!test("d", s)) {
+				if (verbose)
+					fprintf(stderr, "'%s' ignored because it doesn't include existent directory name.\n", path);
+			} else {
+				if (verbose)
+					fprintf(stderr, "GTAGSROOT found at '%s'.\n", path);
+				if (*s != '/') {
+					char buf[MAXPATHLEN+1];
+					s = realpath(makepath(root, s, NULL), buf);
+				}
+				strcpy(root, s);
+			}
+			fclose(fp);
+			strbuf_close(sb);
+			break;
+		} while (0);
 	}
 }

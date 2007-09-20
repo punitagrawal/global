@@ -115,9 +115,13 @@ C(yacc)
 					strbuf_reset(sb);
 					strbuf_puts(sb, sp);
 					saveline = strbuf_value(sb);
-					if (function_definition(target))
+					if (function_definition(target)) {
 						if (target == DEF)
 							PUT(savetok, savelineno, saveline);
+					} else {
+						if (target == SYM)
+							PUT(savetok, savelineno, saveline);
+					}
 				}
 			} else {
 				if (dflag) {
@@ -287,6 +291,65 @@ C(yacc)
 			if (wflag && !startmacro && level == 0)
 				fprintf(stderr, "Warning: Out of function. %8s [+%d %s]\n", token, lineno, curfile);
 			break;
+		case C_TYPEDEF:
+			if (tflag) {
+				char	savetok[MAXTOKEN];
+				int	savelineno;
+				char	savefunc[MAXTOKEN];
+				int	savefunclineno;
+				int	typelevel = 0;
+				int	funclevel = 0;
+
+				savetok[0] = savefunc[0] = 0;
+				while ((c = nexttoken("{}();", reserved)) != EOF) {
+					if (c == ';' && typelevel == 0)
+						break;
+					if (c == '(' || c == ')') {
+						if (c == '(') {
+							if (funclevel++ == 0) {
+								strcpy(savefunc, savetok);
+								savefunclineno = savelineno;
+								savetok[0] = 0;
+							}
+						}
+						if (c == ')') {
+							if (--funclevel == 0) {
+								strcpy(savetok, savefunc);
+								savelineno = savefunclineno;
+								savefunc[0] = 0;
+							}
+						}
+						continue;
+					} else if (c == '{' || c == '}') {
+						if (c == '{')
+							typelevel++;
+						if (c == '}')
+							typelevel--;
+						continue;
+					}
+					if (savetok[0]) {
+						if (target == SYM)
+							PUT(savetok, lineno, sp);
+						if (target == REF && defined(savetok))
+							PUT(savetok, lineno, sp);
+						savetok[0] = 0;
+					}
+					if (c == SYMBOL) {
+						/* save lastest token */
+						strcpy(savetok, token);
+						savelineno = lineno;
+					}
+				}
+				if (wflag && c == EOF) {
+					if (typelevel > 0)
+						fprintf(stderr, "Warning: typedef block unmatched. (last at level %d.)[+%d %s]\n", typelevel, lineno, curfile);
+					if (funclevel > 0)
+						fprintf(stderr, "Warning: () block unmatched. (last at level %d.)[+%d %s]\n", funclevel, lineno, curfile);
+				}
+				if (target == DEF && savetok[0])
+					PUT(savetok, lineno, sp);
+			}
+			break;
 		default:
 			break;
 		}
@@ -312,7 +375,7 @@ int	target;
 	int     brace_level, isdefine;
 
 	brace_level = isdefine = 0;
-	while ((c = nexttoken("(,)", reserved)) != EOF) {
+	while ((c = nexttoken("()", reserved)) != EOF) {
 		switch (c) {
 		case CP_IFDEF:
 		case CP_IFNDEF:
@@ -331,14 +394,15 @@ int	target;
 		else if (c == /* ( */')') {
 			if (--brace_level == 0)
 				break;
-		} else if (c == SYMBOL) {
-			if (target == SYM)
-				PUT(token, lineno, sp);
 		}
+		/* pick up symbol */
+		if (c == SYMBOL && target == SYM)
+			PUT(token, lineno, sp);
 	}
 	if (c == EOF)
 		return 0;
-	while ((c = nexttoken(",;{}=", reserved)) != EOF) {
+	brace_level = 0;
+	while ((c = nexttoken(",;[](){}=", reserved)) != EOF) {
 		switch (c) {
 		case CP_IFDEF:
 		case CP_IFNDEF:
@@ -352,7 +416,11 @@ int	target;
 		default:
 			break;
 		}
-		if (c == SYMBOL || IS_RESERVED(c))
+		if (c == '('/* ) */ || c == '[')
+			brace_level++;
+		else if (c == /* ( */')' || c == ']')
+			brace_level--;
+		else if (brace_level == 0 && (c == SYMBOL || IS_RESERVED(c)))
 			isdefine = 1;
 		else if (c == ';' || c == ',') {
 			if (!isdefine)
@@ -360,10 +428,14 @@ int	target;
 		} else if (c == '{' /* } */) {
 			pushbacktoken();
 			return 1;
-		} else if (c == /* { */'}') {
+		} else if (c == /* { */'}')
 			break;
-		} else if (c == '=')
+		else if (c == '=')
 			break;
+
+		/* pick up symbol */
+		if (c == SYMBOL && target == SYM)
+			PUT(token, lineno, sp);
 	}
 	return 0;
 }
