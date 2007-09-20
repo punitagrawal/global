@@ -3,19 +3,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef _COMMON_H_
 #define _COMMON_H_
@@ -51,9 +50,15 @@ extern const char *cvslink_end;
 extern const char *caution_begin;
 extern const char *caution_end;
 extern const char *list_begin;
+extern const char *list_end;
 extern const char *item_begin;
 extern const char *item_end;
-extern const char *list_end;
+extern const char *flist_begin;
+extern const char *flist_end;
+extern const char *fline_begin;
+extern const char *fline_end;
+extern const char *fitem_begin;
+extern const char *fitem_end;
 extern const char *define_list_begin;
 extern const char *define_list_end;
 extern const char *define_term_begin;
@@ -93,16 +98,13 @@ extern const char *noframes_begin;
 extern const char *noframes_end;
 
 int fputs_nl(const char *, FILE *);
-void setup_html();
-void setup_xhtml();
-void setup_tex();
-const char *meta_record();
+void setup_xhtml(void);
 const char *upperdir(const char *);
 const char *gen_insert_header(int);
 const char *gen_insert_footer(int);
 const char *gen_page_begin(const char *, int);
-const char *gen_frameset_page_begin(const char *);
-const char *gen_page_end();
+const char *gen_page_frameset_begin(const char *);
+const char *gen_page_end(void);
 const char *gen_image(int, const char *, const char *);
 const char *gen_name_number(int);
 const char *gen_name_string(const char *);
@@ -110,20 +112,20 @@ const char *gen_href_begin_with_title_target(const char *, const char *, const c
 const char *gen_href_begin_with_title(const char *, const char *, const char *, const char *, const char *);
 const char *gen_href_begin(const char *, const char *, const char *, const char *);
 const char *gen_href_begin_simple(const char *);
-const char *gen_href_end();
-const char *gen_list_begin();
+const char *gen_href_end(void);
+const char *gen_list_begin(void);
 const char *gen_list_body(const char *, const char *);
-const char *gen_list_end();
+const char *gen_list_end(void);
 const char *gen_div_begin(const char *);
-const char *gen_div_end();
+const char *gen_div_end(void);
 const char *gen_form_begin(const char *);
-const char *gen_form_end();
+const char *gen_form_end(void);
 const char *gen_input(const char *, const char *, const char *);
 const char *gen_input_radio(const char *, const char *, int, const char *);
 const char *gen_input_checkbox(const char *, const char *, const char *);
 const char *gen_input_with_title_checked(const char *, const char *, const char *, int, const char *);
 const char *gen_frameset_begin(const char *);
-const char *gen_frameset_end();
+const char *gen_frameset_end(void);
 const char *gen_frame(const char *, const char *);
 
 #endif /* ! _COMMON_H_ */

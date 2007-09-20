@@ -12,6 +12,8 @@
 #
 bin_PROGRAMS= global
 
+global_SOURCES = global.c
+
 INCLUDES = @INCLUDES@
 
 LDADD = @LDADD@

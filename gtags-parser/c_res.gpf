@@ -99,17 +99,18 @@
 #define YACC_PREC	4026
 #define YACC_PRINTER	4027
 #define YACC_PURE_PARSER	4028
-#define YACC_RIGHT	4029
-#define YACC_SKELETON	4030
-#define YACC_START	4031
-#define YACC_TOKEN	4032
-#define YACC_TOKEN_TABLE	4033
-#define YACC_TYPE	4034
-#define YACC_UNION	4035
-#define YACC_VERBOSE	4036
-#define YACC_YACC	4037
-#define YACC_BEGIN	4038
-#define YACC_END	4039
+#define YACC_REQUIRE	4029
+#define YACC_RIGHT	4030
+#define YACC_SKELETON	4031
+#define YACC_START	4032
+#define YACC_TOKEN	4033
+#define YACC_TOKEN_TABLE	4034
+#define YACC_TYPE	4035
+#define YACC_UNION	4036
+#define YACC_VERBOSE	4037
+#define YACC_YACC	4038
+#define YACC_BEGIN	4039
+#define YACC_END	4040
 %}
 struct keyword { char *name; int token; }
 %%
@@ -226,6 +227,7 @@ while, C_WHILE
 "%printer", YACC_PRINTER
 "%pure_parser", YACC_PURE_PARSER
 "%pure-parser", YACC_PURE_PARSER
+"%require", YACC_REQUIRE
 "%right", YACC_RIGHT
 "%skeleton", YACC_SKELETON
 "%start", YACC_START
@@ -244,22 +246,16 @@ while, C_WHILE
 "%{", YACC_BEGIN
 "%}", YACC_END
 %%
-int c_reserved_word(const char *, int);
 int
-c_reserved_word(str, len)
-	const char *str;
-	int len;
+c_reserved_word(const char *str, int len)
 {
 	struct keyword *keyword;
 
 	keyword = c_lookup(str, len);
 	return (keyword && IS_RESERVED_WORD(keyword->token)) ? keyword->token : 0;
 }
-int c_reserved_sharp(const char *, int);
 int
-c_reserved_sharp(str, len)
-	const char *str;
-	int len;
+c_reserved_sharp(const char *str, int len)
 {
 	struct keyword *keyword;
 
@@ -269,11 +265,8 @@ c_reserved_sharp(str, len)
 	keyword = c_lookup(str, len);
 	return (keyword && IS_RESERVED_SHARP(keyword->token)) ? keyword->token : 0;
 }
-int c_reserved_yacc(const char *, int);
 int
-c_reserved_yacc(str, len)
-	const char *str;
-	int len;
+c_reserved_yacc(const char *str, int len)
 {
 	struct keyword *keyword;
 

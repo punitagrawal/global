@@ -4,24 +4,24 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef _HTAGS_H_
 #define _HTAGS_H_
 
 #include "gparam.h"
+#include "gtagsop.h"
 
 #if defined(_WIN32) || defined(__DJGPP__)
 #define W32	1
@@ -51,9 +51,8 @@
 
 extern int w32;
 extern const char *www;
-extern int file_count;
+extern int html_count;
 extern int sep;
-extern int exitflag;
 extern const char *save_config;
 extern const char *save_argv;
 
@@ -62,10 +61,9 @@ extern char dbpath[MAXPATHLEN];
 extern char distpath[MAXPATHLEN];
 extern char gtagsconf[MAXPATHLEN];
 
-extern char sort_path[MAXFILLEN];
 extern char gtags_path[MAXFILLEN];
 extern char global_path[MAXFILLEN];
-extern char findcom[MAXFILLEN];
+extern int gtags_exist[GTAGLIM];
 extern const char *null_device;
 extern const char *tmpdir;
 
@@ -73,8 +71,9 @@ extern int aflag;
 extern int cflag;
 extern int fflag;
 extern int Fflag;
-extern int nflag;
 extern int gflag;
+extern int Iflag;
+extern int nflag;
 extern int Sflag;
 extern int qflag;
 extern int vflag;
@@ -88,7 +87,6 @@ extern int dynamic;
 extern int symbol;
 extern int statistics;
 
-extern int no_map_file;
 extern int no_order_list;
 extern int other_files;
 extern int enable_grep;
@@ -99,8 +97,8 @@ extern const char *action_value;
 extern const char *id_value;
 extern const char *cgidir;
 extern const char *main_func;
-extern const char *style_sheet;
 extern const char *cvsweb_url;
+extern int use_cvs_module;
 extern const char *cvsweb_cvsroot;
 extern const char *gtagslabel;
 extern const char *title;
@@ -123,16 +121,16 @@ extern const char *file_icon;
 
 extern int ncol;
 extern int tabs;
-extern char stabs[];
+extern int flist_fields;
 extern int full_path;
 extern int map_file;
-extern const char *icon_list;
 extern const char *icon_suffix;
 extern const char *icon_spec;
 extern const char *prolog_script;
 extern const char *epilog_script;
 extern int show_position;
 extern int table_list;
+extern int table_flist;
 extern int colorize_warned_line;
 extern const char *script_alias;
 extern const char *gzipped_suffix;

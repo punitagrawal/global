@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -44,13 +43,11 @@
  *	gi)	tag cache
  */
 int
-makedefineindex(file, total, defines)
-	const char *file;
-	int total;
-	STRBUF *defines;
+makedefineindex(const char *file, int total, STRBUF *defines)
 {
 	int count = 0;
 	int alpha_count = 0;
+	FILEOP *fileop_MAP = NULL, *fileop_DEFINES, *fileop_ALPHA = NULL;
 	FILE *MAP = NULL;
 	FILE *DEFINES, *STDOUT, *TAGS, *ALPHA = NULL;
 	STRBUF *sb = strbuf_open(0);
@@ -69,11 +66,11 @@ makedefineindex(file, total, defines)
 		indexlink = "../mains";
 
 	if (map_file) {
-		if (!(MAP = fopen(makepath(distpath, "MAP", NULL), "w")))
-			die("cannot open '%s'.", makepath(distpath, "MAP", NULL));
+		fileop_MAP = open_output_file(makepath(distpath, "MAP", NULL), 0);
+		MAP = get_descripter(fileop_MAP);
 	}
-	if (!(DEFINES = fopen(makepath(distpath, file, NULL), "w")))
-		die("cannot make function index '%s'.", file);
+	fileop_DEFINES = open_output_file(makepath(distpath, file, NULL), 0);
+	DEFINES = get_descripter(fileop_DEFINES);
 	fputs_nl(gen_page_begin(title_define_index, TOPDIR), DEFINES);
 	fputs_nl(body_begin, DEFINES);
 	fputs(header_begin, DEFINES);
@@ -85,7 +82,7 @@ makedefineindex(file, total, defines)
 	fputs_nl(header_end, DEFINES);
 	if (!aflag && !Fflag) {
 		fputs(gen_href_begin_with_title(NULL, indexlink, normal_suffix, NULL, index_string), DEFINES);
-		if (icon_list)
+		if (Iflag)
 			fputs(gen_image(CURRENT, back_icon, ".."), DEFINES);
 		else
 			fputs("[..]", DEFINES);
@@ -99,7 +96,7 @@ makedefineindex(file, total, defines)
 	 * map DEFINES to STDOUT.
 	 */
 	STDOUT = DEFINES;
-	snprintf(command, sizeof(command), "global -c");
+	snprintf(command, sizeof(command), "%s -c", global_path);
 	if ((TAGS = popen(command, "r")) == NULL)
 		die("cannot fork.");
 	alpha[0] = '\0';
@@ -110,8 +107,8 @@ makedefineindex(file, total, defines)
 		count++;
 		tag = _;
 		message(" [%d/%d] adding %s", count, total, tag);
-		if (aflag && (alpha[0] == '\0' || strncmp(tag, alpha, strlen(alpha)))) {
-			const char *msg = (alpha_count == 1) ? "definition is contained." : "definitions are contained.";
+		if (aflag && (alpha[0] == '\0' || !locatestring(tag, alpha, MATCH_AT_FIRST))) {
+			const char *msg = (alpha_count == 1) ? "definition" : "definitions";
 			int c;
 
 			if (alpha[0]) {
@@ -126,19 +123,15 @@ makedefineindex(file, total, defines)
 				else
 					fputs_nl(br, ALPHA);
 				fputs(gen_href_begin_with_title(NULL, indexlink, normal_suffix, NULL, index_string), ALPHA);
-				if (icon_list)
+				if (Iflag)
 					fputs(gen_image(PARENT, back_icon, ".."), ALPHA);
 				else
 					fputs("[..]", ALPHA);
 				fputs_nl(gen_href_end(), ALPHA);
 				fputs_nl(body_end, ALPHA);
 				fputs_nl(gen_page_end(), ALPHA);
-				if (cflag) {
-					if (pclose(ALPHA) != 0)
-						die("terminated abnormally.");
-				} else
-					fclose(ALPHA);
-				file_count++;
+				close_file(fileop_ALPHA);
+				html_count++;
 			}
 			/*
 			 * setup index char (for example, 'a' of '[a]').
@@ -174,21 +167,15 @@ makedefineindex(file, total, defines)
 				alpha[1] = '\0';
 				snprintf(alpha_f, sizeof(alpha_f), "%03d", c);
 			}
-			if (cflag) {
-				snprintf(buf, sizeof(buf), "gzip -c >%s/defines/%s.%s", distpath, alpha_f, HTML);
-				ALPHA = popen(buf, "w");
-			} else {
-				snprintf(buf, sizeof(buf), "%s/defines/%s.%s", distpath, alpha_f, HTML);
-				ALPHA = fopen(buf, "w");
-			}
-			if (!ALPHA)
-				die("cannot make alphabetical function index.");
+			snprintf(buf, sizeof(buf), "%s/defines/%s.%s", distpath, alpha_f, HTML);
+			fileop_ALPHA = open_output_file(buf, cflag);
+			ALPHA = get_descripter(fileop_ALPHA);
 			snprintf(buf, sizeof(buf), "[%s]", alpha);
 			fputs_nl(gen_page_begin(buf, SUBDIR), ALPHA);
 			fputs_nl(body_begin, ALPHA);
 			fprintf(ALPHA, "%s[%s]%s\n", header_begin, alpha, header_end);
 			fputs(gen_href_begin_with_title(NULL, indexlink, normal_suffix, NULL, index_string), ALPHA);
-			if (icon_list)
+			if (Iflag)
 				fputs(gen_image(PARENT, back_icon, ".."), ALPHA);
 			else
 				fputs("[..]", ALPHA);
@@ -239,7 +226,7 @@ makedefineindex(file, total, defines)
 			SPLIT ptable;
 			const char *lno, *fid, *path;
 
-			if (split((char *)line, 3, &ptable) < 3) {
+			if (split((char *)line, 2, &ptable) < 2) {
 				recover(&ptable);
 				die("too small number of parts in makedefineindex().\n'%s'", line);
 			}
@@ -273,7 +260,7 @@ makedefineindex(file, total, defines)
 		die("'%s' failed.", command);
 	if (aflag && alpha[0]) {
 		char tmp[128];
-		const char *msg = (alpha_count == 1) ? "definition is contained." : "definitions are contained.";
+		const char *msg = (alpha_count == 1) ? "definition" : "definitions";
 
 		snprintf(tmp, sizeof(tmp), "%d %s", alpha_count, msg);
 		strbuf_puts(defines, gen_href_begin_with_title("defines", alpha_f, HTML, NULL, tmp));
@@ -284,15 +271,15 @@ makedefineindex(file, total, defines)
 		else
 			fputs_nl(br, ALPHA);
 		fputs(gen_href_begin_with_title(NULL, indexlink, normal_suffix, NULL, index_string), ALPHA);
-		if (icon_list)
+		if (Iflag)
 			fputs(gen_image(PARENT, back_icon, ".."), ALPHA);
 		else
 			fputs("[..]", ALPHA);
 		fputs_nl(gen_href_end(), ALPHA);
 		fputs_nl(body_end, ALPHA);
 		fputs_nl(gen_page_end(), ALPHA);
-		fclose(ALPHA);
-		file_count++;
+		close_file(fileop_ALPHA);
+		html_count++;
 
 		fputs(strbuf_value(defines), DEFINES);
 	}
@@ -300,7 +287,7 @@ makedefineindex(file, total, defines)
 		fputs_nl(list_end, DEFINES);
 	if (!aflag && !Fflag) {
 		fputs(gen_href_begin_with_title(NULL, "mains", normal_suffix, NULL, index_string), DEFINES);
-		if (icon_list)
+		if (Iflag)
 			fputs(gen_image(CURRENT, back_icon, ".."), DEFINES);
 		else
 			fputs("[..]", DEFINES);
@@ -308,10 +295,10 @@ makedefineindex(file, total, defines)
 	}
 	fputs_nl(body_end, DEFINES);
 	fputs_nl(gen_page_end(), DEFINES);
-	fclose(DEFINES);
-	file_count++;
+	close_file(fileop_DEFINES);
+	html_count++;
 	if (map_file)
-		fclose(MAP);
+		close_file(fileop_MAP);
 	strbuf_close(sb);
 	strbuf_close(url);
 	return count;

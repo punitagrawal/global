@@ -53,11 +53,8 @@ struct keyword { char *name; int token; }
 "#undef", SHARP_UNDEF
 "#warning", SHARP_WARNING
 %%
-int asm_reserved_sharp(const char *, int);
 int
-asm_reserved_sharp(str, len)
-	const char *str;
-	int len;
+asm_reserved_sharp(const char *str, int len)
 {
 	struct keyword *keyword;
 

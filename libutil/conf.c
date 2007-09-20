@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -34,6 +33,7 @@
 #endif
 
 #include "gparam.h"
+#include "checkalloc.h"
 #include "conf.h"
 #include "die.h"
 #include "env.h"
@@ -73,8 +73,7 @@ static void includelabel(STRBUF *, const char *, int);
  * :var1=a b :
  */
 static void
-trim(l)
-	char *l;
+trim(char *l)
 {
 	char *f, *b;
 	int colon = 0;
@@ -113,8 +112,7 @@ trim(l)
  * o format check.
  */
 static const char *
-readrecord(label)
-	const char *label;
+readrecord(const char *label)
 {
 	char *p;
 	int flag = STRBUF_NOCRLF;
@@ -144,10 +142,7 @@ readrecord(label)
 			if (!strcmp(label, candidate)) {
 				if (!(p = locatestring(p, ":", MATCH_FIRST)))
 					die("invalid config file format (line %d).", count);
-				p = strdup(p);
-				if (!p)
-					die("short of memory.");
-				return p;
+				return check_strdup(p);
 			}
 			/*
 			 * locate next candidate.
@@ -174,10 +169,7 @@ readrecord(label)
  *	i)	level	nest level for check
  */
 static void
-includelabel(sb, label, level)
-	STRBUF	*sb;
-	const char *label;
-	int	level;
+includelabel(STRBUF *sb, const char *label, int	level)
 {
 	const char *savep, *p, *q;
 
@@ -256,17 +248,13 @@ openconf(void)
 	if (!(config = configpath())) {
 		if (vflag)
 			fprintf(stderr, " Using default configuration.\n");
-		confline = strdup("");
-		if (!confline)
-			die("short of memory.");
+		confline = check_strdup("");
 	}
 	/*
 	 * if it is not an absolute path then assumed config value itself.
 	 */
 	else if (!isabspath(config)) {
-		confline = strdup(config);
-		if (!confline)
-			die("short of memory.");
+		confline = check_strdup(config);
 		if (!locatestring(confline, ":", MATCH_FIRST))
 			die("GTAGSCONF must be absolute path name.");
 	}
@@ -292,9 +280,7 @@ openconf(void)
 		ib = strbuf_open(MAXBUFLEN);
 		sb = strbuf_open(0);
 		includelabel(sb, label, 0);
-		confline = strdup(strbuf_value(sb));
-		if (!confline)
-			die("short of memory.");
+		confline = check_strdup(strbuf_value(sb));
 		strbuf_close(ib);
 		strbuf_close(sb);
 		fclose(fp);
@@ -358,9 +344,7 @@ openconf(void)
 	}
 	strbuf_unputc(sb, ':');
 	strbuf_putc(sb, ':');
-	confline = strdup(strbuf_value(sb));
-	if (!confline)
-		die("short of memory.");
+	confline = check_strdup(strbuf_value(sb));
 	strbuf_close(sb);
 	trim(confline);
 	return;
@@ -373,9 +357,7 @@ openconf(void)
  *	r)		1: found, 0: not found
  */
 int
-getconfn(name, num)
-	const char *name;
-	int *num;
+getconfn(const char *name, int *num)
 {
 	const char *p;
 	char buf[MAXPROPLEN+1];
@@ -399,9 +381,7 @@ getconfn(name, num)
  *	r)		1: found, 0: not found
  */
 int
-getconfs(name, sb)
-	const char *name;
-	STRBUF *sb;
+getconfs(const char *name, STRBUF *sb)
 {
 	const char *p;
 	char buf[MAXPROPLEN+1];
@@ -449,8 +429,7 @@ getconfs(name, sb)
  *	r)		1: TRUE, 0: FALSE
  */
 int
-getconfb(name)
-	const char *name;
+getconfb(const char *name)
 {
 	char buf[MAXPROPLEN+1];
 

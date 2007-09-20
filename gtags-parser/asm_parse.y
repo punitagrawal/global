@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -30,6 +29,10 @@
 #include "gctags.h"
 #include "linetable.h"
 #include "strbuf.h"
+
+#define YYLTYPE		int
+
+#define YYLLOC_DEFAULT(Current, Rhs, N)	((Current) = (Rhs)[1])
 
 #undef PUT
 #define PUT(tag, lno) do {						\
@@ -62,10 +65,14 @@ static int target;
 %token ASM_EXT			/* EXT, SYMBOL_NAME, ... */
 %token ASM_SYMBOL_PAREN		/* sym( */
 %token ASM_SYMBOL
+%token ASM_LABEL		/* ^sym */
 
 %token ASM_DEFINE "#define"
 %token ASM_UNDEF "#undef"
 %token ASM_DIRECTIVE		/* #xxx */
+
+%token ASM_MACRO		/* .macro */
+%token ASM_EQU			/* .equ */
 
 %start input
 %name-prefix="asm_"
@@ -82,10 +89,10 @@ line:	ASM_ENTRY '(' ASM_SYMBOL ')' error '\n'
 				char *sym = GET_SYM($1);
 
 				if (defined(sym))
-					PUT(sym, @1.first_line);
+					PUT(sym, @1);
 			}
 			if (target == DEF)
-				PUT(GET_SYM($3), @3.first_line);
+				PUT(GET_SYM($3), @3);
 			strbuf_reset(asm_symtable);
 		}
 	| ASM_CALL ASM_SYMBOL error '\n'
@@ -98,7 +105,7 @@ line:	ASM_ENTRY '(' ASM_SYMBOL ')' error '\n'
 
 					if ((isalpha(c) || c == '_' || c >= 0x80)
 					    && defined(&sym[1]))
-						PUT(&sym[1], @2.first_line);
+						PUT(&sym[1], @2);
 				}
 			}
 			strbuf_reset(asm_symtable);
@@ -110,30 +117,54 @@ line:	ASM_ENTRY '(' ASM_SYMBOL ')' error '\n'
 
 				sym = GET_SYM($2);
 				if (defined(sym))
-					PUT(sym, @2.first_line);
+					PUT(sym, @2);
 
 				sym = GET_SYM($4);
 				if (defined(sym))
-					PUT(sym, @4.first_line);
+					PUT(sym, @4);
 			}
 			strbuf_reset(asm_symtable);
 		}
 	| "#define" ASM_SYMBOL error '\n'
 		{
 			if (target == DEF && dflag)
-				PUT(GET_SYM($2), @2.first_line);
+				PUT(GET_SYM($2), @2);
 			strbuf_reset(asm_symtable);
 		}
 	| "#define" ASM_SYMBOL_PAREN error '\n'
 		{
 			if (target == DEF)
-				PUT(GET_SYM($2), @2.first_line);
+				PUT(GET_SYM($2), @2);
 			strbuf_reset(asm_symtable);
 		}
 	| "#undef" ASM_SYMBOL error '\n'
 		{
 			if (target == DEF && dflag)
-				PUT(GET_SYM($2), @2.first_line);
+				PUT(GET_SYM($2), @2);
+			strbuf_reset(asm_symtable);
+		}
+	| ASM_MACRO ASM_SYMBOL error '\n'
+		{
+			if (target == DEF && dflag)
+				PUT(GET_SYM($2), @2);
+			strbuf_reset(asm_symtable);
+		}
+	| ASM_LABEL ASM_MACRO error '\n'
+		{
+			if (target == DEF && dflag)
+				PUT(GET_SYM($1), @1);
+			strbuf_reset(asm_symtable);
+		}
+	| ASM_EQU ASM_SYMBOL ',' error '\n'
+		{
+			if (target == DEF && dflag)
+				PUT(GET_SYM($2), @2);
+			strbuf_reset(asm_symtable);
+		}
+	| ASM_LABEL ASM_EQU error '\n'
+		{
+			if (target == DEF && dflag)
+				PUT(GET_SYM($1), @1);
 			strbuf_reset(asm_symtable);
 		}
 	| error '\n'
@@ -143,8 +174,7 @@ line:	ASM_ENTRY '(' ASM_SYMBOL ')' error '\n'
 %%
 
 void
-assembler(file)
-const char *file;
+assembler(const char *file)
 {
 	/* symbol search doesn't supported. */
 	if (sflag)
@@ -165,8 +195,7 @@ const char *file;
 }
 
 static void
-yyerror(s)
-const char *s;
+yyerror(const char *s)
 {
 
 }

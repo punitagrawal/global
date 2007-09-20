@@ -1,22 +1,21 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000
+ * Copyright (c) 1997, 1998, 1999, 2000, 2006
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -49,21 +48,20 @@
  *	r)	0: is not binary, 1: is binary
  */
 static int
-is_binary(path)
-	const char *path;
+is_binary(const char *path)
 {
 	int ip;
 	char buf[32];
 	int i, c, size;
 
-	ip = open(path, 0);
+	ip = open(path, O_RDONLY);
 	if (ip < 0)
 		die("cannot open file '%s' in read mode.", path);
 	size = read(ip, buf, sizeof(buf));
 	close(ip);
 	if (size < 0)
 		return 1;
-	if (!strncmp(buf, "!<arch>", 7))
+	if (size >= 7 && locatestring(buf, "!<arch>", MATCH_AT_FIRST))
 		return 1;
 	for (i = 0; i < size; i++) {
 		c = (unsigned char)buf[i];
@@ -92,9 +90,7 @@ is_binary(path)
  * You can specify more than one character. It assumed 'AND' test.
  */
 int
-test(flags, path)
-	const char *flags;
-	const char *path;
+test(const char *flags, const char *path)
 {
 	static struct stat sb;
 	int c;
@@ -149,4 +145,20 @@ test(flags, path)
 		}
 	}
 	return 1;
+}
+/*
+ * filesize: get file size in bytes.
+ *
+ *	i)	path	path of file
+ *	r)		!= -1: file size
+ *			== -1: file not found
+ */
+int
+filesize(const char *path)
+{
+	struct stat sb;
+
+	if (stat(path, &sb) < 0)
+		return -1;
+	return sb.st_size;
 }

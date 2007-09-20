@@ -3,19 +3,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -47,7 +46,7 @@ static char *curp;
 static char *endp;
 
 /* Offset table */
-VARRAY *vb;
+static VARRAY *vb;
 
 static void linetable_put(int, int);
 /*
@@ -58,8 +57,7 @@ static void linetable_put(int, int);
  *			-1: cannot open file.
  */
 int
-linetable_open(path)
-	const char *path;
+linetable_open(const char *path)
 {
 	FILE *ip;
 	struct stat sb;
@@ -96,9 +94,7 @@ linetable_open(path)
  *			!=-1: number of bytes actually read
  */
 int
-linetable_read(buf, size)
-	char *buf;
-	int size;
+linetable_read(char *buf, int size)
 {
 	int leaved = endp - curp;
 
@@ -118,9 +114,7 @@ linetable_read(buf, size)
  *	i)	lineno	line number of the line (>= 1)
  */
 void
-linetable_put(offset, lineno)
-	int offset;
-	int lineno;
+linetable_put(int offset, int lineno)
 {
 	int *entry;
 
@@ -138,9 +132,7 @@ linetable_put(offset, lineno)
  *	r)		line pointer
  */
 char *
-linetable_get(lineno, offset)
-	int lineno;
-	int *offset;
+linetable_get(int lineno, int *offset)
 {
 	int addr;
 
@@ -167,20 +159,22 @@ linetable_close(void)
  *	i)	lineno	line number (>= 1)
  */
 void
-linetable_print(op, lineno)
-	FILE *op;
-	int lineno;
+linetable_print(FILE *op, int lineno)
 {
 	const char *s, *p;
 
 	if (lineno <= 0)
 		die("linetable_print: line number must >= 1 (lineno = %d)", lineno);
 	s = linetable_get(lineno, NULL);
-	if (s == NULL)
-		return;
-	for (p = s; *p != '\n'; p++)
-		;
-	if (p > s)
+	if (vb->length == lineno) {
+		/*
+		 * The last line may not include newline.
+		 */
+		fwrite(s, 1, endp - s, op);
+		if (endp[-1] != '\n')
+			fputc('\n', op);
+	} else {
+		p = linetable_get(lineno + 1, NULL);
 		fwrite(s, 1, p - s, op);
-	fputc('\n', op);
+	}
 }

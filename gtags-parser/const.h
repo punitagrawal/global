@@ -32,4 +32,6 @@ const char *help_const = "Options:\n\
        Language mapping. Each comma-separated  map  consists of\n\
        the language name, a colon, and a list of file extensions.\n\
        Default mapping is 'c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml'.\n\
+See also:\n\
+       GNU GLOBAL web site: http://www.gnu.org/software/global/\n\
 ";

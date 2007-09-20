@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2003, 2004, 2005
+ Copyright (c) 2000, 2003, 2004, 2005, 2006, 2007
 	Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
@@ -20,12 +20,35 @@ ___________________________________
 Frequentry Asked Questions about GLOBAL.
 
 ----------------------------------------------------------------------------
+Q0. Please explain about BOKINware.
+
+A0. GNU GLOBAL is BOKINware. It means that it is free software
+    based on GNU GPL, and is commercial (for-profit) software
+    based on BOKIN model.
+
+    BOKIN Model is a business model to obtain proceeds by widely
+    collecting donations while developing and distributing
+    free software. This model is constructed not to take away
+    consumer's freedom of software, and is similar to the model
+    of FSF except that FSF is not commercial organization.
+    Your contribution is put on donors list in DONORS file, and
+    distributed all over the world with GNU GLOBAL itself.
+
+    Please see the files: DONORS, BOKIN_MODEL and BOKIN_MODEL_FAQ
+    for more details.
+
+----------------------------------------------------------------------------
 Q1. Does GLOBAL support DOS and Windows 32 environment?
 
 A1. No, it doesn't. GNU GLOBAL supports only UNIX(POSIX) environment.
     But some outsite projects develop DOS and Windows 32 version of it.
     Please see:
            http://www.gnu.org/software/global/download.html
+
+    Though GLOBAL doesn't supports DOS and Windows 32 environment,
+    we accept the code for them if the following requirements are met:
+    o It works in DOS and(or) Windows 32 environment.
+    o It doesn't influence UNIX environment.
 
 ----------------------------------------------------------------------------
 Q2. GLOBAL skips some functions.
@@ -61,20 +84,10 @@ A2. GLOBAL cannot recognize 'func()', because M(a) seems to be a function
 	|...
 
 ----------------------------------------------------------------------------
-Q3. I have set up 'gtags.conf' to use emacs's ctags command with GLOBAL
-    but I cannot use htags.
+Q3. Why doesn't htags(1) generate XHTML+CSS hypertext by default?
 
-	$ gtags
-	$ htags
-	htags: GTAGS and GRTAGS not found. Please make them.
-	$ ls G*
-	GPATH   GTAGS
-
-A3. Since Emacs's ctags cannot locate function referencies, gtags(1) cannot
-    make GRTAGS tag file with it. With the result that htags(1) doesn't
-    work because it requires both GTAGS and GRTAGS.
-    Besides, you cannot use the -r(--reference) option of global(1).
-
+A3. Because still a lot of browsers which cannot treat XHTML+CSS well remain.
+    If you hope XHTML+CSS, please use the --xhtml option of htags.
 ----------------------------------------------------------------------------
 Q4. Deleted.
 ----------------------------------------------------------------------------
@@ -86,7 +99,7 @@ Q6. It seems that gtags(1) cannot treat files which include blanks in the path.
 A6. Because it is hard for GLOBAL to treat them correctly with keeping
     upper compatibility. Gtags(1) currently ignores files which include
     blanks in the path. We put the improvement to our TODO list but
-    the priority is not high. The best way is no to use blanks in path name.
+    the priority is not high. The best way is not to use blanks in path name.
 
 ----------------------------------------------------------------------------
 Q7. Gtags(1) and htags(1) work only for one directory tree. So, we cannot
@@ -120,12 +133,13 @@ Q10. Does GLOBAL support multi-byte code set?
      Which character code set is supported?
 
 A10. GLOBAL doesn't support multi-byte character code set yet.
+     GLOBAL supports only ASCII and ASCII supersets.
 
 ----------------------------------------------------------------------------
 Q11. Can GLOBAL running on a UNIX machine treat source files
      which include DOS/Windows style new-line code? And vice versa? 
 
-A11. GLOBAL support only the native text format.
+A11. GLOBAL supports only native text format of POSIX.
      Besides, please go by the own responsibility.
 
 ----------------------------------------------------------------------------

@@ -1,12 +1,12 @@
 /* This file is generated automatically by convert.pl from global/manual.in. */
 const char *progname = "global";
 const char *usage_const = "Usage: global [-aGilnqrstTvx][-e] pattern\n\
-       global -c[qsv] prefix\n\
+       global -c[qrsv] prefix\n\
        global -f[anqrstvx] files\n\
-       global -g[aGilnoqtvx][-e] pattern\n\
+       global -g[aGilnoOqtvx][-e] pattern\n\
        global -I[ailnqtvx][-e] pattern\n\
        global -p[qrv]\n\
-       global -P[aGilnoqtvx][-e] pattern\n\
+       global -P[aGilnoOqtvx][-e] pattern\n\
        global -u[qv]\n";
 const char *help_const = "Commands:\n\
 pattern\n\
@@ -14,18 +14,18 @@ pattern\n\
        Extended regular expressions which are the same as those\n\
        accepted by egrep(1) are available.\n\
 -c, --completion [prefix]\n\
-       Print candidate function names which start with specified\n\
+       Print candidate definition names which start with specified\n\
        prefix. Prefix is not specified,\n\
-       print all function names.\n\
+       print all definition names.\n\
 -f, --file files\n\
-       Print all function definitions in the files.\n\
+       Print all tags in the files.\n\
        This option implies -x option.\n\
 -g, --grep\n\
        Print all lines which match to the pattern.\n\
 -I, --idutils\n\
        Print all lines which match to the pattern.\n\
-       This function use id-utils(1) as a search engine.\n\
-       To use this command, you need to install id-utils(1)\n\
+       This function use idutils(1) as a search engine.\n\
+       To use this command, you need to install idutils(1)\n\
        in your system and you must execute gtags(1)\n\
        with -I option.\n\
 -p, --print-dbpath\n\
@@ -59,15 +59,23 @@ Options:\n\
        Search pattern in not only source files but also other files\n\
        like README.\n\
        This option is valid only with -g or -P command.\n\
+-O, --only-other\n\
+       Search pattern only in other files like README.\n\
+       This option is valid only with -g or -P command.\n\
+       This option override the -o option.\n\
 -q, --quiet\n\
        Quiet mode.\n\
 -r, --reference, --rootdir\n\
        Print the locations of object references.\n\
        By default, print object definitions.\n\
        With the -p option, print the root directory of source tree.\n\
+--result format\n\
+       format may be 'path', `ctags', `ctags-x', `grep' or 'cscope'.\n\
+       The --result=ctags and --result=ctags-x are\n\
+       equivalent to the -t and -x respectively.\n\
+       The --result option is given to priority more than the -t and -x option.\n\
 -s, --symbol\n\
-       Print the locations of specified symbol other than function names.\n\
-       You need GSYMS tags file. See gtags(1).\n\
+       Print the locations of specified symbol other than definitions.\n\
 -t, --tags\n\
        Print with standard ctags format.\n\
 -T, --through\n\
@@ -80,4 +88,6 @@ Options:\n\
 -x, --cxref\n\
        In addition to the default output, produce the line number and\n\
        the line contents.\n\
+See also:\n\
+       GNU GLOBAL web site: http://www.gnu.org/software/global/\n\
 ";

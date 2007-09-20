@@ -1,5 +1,5 @@
-/* C code produced by gperf version 3.0.1 */
-/* Command-line: gperf --language=C --struct-type --slot-name=name --hash-fn-name=asm_hash --lookup-fn-name=asm_lookup  */
+/* ANSI-C code produced by gperf version 3.0.3 */
+/* Command-line: gperf --language=ANSI-C --struct-type --slot-name=name --hash-fn-name=asm_hash --lookup-fn-name=asm_lookup  */
 /* Computed positions: -k'3,5' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -26,7 +26,7 @@
       && ('w' == 119) && ('x' == 120) && ('y' == 121) && ('z' == 122) \
       && ('{' == 123) && ('|' == 124) && ('}' == 125) && ('~' == 126))
 /* The character set is not based on ISO-646.  */
-error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
+#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
 
 
@@ -77,9 +77,7 @@ inline
 #endif
 #endif
 static unsigned int
-asm_hash (str, len)
-     register const char *str;
-     register unsigned int len;
+asm_hash (register const char *str, register unsigned int len)
 {
   static unsigned char asso_values[] =
     {
@@ -129,11 +127,12 @@ asm_hash (str, len)
 
 #ifdef __GNUC__
 __inline
+#ifdef __GNUC_STDC_INLINE__
+__attribute__ ((__gnu_inline__))
+#endif
 #endif
 struct keyword *
-asm_lookup (str, len)
-     register const char *str;
-     register unsigned int len;
+asm_lookup (register const char *str, register unsigned int len)
 {
   static struct keyword wordlist[] =
     {
@@ -180,11 +179,8 @@ asm_lookup (str, len)
   return 0;
 }
 
-int asm_reserved_sharp(const char *, int);
 int
-asm_reserved_sharp(str, len)
-	const char *str;
-	int len;
+asm_reserved_sharp(const char *str, int len)
 {
 	struct keyword *keyword;
 

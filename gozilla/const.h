@@ -9,8 +9,6 @@ const char *help_const = "Options:\n\
        with -l option, you can specify any line.\n\
 -b browser\n\
        browser to use. By default, it is assumed mozilla.\n\
-       If you specify another browser, gozilla waits for\n\
-       exiting of the browser.\n\
 -p\n\
        just print generated target URL.\n\
 file\n\
@@ -25,4 +23,6 @@ file\n\
        Show version number.\n\
 --help\n\
        Show help.\n\
+See also:\n\
+       GNU GLOBAL web site: http://www.gnu.org/software/global/\n\
 ";

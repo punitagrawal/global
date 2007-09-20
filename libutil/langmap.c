@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -48,8 +47,7 @@ static STRBUF *active_map;
  * language map		c\0.c.h\0java\0.java\0cpp\0.C.H\0
  */
 void
-setup_langmap(map)
-	const char *map;
+setup_langmap(const char *map)
 {
 	char *p;
 	int onsuffix = 0;		/* not on suffix string */
@@ -76,17 +74,15 @@ setup_langmap(map)
  * decide the language of the suffix.
  */
 const char *
-decide_lang(suffix)
-	const char *suffix;
+decide_lang(const char *suffix)
 {
 	const char *lang, *list, *tail;
 
-	list = strbuf_value(active_map);
-	tail = list + strbuf_getlen(active_map);
-	lang = list;
+	lang = strbuf_value(active_map);
+	tail = lang + strbuf_getlen(active_map);
 
 	/* check whether or not list includes suffix. */
-	while (list < tail) {
+	while (lang < tail) {
 		list = lang + strlen(lang) + 1;
 		if (match_suffix_list(suffix, list))
 			return lang;
@@ -100,16 +96,16 @@ decide_lang(suffix)
  * return true if suffix matches with one in suffix list.
  */
 static int
-match_suffix_list(suffix, list)
-	const char *suffix;
-	const char *list;
+match_suffix_list(const char *suffix, const char *list)
 {
+	const char *p;
+
 	while (*list) {
-		if (locatestring(list, suffix, MATCH_AT_FIRST
+		if ((p = locatestring(list, suffix, MATCH_AT_FIRST
 #if defined(_WIN32) || defined(__DJGPP__)
 							     |IGNORE_CASE
 #endif
-									 ))
+			)) != NULL && (*p == '\0' || *p == '.'))
 			return 1;
 		for (list++; *list && *list != '.'; list++)
 			;
@@ -121,9 +117,7 @@ match_suffix_list(suffix, list)
  * make the suffixes value from langmap value.
  */
 void
-make_suffixes(langmap, sb)
-	const char *langmap;
-	STRBUF *sb;
+make_suffixes(const char *langmap, STRBUF *sb)
 {
 	const char *p;
 	int onsuffix = 0;		/* not on suffix string */

@@ -3,19 +3,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -43,8 +42,7 @@ static int nextkey;
  * load the contents of GPATH file into the memory.
  */
 void
-load_gpath(dbpath)
-	const char *dbpath;
+load_gpath(const char *dbpath)
 {
 	DBOP *dbop;
 	const char *path;
@@ -56,7 +54,7 @@ load_gpath(dbpath)
 	if (dbop == NULL)
 		die("cannot open '%s'.", makepath(dbpath, dbname(GPATH), NULL));
 	for (path = dbop_first(dbop, "./", NULL, DBOP_PREFIX | DBOP_KEY); path; path = dbop_next(dbop)) {
-		const char *no = dbop_lastdat(dbop);
+		const char *no = dbop_lastdat(dbop, NULL);
 
 		path += 2;			/* remove './' */
 		assoc_put(assoc, path, no);
@@ -83,8 +81,7 @@ unload_gpath(void)
  *	r)		id
  */
 const char *
-path2fid(path)
-	const char *path;
+path2fid(const char *path)
 {
 	static char number[32];
 	const char *p;

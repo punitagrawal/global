@@ -1,5 +1,5 @@
-/* C code produced by gperf version 3.0.1 */
-/* Command-line: gperf --language=C --struct-type --slot-name=name --hash-fn-name=cpp_hash --lookup-fn-name=cpp_lookup  */
+/* ANSI-C code produced by gperf version 3.0.3 */
+/* Command-line: gperf --language=ANSI-C --struct-type --slot-name=name --hash-fn-name=cpp_hash --lookup-fn-name=cpp_lookup  */
 /* Computed positions: -k'2-4' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -26,7 +26,7 @@
       && ('w' == 119) && ('x' == 120) && ('y' == 121) && ('z' == 122) \
       && ('{' == 123) && ('|' == 124) && ('}' == 125) && ('~' == 126))
 /* The character set is not based on ISO-646.  */
-error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
+#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
 
 
@@ -145,9 +145,7 @@ inline
 #endif
 #endif
 static unsigned int
-cpp_hash (str, len)
-     register const char *str;
-     register unsigned int len;
+cpp_hash (register const char *str, register unsigned int len)
 {
   static unsigned char asso_values[] =
     {
@@ -197,11 +195,12 @@ cpp_hash (str, len)
 
 #ifdef __GNUC__
 __inline
+#ifdef __GNUC_STDC_INLINE__
+__attribute__ ((__gnu_inline__))
+#endif
 #endif
 struct keyword *
-cpp_lookup (str, len)
-     register const char *str;
-     register unsigned int len;
+cpp_lookup (register const char *str, register unsigned int len)
 {
   static struct keyword wordlist[] =
     {
@@ -364,22 +363,16 @@ cpp_lookup (str, len)
   return 0;
 }
 
-int cpp_reserved_word(const char *, int);
 int
-cpp_reserved_word(str, len)
-	const char *str;
-	int len;
+cpp_reserved_word(const char *str, int len)
 {
 	struct keyword *keyword;
 
 	keyword = cpp_lookup(str, len);
 	return (keyword && IS_RESERVED_WORD(keyword->token)) ? keyword->token : 0;
 }
-int cpp_reserved_sharp(const char *, int);
 int
-cpp_reserved_sharp(str, len)
-	const char *str;
-	int len;
+cpp_reserved_sharp(const char *str, int len)
 {
 	struct keyword *keyword;
 

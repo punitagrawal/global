@@ -1,22 +1,21 @@
 /*
- * Copyright (c) 1998, 1999, 2000, 2004
+ * Copyright (c) 1998, 1999, 2000, 2004, 2006
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -37,15 +36,13 @@
  *	r)		result string
  *
  * Usage:
- *	strmake("aaa:bbb", ":/=")	=> "aaaa"
+ *	strmake("aaa:bbb", ":/=")	=> "aaa"
  *
  * Note: The result string area is function local. So, following call
  *	 to this function may destroy the area.
  */
 const char *
-strmake(p, lim)
-	const char *p;
-	const char *lim;
+strmake(const char *p, const char *lim)
 {
 	STATIC_STRBUF(sb);
 	const char *c;
@@ -83,10 +80,7 @@ end:
  *	 to this function may destroy the area.
  */
 const char *
-strtrim(p, flag, len)
-	const char *p;
-	int flag;
-	int *len;
+strtrim(const char *p, int flag, int *len)
 {
 	STATIC_STRBUF(sb);
 	int cut_off = -1;
@@ -120,4 +114,35 @@ strtrim(p, flag, len)
 	if (len)
 		*len = strbuf_getlen(sb);
 	return strbuf_value(sb);
+}
+/*
+ * strcmp with terminate character.
+ *
+ *	i)	s1	string1
+ *	i)	s2	string2
+ *	i)	term	terminate character
+ *	r)		==0: equal, !=0: not equal
+ *
+ * Usage:
+ *	strcmp_withterm("aaa", "aaa", ':')		=> 0
+ *	strcmp_withterm("aaa:bbb", "aaa", ':')		=> 0
+ *	strcmp_withterm("aaa:bbb", "aaa:ccc", ':')	=> 0
+ *	strcmp_withterm("aaa/bbb", "aaa/ccc", ':')	=> -1
+ */
+int
+strcmp_withterm(const char *s1, const char *s2, int term)
+{
+	unsigned int c1, c2;
+
+	do {
+		c1 = *s1++;
+		c2 = *s2++;
+		/* replace terminate character with NULL */
+		if (c1 == term)
+			c1 = '\0';
+		if (c2 == term)
+			c2 = '\0';
+	} while (c1 == c2 && c1 != '\0');
+
+	return c1 - c2;
 }

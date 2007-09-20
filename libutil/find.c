@@ -1,22 +1,21 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -28,6 +27,9 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
 #endif
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -46,14 +48,17 @@
 #include "regex.h"
 
 #include "char.h"
+#include "checkalloc.h"
 #include "conf.h"
 #include "die.h"
 #include "find.h"
 #include "is_unixy.h"
 #include "locatestring.h"
 #include "makepath.h"
+#include "path.h"
 #include "strbuf.h"
 #include "strlimcpy.h"
+#include "test.h"
 
 /*
  * usage of find_xxx()
@@ -72,10 +77,19 @@ static regex_t *suff = &suff_area;	/* regex for suffixes */
 static STRBUF *list;
 static int list_count;
 static char **listarray;		/* list for skipping full path */
-static int opened;
-static int retval;
+static FILE *ip;
+static FILE *temp;
+static char rootdir[MAXPATHLEN+1];
+static int status;
+#define FIND_OPEN	1
+#define FILELIST_OPEN	2
+#define END_OF_FIND	3
 
 static void trim(char *);
+static char *find_read_traverse(void);
+static char *find_read_filelist(void);
+
+extern int qflag;
 #ifdef DEBUG
 extern int debug;
 #endif
@@ -83,13 +97,12 @@ extern int debug;
  * trim: remove blanks and '\'.
  */
 static void
-trim(s)
-	char *s;
+trim(char *s)
 {
 	char *p;
 
 	for (p = s; *s; s++) {
-		if (isspace(*s))
+		if (isspace((unsigned char)*s))
 			continue;	
 		if (*s == '\\' && *(s + 1))
 			s++;
@@ -121,12 +134,11 @@ prepare_source(void)
 	strbuf_reset(sb);
 	if (!getconfs("suffixes", sb))
 		die("cannot get suffixes data.");
-	sufflist = strdup(strbuf_value(sb));
-	if (!sufflist)
-		die("short of memory.");
+	sufflist = check_strdup(strbuf_value(sb));
 	trim(sufflist);
 	{
 		const char *suffp;
+		int retval;
 
 		strbuf_reset(sb);
 		strbuf_puts(sb, "\\.(");       /* ) */
@@ -134,7 +146,7 @@ prepare_source(void)
 			const char *p;
 
 			for (p = suffp; *p && *p != ','; p++) {
-				if (!isalnum(*p))
+				if (!isalnum((unsigned char)*p))
 					strbuf_putc(sb, '\\');
 				strbuf_putc(sb, *p);
 			}
@@ -198,11 +210,11 @@ prepare_skip(void)
 	/*
 	 * load skip data.
 	 */
-	if (!getconfs("skip", reg))
+	if (!getconfs("skip", reg)) {
+		strbuf_close(reg);
 		return;
-	skiplist = strdup(strbuf_value(reg));
-	if (!skiplist)
-		die("short of memory.");
+	}
+	skiplist = check_strdup(strbuf_value(reg));
 	trim(skiplist);
 	strbuf_reset(reg);
 	/*
@@ -233,6 +245,8 @@ prepare_skip(void)
 	strbuf_unputc(reg, '|');
 	strbuf_putc(reg, ')');
 	if (reg_count > 0) {
+		int retval;
+
 		/*
 		 * compile regular expression.
 		 */
@@ -249,9 +263,7 @@ prepare_skip(void)
 	}
 	if (list_count > 0) {
 		int i;
-		listarray = (char **)malloc(sizeof(char *) * list_count);
-		if (listarray == NULL)
-			die("short of memory.");
+		listarray = (char **)check_malloc(sizeof(char *) * list_count);
 		p = strbuf_value(list);
 #ifdef DEBUG
 		if (debug)
@@ -282,9 +294,8 @@ prepare_skip(void)
  *	i)	path	path name (must start with ./)
  *	r)		1: skip, 0: dont skip
  */
-int
-skipthisfile(path)
-	const char *path;
+static int
+skipthisfile(const char *path)
 {
 	const char *first, *last;
 	int i;
@@ -335,9 +346,7 @@ static  struct {
  * means directory 'dir1', file 'file1' and symbolic link 'link'.
  */
 static int
-getdirs(dir, sb)
-	const char *dir;
-	STRBUF *sb;
+getdirs(const char *dir, STRBUF *sb)
 {
 	DIR *dirp;
 	struct dirent *dp;
@@ -352,12 +361,12 @@ getdirs(dir, sb)
 			continue;
 #ifdef HAVE_LSTAT
 		if (lstat(makepath(dir, dp->d_name, NULL), &st) < 0) {
-			fprintf(stderr, "cannot lstat '%s'. (Ignored)\n", dp->d_name);
+			warning("cannot lstat '%s'. (Ignored)", dp->d_name);
 			continue;
 		}
 #else
 		if (stat(makepath(dir, dp->d_name, NULL), &st) < 0) {
-			fprintf(stderr, "cannot stat '%s'. (Ignored)\n", dp->d_name);
+			warning("cannot stat '%s'. (Ignored)", dp->d_name);
 			continue;
 		}
 #endif
@@ -384,11 +393,10 @@ getdirs(dir, sb)
  *			If NULL, assumed '.' directory.
  */
 void
-find_open(start)
-	const char *start;
+find_open(const char *start)
 {
-	assert(opened == 0);
-	opened = 1;
+	assert(status == 0);
+	status = FIND_OPEN;
 
 	if (!start)
 		start = ".";
@@ -412,15 +420,81 @@ find_open(start)
 	prepare_skip();
 }
 /*
+ * find_open_filelist: find_open like interface for handling output of find(1).
+ *
+ *	i)	filename	file including list of file names.
+ *				When "-" is specified, read from standard input.
+ *	i)	root		root directory of source tree
+ */
+void
+find_open_filelist(const char *filename, const char *root)
+{
+	assert(status == 0);
+	status = FILELIST_OPEN;
+
+	if (!strcmp(filename, "-")) {
+		/*
+		 * If the filename is '-', copy standard input onto
+		 * temporary file to be able to read repeatedly.
+		 */
+		if (temp == NULL) {
+			char buf[MAXPATHLEN+1];
+
+			temp = tmpfile();
+			while (fgets(buf, sizeof(buf), stdin) != NULL)
+				fputs(buf, temp);
+		}
+		rewind(temp);
+		ip = temp;
+	} else {
+		ip = fopen(filename, "r");
+		if (ip == NULL)
+			die("cannot open '%s'.", filename);
+	}
+	/*
+	 * rootdir always ends with '/'.
+	 */
+	if (!strcmp(root, "/"))
+		strcpy(rootdir, root);
+	else
+		snprintf(rootdir, sizeof(rootdir), "%s/", root);
+
+	/*
+	 * prepare regular expressions.
+	 */
+	prepare_skip();
+	prepare_source();
+}
+/*
  * find_read: read path without GPATH.
  *
  *	r)		path
  */
-char    *
+char *
 find_read(void)
 {
+	static char *path;
+
+	assert(status != 0);
+	if (status == END_OF_FIND)
+		path = NULL;
+	else if (status == FILELIST_OPEN)
+		path = find_read_filelist();
+	else if (status == FIND_OPEN)
+		path = find_read_traverse();
+	else
+		die("find_read: internal error.");
+	return path;
+}
+/*
+ * find_read_traverse: read path without GPATH.
+ *
+ *	r)		path
+ */
+char *
+find_read_traverse(void)
+{
 	static char val[MAXPATHLEN+1];
-	extern int qflag;
 
 	for (;;) {
 		while (curp->p < curp->end) {
@@ -436,12 +510,27 @@ find_read(void)
 				if (skipthisfile(path))
 					continue;
 				/*
+				 * Skip the following:
+				 * o directory
+				 * o file which does not exist
+				 * o dead symbolic link
+				 */
+				if (!test("f", path)) {
+					if (!qflag) {
+						if (test("d", path))
+							warning("'%s' is a directory. (Ignored)", path);
+						else
+							warning("'%s' not found. (Ignored)", path);
+					}
+					continue;
+				}
+				/*
 				 * GLOBAL cannot treat path which includes blanks.
 				 * It will be improved in the future.
 				 */
 				if (locatestring(path, " ", MATCH_FIRST)) {
 					if (!qflag)
-						warning("'%s' ignored, because it includes blank in the path.", &path[2]);
+						warning("'%s' ignored, because it includes blank.", &path[2]);
 					continue;
 				}
 				/*
@@ -466,7 +555,7 @@ find_read(void)
 				strcat(dirp, "/");
 				strcat(dirp, unit);
 				if (getdirs(dir, sb) < 0) {
-					fprintf(stderr, "cannot open directory '%s'. (Ignored)\n", dir);
+					warning("cannot open directory '%s'. (Ignored)", dir);
 					strbuf_close(sb);
 					*(curp->dirp) = 0;
 					continue;
@@ -492,7 +581,87 @@ find_read(void)
 		curp--;
 		*(curp->dirp) = 0;
 	}
+	status = END_OF_FIND;
 	return NULL;
+}
+/*
+ * find_read_filelist: read path from file
+ *
+ *	r)		path
+ */
+static char *
+find_read_filelist(void)
+{
+	STATIC_STRBUF(ib);
+	static char buf[MAXPATHLEN + 1];
+	static char *path;
+
+	strbuf_clear(ib);
+	for (;;) {
+		path = strbuf_fgets(ib, ip, STRBUF_NOCRLF);
+		if (path == NULL) {
+			/* EOF */
+			status = END_OF_FIND;
+			return NULL;
+		}
+		if (*path == '\0') {
+			/* skip empty line.  */
+			continue;
+		}
+		/*
+		 * Skip the following:
+		 * o directory
+		 * o file which does not exist
+		 * o dead symbolic link
+		 */
+		if (!test("f", path)) {
+			if (!qflag) {
+				if (test("d", path))
+					warning("'%s' is a directory. (Ignored)", path);
+				else
+					warning("'%s' not found. (Ignored)", path);
+			}
+			continue;
+		}
+		if (realpath(path, buf) == NULL) {
+			if (!qflag)
+				warning("realpath(\"%s\", buf) failed.", path);
+			continue;
+		}
+		if (!isabspath(buf))
+			die("realpath(3) is not compatible with BSD version.");
+		/*
+		 * Remove the root part of buf and insert './'.
+		 *	rootdir  /a/b/
+		 *	buf      /a/b/c/d.c -> c/d.c -> ./c/d.c
+		 */
+		path = locatestring(buf, rootdir, MATCH_AT_FIRST);
+		if (path == NULL) {
+			if (!qflag)
+				warning("'%s' is out of source tree.", buf);
+			continue;
+		}
+		path -= 2;
+		*path = '.';
+		/*
+		 * GLOBAL cannot treat path which includes blanks.
+		 * It will be improved in the future.
+		 */
+		if (locatestring(path, " ", MATCH_LAST)) {
+			if (!qflag)
+				warning("'%s' ignored, because it includes blank.", path + 2);
+			continue;
+		}
+		if (skipthisfile(path))
+			continue;
+		/*
+		 * A blank at the head of path means
+		 * other than source file.
+		 */
+		if (regexec(suff, path, 0, 0, 0) != 0)
+			*--path = ' ';
+		return path;
+	}
 }
 /*
  * find_close: close iterator.
@@ -500,12 +669,23 @@ find_read(void)
 void
 find_close(void)
 {
-	assert(opened == 1);
-	for (curp = &stack[0]; curp < topp; curp++)
-		if (curp->sb != NULL)
-			strbuf_close(curp->sb);
+	assert(status != 0);
+	if (status == FIND_OPEN) {
+		for (curp = &stack[0]; curp < topp; curp++)
+			if (curp->sb != NULL)
+				strbuf_close(curp->sb);
+	} else if (status == FILELIST_OPEN) {
+		/*
+		 * The --file=- option is specified, we don't close file
+		 * to read it repeatedly.
+		 */
+		if (ip != temp)
+			fclose(ip);
+	} else if (status != END_OF_FIND) {
+		die("illegal find_close");
+	}
 	regfree(suff);
 	if (skip)
 		regfree(skip);
-	opened = 0;
+	status = 0;
 }

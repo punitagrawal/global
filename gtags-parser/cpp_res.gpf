@@ -200,22 +200,16 @@ while, CPP_WHILE
 "#undef", SHARP_UNDEF
 "#warning", SHARP_WARNING
 %%
-int cpp_reserved_word(const char *, int);
 int
-cpp_reserved_word(str, len)
-	const char *str;
-	int len;
+cpp_reserved_word(const char *str, int len)
 {
 	struct keyword *keyword;
 
 	keyword = cpp_lookup(str, len);
 	return (keyword && IS_RESERVED_WORD(keyword->token)) ? keyword->token : 0;
 }
-int cpp_reserved_sharp(const char *, int);
 int
-cpp_reserved_sharp(str, len)
-	const char *str;
-	int len;
+cpp_reserved_sharp(const char *str, int len)
 {
 	struct keyword *keyword;
 

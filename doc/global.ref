@@ -5,12 +5,12 @@ global - print the locations of specified object.
 @noindent
 @quotation
 global [-aGilnqrstTvx][-e] pattern@*
-global -c[qsv] prefix@*
+global -c[qrsv] prefix@*
 global -f[anqrstvx] files@*
-global -g[aGilnoqtvx][-e] pattern@*
+global -g[aGilnoOqtvx][-e] pattern@*
 global -I[ailnqtvx][-e] pattern@*
 global -p[qrv]@*
-global -P[aGilnoqtvx][-e] pattern@*
+global -P[aGilnoOqtvx][-e] pattern@*
 global -u[qv]@*
 @end quotation
 @unnumberedsubsec DESCRIPTION
@@ -19,8 +19,8 @@ in C, C++, Yacc, Java, PHP and Assembly source files.
 Global can treat a source tree, that is, a directory that
 has subdirectories and source files.
 You can get the relative path of objects from anywhere within the tree.
-Global can locate not only function definitions but also
-function references and other symbols.
+Global can locate not only object definitions but also object
+references and other symbols.
 Duplicate entries are allowed.
 
 In advance of using this command, you must execute gtags(1)
@@ -34,18 +34,18 @@ Print object which match to the pattern.
 Extended regular expressions which are the same as those
 accepted by egrep(1) are available.
 @item @samp{-c}, @samp{--completion} [prefix]
-Print candidate function names which start with specified
+Print candidate definition names which start with specified
 prefix. Prefix is not specified,
-print all function names.
+print all definition names.
 @item @samp{-f}, @samp{--file} files
-Print all function definitions in the files.
+Print all tags in the files.
 This option implies -x option.
 @item @samp{-g}, @samp{--grep}
 Print all lines which match to the pattern.
 @item @samp{-I}, @samp{--idutils}
 Print all lines which match to the pattern.
-This function use id-utils(1) as a search engine.
-To use this command, you need to install id-utils(1)
+This function use idutils(1) as a search engine.
+To use this command, you need to install idutils(1)
 in your system and you must execute gtags(1)
 with @samp{-I} option.
 @item @samp{-p}, @samp{--print-dbpath}
@@ -82,15 +82,23 @@ Suppress sort filter and path conversion filter.
 Search pattern in not only source files but also other files
 like @file{README}.
 This option is valid only with @samp{-g} or @samp{-P} command.
+@item @samp{-O}, @samp{--only-other}
+Search pattern only in other files like @file{README}.
+This option is valid only with @samp{-g} or @samp{-P} command.
+This option override the @samp{-o} option.
 @item @samp{-q}, @samp{--quiet}
 Quiet mode.
 @item @samp{-r}, @samp{--reference}, @samp{--rootdir}
 Print the locations of object references.
 By default, print object definitions.
 With the @samp{-p} option, print the root directory of source tree.
+@item @samp{--result} format
+format may be 'path', `ctags', `ctags-x', `grep' or 'cscope'.
+The @samp{--result=ctags} and @samp{--result=ctags-x} are
+equivalent to the @samp{-t} and @samp{-x} respectively.
+The --result option is given to priority more than the -t and -x option.
 @item @samp{-s}, @samp{--symbol}
-Print the locations of specified symbol other than function names.
-You need @file{GSYMS} tags file. See gtags(1).
+Print the locations of specified symbol other than definitions.
 @item @samp{-t}, @samp{--tags}
 Print with standard ctags format.
 @item @samp{-T}, @samp{--through}
@@ -138,9 +146,9 @@ the line contents.
 @unnumberedsubsec FILES
 @table @asis
 @item @file{GTAGS}
-Tag file for function definitions.
+Tag file for object definitions.
 @item @file{GRTAGS}
-Tag file for function references.
+Tag file for object references.
 @item @file{GSYMS}
 Tag file for other symbols.
 @item @file{GPATH}

@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -32,7 +31,6 @@
 #include "global.h"
 #include "anchor.h"
 #include "incop.h"
-#include "path2url.h"
 #include "common.h"
 #include "htags.h"
 #include "../gtags-parser/c_res.h"
@@ -65,7 +63,7 @@ YACC_IDENTIFIER	({ALPHA}|\.)({ALPHANUM}|\.)*
 
 %start	C C_COMMENT CPP_COMMENT SHELL_COMMENT STRING LITERAL PREPROCESSOR_LINE
 %start	YACC_DECLARATIONS YACC_RULES YACC_PROLOGUE BRACED_CODE
-%option 8bit noyywrap noyy_top_state stack prefix="c_"
+%option 8bit noyywrap noyy_top_state stack never-interactive prefix="c_"
 %%
  /* Backslash-newline */
 \\\n		DEFAULT_BACKSLASH_NEWLINE_ACTION
@@ -230,8 +228,7 @@ YACC_IDENTIFIER	({ALPHA}|\.)({ALPHANUM}|\.)*
 
 %%
 void
-c_parser_init(ip)
-	FILE *ip;
+c_parser_init(FILE *ip)
 {
 	newline_terminate_string = 1;
 	DEFAULT_BEGIN_OF_FILE_ACTION
@@ -239,8 +236,7 @@ c_parser_init(ip)
 }
 
 void
-yacc_parser_init(ip)
-	FILE *ip;
+yacc_parser_init(FILE *ip)
 {
 	newline_terminate_string = 1;
 	DEFAULT_BEGIN_OF_FILE_ACTION

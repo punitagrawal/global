@@ -3,19 +3,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -42,8 +41,8 @@
 
 #include "global.h"
 #include "common.h"
-#include "path2url.h"
 #include "htags.h"
+#include "path2url.h"
 
 /*
  * Tag definitions
@@ -56,7 +55,7 @@ const char *html_head_begin	= "<head>";
 const char *html_head_end	= "</head>";
 const char *html_title_begin	= "<title>";
 const char *html_title_end	= "</title>";
-const char *body_begin		= "<body>";
+const char *body_begin		= "<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>";
 const char *body_end		= "</body>";
 const char *title_begin		= "<h1><font color='#cc0000'>";
 const char *title_end		= "</font></h1>";
@@ -70,6 +69,12 @@ const char *list_begin		= "<ol>";
 const char *list_end		= "</ol>";
 const char *item_begin		= "<li>";
 const char *item_end		= "";
+const char *flist_begin		= "<table cellpadding='2' width='100%'>";
+const char *flist_end		= "</table>";
+const char *fline_begin		= "<tr>";
+const char *fline_end		= "</tr>";
+const char *fitem_begin		= "<td nowrap>";
+const char *fitem_end		= "</td>";
 const char *define_list_begin	= "<dl>";
 const char *define_list_end	= "</dl>";
 const char *define_term_begin	= "<dt>";
@@ -82,7 +87,7 @@ const char *comment_begin	= "<i><font color='green'>";
 const char *comment_end		= "</font></i>";
 const char *sharp_begin		= "<font color='darkred'>";
 const char *sharp_end		= "</font>";
-const char *brace_begin		= "<font color='blue'>";
+const char *brace_begin		= "<font color='red'>";
 const char *brace_end		= "</font>";
 const char *verbatim_begin	= "<pre>";
 const char *verbatim_end	= "</pre>";
@@ -119,9 +124,7 @@ static int strict_xhtml = 0;
  * This function is a replacement of fprintf(op, "%s\n", s) in htags.
  */
 int
-fputs_nl(s, op)
-	const char *s;
-	FILE *op;
+fputs_nl(const char *s, FILE *op)
 {
 	fputs(s, op);
 	putc('\n', op);
@@ -158,6 +161,12 @@ setup_xhtml(void)
 	list_end		= "</ol>";
 	item_begin		= "<li>";
 	item_end		= "</li>";
+	flist_begin		= "<table class='flist'>";
+	flist_end		= "</table>";
+	fline_begin		= "<tr class='flist'>";
+	fline_end		= "</tr>";
+	fitem_begin		= "<td class='flist'>";
+	fitem_end		= "</td>";
 	define_list_begin	= "<dl>";
 	define_list_end		= "</dl>";
 	define_term_begin	= "<dt>";
@@ -200,8 +209,7 @@ setup_xhtml(void)
  * Generate upper directory.
  */
 const char *
-upperdir(dir)
-	const char *dir;
+upperdir(const char *dir)
 {
 	STATIC_STRBUF(sb);
 
@@ -215,9 +223,7 @@ upperdir(dir)
  * of the 'HTML' directory.
  */
 static const char *
-sed(ip, place)
-	FILE *ip;
-	int place;
+sed(FILE *ip, int place)
 {
 	STATIC_STRBUF(sb);
 	const char *parent_dir = (place == SUBDIR) ? "../.." : "..";
@@ -253,8 +259,7 @@ sed(ip, place)
  * Generate custom header.
  */
 const char *
-gen_insert_header(place)
-	int place;
+gen_insert_header(int place)
 {
 	static FILE *ip;
 
@@ -271,8 +276,7 @@ gen_insert_header(place)
  * Generate custom footer.
  */
 const char *
-gen_insert_footer(place)
-	int place;
+gen_insert_footer(int place)
 {
 	static FILE *ip;
 
@@ -295,10 +299,7 @@ gen_insert_footer(place)
  *			use frameset document type or not
  */
 static const char *
-gen_page_generic_begin(title, place, use_frameset)
-	const char *title;
-	int place;
-	int use_frameset;
+gen_page_generic_begin(const char *title, int place, int use_frameset)
 {
 	STATIC_STRBUF(sb);
 	const char *dir = (place == SUBDIR) ? "../" : "";
@@ -339,8 +340,6 @@ gen_page_generic_begin(title, place, use_frameset)
 		strbuf_sprintf(sb, "<meta http-equiv='Content-Style-Type' content='text/css'%s>\n", empty_element);
 		strbuf_sprintf(sb, "<link rel='stylesheet' type='text/css' href='%sstyle.css'%s>\n", dir, empty_element);
 	}
-	if (style_sheet)
-		strbuf_puts(sb, style_sheet);
 	strbuf_puts(sb, html_head_end);
 	return strbuf_value(sb);
 }
@@ -352,9 +351,7 @@ gen_page_generic_begin(title, place, use_frameset)
  *			TOPDIR: this page is in the top directory
  */
 const char *
-gen_page_begin(title, place)
-	const char *title;
-	int place;
+gen_page_begin(const char *title, int place)
 {
 	return gen_page_generic_begin(title, place, 0);
 }
@@ -364,8 +361,7 @@ gen_page_begin(title, place)
  *	i)	title	title of this page
  */
 const char *
-gen_frameset_page_begin(title)
-	const char *title;
+gen_page_frameset_begin(const char *title)
 {
 	return gen_page_generic_begin(title, TOPDIR, 1);
 }
@@ -388,10 +384,7 @@ gen_page_end(void)
  *	i)	alt	alt string
  */
 const char *
-gen_image(where, file, alt)
-	int where;
-	const char *file;
-	const char *alt;
+gen_image(int where, const char *file, const char *alt)
 {
 	STATIC_STRBUF(sb);
 	const char *dir = (where == PARENT) ? "../icons" : "icons";
@@ -409,8 +402,7 @@ gen_image(where, file, alt)
  * Generate name tag.
  */
 const char *
-gen_name_number(number)
-	int number;
+gen_name_number(int number)
 {
 	static char buf[32];
 
@@ -421,8 +413,7 @@ gen_name_number(number)
  * Generate name tag.
  */
 const char *
-gen_name_string(name)
-	const char *name;
+gen_name_string(const char *name)
 {
 	STATIC_STRBUF(sb);
 
@@ -455,13 +446,7 @@ gen_name_string(name)
  *	r)		generated anchor tag
  */
 const char *
-gen_href_begin_with_title_target(dir, file, suffix, key, title, target)
-	const char *dir;
-	const char *file;
-	const char *suffix;
-	const char *key;
-	const char *title;
-	const char *target;
+gen_href_begin_with_title_target(const char *dir, const char *file, const char *suffix, const char *key, const char *title, const char *target)
 {
 	STATIC_STRBUF(sb);
 
@@ -504,8 +489,7 @@ gen_href_begin_with_title_target(dir, file, suffix, key, title, target)
  * Generate simple anchor begin tag.
  */
 const char *
-gen_href_begin_simple(file)
-	const char *file;
+gen_href_begin_simple(const char *file)
 {
 	return gen_href_begin_with_title_target(NULL, file, NULL, NULL, NULL, NULL);
 }
@@ -513,11 +497,7 @@ gen_href_begin_simple(file)
  * Generate anchor begin tag without title and target.
  */
 const char *
-gen_href_begin(dir, file, suffix, key)
-	const char *dir;
-	const char *file;
-	const char *suffix;
-	const char *key;
+gen_href_begin(const char *dir, const char *file, const char *suffix, const char *key)
 {
 	return gen_href_begin_with_title_target(dir, file, suffix, key, NULL, NULL);
 }
@@ -525,12 +505,7 @@ gen_href_begin(dir, file, suffix, key)
  * Generate anchor begin tag without target.
  */
 const char *
-gen_href_begin_with_title(dir, file, suffix, key, title)
-	const char *dir;
-	const char *file;
-	const char *suffix;
-	const char *key;
-	const char *title;
+gen_href_begin_with_title(const char *dir, const char *file, const char *suffix, const char *key, const char *title)
 {
 	return gen_href_begin_with_title_target(dir, file, suffix, key, title, NULL);
 }
@@ -580,20 +555,18 @@ gen_list_begin(void)
  * s must be choped.
  */
 const char *
-gen_list_body(srcdir, string)
-	const char *srcdir;
-	const char *string;		/* virtually const */
+gen_list_body(const char *srcdir, const char *ctags_x)		/* virtually const */
 {
 	STATIC_STRBUF(sb);
 	const char *p, *filename, *fid;
 	SPLIT ptable;
 
 	strbuf_clear(sb);
-	if (split((char *)string, 4, &ptable) < 4) {
+	if (split((char *)ctags_x, 4, &ptable) < 4) {
 		recover(&ptable);
-		die("too small number of parts in list_body().\n'%s'", string);
+		die("too small number of parts in list_body().\n'%s'", ctags_x);
 	}
-	filename = ptable.part[2].start + 2;		/* remove './' */
+	filename = ptable.part[PART_PATH].start + 2;	/* remove './' */
 	fid = path2fid(filename);
 	if (table_list) {
 		if (enable_xhtml) {
@@ -637,7 +610,7 @@ gen_list_body(srcdir, string)
 		strbuf_puts(sb, gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
 		strbuf_puts(sb, ptable.part[PART_TAG].start);
 		strbuf_puts(sb, gen_href_end());
-		p = string + strlen(ptable.part[PART_TAG].start);
+		p = ctags_x + strlen(ptable.part[PART_TAG].start);
 		recover(&ptable);
 
 		for (; *p; p++) {
@@ -673,8 +646,7 @@ gen_list_end(void)
  *	i)	align	right,left,center
  */
 const char *
-gen_div_begin(align)
-	const char *align;
+gen_div_begin(const char *align)
 {
 	STATIC_STRBUF(sb);
 
@@ -708,8 +680,7 @@ gen_div_end(void)
  *	i)	target	target
  */
 const char *
-gen_form_begin(target)
-	const char *target;
+gen_form_begin(const char *target)
 {
 	STATIC_STRBUF(sb);
 
@@ -732,10 +703,7 @@ gen_form_end(void)
  * Generate input tag
  */
 const char *
-gen_input(name, value, type)
-	const char *name;
-	const char *value;
-	const char *type;
+gen_input(const char *name, const char *value, const char *type)
 {
 	return gen_input_with_title_checked(name, value, type, 0, NULL);
 }
@@ -743,11 +711,7 @@ gen_input(name, value, type)
  * Generate input radiobox tag
  */
 const char *
-gen_input_radio(name, value, checked, title)
-	const char *name;
-	const char *value;
-	int checked;
-	const char *title;
+gen_input_radio(const char *name, const char *value, int checked, const char *title)
 {
 	return gen_input_with_title_checked(name, value, "radio", checked, title);
 }
@@ -755,10 +719,7 @@ gen_input_radio(name, value, checked, title)
  * Generate input checkbox tag
  */
 const char *
-gen_input_checkbox(name, value, title)
-	const char *name;
-	const char *value;
-	const char *title;
+gen_input_checkbox(const char *name, const char *value, const char *title)
 {
 	return gen_input_with_title_checked(name, value, "checkbox", 0, title);
 }
@@ -766,12 +727,7 @@ gen_input_checkbox(name, value, title)
  * Generate input radio tag
  */
 const char *
-gen_input_with_title_checked(name, value, type, checked, title)
-	const char *name;
-	const char *value;
-	const char *type;
-	int checked;
-	const char *title;
+gen_input_with_title_checked(const char *name, const char *value, const char *type, int checked, const char *title)
 {
 	STATIC_STRBUF(sb);
 
@@ -800,8 +756,7 @@ gen_input_with_title_checked(name, value, type, checked, title)
  *	i)	target	target
  */
 const char *
-gen_frameset_begin(contents)
-	const char *contents;
+gen_frameset_begin(const char *contents)
 {
 	STATIC_STRBUF(sb);
 
@@ -823,9 +778,7 @@ gen_frameset_end(void)
  *	i)	target	target
  */
 const char *
-gen_frame(name, src)
-	const char *name;
-	const char *src;
+gen_frame(const char *name, const char *src)
 {
 	STATIC_STRBUF(sb);
 

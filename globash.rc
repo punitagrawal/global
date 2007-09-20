@@ -1,29 +1,31 @@
 #
 # GloBash --- Global facility for Bash
 #
-# Copyright (c) 2001, 2002, 2004 Tama Communications Corporation
+# Copyright (c) 2001, 2002, 2004, 2006 Tama Communications Corporation
 #
 # This file is part of GNU GLOBAL.
 #
-# GNU GLOBAL is free software; you can redistribute it and/or modify
+# This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-#
-# GNU GLOBAL is distributed in the hope that it will be useful,
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#
+# 
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # GLOBAL home page is at: http://www.gnu.org/software/global/
 # Author: Tama Communications Corporation
-  version=0.1
+  version=0.3
 # Usage:
 # $ bash --rcfile <this file>
+#	or
+# $ source <this file>
+#
 # [/usr/src/sys] ghelp<RET>
 #
 
@@ -46,6 +48,12 @@ if [ -n "$HOME_ETC" ]; then
 else
         GHOME=$HOME/.globash
 fi
+#
+# Less-370 or later can treat GLOBAL as tag system if environment variable
+# LESSGLOBALTAGS is set.
+#
+export LESSGLOBALTAGS=global
+
 if [ ! -d $GHOME ]; then
 	echo
 	echo "GloBash --- Global facility for Bash"
@@ -216,6 +224,7 @@ __gtags_pwd() {
 }
 __gtags_prompt() {
 	local cwd=`__gtags_pwd`
+	local dbpath=`global -p 2>/dev/null`
 	local root=`global -pr 2>/dev/null`
 	local ps
 
@@ -248,6 +257,7 @@ __gtags_prompt() {
 		cp /dev/null $MARKER
 	fi
 	PS1="$ps "
+	__gtags_filter="gtags --path=relative $root $cwd $dbpath"
 	__gtags_prev_root=$root
 }
 cd() {
@@ -370,14 +380,7 @@ warp() {
 __gtags_edit_marked_file()
 {
 	if [ -s $MARKER ] && __gtags_is_num $1; then
-		local com filter
-
-		filter=`global --filter -x`
-		case $filter in
-		'')	echo "Cannot get internal filter."
-			return 1;;
-		esac
-		com="cat $MARKER | $filter | sed -n '${1}p'"
+		com="cat $MARKER | $__gtags_filter | sed -n '${1}p'"
 		line=$( eval $com )
 		if [ "$line" != "" ]; then
 			set $line
@@ -402,14 +405,7 @@ mark()
 	case $1 in
 	-list|-lis|-li|-l)
 		if [ -s $MARKER ]; then
-			local com filter
-
-			filter=`global --filter -x`
-			case $filter in
-			'')	echo "Cannot get internal filter."
-				return 1;;
-			esac
-			com="cat $MARKER | $filter | cat -n"
+			com="cat $MARKER | $__gtags_filter | cat -n"
 			eval $com
 		fi
 		;;
@@ -476,11 +472,7 @@ __gtags_gen_xref()
 			__gtags_lasttag=$2
 		fi
 		if [ "$__gtags_lasttag" != "" ]; then
-			case $__gtags_lastcom in
-			f)	sortfilter=cat;;
-			*)	sortfilter='sort -k 1,1 -k 3,3 -k 2,2n';;
-			esac
-			com="global -xn$__gtags_lastcom $__gtags_lasttag | $sortfilter >$XREF"
+			com="global --nofilter=path -x$__gtags_lastcom $__gtags_lasttag >$XREF"
 			eval $com
 			__gtags_count=`wc -l < $XREF | sed 's/ //g'`
 		else
@@ -493,20 +485,10 @@ __gtags_gen_xref()
 }
 __gtags_list_xref()
 {
-	local com filter
-
 	if [ ! -s $XREF ]; then
 		return 1
 	fi
-	case $__gtags_lastcom in
-	f)	filter=`global --filter -f`;;
-	*)	filter=`global --filter -x`;;
-	esac
-	case $filter in
-	'')	echo "Cannot get internal filter."
-		return 1;;
-	esac
-	com="cat $XREF | $filter | cat -n | sed '${__gtags_current}s/^ />/'"
+	com="cat $XREF | $__gtags_filter | cat -n | sed '${__gtags_current}s/^ />/'"
 	if (( __gtags_count > LINES - 1 )); then
 		local pager=${PAGER-more}
 
@@ -520,24 +502,48 @@ __gtags_list_xref()
 	return 0
 }
 __gtags_locate_tag() {
-	case "$2$__gtags_lasttag" in
-	'')	echo "tag not specified."
+	local command less tag
+	command=$1
+	case $command in
+	x|r|s|g|I|P)	;;
+	*)	echo "Unknown command '$command'."
 		return 1;;
 	esac
-	__gtags_push_stack
-	__gtags_current=1
-	__gtags_gen_xref $1 $2
-	__gtags_list_xref
+	shift
+	if [ "$1" = "-l" ]; then
+		less=1
+		shift
+	fi
+	tag=$1
+	if [ "$tag" = "" ]; then
+		if [ "$__gtags_lasttag" = "" ]; then
+			echo "tag not specified."
+			return 1
+		fi
+		tag=$__gtags_lasttag
+	fi
+	if [ "$less" = "1" ]; then
+		global -x$command $tag | less -T-
+	else
+		__gtags_push_stack
+		__gtags_current=1
+		__gtags_gen_xref $command $tag
+		__gtags_list_xref
+	fi
 }
-x() { __gtags_locate_tag x $1; }
-r() { __gtags_locate_tag r $1; }
-s() { __gtags_locate_tag s $1; }
-g() { __gtags_locate_tag g $1; }
-I() { __gtags_locate_tag I $1; }
-P() { __gtags_locate_tag P $1; }
+x() { __gtags_locate_tag x $*; }
+r() { __gtags_locate_tag r $*; }
+s() { __gtags_locate_tag s $*; }
+g() { __gtags_locate_tag g $*; }
+I() { __gtags_locate_tag I $*; }
+P() { __gtags_locate_tag P $*; }
 f() {
-	local absolute
+	local less absolute
 
+	if [ "$1" = "-l" ]; then
+		less=1
+		shift
+	fi
 	if [ "$1" = "" ]; then
 		if [ "$__gtags_prev_file" = "" ]; then
 			echo "file not specified."
@@ -551,20 +557,24 @@ f() {
 		echo "file not found."
 		return 1
 	fi
-	__gtags_prev_file=$absolute
-	__gtags_push_stack
-	__gtags_current=1
-	__gtags_gen_xref f $absolute
-	__gtags_list_xref
+	if [ "$less" = "1" ]; then
+		global -xf $absolute | less -T-
+	else
+		__gtags_prev_file=$absolute
+		__gtags_push_stack
+		__gtags_current=1
+		__gtags_gen_xref f $absolute
+		__gtags_list_xref
+	fi
 }
 list() {
 	__gtags_list_xref
 }
 tags() {
 	if [ -s $XREF ]; then
-		cat <( cat $XREF | sed -n "${__gtags_current}p" ) $STACK | cat -n | sed '1s/^ />/'
+		cat <( cat $XREF | sed -n "${__gtags_current}p" ) $STACK | $__gtags_filter | cat -n | sed '1s/^ />/'
 	elif [ -s $STACK ]; then
-		echo | cat - $STACK | cat -n | sed '1s/^ />/'
+		echo | cat - $STACK | $__gtags_filter | cat -n | sed '1s/^ />/'
 	fi
 }
 pop()
@@ -642,14 +652,10 @@ __gtags_view_tag() {
 	if [ "${EDITOR}" = "noedit" ]; then
 		return 0
 	fi
-	local filter=`global --filter -x`
-	if [ "$filter" != "" ]; then
-		local com="sed -n '${__gtags_current}p' $XREF | $filter"
-		local line=$( eval $com )
-
-		set $line
-		${EDITOR-vi} +$2 $3
-	fi
+	local com="sed -n '${__gtags_current}p' $XREF | $__gtags_filter"
+	local line=$( eval $com )
+	set $line
+	${EDITOR-vi} +$2 $3
 	return 0
 }
 first()	{
@@ -704,7 +710,7 @@ ghelp() {
 	echo
 	echo "GloBash --- Global facility for Bash"
 	echo
-	echo "Copyright (c) 2001, 2002 Tama Communications Corporation"
+	echo "Copyright (c) 2001, 2002, 2004, 2006 Tama Communications Corporation"
 	echo "GLOBAL WWW: http://www.gnu.org/software/global/"
 	echo
 	echo "Prompt:"
@@ -720,13 +726,14 @@ ghelp() {
 	echo "Commands:"
 	echo
 	echo " - Tag search command:"
-	echo "	x [pattern]	- locate function definitions."
-	echo "	r [pattern]	- locate function references."
-	echo "	s [pattern]	- locate other symbols."
-	echo "	g [pattern]	- locate pattern using grep(1)."
-	echo "	P [pattern]	- locate file include pattern."
-	echo "	I [pattern]	- locate pattern using id-utils(1)."
-	echo "	f [file]	- locate function definitions in a file."
+	echo "  (-l: use less(1) instead of tag stack.)"
+	echo "	x [-l][pattern]	- locate function definitions."
+	echo "	r [-l][pattern]	- locate function references."
+	echo "	s [-l][pattern]	- locate other symbols."
+	echo "	g [-l][pattern]	- locate pattern using grep(1)."
+	echo "	P [-l][pattern]	- locate file include pattern."
+	echo "	I [-l][pattern]	- locate pattern using idutils(1)."
+	echo "	f [-l][file]	- locate function definitions in a file."
 	echo "	(By default, the previous value is used for pattern and file.)"
 	echo "	list		- print tag list."
 	echo "	tags		- print tag stack."
@@ -769,7 +776,7 @@ ghelp() {
 	echo
 	echo " - Standard aliases:"
 	echo "	<n> (n=1-999)	- show <n>"
-	echo "	.., ../.., ...	- cd .., cd ../.., ..."
+	echo "	..		- cd .."
 	echo "	..<n> (n=1-5)	- cd .. (* <n> times)"
 	echo "	l,t,n,p,.,c,m	- list,tags,next,prev,show,cookie,mark"
 	echo "	'\C-t'		- pop"
@@ -798,13 +805,6 @@ if [ "$gtags_aliases" = "1" ]; then
 		(( n++ ))
 	done
 	alias ..='cd ..'
-
-# these are invalid in bash 3.00.16(1)
-#	alias ../..='cd ../..'
-#	alias ../../..='cd ../../..'
-#	alias ../../../..='cd ../../../..'
-#	alias ../../../../..='cd ../../../../..'
-
 	alias ..1='cd ..'
 	alias ..2='cd ../..'
 	alias ..3='cd ../../..'

@@ -1,4 +1,4 @@
-This is global.info, produced by makeinfo version 4.7 from global.txi.
+This is global.info, produced by makeinfo version 4.8 from global.texi.
 
 INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
@@ -7,11 +7,11 @@ END-INFO-DIR-ENTRY
 
    This file documents the GNU GLOBAL source code tag system.
 
-   Copyright (c) 2000, 2001, 2002, 2003, 2004 Tama Communications
-Corporation
+   Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2006 Tama
+Communications Corporation
 
    Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1 or
+under the terms of the GNU Free Documentation License, Version 1.2 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
 Texts.  A copy of the license is included in the section entitled "GNU
@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU GLOBAL source code tag system
 *********************************
 
-This manual documents version 4.8.6 of the GNU GLOBAL source code tag
+This manual documents version 5.6.1 of the GNU GLOBAL source code tag
 system.
 
 * Menu:
@@ -32,8 +32,9 @@ system.
 * Global::                              Command line GLOBAL.
 * Applications::			Various applications.
 * Other topics::                        Other topics.
-* Reference::				Reference manual.
-* GNU Free Documentation License::	GNU Free Documentation License.
+* Reference::                           Command References.
+* Copying This Manual::                 Copying This Manual.
+* Business Model::                      Business Model for Free Software.
 * Index::                               Option index.
 
 
@@ -45,25 +46,20 @@ File: global.info,  Node: Introduction,  Next: Global,  Prev: Top,  Up: Top
 1.1 What is this?
 =================
 
-GNU GLOBAL is a source code tag system that works the same way across
-diverse environments.  You can locate a specified object in the source
-files and move there easily.  It is useful for hacking a large project
-containing many subdirectories, many `#ifdef' and many `main()'
-functions.
-
-   It is similar to ctags or etags but is different from them at the
-point of independence of any editor.
+GLOBAL is a source code tagging system (like ctags/etags) that is
+compatible with numerous application environments including vi, emacs,
+less, bash.  You can locate specified object in source files and move
+there easily.  It is useful for hacking a large project containing many
+subdirectories, many `#ifdef' and many `main()' functions.
 
 1.2 Concept of project.
 =======================
 
 GNU GLOBAL can treat a source tree containing subdirectories as a
-project.  It is similar to CVS.  You can get the relative path of your
-object from anywhere in the source tree.
-
-   You need not specify where the tag file is.  Instead, global(1) will
-locate the tag file by itself.  If tag file isn't found in the current
-directory, global(1) search parent directories for tag file.
+project.  It is similar to CVS.  You need not specify where the tag
+file is.  Instead, global(1) will locate the tag file by itself.  If
+tag file isn't found in the current directory, global(1) search parent
+directories for tag file.
 
    User's position (current directory) is the first argument for
 GLOBAL's command.
@@ -93,7 +89,9 @@ GNU GLOBAL has following features:
 
         - Web browser
 
-   * find the locations of a specified object quickly.
+        - Doxygen documentation system
+
+   * find the locations of specified object quickly.
 
    * locate not only object definitions but also object references.
 
@@ -105,15 +103,13 @@ GNU GLOBAL has following features:
 
    * understand POSIX 1003.2 regular expressions.
 
-   * support external search engine (grep and id-utils).
+   * support external search engine (grep and idutils).
 
    * generate hypertext of source code.
 
    * tag files are independent of machine architecture.
 
-   * plugged-in parser is available to treat new language.
-
-   * compact format is available to save disk space.
+   * plugin parser is available to treat new language.
 
    * support incremental updating of tag files.
 
@@ -142,8 +138,8 @@ File: global.info,  Node: Preparation,  Next: Basic usage,  Up: Global
 2.1 Preparation.
 ================
 
-First of all, you must execute gtags(1)(See *Note gtags::.) at the root
-of source tree.  For example, if you want to browse vi's source code:
+First of all, you must execute gtags(1)(*note gtags::) at the root of
+source tree.  For example, if you want to browse vi's source code:
 
 
          $ cd /usr/src/usr.bin/vi
@@ -163,6 +159,18 @@ the source tree.
    * `GSYMS'         database of other symbols
 
    * `GPATH'         database of path names
+
+   You should prepare for considerable disk space for tag files.  For
+example, FreeBSD 7.0 kernel source code requires:
+
+         source code(/usr/src/sys)       123MB
+
+         GPATH                             1MB
+         GTAGS                            24MB
+         GRTAGS                           28MB
+         GSYMS                            32MB
+         -------------------------------------
+         total of tag files               85MB
 
 
 File: global.info,  Node: Basic usage,  Next: Applied usage,  Prev: Preparation,  Up: Global
@@ -424,8 +432,8 @@ ROOT/, version1.0/ and version2.0/.
               % global kmem_suballoc
               ../vm/vm_kern.c
 
-   * You can edit all files that include a specified object by typing
-     one command, for example:
+   * You can edit all files that include specified object by typing one
+     command, for example:
 
 
               $ vi `global func1`     # edit fileB.c
@@ -460,6 +468,7 @@ File: global.info,  Node: Applications,  Next: Other topics,  Prev: Global,  Up:
 * Vim editor::                          Vim using GLOBAL.
 * Emacs editor::                        Extended emacs using GLOBAL.
 * Web browser::                         Hypertext generator.
+* Doxygen documentation system::	Doxygen using GLOBAL.
 
 
 File: global.info,  Node: GloBash,  Next: Less viewer,  Up: Applications
@@ -498,8 +507,8 @@ File: global.info,  Node: Preparation(globash),  Next: Basic usage(globash),  Pr
 3.1.2 Preparation.
 ------------------
 
-First, do the preparation of global. (Please see *Note Preparation::.).
-And you can invoke bash(1) with --rcfile option.
+First, do the preparation of global. *Note Preparation::.  And you can
+invoke bash(1) with --rcfile option.
 
          $ bash --rcfile /usr/local/share/gtags/globash.rc
 
@@ -532,8 +541,8 @@ File: global.info,  Node: Basic usage(globash),  Next: Applied usage(globash),  
 3.1.3 Basic usage.
 ------------------
 
-   * Almost global(1)(See *Note global::.)'s command character is
-     available as a command.
+   * Almost global(1)(*note global::)'s command character is available
+     as a command.
 
               [/usr/src/sys] x fork               <- (global -x fork)
               >    1  fork              94 kern/kern_fork.c fork(p, uap)
@@ -673,7 +682,7 @@ File: global.info,  Node: Preparation(less),  Next: Basic usage(less),  Prev: Fe
 3.2.2 Preparation.
 ------------------
 
-First, do the preparation of global. (Please see *Note Preparation::.).
+First, do the preparation of global. *Note Preparation::.
 
    Second, to use global from less, you need to set environment variable
 `LESSGLOBALTAGS' to "global".
@@ -735,7 +744,7 @@ File: global.info,  Node: Applied usage(less),  Prev: Basic usage(less),  Up: Le
               # pattern match with grep(1).
               $ global -xg 'lseek(.*)' | less -T-
 
-              # pattern match with id-utils(1).
+              # pattern match with idutils(1).
               $ global -xI func | less -T-
 
               # all objects definitions in *.c.
@@ -811,7 +820,7 @@ File: global.info,  Node: Preparation(nvi-1.79),  Next: Basic usage(nvi-1.79),  
 3.3.2 Preparation.
 ------------------
 
-First, do the preparation of global. (Please see *Note Preparation::.).
+First, do the preparation of global. *Note Preparation::.
 
    Second, to use global from nvi, you need to get into "gtagsmode".
 There are several ways to do this:
@@ -980,7 +989,7 @@ File: global.info,  Node: Preparation(nvi-1.81.5),  Next: Basic usage(nvi-1.81.5
 3.4.2 Preparation.
 ------------------
 
-First, do the preparation of global. (Please see *Note Preparation::.).
+First, do the preparation of global. *Note Preparation::.
 
    Second, to use global from nvi, you need write to `.nexrc' like this:
 It assumed that gtags.pl is put on `$HOME/perl'.
@@ -1102,7 +1111,7 @@ File: global.info,  Node: Preparation(elvis),  Next: Basic usage(elvis),  Prev: 
 3.5.2 Preparation.
 ------------------
 
-First, do the preparation of global. (Please see *Note Preparation::.).
+First, do the preparation of global. *Note Preparation::.
 
    Second, start elvis and execute `set tagprg="global -t $1"' like
 this.  
@@ -1258,7 +1267,7 @@ File: global.info,  Node: Preparation(vim),  Next: Basic usage(vim),  Prev: Feat
 3.6.2 Preparation.
 ------------------
 
-First, do the preparation of global. (Please see *Note Preparation::.).
+First, do the preparation of global. *Note Preparation::.
 
    Second, copy `gtags.vim' to your plugin directory or source it from
 your vimrc.
@@ -1358,7 +1367,7 @@ File: global.info,  Node: Applied usage(vim),  Prev: Basic usage(vim),  Up: Vim 
 
 
               :Gtags -gi paTtern         <- match to both 'PATTERN' and 'pattern'.
-     	About the other options, See *Note global::.
+     	About the other options, *Note global::.
 
    * The GtagsCursor command brings you to the definition or reference
      of 	the current token in C language.  	The GtagsCursor is
@@ -1425,7 +1434,7 @@ File: global.info,  Node: Preparation(emacs),  Next: Basic usage(emacs),  Prev: 
 3.7.2 Preparation.
 ------------------
 
-First, do the preparation of global. (Please see *Note Preparation::.).
+First, do the preparation of global. *Note Preparation::.
 
    Second, to use global from emacs, you need to load the `gtags.el'
 and execute gtags-mode function in it.
@@ -1511,8 +1520,9 @@ File: global.info,  Node: Basic usage(emacs),  Next: Applied usage(emacs),  Prev
 
      If current token is a definition, it is equivalent to `Find tag
      (reference): CURRENT TOKENRET', otherwise it is equivalent to
-     `Find tag: CURRENT TOKENRET'.  (GLOBAL decides this
-     intelligentlly, but may sometimes misunderstand.)
+     `Find tag: CURRENT TOKENRET'.  (This facility is supported only in
+     C language.  GLOBAL decides this intelligentlly, but may sometimes
+     misunderstand.)
 
    * To go to any symbols which are not defined in `GTAGS', try
      `gtags-find-symbol'.
@@ -1569,7 +1579,7 @@ File: global.info,  Node: Applied usage(emacs),  Prev: Basic usage(emacs),  Up: 
      To return to the previous position, click the right button.
 
 
-File: global.info,  Node: Web browser,  Prev: Emacs editor,  Up: Applications
+File: global.info,  Node: Web browser,  Next: Doxygen documentation system,  Prev: Emacs editor,  Up: Applications
 
 3.8 Hypertext generator
 =======================
@@ -1605,29 +1615,35 @@ File: global.info,  Node: Preparation(browser),  Next: Usage(browser),  Prev: Fe
 3.8.2 Preparation.
 ------------------
 
-At first, you must ensure that you have a lot of disk space. Hypertext
-needs a great amount of disk space. For example, the source code of
-FreeBSD kernel needs:
+At first, you must ensure that you have a lot of disk space for
+hypertext.  For example, FreeBSD 7.0 kernel source code (123MB)
+requires disk space from 600 to 1200MB.
 
 
-         source code(/usr/src/sys)       14.0MB
+         source code(/usr/src/sys)            123MB
+         GPATH,GTAGS,GRTAGS,GSYMS              86MB
 
-         GTAGS                            1.5MB
-         GRTAGS                           8.0MB
-         GSYMS                           12.0MB
-         HTML/                           55MB(!!!)
-         -------------------------------------------------
-         total                           77MB
+         hypertext (with no option)           645MB
+         hypertext (with -s option)          1168MB
+         hypertext (with -D option)           383MB
+         hypertext (with -s and -D option)    616MB
 
-   Please invoke gtags(1)(See *Note gtags::.) and htags(1)(See *Note
-htags::.)  in order like this:
+   Please invoke gtags(1)(*note gtags::) and htags(1)(*note htags::) in
+order like this:
 
 
          (at your source directory)
-         $ gtags                 # make the tag database(GTAGS,GRTAGS,GSYMS)
-         $ htags                 # make the hypertext(HTML/)
+         $ gtags                 # make tag files(GTAGS,GRTAGS,GSYMS)
+         $ htags                 # make hypertext(HTML/)
 
    Then you will find an `HTML' subdirectory in the current directory.
+Htags has many options.
+
+         Suggested option:
+         $ htags -vsanohIT
+
+   If http server is available then the -D and -f option are also
+useful.
 
 
 File: global.info,  Node: Usage(browser),  Prev: Preparation(browser),  Up: Web browser
@@ -1657,6 +1673,35 @@ like this:
 directory.
 
 
+File: global.info,  Node: Doxygen documentation system,  Prev: Web browser,  Up: Applications
+
+3.9 Doxygen using global
+========================
+
+You can use GLOBAL as a source browser of Doxygen.
+
+   Doxygen Release 1.4.3 or later includs config option USE_HTAGS.
+When enabled in combination with SOURCE_BROWSER=YES, htags(1) is used
+as the source browser instead of doxygen's own.
+
+   Here is an example.
+
+
+     (in source directory)
+     $ doxygen -g
+     $ vi Doxyfile
+     +---------------------------------
+     |...
+     |INPUT                  = .
+     |RECURSIVE              = YES
+     |SOURCE_BROWSER         = YES
+     |USE_HTAGS              = YES
+     |...
+
+     $ doxygen
+     $ lynx html/index.html
+
+
 File: global.info,  Node: Other topics,  Next: Reference,  Prev: Applications,  Up: Top
 
 4 Other topics
@@ -1665,8 +1710,7 @@ File: global.info,  Node: Other topics,  Next: Reference,  Prev: Applications,  
 * Menu:
 
 * Configuration::                       How to config GLOBAL.
-* Plugin::                              How to plug in a parser.
-* Compact format::                      Compact format.
+* Plugin::                              Plug-in parser.
 * Incremental updating::                Incremental updating.
 
 
@@ -1678,41 +1722,32 @@ File: global.info,  Node: Configuration,  Next: Plugin,  Up: Other topics
 You can customize GLOBAL using configuration file.
 
 
-         # cp gtags.conf /etc/gtags.conf         # system wide configuration file.
+         # cp gtags.conf /etc/gtags.conf         # system wide config file.
          # vi /etc/gtags.conf
 
-         $ cp gtags.conf $HOME/.globalrc         # personal configuration file.
+         $ cp gtags.conf $HOME/.globalrc         # personal config file.
          $ vi $HOME/.globalrc
 
    If `$HOME/.globalrc' exists then GLOBAL use it. Else if
 `/etc/gtags.conf' exists then GLOBAL use it. Otherwise default value
 will be used.  The format of `gtags.conf' is resemble to termcap(5). By
 default, 'default' target is used.  About the capabilities, please see
-each command manual. (See *Note Reference::.)
+each command manual. *Note Reference::.
 
 
-File: global.info,  Node: Plugin,  Next: Compact format,  Prev: Configuration,  Up: Other topics
+File: global.info,  Node: Plugin,  Next: Incremental updating,  Prev: Configuration,  Up: Other topics
 
-4.2 How to plug in a parser.
-============================
+4.2 Plug-in parser.
+===================
 
-You can write new parser and use as a plugged-in parser.
+You can write new parser and use as a plugin parser.
 
-   Copy `gtags.conf' to `/etc/gtags.conf' or `$HOME/.globalrc'.
+4.2.1 How to plug in a parser.
+------------------------------
 
-   For example, if you would like to use ctags based on etags (included
-by Emacs),
+Copy `gtags.conf' to `/etc/gtags.conf' or `$HOME/.globalrc'.
 
-
-         $ cd /EMACS SOURCE DIRECTORY/lib-src
-         $ make ctags
-         # cp ctags /usr/local/bin/ctags-emacs
-         $ export GTAGSLABEL=ctags-emacs         # see gtags.conf
-         $ gtags
-         $ ls G*
-         GPATH   GTAGS
-
-   Or if you would like to use exuberant ctags (included by Vim editor),
+   If you would like to use exuberant ctags included by Vim editor,
 
 
          $ cd /VIM SOURCE DIRECTORY/src/ctags
@@ -1725,8 +1760,12 @@ by Emacs),
          GPATH   GTAGS
 
    `GRTAGS' and `GSYMS' don't exist, simply because these parsers don't
-support the `-r' option and `-s' option like gtags-parser(1) does.  All
-plugged-in parsers must print tag information to standard output in the
+support the `-r' option and `-s' option like gtags-parser(1) does.  
+
+4.2.2 Requirement of plugin parser.
+-----------------------------------
+
+Plug-in parser must print tag information to standard output in the
 same style as `ctags -x', ie.:
 
 
@@ -1739,54 +1778,41 @@ same style as `ctags -x', ie.:
          [3] path name. It must be equal to argument path name.
          [4] line image
 
-   Otherwise, you can make a suitable wrapper for the plug-in parser.
+   Plug-in parser must process the files in the order they are given in
+the argument. In each file, any order is acceptable.
+
+   * Good example
+
+     The following `good-prog' does correct operation as a plugin
+     parser.
+
+                  $ good-prog a.c b.c        <= order: a.c -> b.c
+                              ~~~~~~~
+                  main          25 a.c  main(int argc, char *argv[])
+                  func          45 a.c  func(int a) {
+                  sub2          20 b.c  sub2() {
+                  sub1          10 b.c  sub1() {
+                                    ^
+                                    |
+                                   *** order: a.c -> b.c (Good!)
+
+   * Bad example
+
+     The following `bad-prog' does wrong operation as a plugin parser.
+
+                  $ bad-prog a.c b.c        <= order: a.c -> b.c
+                  main          25 a.c  main(int argc, char *argv[])
+                  sub2          20 b.c  sub2() {
+                  sub1          10 b.c  sub1() {
+                  func          45 a.c  func(int a) {
+                                    ^
+                                    |
+                                   *** order: b.c -> a.c (BAD!!!)
 
 
-File: global.info,  Node: Compact format,  Next: Incremental updating,  Prev: Plugin,  Up: Other topics
+File: global.info,  Node: Incremental updating,  Prev: Plugin,  Up: Other topics
 
-4.3 Compact format.
-===================
-
-You can save disk space with the compact format.
-
-   * To specify the use of the compact format on the command line,
-     add the `-c' option: 
-
-              $ gtags -c
-
-   * To specify the use of the compact format in the configuration file:
-
-              +----------------------------
-              |...
-              |default:\
-              |       format=compact:...
-
-   * If you will publish hypertext generated by htags then use the `-c'
-     option      of htags too: 
-
-              $ htags -c
-
-     With the `-c' option, htags makes gzipped hypertext.  You need to
-     set up an HTTP server so that gzipped files can be read (see
-     `HTML/.htaccess').
-
-
-              Example:
-
-                      Standard        Compact         Compressed rate
-              -------------------------------------------------------
-              GTAGS    1744896 bytes   720896 bytes   -59%
-              GRTAGS  10133504 bytes  1409024 bytes   -86%
-              GSYMS   11911168 bytes  9306112 bytes   -22%
-
-                      Standard        Compact         Compressed rate
-              -------------------------------------------------------
-              HTML/   56618 kbytes    15219 kbytes    -73%
-
-
-File: global.info,  Node: Incremental updating,  Prev: Compact format,  Up: Other topics
-
-4.4 Incremental updating.
+4.3 Incremental updating.
 =========================
 
 Modifying some source files, you need not remake whole tag files.
@@ -1801,7 +1827,15 @@ Instead, you can use incremental updating facility (`-u' option).
          [Sun Dec  6 16:27:47 JST 1998] Gtags started
           Tag found in '/usr/src/sys'.
           Incremental update.
-          Updating tags of 'kern/tty.c' ...GTAGS..GRTAGS..GSYMS.. Done.
+         [Sun Dec  6 16:28:48 JST 1998] Updating 'GTAGS'.
+          [1/1] deleting tags of kern/tty.c
+          [1/1] adding tags of kern/tty.c
+         [Sun Dec  6 16:28:59 JST 1998] Updating 'GRTAGS'.
+          [1/1] deleting tags of kern/tty.c
+          [1/1] adding tags of kern/tty.c
+         [Sun Dec  6 16:28:14 JST 1998] Updating 'GSYMS'.
+          [1/1] deleting tags of kern/tty.c
+          [1/1] adding tags of kern/tty.c
           Global databases have been modified.
          [Sun Dec  6 16:28:30 JST 1998] Done.
          $ global -vu                            # try again
@@ -1812,10 +1846,10 @@ Instead, you can use incremental updating facility (`-u' option).
          [Sun Dec  6 16:28:52 JST 1998] Done.
 
 
-File: global.info,  Node: Reference,  Next: GNU Free Documentation License,  Prev: Other topics,  Up: Top
+File: global.info,  Node: Reference,  Next: Copying This Manual,  Prev: Other topics,  Up: Top
 
-5 Reference manual
-******************
+5 Command References
+********************
 
 * Menu:
 
@@ -1824,6 +1858,7 @@ File: global.info,  Node: Reference,  Next: GNU Free Documentation License,  Pre
 * htags::          htags - generate hypertext from source code.
 * gtags-parser::   gtags-parser - print cross reference list for gtags.
 * gozilla::        gozilla - force mozilla to display specified source file.
+* gtags-cscope::   gtags-cscope - pseudo cscope which implements the line-oriented interface
 
 
 File: global.info,  Node: global,  Next: gtags,  Up: Reference
@@ -1842,12 +1877,12 @@ SYNOPSIS
 
 
      global [-aGilnqrstTvx][-e] pattern
-     global -c[qsv] prefix
+     global -c[qrsv] prefix
      global -f[anqrstvx] files
-     global -g[aGilnoqtvx][-e] pattern
+     global -g[aGilnoOqtvx][-e] pattern
      global -I[ailnqtvx][-e] pattern
      global -p[qrv]
-     global -P[aGilnoqtvx][-e] pattern
+     global -P[aGilnoOqtvx][-e] pattern
      global -u[qv]
 
 DESCRIPTION
@@ -1857,8 +1892,8 @@ Global find the locations of specified object in C, C++, Yacc, Java,
 PHP and Assembly source files.  Global can treat a source tree, that
 is, a directory that has subdirectories and source files.  You can get
 the relative path of objects from anywhere within the tree.  Global can
-locate not only function definitions but also function references and
-other symbols.  Duplicate entries are allowed.
+locate not only object definitions but also object references and other
+symbols.  Duplicate entries are allowed.
 
    In advance of using this command, you must execute gtags(1) at the
 root directory of the source tree to make tag files.  Then you can
@@ -1874,20 +1909,19 @@ pattern
      available.
 
 `-c', `--completion' [prefix]
-     Print candidate function names which start with specified prefix.
-     Prefix is not specified, print all function names.
+     Print candidate definition names which start with specified
+     prefix. Prefix is not specified, print all definition names.
 
 `-f', `--file' files
-     Print all function definitions in the files.  This option implies
-     -x option.
+     Print all tags in the files.  This option implies -x option.
 
 `-g', `--grep'
      Print all lines which match to the pattern.
 
 `-I', `--idutils'
      Print all lines which match to the pattern.  This function use
-     id-utils(1) as a search engine.  To use this command, you need to
-     install id-utils(1) in your system and you must execute gtags(1)
+     idutils(1) as a search engine.  To use this command, you need to
+     install idutils(1) in your system and you must execute gtags(1)
      with `-I' option.
 
 `-p', `--print-dbpath'
@@ -1935,6 +1969,11 @@ The following options are available:
      Search pattern in not only source files but also other files like
      `README'.  This option is valid only with `-g' or `-P' command.
 
+`-O', `--only-other'
+     Search pattern only in other files like `README'.  This option is
+     valid only with `-g' or `-P' command.  This option override the
+     `-o' option.
+
 `-q', `--quiet'
      Quiet mode.
 
@@ -1943,9 +1982,14 @@ The following options are available:
      object definitions.  With the `-p' option, print the root
      directory of source tree.
 
+`--result' format
+     format may be 'path', `ctags', `ctags-x', `grep' or 'cscope'.  The
+     `--result=ctags' and `--result=ctags-x' are equivalent to the `-t'
+     and `-x' respectively.  The -result option is given to priority
+     more than the -t and -x option.
+
 `-s', `--symbol'
-     Print the locations of specified symbol other than function names.
-     You need `GSYMS' tags file. See gtags(1).
+     Print the locations of specified symbol other than definitions.
 
 `-t', `--tags'
      Print with standard ctags format.
@@ -1998,10 +2042,10 @@ FILES
 -----
 
 `GTAGS'
-     Tag file for function definitions.
+     Tag file for object definitions.
 
 `GRTAGS'
-     Tag file for function references.
+     Tag file for object references.
 
 `GSYMS'
      Tag file for other symbols.
@@ -2082,7 +2126,7 @@ SYNOPSIS
 
 
 
-     gtags [-c][-i][-I][-o][-P][-q][-v][-w][dbpath]
+     gtags [-iIqvw][-f file][-n number][dbpath]
 
 DESCRIPTION
 -----------
@@ -2107,12 +2151,16 @@ OPTIONS
 -------
 
 The following options are available:
-`-c', `--compact'
-     Make tag files with compact format.
-
-`--config' name
+`--config'[=name]
      Show the value of config variable name.  If name is not specified
      then show whole of config entry.
+
+`-f', `--file' file
+     Read from file a list of file names which should be considered as
+     the candidate of source files.  By default, all files under the
+     current directory are considered as the candidate.  If file is
+     `-', read from standard input.  File names must be separated by
+     newline.
 
 `--gtagsconf' file
      Load user's configuration from file.
@@ -2126,15 +2174,12 @@ The following options are available:
      the -u option.
 
 `-I', `--idutils'
-     Make index files for id-utils(1).
+     Make index files for idutils(1).
 
-`--info' info
-     Pass info string to external system.  Currently you can use it
-     with -P option.
-
-`-o', `--omit-gsyms'
-     Suppress making `GSYMS' file.  Use this option if you don't use -s
-     option of global(1).
+`-n', `--max-args' number
+     Maximum number of arguments for gtags-parser(1).  By default,
+     gtags invokes the parser with arguments as a lot as possible to
+     decrease the frequency of invoking.
 
 `-q', `--quiet'
      Quiet mode.
@@ -2224,10 +2269,6 @@ option.
      is obsoleted. If the langmap variable is defined gtags no longer
      refers this.
 
-`format'(standard|compact)
-     Format of tag files. The default is `standard'.  Compact format is
-     same to `-c'(`--compact').
-
 `icase_path'(boolean)
      Ignore case distinctions in the path.  Suffixes check are affected
      by this capability.
@@ -2297,8 +2338,8 @@ SYNOPSIS
 
 
 
-     htags [-a][-c][-D][-f][-F][-g][-n][-o][-s][-v][-w][-x][-d
-     dbpath][-m name][-S cgidir][-t title][htmldir]
+     htags [-acDfFghInosTvwx][-d dbpath][-m name][-S cgidir][-t
+     title][dir]
 
 DESCRIPTION
 -----------
@@ -2335,7 +2376,9 @@ The following options are available:
      `HTML/.htaccess' that is generated by htags.
 
 `--cvsweb' url
-     Include cvsweb URL. url is used as base of URL.
+     Include cvsweb URL. url is used as base of URL.  When directory
+     `CVS' exists in the root directory of source project, content of
+     `CVS/Repository' is used as relative path from the base.
 
 `--cvsweb-cvsroot' cvsroot
      Specifies cvsroot in cvsweb URL.
@@ -2359,9 +2402,25 @@ The following options are available:
 `-F', `--frame'
      Use frame for each part of the contents.
 
+`--full-path'
+     List file names with full path in file index.  By default, list
+     just the last component of a path.
+
 `-g', `--gtags'
      Execute gtags(1) before creating hypertext.  The `-v', `-w' and
      dbpath are passed to gtags.
+
+`-h', `--func-header'[=position]
+     Insert function header for each function.  By default, htags
+     doesn't generates it.  You can specify the position using position
+     argument, which allows one of `before', `right' and `after'.  The
+     default position is `after'.
+
+`-I', `--icon'
+     Use icons instead of text for some links.
+
+`--disable-grep'
+     Disable grep in search form(-f,-form).
 
 `--gtagsconf' file
      Load user's configuration from file.
@@ -2376,11 +2435,18 @@ The following options are available:
 `--insert-footer' file
      Insert custom footer derived from file before </body> tag.
 
+`--item-order' spec
+     Specify order of items in the top page.  The spec is a string
+     consists of item signs in order.  Each sign means as follows: c:
+     caution, s: search form, m: mains, d: definition, f: files.  The
+     default is csmdf.
+
 `-m', `--main-func' name
      Specify the main function name. The default is `main'.
 
-`-n', `--line-number'
-     Print line numbers. By default, doesn't print them.
+`-n', `--line-number'[=columns]
+     Print line numbers. By default, doesn't print them.  The default
+     value of columns is 4.
 
 `--no-map-file'
      Doesn't generate `MAP' and `FILEMAP' file.  By default, htags
@@ -2392,10 +2458,6 @@ The following options are available:
 
 `--statistics'
      Print statistics information.
-
-`--style-sheet' file
-     Load style sheet file and insert it into <head> tag.  If you use
-     the `--xhtml' option, you should use `style.css' instead.
 
 `-s', `--symbol'
      Make anchors not only for functions but also other symbols.
@@ -2411,38 +2473,39 @@ The following options are available:
      The title of this hypertext. The default is the last component of
      the current directory.
 
+`-T', `--table-flist'[=fields]
+     Generate file list using <table> tag.  The fields is used for
+     field number in a line. The default is 5.
+
+`--table-list'
+     List tags using <table> tag.
+
+`--tabs number'
+     Tab stop. The default is 8.
+
 `-v', `--verbose'
      Verbose mode.
 
 `-w', `--warning'
      Print warning messages.
 
-`-x', `--xhtml'
+`-x', `--xhtml'[=version]
      Generate XHTML hypertext instead of HTML.  If the `--frame' option
      is specified then generate XHTML-1.0 Frameset for index.html and
-     generate XHTML-1.0 Transitional for other files, else if config
-     variable `xhtml_version' is set to `1.1' then generate XHTML-1.1
-     else XHTML 1.0 Transitional.
+     generate XHTML-1.0 Transitional for other files, else if version
+     is `1.1' or config variable `xhtml_version' is set to `1.1' then
+     generate XHTML-1.1 else XHTML 1.0 Transitional.
 
-htmldir
+dir
      The directory in which hypertext is generated.  The default is the
      current directory.
 
 EXAMPLES
 --------
 
-     	$ cd /usr/src/sys
-     	# gtags -v
-     	# htags -fFnvat 'Welcom to FreeBSD kernel source tour!'
-     	$ lynx HTML/index.html
-
-     	$ htags -v --gtags
-     	$ awk '$1 == "main" {print $2}' HTML/MAP
-     	D/348.html
-     	$ lynx HTML/D/348.html
-
-     	$ cd global
-     	$ htags -gv --cvsweb=http://savannah.gnu.org/cgi-bin/viewcvs/global/global/
+     	$ gtags -v
+     	$ htags -sanohITvt 'Welcom to XXX source tour!'
+     	$ firefox HTML/index.html
 
 FILES
 -----
@@ -2467,7 +2530,7 @@ FILES
 
 `HTML/MAP'
      Mapping file for converting tag into path of hypertext.  External
-     system utilize this file. See EXAMPLES.
+     system utilize this file.
 
 `HTML/FILEMAP'
      Mapping file for converting file name into path of hypertext.
@@ -2507,7 +2570,7 @@ file (`style.css').
 `datadir'(string)
      Shared data directory. The default is '/usr/local/share' but you
      can change the value using configure script.  Htags lookup
-     templete files in the 'gtags' directory in this data directory.
+     template files in the 'gtags' directory in this data directory.
 
 `htags_options'(string)
      Default options for htags. This value is inserted into the head of
@@ -2517,7 +2580,8 @@ file (`style.css').
      XHTML version. 1.0 and 1.1 are acceptable. The default is 1.0.
 
 `body_begin'(string)
-     Begin tag for body. The default is '<body>'.
+     Begin tag for body. The default is '<body text=#191970
+     bgcolor=#f5f5dc vlink=gray>'.
 
 `body_end'(string)
      End tag for body. The default is '</body>'.
@@ -2540,7 +2604,7 @@ file (`style.css').
 `comment_end'(string)
      End tag for comments. The default is '</font></i>'.
 
-`dynamic'(bool)
+`dynamic'(boolean)
      Generate object list dynamically.
 
 `sharp_begin'(string)
@@ -2550,7 +2614,7 @@ file (`style.css').
      End tag for 'define'. The default is '</font>'.
 
 `brace_begin'(string)
-     Begin tag for brace. The default is '<font color=blue>'.
+     Begin tag for brace. The default is '<font color=red>'.
 
 `brace_end'(string)
      End tag for brace. The default is '</font>'.
@@ -2587,12 +2651,18 @@ file (`style.css').
 `tabs'(number)
      Tab stop. The default is 8.
 
+`flist_fields'(number)
+     Field number of file index. The default is 5.
+
 `full_path'(boolean)
      List file names with full path in file index.  By default, list
      just the last component of a path.
 
 `table_list'(boolean)
-     List tags using table tag. The default is false.
+     List tags using <table> tag. The default is false.
+
+`table_flist'(boolean)
+     Use <table> tag for file index. The default is false.
 
 `normal_suffix'(string)
      Suffix for normal html file. The default is 'html'.
@@ -2609,26 +2679,18 @@ file (`style.css').
 `show_position'(boolean)
      Show position per function definition. The default is false.
 
-`symbol'(boolean)
-     Make anchors not only for functions but also other symbols.
-     `GSYMS' tag file needed.
-
 `definition_header'(no|before|right|after)
-     Position of link header. The default is 'no'.
+     Position of function header. The default is 'no'.
 
 `other_files'(boolean)
      File index includes not only source files but also other files.
      The default is false.
 
-`enable_grep'(boolean)
-     Enable grep search using CGI program. The default is false.  When
-     this function is enabled, you cannot move hypertext from source
-     directory.
+`disable_grep'(boolean)
+     Disable grep in search form(-f,-form). The default is false.
 
 `enable_idutils'(boolean)
-     Enable id-utils search using CGI program. The default is false.
-     When this function is enabled, you cannot move hypertext from
-     source directory.
+     Enable idutils in search form(-f,-form). The default is false.
 
 `include_file_suffixes'(comma separated list)
      Suffixes of include file. The default is 'h,hxx,hpp,H,inc.php'.
@@ -2806,7 +2868,7 @@ HISTORY
 The gtags-parser(gctags) command appeared in FreeBSD 2.2.2.
 
 
-File: global.info,  Node: gozilla,  Prev: gtags-parser,  Up: Reference
+File: global.info,  Node: gozilla,  Next: gtags-cscope,  Prev: gtags-parser,  Up: Reference
 
 5.5 gozilla - force mozilla to display specified source file.
 =============================================================
@@ -2828,11 +2890,11 @@ DESCRIPTION
 -----------
 
 Gozilla force mozilla to display specified source file as a hypertext.
+Gozilla can be used with other browsers like firefox and epiphany.
 
-   In advance of using this command, [1] you must execute gtags(1) and
-htags(1) at the root directory of the source tree to make tag files,
-and [2] execute mozilla in you computer.  Then you can execute gozilla
-at anywhere in the source tree.
+   In advance of using this command, you must execute gtags(1) and
+htags(1) at the root directory of the source tree to make tag files.
+Then you can execute gozilla at anywhere in the source tree.
 
    First form:
 You can specify source file and the line number optionally.
@@ -2840,6 +2902,9 @@ You can specify source file and the line number optionally.
    Second form:
 You can specify definition name directly. Definition name must exist in
 `GTAGS' tag file.
+
+   Some browsers require you to load it before executing gozilla.
+Whether or not gozilla waits for exiting of browser depends on browser.
 
 OPTIONS
 -------
@@ -2851,8 +2916,7 @@ The following options are available:
      option, you can specify any line.
 
 `-b' browser
-     browser to use. By default, it is assumed mozilla.  If you specify
-     another browser, gozilla waits for exiting of the browser.
+     browser to use. By default, it is assumed mozilla.
 
 `-p'
      just print generated target URL.
@@ -2905,9 +2969,16 @@ EXAMPLES
 
      	$ gtags
      	$ htags
-     	$ mozilla &
      	$ global -x main
      	main              82 ctags.c          main(argc, argv)
+     	$ mozilla &
+     	$ gozilla +82 ctags.c
+
+     	$ firefox &
+     	$ gozilla -b firefox +82 ctags.c
+
+     	$ setenv BROWSER 'epiphany --new-tab'
+     	$ epiphany &
      	$ gozilla +82 ctags.c
 
 DIAGNOSTICS
@@ -2918,7 +2989,7 @@ Gozilla exits with a non 0 value if an error occurred, 0 otherwise.
 SEE ALSO
 --------
 
-global(1), gtags(1), htags(1), mozilla(1).
+global(1), gtags(1), htags(1), firefox(1), epiphany(1), mozilla(1).
 
    GNU GLOBAL source code tag system
 (http://www.gnu.org/software/global/).
@@ -2934,9 +3005,6 @@ BUGS
 Gozilla can treat not only source file but also normal file, directory,
 HTML file and even URL, because it is omnivorous.
 
-   I don't know whether or not gozilla works well in Windows32
-environment.
-
 AUTHORS
 -------
 
@@ -2949,375 +3017,545 @@ The gozilla command appeared in FreeBSD 2.2.2 but did not installed by
 default.
 
 
-File: global.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: Reference,  Up: Top
+File: global.info,  Node: gtags-cscope,  Prev: gozilla,  Up: Reference
 
-GNU Free Documentation License
+5.6 gtags-cscope - pseudo cscope which implements the line-oriented interface
+=============================================================================
+
+NAME
+----
+
+gtags-cscope - pseudo cscope which implements the line-oriented
+interface
+
+SYNOPSIS
+--------
+
+
+
+     gtags-cscope [-Cqv]
+
+DESCRIPTION
+-----------
+
+Gtags-cscope is a pseudo cscope which implements the line-oriented
+interface.  You can use this command for various clients instead of
+true cscope.
+
+   Since gtags-cscope is intended to make GLOBAL available through
+cscope interface, the output is not necessarily the same as cscope.
+
+OPTIONS
+-------
+
+The following options are available:
+`-C', `--ignore-case'
+     Ignore letter case when searching.
+
+`-q', `--quiet'
+     Quiet mode.
+
+`-v', `--verbose'
+     Verbose mode.
+
+EXAMPLES
+--------
+
+     	$ gtags-cscope
+     	>> help
+     	0<arg>: Find this C symbol
+     	1<arg>: Find this definition
+     	2<arg>: Find functions called by this function
+     		(Not implemented yet.)
+     	3<arg>: Find functions calling this function
+     	4<arg>: Find this text string
+     	6<arg>: Find this egrep pattern
+     	7<arg>: Find this file
+     	8<arg>: Find files #including this file
+     	c: Toggle ignore/use letter case
+     	r: Rebuild the database
+     	q: Quit the session
+     	h: Show help
+     	>> 1main
+     	cscope: 9 lines
+     	global/global.c main 158 main(int argc, char **argv)
+     	gozilla/gozilla.c main 155 main(int argc, char **argv)
+     	gtags-parser/gctags.c main 158 main(int argc, char **argv)
+     	gtags-cscope/gtags-cscope.c main 115 main(int argc, char **argv)
+     	gtags/gtags.c main 150 main(int argc, char **argv)
+     	htags-refkit/htags_path2url.c main 281 main(int argc, char **argv)
+     	htags/htags.c main 1400 main(int argc, char **argv)
+     	libglibc/getopt.c main 704 main (argc, argv)
+     	libglibc/getopt1.c main 93 main (argc, argv)
+     	>> q
+     	$ _
+
+DIAGNOSTICS
+-----------
+
+Gtags-cscope exits with a non 0 value if an error occurred, 0 otherwise.
+
+SEE ALSO
+--------
+
+cscope(1), gtags-parser(1), gtags(1), global(1), htags(1).
+
+   GNU GLOBAL source code tag system
+(http://www.gnu.org/software/global/).
+
+BUG
+---
+
+The second field of the output is almost <unknown> since GLOBAL doesn't
+recognize it.  Command 2 (Find functions called by this function) is
+not implemented.
+
+AUTHOR
+------
+
+Tama Communications Corporation.
+
+HISTORY
+-------
+
+The gtags-cscope command appeared in 2006.
+
+
+File: global.info,  Node: Copying This Manual,  Next: Business Model,  Prev: Reference,  Up: Top
+
+Appendix A Copying This Manual
 ******************************
 
-                        Version 1.1, March 2000
+* Menu:
 
-     Copyright (C) 2000  Free Software Foundation, Inc.
-         59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+* GNU Free Documentation License::      License for copying this manual.
+
+
+File: global.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
+
+A.1 GNU Free Documentation License
+==================================
+
+                      Version 1.2, November 2002
+
+     Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
+     51 Franklin St, Fifth Floor, Boston, MA  02110-1301, USA
+
      Everyone is permitted to copy and distribute verbatim copies
      of this license document, but changing it is not allowed.
 
-Preamble
-========
+  0. PREAMBLE
 
-The purpose of this License is to make a manual, textbook, or other
-written document "free" in the sense of freedom: to assure everyone the
-effective freedom to copy and redistribute it, with or without
-modifying it, either commercially or noncommercially.  Secondarily,
-this License preserves for the author and publisher a way to get credit
-for their work, while not being considered responsible for
-modifications made by others.
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
 
-   This License is a kind of "copyleft", which means that derivative
-works of the document must themselves be free in the same sense.  It
-complements the GNU General Public License, which is a copyleft license
-designed for free software.
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
 
-   We have designed this License in order to use it for manuals for free
-software, because free software needs free documentation: a free
-program should come with manuals providing the same freedoms that the
-software does.  But this License is not limited to software manuals; it
-can be used for any textual work, regardless of subject matter or
-whether it is published as a printed book.  We recommend this License
-principally for works whose purpose is instruction or reference.
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
 
-APPLICABILITY AND DEFINITIONS
-=============================
+  1. APPLICABILITY AND DEFINITIONS
 
-This License applies to any manual or other work that contains a notice
-placed by the copyright holder saying it can be distributed under the
-terms of this License.  The "Document", below, refers to any such
-manual or work.  Any member of the public is a licensee, and is
-addressed as "you".
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
 
-   A "Modified Version" of the Document means any work containing the
-Document or a portion of it, either copied verbatim, or with
-modifications and/or translated into another language.
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
 
-   A "Secondary Section" is a named appendix or a front-matter section
-of the Document that deals exclusively with the relationship of the
-publishers or authors of the Document to the Document's overall subject
-(or to related matters) and contains nothing that could fall directly
-within that overall subject.  (For example, if the Document is in part a
-textbook of mathematics, a Secondary Section may not explain any
-mathematics.)  The relationship could be a matter of historical
-connection with the subject or with related matters, or of legal,
-commercial, philosophical, ethical or political position regarding them.
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
 
-   The "Invariant Sections" are certain Secondary Sections whose titles
-are designated, as being those of Invariant Sections, in the notice
-that says that the Document is released under this License.
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
 
-   The "Cover Texts" are certain short passages of text that are listed,
-as Front-Cover Texts or Back-Cover Texts, in the notice that says that
-the Document is released under this License.
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
 
-   A "Transparent" copy of the Document means a machine-readable copy,
-represented in a format whose specification is available to the general
-public, whose contents can be viewed and edited directly and
-straightforwardly with generic text editors or (for images composed of
-pixels) generic paint programs or (for drawings) some widely available
-drawing editor, and that is suitable for input to text formatters or
-for automatic translation to a variety of formats suitable for input to
-text formatters.  A copy made in an otherwise Transparent file format
-whose markup has been designed to thwart or discourage subsequent
-modification by readers is not Transparent.  A copy that is not
-"Transparent" is called "Opaque".
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
 
-   Examples of suitable formats for Transparent copies include plain
-ASCII without markup, Texinfo input format, LaTeX input format, SGML or
-XML using a publicly available DTD, and standard-conforming simple HTML
-designed for human modification.  Opaque formats include PostScript,
-PDF, proprietary formats that can be read and edited only by
-proprietary word processors, SGML or XML for which the DTD and/or
-processing tools are not generally available, and the machine-generated
-HTML produced by some word processors for output purposes only.
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
 
-   The "Title Page" means, for a printed book, the title page itself,
-plus such following pages as are needed to hold, legibly, the material
-this License requires to appear in the title page.  For works in
-formats which do not have any title page as such, "Title Page" means
-the text near the most prominent appearance of the work's title,
-preceding the beginning of the body of the text.
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
 
-VERBATIM COPYING
-================
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
 
-You may copy and distribute the Document in any medium, either
-commercially or noncommercially, provided that this License, the
-copyright notices, and the license notice saying this License applies
-to the Document are reproduced in all copies, and that you add no other
-conditions whatsoever to those of this License.  You may not use
-technical measures to obstruct or control the reading or further
-copying of the copies you make or distribute.  However, you may accept
-compensation in exchange for copies.  If you distribute a large enough
-number of copies you must also follow the conditions in section 3.
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
 
-   You may also lend copies, under the same conditions stated above, and
-you may publicly display copies.
+  2. VERBATIM COPYING
 
-COPYING IN QUANTITY
-===================
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
 
-If you publish printed copies of the Document numbering more than 100,
-and the Document's license notice requires Cover Texts, you must enclose
-the copies in covers that carry, clearly and legibly, all these Cover
-Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
-the back cover.  Both covers must also clearly and legibly identify you
-as the publisher of these copies.  The front cover must present the
-full title with all words of the title equally prominent and visible.
-You may add other material on the covers in addition.  Copying with
-changes limited to the covers, as long as they preserve the title of
-the Document and satisfy these conditions, can be treated as verbatim
-copying in other respects.
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
 
-   If the required texts for either cover are too voluminous to fit
-legibly, you should put the first ones listed (as many as fit
-reasonably) on the actual cover, and continue the rest onto adjacent
-pages.
+  3. COPYING IN QUANTITY
 
-   If you publish or distribute Opaque copies of the Document numbering
-more than 100, you must either include a machine-readable Transparent
-copy along with each Opaque copy, or state in or with each Opaque copy
-a publicly-accessible computer-network location containing a complete
-Transparent copy of the Document, free of added material, which the
-general network-using public has access to download anonymously at no
-charge using public-standard network protocols.  If you use the latter
-option, you must take reasonably prudent steps, when you begin
-distribution of Opaque copies in quantity, to ensure that this
-Transparent copy will remain thus accessible at the stated location
-until at least one year after the last time you distribute an Opaque
-copy (directly or through your agents or retailers) of that edition to
-the public.
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
 
-   It is requested, but not required, that you contact the authors of
-the Document well before redistributing any large number of copies, to
-give them a chance to provide you with an updated version of the
-Document.
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
 
-MODIFICATIONS
-=============
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
 
-You may copy and distribute a Modified Version of the Document under
-the conditions of sections 2 and 3 above, provided that you release the
-Modified Version under precisely this License, with the Modified
-Version filling the role of the Document, thus licensing distribution
-and modification of the Modified Version to whoever possesses a copy of
-it.  In addition, you must do these things in the Modified Version:
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
 
-  A. Use in the Title Page (and on the covers, if any) a title distinct
-     from that of the Document, and from those of previous versions
-     (which should, if there were any, be listed in the History section
-     of the Document).  You may use the same title as a previous version
-     if the original publisher of that version gives permission.
+  4. MODIFICATIONS
 
-  B.  List on the Title Page, as authors, one or more persons or
-     entities responsible for authorship of the modifications in the
-     Modified Version, together with at least five of the principal
-     authors of the Document (all of its principal authors, if it has
-     less than five).
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
 
-  C. State on the Title page the name of the publisher of the Modified
-     Version, as the publisher.
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
 
-  D.  Preserve all the copyright notices of the Document.
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
 
-  E. Add an appropriate copyright notice for your modifications
-     adjacent to the other copyright notices.
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
 
-  F. Include, immediately after the copyright notices, a license notice
-     giving the public permission to use the Modified Version under the
-     terms of this License, in the form shown in the Addendum below.
+       D. Preserve all the copyright notices of the Document.
 
-  G. Preserve in that license notice the full lists of Invariant
-     Sections and required Cover Texts given in the Document's license
-     notice.
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
 
-  H. Include an unaltered copy of this License.
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
 
-  I. Preserve the section entitled "History", and its title, and add to
-     it an item stating at least the title, year, new authors, and
-     publisher of the Modified Version as given on the Title Page.  If
-     there is no section entitled "History" in the Document, create one
-     stating the title, year, authors, and publisher of the Document as
-     given on its Title Page, then add an item describing the Modified
-     Version as stated in the previous sentence.
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
 
-  J. Preserve the network location, if any, given in the Document for
-     public access to a Transparent copy of the Document, and likewise
-     the network locations given in the Document for previous versions
-     it was based on.  These may be placed in the "History" section.
-     You may omit a network location for a work that was published at
-     least four years before the Document itself, or if the original
-     publisher of the version it refers to gives permission.
+       H. Include an unaltered copy of this License.
 
-  K. In any section entitled "Acknowledgements" or "Dedications",
-     preserve the section's title, and preserve in the section all the
-     substance and tone of each of the contributor acknowledgements
-     and/or dedications given therein.
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
 
-  L. Preserve all the Invariant Sections of the Document, unaltered in
-     their text and in their titles.  Section numbers or the equivalent
-     are not considered part of the section titles.
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
 
-  M. Delete any section entitled "Endorsements".  Such a section may
-     not be included in the Modified Version.
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
 
-  N. Do not retitle any existing section as "Endorsements" or to
-     conflict in title with any Invariant Section.
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
 
-   If the Modified Version includes new front-matter sections or
-appendices that qualify as Secondary Sections and contain no material
-copied from the Document, you may at your option designate some or all
-of these sections as invariant.  To do this, add their titles to the
-list of Invariant Sections in the Modified Version's license notice.
-These titles must be distinct from any other section titles.
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
 
-   You may add a section entitled "Endorsements", provided it contains
-nothing but endorsements of your Modified Version by various
-parties-for example, statements of peer review or that the text has
-been approved by an organization as the authoritative definition of a
-standard.
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
 
-   You may add a passage of up to five words as a Front-Cover Text, and
-a passage of up to 25 words as a Back-Cover Text, to the end of the list
-of Cover Texts in the Modified Version.  Only one passage of
-Front-Cover Text and one of Back-Cover Text may be added by (or through
-arrangements made by) any one entity.  If the Document already includes
-a cover text for the same cover, previously added by you or by
-arrangement made by the same entity you are acting on behalf of, you
-may not add another; but you may replace the old one, on explicit
-permission from the previous publisher that added the old one.
+       O. Preserve any Warranty Disclaimers.
 
-   The author(s) and publisher(s) of the Document do not by this License
-give permission to use their names for publicity for or to assert or
-imply endorsement of any Modified Version.
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
 
-COMBINING DOCUMENTS
-===================
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
 
-You may combine the Document with other documents released under this
-License, under the terms defined in section 4 above for modified
-versions, provided that you include in the combination all of the
-Invariant Sections of all of the original documents, unmodified, and
-list them all as Invariant Sections of your combined work in its
-license notice.
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
 
-   The combined work need only contain one copy of this License, and
-multiple identical Invariant Sections may be replaced with a single
-copy.  If there are multiple Invariant Sections with the same name but
-different contents, make the title of each such section unique by
-adding at the end of it, in parentheses, the name of the original
-author or publisher of that section if known, or else a unique number.
-Make the same adjustment to the section titles in the list of Invariant
-Sections in the license notice of the combined work.
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
 
-   In the combination, you must combine any sections entitled "History"
-in the various original documents, forming one section entitled
-"History"; likewise combine any sections entitled "Acknowledgements",
-and any sections entitled "Dedications".  You must delete all sections
-entitled "Endorsements."
+  5. COMBINING DOCUMENTS
 
-COLLECTIONS OF DOCUMENTS
-========================
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
 
-You may make a collection consisting of the Document and other documents
-released under this License, and replace the individual copies of this
-License in the various documents with a single copy that is included in
-the collection, provided that you follow the rules of this License for
-verbatim copying of each of the documents in all other respects.
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
 
-   You may extract a single document from such a collection, and
-distribute it individually under this License, provided you insert a
-copy of this License into the extracted document, and follow this
-License in all other respects regarding verbatim copying of that
-document.
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
 
-AGGREGATION WITH INDEPENDENT WORKS
-==================================
+  6. COLLECTIONS OF DOCUMENTS
 
-A compilation of the Document or its derivatives with other separate
-and independent documents or works, in or on a volume of a storage or
-distribution medium, does not as a whole count as a Modified Version of
-the Document, provided no compilation copyright is claimed for the
-compilation.  Such a compilation is called an "aggregate", and this
-License does not apply to the other self-contained works thus compiled
-with the Document, on account of their being thus compiled, if they are
-not themselves derivative works of the Document.
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
 
-   If the Cover Text requirement of section 3 is applicable to these
-copies of the Document, then if the Document is less than one quarter
-of the entire aggregate, the Document's Cover Texts may be placed on
-covers that surround only the Document within the aggregate.  Otherwise
-they must appear on covers around the whole aggregate.
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
 
-TRANSLATION
-===========
+  7. AGGREGATION WITH INDEPENDENT WORKS
 
-Translation is considered a kind of modification, so you may distribute
-translations of the Document under the terms of section 4.  Replacing
-Invariant Sections with translations requires special permission from
-their copyright holders, but you may include translations of some or
-all Invariant Sections in addition to the original versions of these
-Invariant Sections.  You may include a translation of this License
-provided that you also include the original English version of this
-License.  In case of a disagreement between the translation and the
-original English version of this License, the original English version
-will prevail.
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
 
-TERMINATION
-===========
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
 
-You may not copy, modify, sublicense, or distribute the Document except
-as expressly provided for under this License.  Any other attempt to
-copy, modify, sublicense or distribute the Document is void, and will
-automatically terminate your rights under this License.  However,
-parties who have received copies, or rights, from you under this
-License will not have their licenses terminated so long as such parties
-remain in full compliance.
+  8. TRANSLATION
 
-FUTURE REVISIONS OF THIS LICENSE
-================================
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
 
-The Free Software Foundation may publish new, revised versions of the
-GNU Free Documentation License from time to time.  Such new versions
-will be similar in spirit to the present version, but may differ in
-detail to address new problems or concerns.  See
-http://www.gnu.org/copyleft/.
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
 
-   Each version of the License is given a distinguishing version number.
-If the Document specifies that a particular numbered version of this
-License "or any later version" applies to it, you have the option of
-following the terms and conditions either of that specified version or
-of any later version that has been published (not as a draft) by the
-Free Software Foundation.  If the Document does not specify a version
-number of this License, you may choose any version ever published (not
-as a draft) by the Free Software Foundation.
+  9. TERMINATION
 
-ADDENDUM: How to use this License for your documents
-====================================================
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided for under this License.  Any other
+     attempt to copy, modify, sublicense or distribute the Document is
+     void, and will automatically terminate your rights under this
+     License.  However, parties who have received copies, or rights,
+     from you under this License will not have their licenses
+     terminated so long as such parties remain in full compliance.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.
+
+A.1.1 ADDENDUM: How to use this License for your documents
+----------------------------------------------------------
 
 To use this License in a document you have written, include a copy of
 the License in the document and put the following copyright and license
 notices just after the title page:
 
-     Copyright (c)  YEAR  YOUR NAME.
-     Permission is granted to copy, distribute and/or modify this document
-     under the terms of the GNU Free Documentation License, Version 1.1
-     or any later version published by the Free Software Foundation;
-     with the Invariant Sections being LIST THEIR TITLES, with the
-     Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.
-     A copy of the license is included in the section entitled "GNU
-     Free Documentation License".
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.2
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
 
-   If you have no Invariant Sections, write "with no Invariant Sections"
-instead of saying which ones are invariant.  If you have no Front-Cover
-Texts, write "no Front-Cover Texts" instead of "Front-Cover Texts being
-LIST"; likewise for Back-Cover Texts.
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
 
    If your document contains nontrivial examples of program code, we
 recommend releasing these examples in parallel under your choice of
@@ -3325,7 +3563,227 @@ free software license, such as the GNU General Public License, to
 permit their use in free software.
 
 
-File: global.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: global.info,  Node: Business Model,  Next: Index,  Prev: Copying This Manual,  Up: Top
+
+Appendix B Business Model
+*************************
+
+* Menu:
+
+* The BOKIN Model Definition:: Business Model for Free Software.
+* Frequently Asked Questions:: BOKIN Model Frequently Asked Questions.
+
+
+File: global.info,  Node: The BOKIN Model Definition,  Next: Frequently Asked Questions,  Up: Business Model
+
+B.1 The BOKIN Model Definition
+==============================
+
+     Version 1.0, December 17, 2005
+     Copyright (C) 2005 Tama Communications Corporation
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this document, but changing it is not allowed.
+
+Introduction
+------------
+
+"BOKIN Model" is a business model to obtain proceeds by widely
+collecting donations while developing and distributing free software.
+This model is constructed not to take away consumer's freedom of
+software.
+
+   The business which comply with the following criteria can be called
+"a business based on BOKIN Model".
+
+Criteria
+--------
+
+  1. CORPORATION
+     The person who start a business based on BOKIN Model must be a
+     business corporation registered in the home country.  (Herein
+     after called "the corporation")
+
+  2. FREE SOFTWARE
+     The corporation develops free software. (Herein after called "the
+     BOKINware")
+
+  3. LICENSE
+     The corporation distributes the BOKINware under GNU GPL (GNU
+     General Public License) and GNU FDL (GNU Free Documentation
+     License). Exceptionally, external packages which the BOKINware
+     uses, small supporting files, short manuals and rough
+     documentation can use simple all-permissive license, compatible
+     with GNU GPL.
+
+  4. COPYRIGHT MANAGEMENT
+     The corporation manages copyright on the BOKINware for consumers to
+     keep on using it at ease.
+
+        * Every file in the BOKINware should have a legally valid
+          copyright notice and a license notice.
+
+        * To include program which is assigned from another developer,
+          the corporation receives a disclaimer paper or assignment
+          paper signed by the author.
+
+        * To include program which is not assigned, the corporation
+          confirms its license is GNU GPL or compatible with GNU GPL,
+          lists the files and authors in a file named `AUTHORS', and
+          lists the license in a file named `LICENSE'.  The BOKINware
+          should contain these two files.
+
+  5. MAILING LIST
+     The corporation maintains mailing lists for consumers to cooperate
+     one another.
+
+     The list members, including the corporation, don't owe any duty.
+
+     The mailing lists should include the following two at least.
+
+        * Bug mailing list
+          This list distributes, to the active maintainers of the
+          BOKINware, bug reports and fixes for, and suggestions for
+          improvements in the BOKINware. This list is also for user
+          discussion.
+
+        * Help mailing list
+          This list is the place for authors, users and installers of
+          the BOKINware to ask for help.
+
+     The mailing lists can be replaced with a similar communication
+     tool.
+
+     The corporation can decide the operation policy of the list, but
+     must not obstruct the list members to cooperate one another.
+
+  6. COLLECTING DONATIONS
+     The corporation collects donations widely as its proceeds.
+
+     The corporation must not offer the donor an individual supply of
+     profit.
+
+  7. DONOR LIST
+     The corporation open the donor list to the public.
+
+     The donor list includes the following information.
+
+        * Date of donation (The date when the corporation received the
+          donation)
+
+        * Amount of donation (Amount which the corporation received)
+
+        * Donor's name
+
+        * Donor's nationality
+
+     When donor's name and nationality are unknown or the donor prefers
+     to remain anonymous, they are treated as "anonymous".
+
+     The BOKINware should contain the donor list as a file named
+     `DONORS'.  It is preferable that the list is open to the public
+     even on the Internet.
+
+  8. BOKIN MODEL DEFINITION
+     The BOKINware should contain the present definition as a file named
+     `BOKIN_MODEL'.
+
+
+Renewal
+-------
+
+The author may publish revised and/or new versions of the BOKIN Model
+Definition from time to time. Such new versions will be similar in
+spirit to the present version, but may differ in detail to address new
+problems or concerns.
+
+
+File: global.info,  Node: Frequently Asked Questions,  Prev: The BOKIN Model Definition,  Up: Business Model
+
+B.2 Frequently Asked Questions
+==============================
+
+     Version 1.0, December 17, 2005
+     Copyright (C) 2005 Tama Communications Corporation
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this document, but changing it is not allowed.
+
+BOKIN Model Frequently Asked Questions
+--------------------------------------
+
+  1. What does "BOKIN" mean?
+     "BOKIN" means collecting donations in Japanese.  ("BO"=collect,
+     "KIN"=money)
+
+  2. What is the purpose to require the person who start a BOKIN model
+     business being a registered corporation?
+     The purpose is to prevent people from donating to the person who
+     does not exist actually.
+
+  3. Is annoying copyright management necessary?
+     Yes, it is.  Copyright management is absolutely necessary for
+     consumers to keep on using the BOKINware at ease.
+
+     It is dangerous to use the software whose copyright is not neatly
+     managed.  If you use such software, you might suddenly be
+     prohibited to use it, or be claimed a license fee of high priced.
+     These are not imaginary fears but troubles of reality.
+
+  4. Why is program license limited to GNU GPL?
+     Because GNU GPL defends consumers in two points.
+        * Copyleft License
+          Since GNU GPL is copyleft license, it makes a program free,
+          and requiring all modified and extended versions of the
+          program to be free as well. As a result, consumer can keep on
+          using the BOKINware at ease in the future.
+
+        * Widely Known
+          Since GNU GPL is widely known, and is explained frequently,
+          it does not become the load to consumer. It is troublesome
+          for consumer to understand new licenses.
+
+  5. What is the purpose of the donor list?
+     There are two purposes.
+        * To defend freedom of donation.
+          The consumer can decide whether to donate after understanding
+          the situation of the donation.  If nothing being informed,
+          freedom does not exist there.  In BOKIN model, consumers are
+          not isolated existence.
+
+        * To praise donation.
+          To praise donation brings new donors.  Since BOKIN model owes
+          all to people's free wills, we cannot praise the donation too
+          much.
+
+  6. Is donation spent on the BOKINware?
+     It depends on the management of the corporation.  Since donations
+     become the proceeds of the corporation, the corporation itself
+     decides the usage under its freedom.
+
+  7. Is the donor list kept true?
+     It is very difficult to mix lies in the public information, because
+     it is checked by various methods.
+
+        * Donors can confirm whether they are listed.
+
+        * People can ask whether to have donated to the donors in the
+          list.
+
+        * The tax office can examine the contradiction between the
+          content of the list and the content of the declaration of the
+          corporation's taxation business.
+
+  8. Why is the corporation prohibited from doing an individual supply
+     of profit for the donors?
+     When individual supply of profit becomes ordinary, donation fall
+     into the payment for the profit. We cannot call it donation.
+     BOKIN Model business should be supported only by people's free
+     will.
+
+
+
+File: global.info,  Node: Index,  Prev: Business Model,  Up: Top
 
 Option Index
 ************
@@ -3334,96 +3792,103 @@ Option Index
 * Menu:
 
 * -a:                                    Basic usage.         (line  75)
-* -c <1>:                                Compact format.      (line   9)
 * -c:                                    Applied usage.       (line  94)
 * -f <1>:                                Basic usage(vim).    (line  54)
 * -f <2>:                                Applied usage(elvis).
                                                               (line  12)
 * -f <3>:                                Basic usage(elvis).  (line  43)
 * -f:                                    Basic usage.         (line 110)
-* -g <1>:                                Applied usage(vim).  (line   6)
-* -g <2>:                                Basic usage(vim).    (line  50)
-* -g <3>:                                Applied usage(elvis).
+* -g <1>:                                Basic usage(vim).    (line  50)
+* -g <2>:                                Applied usage(vim).  (line   6)
+* -g <3>:                                Basic usage(elvis).  (line  23)
+* -g <4>:                                Basic usage.         (line  89)
+* -g:                                    Applied usage(elvis).
                                                               (line   6)
 * -g <4>:                                Basic usage(elvis).  (line  23)
 * -g:                                    Basic usage.         (line  89)
 * -P <1>:                                Applied usage(vim).  (line  18)
 * -P <2>:                                Applied usage(elvis).
                                                               (line  16)
-* -P:                                    Basic usage.         (line  96)
-* -r <1>:                                Plugin.              (line  35)
-* -r <2>:                                Basic usage(vim).    (line  40)
-* -r <3>:                                Basic usage(elvis).  (line  13)
-* -r:                                    Basic usage.         (line  51)
-* -s <1>:                                Plugin.              (line  35)
+* -r <1>:                                Basic usage.         (line  51)
+* -r <2>:                                Plugin.              (line  26)
+* -r <3>:                                Basic usage(vim).    (line  40)
+* -r:                                    Basic usage(elvis).  (line  13)
+* -s <1>:                                Basic usage(elvis).  (line  19)
 * -s <2>:                                Basic usage(vim).    (line  46)
-* -s <3>:                                Basic usage(elvis).  (line  19)
+* -s <3>:                                Plugin.              (line  26)
 * -s:                                    Basic usage.         (line  82)
 * -t:                                    Preparation(elvis).  (line   9)
 * -u:                                    Incremental updating.
                                                               (line   7)
 * -x:                                    Basic usage.         (line  66)
+* FDL, GNU Free Documentation License:   GNU Free Documentation License.
+                                                              (line   6)
 
 
 
 Tag Table:
-Node: Top734
-Node: Introduction1333
-Node: Global3587
-Node: Preparation4009
-Node: Basic usage4662
-Node: Applied usage8355
-Node: Applications14032
-Node: GloBash14687
-Node: Features(globash)15027
-Node: Preparation(globash)15382
-Node: Basic usage(globash)16400
-Node: Applied usage(globash)19758
-Node: Less viewer21623
-Node: Features(less)22057
-Node: Preparation(less)22294
-Node: Basic usage(less)22666
-Node: Applied usage(less)23669
-Node: Nvi-1.79 editor25267
-Node: Features(nvi-1.79)25724
-Node: Preparation(nvi-1.79)26109
-Node: Basic usage(nvi-1.79)26939
-Node: Applied usage(nvi-1.79)28583
-Node: Nvi-1.81.5 editor30210
-Node: Features(nvi-1.81.5)30600
-Node: Preparation(nvi-1.81.5)30855
-Node: Basic usage(nvi-1.81.5)31622
-Node: Elvis editor33477
-Node: Features(elvis)33980
-Node: Preparation(elvis)34240
-Node: Basic usage(elvis)34668
-Node: Applied usage(elvis)36653
-Node: Vim editor38144
-Node: Features(vim)38561
-Node: Preparation(vim)38876
-Node: Basic usage(vim)39249
-Node: Applied usage(vim)40809
-Node: Emacs editor42737
-Node: Features(emacs)43175
-Node: Preparation(emacs)43520
-Node: Basic usage(emacs)44984
-Node: Applied usage(emacs)47222
-Node: Web browser48806
-Node: Features(browser)49147
-Node: Preparation(browser)49633
-Node: Usage(browser)50651
-Node: Other topics51396
-Node: Configuration51773
-Node: Plugin52499
-Node: Compact format54106
-Node: Incremental updating55465
-Node: Reference56520
-Node: global57016
-Node: gtags63521
-Node: htags69453
-Node: gtags-parser80540
-Node: gozilla84139
-Node: GNU Free Documentation License86957
-Node: Index105648
+Node: Top747
+Node: Introduction1439
+Node: Global3533
+Node: Preparation3955
+Node: Basic usage5055
+Node: Applied usage8748
+Node: Applications14423
+Node: GloBash15133
+Node: Features(globash)15473
+Node: Preparation(globash)15828
+Node: Basic usage(globash)16749
+Node: Applied usage(globash)20102
+Node: Less viewer21967
+Node: Features(less)22401
+Node: Preparation(less)22638
+Node: Basic usage(less)22996
+Node: Applied usage(less)23999
+Node: Nvi-1.79 editor25596
+Node: Features(nvi-1.79)26053
+Node: Preparation(nvi-1.79)26438
+Node: Basic usage(nvi-1.79)27254
+Node: Applied usage(nvi-1.79)28898
+Node: Nvi-1.81.5 editor30525
+Node: Features(nvi-1.81.5)30915
+Node: Preparation(nvi-1.81.5)31170
+Node: Basic usage(nvi-1.81.5)31923
+Node: Elvis editor33778
+Node: Features(elvis)34281
+Node: Preparation(elvis)34541
+Node: Basic usage(elvis)34955
+Node: Applied usage(elvis)36940
+Node: Vim editor38431
+Node: Features(vim)38848
+Node: Preparation(vim)39163
+Node: Basic usage(vim)39522
+Node: Applied usage(vim)41082
+Node: Emacs editor43006
+Node: Features(emacs)43444
+Node: Preparation(emacs)43789
+Node: Basic usage(emacs)45239
+Node: Applied usage(emacs)47530
+Node: Web browser49114
+Node: Features(browser)49492
+Node: Preparation(browser)49978
+Node: Usage(browser)51099
+Node: Doxygen documentation system51844
+Node: Other topics52562
+Node: Configuration52874
+Node: Plugin53580
+Node: Incremental updating56109
+Node: Reference57517
+Node: global58099
+Node: gtags64979
+Node: htags71008
+Node: gtags-parser82808
+Node: gozilla86407
+Node: gtags-cscope89424
+Node: Copying This Manual91944
+Node: GNU Free Documentation License92190
+Node: Business Model114600
+Node: The BOKIN Model Definition114895
+Node: Frequently Asked Questions119093
+Node: Index122506
 
 End Tag Table

@@ -4,7 +4,7 @@ gtags - create tag files for global.
 @unnumberedsubsec SYNOPSIS
 @noindent
 @quotation
-gtags [-c][-i][-I][-o][-P][-q][-v][-w][dbpath]@*
+gtags [-iIqvw][-f file][-n number][dbpath]@*
 @end quotation
 @unnumberedsubsec DESCRIPTION
 Gtags recursively collect the source files under
@@ -29,11 +29,16 @@ Other files are searched for C style definitions.
 @unnumberedsubsec OPTIONS
 The following options are available:
 @table @asis
-@item @samp{-c}, @samp{--compact}
-Make tag files with compact format.
-@item @samp{--config} name
+@item @samp{--config}[=name]
 Show the value of config variable name.
 If name is not specified then show whole of config entry.
+@item @samp{-f}, @samp{--file} file
+Read from file a list of file names which should be
+considered as the candidate of source files.
+By default, all files under the current directory are
+considered as the candidate.
+If file is @file{-}, read from standard input.
+File names must be separated by newline.
 @item @samp{--gtagsconf} file
 Load user's configuration from file.
 @item @samp{--gtagslabel} label
@@ -43,13 +48,11 @@ The default is @code{default}.
 Update tag files incrementally. You had better use
 global(1) with the -u option.
 @item @samp{-I}, @samp{--idutils}
-Make index files for id-utils(1).
-@item @samp{--info} info
-Pass info string to external system.
-Currently you can use it with -P option.
-@item @samp{-o}, @samp{--omit-gsyms}
-Suppress making @file{GSYMS} file.
-Use this option if you don't use -s option of global(1).
+Make index files for idutils(1).
+@item @samp{-n}, @samp{--max-args} number
+Maximum number of arguments for gtags-parser(1).
+By default, gtags invokes the parser with arguments
+as a lot as possible to decrease the frequency of invoking.
 @item @samp{-q}, @samp{--quiet}
 Quiet mode.
 @item @samp{-v}, @samp{--verbose}
@@ -119,9 +122,6 @@ Suffixes of target source file.
 As a special exception, gtags collect values from multiple @code{suffixes} variables.
 This variable is obsoleted. If the langmap variable is defined
 gtags no longer refers this.
-@item @code{format}(standard|compact)
-Format of tag files. The default is @code{standard}.
-Compact format is same to @samp{-c}(@samp{--compact}).
 @item @code{icase_path}(boolean)
 Ignore case distinctions in the path.
 Suffixes check are affected by this capability.

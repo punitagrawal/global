@@ -1,32 +1,31 @@
 #
 # Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
-#	Tama Communications Corporation
+#	2007 Tama Communications Corporation
 #
 # This file is part of GNU GLOBAL.
 #
-# GNU GLOBAL is free software; you can redistribute it and/or modify
+# This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-#
-# GNU GLOBAL is distributed in the hope that it will be useful,
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#
+# 
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # This file is converted to the following files:
 #	o command source file(for usage and help).
 #	o man format reference manual.
 #	o texinfo format reference manual.
 #
-@HEADER	GTAGS,1,April 2005,GNU Project
+@HEADER	GTAGS,1,January 2007,GNU Project
 @NAME	gtags - create tag files for global.
 @SYNOPSIS
-	@name{gtags} [-c][-i][-I][-o][-P][-q][-v][-w][@arg{dbpath}]
+	@name{gtags} [-iIqvw][-f @arg{file}][-n @arg{number}][@arg{dbpath}]
 @DESCRIPTION
 	@name{Gtags} recursively collect the source files under
 	the current directory,
@@ -50,11 +49,16 @@
 @OPTIONS
 	The following options are available:
 	@begin_itemize
-	@item{@option{-c}, @option{--compact}}
-		Make tag files with compact format.
-	@item{@option{--config} @arg{name}}
+	@item{@option{--config}[=@arg{name}]}
 		Show the value of config variable @arg{name}.
 		If @arg{name} is not specified then show whole of config entry.
+	@item{@option{-f}, @option{--file} @arg{file}}
+		Read from @arg{file} a list of file names which should be
+		considered as the candidate of source files.
+		By default, all files under the current directory are
+		considered as the candidate.
+		If @arg{file} is @file{-}, read from standard input.
+		File names must be separated by newline.
 	@item{@option{--gtagsconf} @arg{file}}
 		Load user's configuration from @arg{file}.
 	@item{@option{--gtagslabel} @arg{label}}
@@ -64,13 +68,11 @@
 		Update tag files incrementally. You had better use
 		@xref{global,1} with the -u option.
 	@item{@option{-I}, @option{--idutils}}
-		Make index files for @xref{id-utils,1}.
-	@item{@option{--info} @arg{info}}
-		Pass info string to external system.
-		Currently you can use it with -P option.
-	@item{@option{-o}, @option{--omit-gsyms}}
-		Suppress making @file{GSYMS} file.
-		Use this option if you don't use -s option of @xref{global,1}.
+		Make index files for @xref{idutils,1}.
+	@item{@option{-n}, @option{--max-args} @arg{number}}
+		Maximum number of arguments for @xref{gtags-parser,1}.
+		By default, gtags invokes the parser with arguments
+		as a lot as possible to decrease the frequency of invoking.
 	@item{@option{-q}, @option{--quiet}}
 		Quiet mode.
 	@item{@option{-v}, @option{--verbose}}
@@ -138,9 +140,6 @@
 		As a special exception, @name{gtags} collect values from multiple @code{suffixes} variables.
 		This variable is obsoleted. If the langmap variable is defined
 		@name{gtags} no longer refers this.
-	@item{@code{format}(standard|compact)}
-		Format of tag files. The default is @code{standard}.
-		Compact format is same to @option{-c}(@option{--compact}).
 	@item{@code{icase_path}(boolean)}
 		Ignore case distinctions in the path.
 		Suffixes check are affected by this capability.

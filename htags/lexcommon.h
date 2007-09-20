@@ -1,36 +1,36 @@
 /*
- * Copyright (c) 2004 Tama Communications Corporation
+ * Copyright (c) 2004, 2005 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef _LEXCOMMON_H
 #define _LEXCOMMON_H
 
 #include "incop.h"
+#include "tab.h"
 
 /*
  * Definition of LEXTEXT, LEXLENG, LEXIN and LEXRESTART.
  *
- * These symbol are the substitutions of yytext, yyleng, yyin and yyrestart.
- * You should write code using them.
- * How to include this file. For example, in c.l:
+ * These symbols are substitutions of yytext, yyleng, yyin and yyrestart.
+ * You should write lex code using them.
+ * The usage of this file is, for instance, in c.l:
  *
- * #define lex_symbol_generation_rule(x) c_ ## x
- * #include "lexcommon.h"
+ *	#define lex_symbol_generation_rule(x) c_ ## x
+ *	#include "lexcommon.h"
  */
 #ifndef lex_symbol_generation_rule
 ERROR: lex_symbol_generation_rule(x) macro not defined.
@@ -56,6 +56,17 @@ static int begin_line;
  */
 static int newline_terminate_string = 0;
 
+/*
+ * Variables for converting tabs to spaces.
+ */
+static int dest_column;
+static int left_spaces;
+
+#define YY_INPUT(buf, result, max_size) do {				\
+	result = read_file_detabing(buf, max_size, LEXIN,		\
+			&dest_column, &left_spaces);			\
+} while (0)
+
 #define LINENO lexcommon_lineno
 
 #define DEFAULT_BEGIN_OF_FILE_ACTION {					\
@@ -63,6 +74,8 @@ static int newline_terminate_string = 0;
         LEXRESTART(LEXIN);						\
         LINENO = 1;							\
         begin_line = 1;							\
+	dest_column = 0;						\
+	left_spaces = 0;						\
 }
 
 #define DEFAULT_YY_USER_ACTION {					\
@@ -121,19 +134,19 @@ static int newline_terminate_string = 0;
  * Output routine.
  */
 extern void echoc(int);
-extern void echos(const char *s);
-extern char *generate_guide(int);
+extern void echos(const char *);
+extern const char *generate_guide(int);
 extern void put_anchor(char *, int, int);
-extern void put_include_anchor(struct data *, char *);
-extern void put_reserved_word(char *);
-extern void put_macro(char *);
-extern void unknown_preprocessing_directive(char *, int);
+extern void put_include_anchor(struct data *, const char *);
+extern void put_reserved_word(const char *);
+extern void put_macro(const char *);
+extern void unknown_preprocessing_directive(const char *, int);
 extern void unexpected_eof(int);
-extern void unknown_yacc_directive(char *, int);
-extern void missing_left(char *, int);
+extern void unknown_yacc_directive(const char *, int);
+extern void missing_left(const char *, int);
 extern void put_char(int);
-extern void put_string(char *);
-extern void put_brace(char *);
+extern void put_string(const char *);
+extern void put_brace(const char *);
 extern void put_begin_of_line(int);
 extern void put_end_of_line(int);
 

@@ -450,19 +450,18 @@ char *yytext;
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -478,7 +477,6 @@ char *yytext;
 #include "global.h"
 #include "anchor.h"
 #include "incop.h"
-#include "path2url.h"
 #include "common.h"
 #include "htags.h"
 #include "../gtags-parser/asm_res.h"
@@ -505,7 +503,8 @@ static int last_directive;
 
 #define YY_NO_TOP_STATE 1
 #define YY_STACK_USED 1
-#line 509 "asm.c"
+#define YY_NEVER_INTERACTIVE 1
+#line 508 "asm.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -659,10 +658,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 65 "asm.l"
+#line 63 "asm.l"
 
  /* Backslash-newline */
-#line 666 "asm.c"
+#line 665 "asm.c"
 
 	if ( yy_init )
 		{
@@ -748,27 +747,27 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 67 "asm.l"
+#line 65 "asm.l"
 DEFAULT_BACKSLASH_NEWLINE_ACTION
 	YY_BREAK
 /* Comment */
 case 2:
 YY_RULE_SETUP
-#line 70 "asm.l"
+#line 68 "asm.l"
 { echos(comment_begin); ECHO; yy_push_state(C_COMMENT); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 71 "asm.l"
+#line 69 "asm.l"
 { ECHO; echos(comment_end); yy_pop_state(); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 72 "asm.l"
+#line 70 "asm.l"
 { put_char(LEXTEXT[0]); }
 	YY_BREAK
 case YY_STATE_EOF(C_COMMENT):
-#line 73 "asm.l"
+#line 71 "asm.l"
 {
 		if (wflag)
 			unexpected_eof(LINENO);
@@ -777,45 +776,45 @@ case YY_STATE_EOF(C_COMMENT):
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 78 "asm.l"
+#line 76 "asm.l"
 { echos(comment_begin); ECHO; yy_push_state(CPP_COMMENT); }
 	YY_BREAK
 /* String */
 case 6:
 YY_RULE_SETUP
-#line 81 "asm.l"
+#line 79 "asm.l"
 { ECHO; yy_push_state(STRING); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 82 "asm.l"
+#line 80 "asm.l"
 { ECHO; yy_pop_state(); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 83 "asm.l"
+#line 81 "asm.l"
 { put_char(LEXTEXT[0]); put_char(LEXTEXT[1]); }
 	YY_BREAK
 /* Literal */
 case 9:
 YY_RULE_SETUP
-#line 86 "asm.l"
+#line 84 "asm.l"
 { ECHO; yy_push_state(LITERAL); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 87 "asm.l"
+#line 85 "asm.l"
 { ECHO; yy_pop_state(); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 88 "asm.l"
+#line 86 "asm.l"
 { put_char(LEXTEXT[0]); put_char(LEXTEXT[1]); }
 	YY_BREAK
 /* Preprocessing directive */
 case 12:
 YY_RULE_SETUP
-#line 91 "asm.l"
+#line 89 "asm.l"
 {
 		int c;
 
@@ -866,7 +865,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 138 "asm.l"
+#line 136 "asm.l"
 {
 		if ((last_directive = asm_reserved_sharp(LEXTEXT, LEXLENG)) != 0) {
 			put_macro(LEXTEXT);
@@ -885,17 +884,17 @@ YY_RULE_SETUP
 /* Null directive */
 case 14:
 YY_RULE_SETUP
-#line 153 "asm.l"
+#line 151 "asm.l"
 { put_macro(LEXTEXT); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 155 "asm.l"
+#line 153 "asm.l"
 ECHO;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 156 "asm.l"
+#line 154 "asm.l"
 {
 		if (YY_START == PREPROCESSOR_LINE
 		    && (last_directive == SHARP_IF || last_directive == SHARP_ELIF)
@@ -914,26 +913,26 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 171 "asm.l"
+#line 169 "asm.l"
 { put_brace(LEXTEXT); }
 	YY_BREAK
 /* New line */
 case 18:
 YY_RULE_SETUP
-#line 173 "asm.l"
+#line 171 "asm.l"
 DEFAULT_END_OF_LINE_ACTION
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 174 "asm.l"
+#line 172 "asm.l"
 { put_char(LEXTEXT[0]); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 176 "asm.l"
+#line 174 "asm.l"
 ECHO;
 	YY_BREAK
-#line 937 "asm.c"
+#line 936 "asm.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(ASM):
 case YY_STATE_EOF(CPP_COMMENT):
@@ -1827,11 +1826,10 @@ int main()
 	return 0;
 	}
 #endif
-#line 176 "asm.l"
+#line 174 "asm.l"
 
 void
-asm_parser_init(ip)
-	FILE *ip;
+asm_parser_init(FILE *ip)
 {
 	newline_terminate_string = 1;
 	DEFAULT_BEGIN_OF_FILE_ACTION

@@ -296,22 +296,16 @@ Xor, PHP_XOR
 "_SERVER", PHP__SERVER
 "_SESSION", PHP__SESSION
 %%
-int php_reserved_word(const char *, int);
 int
-php_reserved_word(str, len)
-	const char *str;
-	int len;
+php_reserved_word(const char *str, int len)
 {
 	struct keyword *keyword;
 
 	keyword = php_lookup(str, len);
 	return (keyword && IS_RESERVED_WORD(keyword->token)) ? keyword->token : 0;
 }
-int php_reserved_variable(const char *, int);
 int
-php_reserved_variable(str, len)
-	const char *str;
-	int len;
+php_reserved_variable(const char *str, int len)
 {
 	struct keyword *keyword;
 

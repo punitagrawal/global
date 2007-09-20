@@ -1,25 +1,25 @@
 /*
- * Copyright (c) 2004 Tama Communications Corporation
+ * Copyright (c) 2004, 2005 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef _ANCHOR_H_
 #define _ANCHOR_H_
 
+#include "checkalloc.h"
 /*
  * Anchor table.
  *
@@ -46,9 +46,7 @@ struct anchor {
 		strlimcpy((a)->tag, tag, sizeof((a)->tag));		\
 		(a)->reserve = NULL;					\
 	} else {							\
-		(a)->reserve = strdup(tag);				\
-		if ((a)->reserve == NULL)				\
-			die("short of memory.");			\
+		(a)->reserve = check_strdup(tag);			\
 		(a)->tag[0] = '\0';					\
 	}								\
 } while (0)
@@ -65,10 +63,11 @@ struct anchor {
 #define A_HELP		7
 #define A_LIMIT		8
 
+void anchor_prepare(FILE *);
 void anchor_load(const char *);
 void anchor_unload(void);
-struct anchor *anchor_first();
-struct anchor *anchor_next();
+struct anchor *anchor_first(void);
+struct anchor *anchor_next(void);
 struct anchor *anchor_get(const char *, int, int, int);
 int define_line(int);
 int *anchor_getlinks(int);

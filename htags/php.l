@@ -1,22 +1,21 @@
 %{
 /*
- * Copyright (c) 2002, 2004 Tama Communications Corporation
+ * Copyright (c) 2002, 2004, 2005, 2006 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -39,7 +38,6 @@
 #include "common.h"
 #include "incop.h"
 #include "htags.h"
-#include "path2url.h"
 #include "../gtags-parser/php_res.h"
 
 #define lex_symbol_generation_rule(x) php_ ## x
@@ -51,6 +49,9 @@
 #define ECHO	echos(LEXTEXT)
 
 #define YY_USER_ACTION DEFAULT_YY_USER_ACTION
+
+static int pre_here_document;
+static char end_of_here_document[IDENTLEN+1];
 
 %}
  /* Definitions */
@@ -64,8 +65,8 @@ ALPHA		[a-zA-Z_\x80-\xff]
 ALPHANUM	[a-zA-Z_\x80-\xff0-9]
 WORD		{ALPHA}{ALPHANUM}*
 
-%start	PHP C_COMMENT CPP_COMMENT SHELL_COMMENT STRING LITERAL PREPROCESSOR_LINE
-%option 8bit noyywrap noyy_top_state stack prefix="php_"
+%start	PHP C_COMMENT CPP_COMMENT SHELL_COMMENT STRING LITERAL HEREDOCUMENT PREPROCESSOR_LINE
+%option 8bit noyywrap noyy_top_state stack never-interactive prefix="php_"
 %%
  /* Start PHP */
 <INITIAL>"<?="		{ put_string(LEXTEXT); BEGIN PHP; }
@@ -74,7 +75,7 @@ WORD		{ALPHA}{ALPHANUM}*
 <INITIAL>"<%"		{ put_string(LEXTEXT); BEGIN PHP; }
 <INITIAL>"<script[ \t]+language=(\")?php(\")?>" { put_string(LEXTEXT); BEGIN PHP; }
  /* Ignore HTML */
-<INITIAL>.              ECHO;
+<INITIAL>.              put_string(LEXTEXT);
  /* End of PHP */
 <PHP>"?>"		{ put_string(LEXTEXT); BEGIN INITIAL; }
 <PHP>"%>"               { put_string(LEXTEXT); BEGIN INITIAL; }
@@ -97,6 +98,25 @@ WORD		{ALPHA}{ALPHANUM}*
 <LITERAL>\'	{ ECHO; yy_pop_state(); }
 <LITERAL>\\.	{ put_char(LEXTEXT[0]); put_char(LEXTEXT[1]); }
 
+ /* Here document */
+<PHP><<<{WORD} {
+		/* extract word and save */
+		if (LEXLENG - 3 > IDENTLEN)
+			die("Too long name '%s'.", LEXTEXT + 3);
+		strcpy(end_of_here_document, LEXTEXT + 3);
+		put_string("<<<");
+		put_reserved_word(end_of_here_document);
+		/* begin here document from the next line */
+		pre_here_document = 1;
+	}
+<HEREDOCUMENT>^[ \t]*{WORD} {
+		const char *keyword = strtrim((const char *)LEXTEXT, TRIM_HEAD, NULL);
+		put_reserved_word(LEXTEXT);
+		if (!strcmp(end_of_here_document, keyword)) {
+			end_of_here_document[0] = '\0';
+			yy_pop_state();
+		}
+	}
 <PHP>^[ \t]*include[ \t]*\( {
 		int c;
 
@@ -143,8 +163,8 @@ WORD		{ALPHA}{ALPHANUM}*
 		}
 	}
 <PHP>{NUMBER}	ECHO;
-<PHP,STRING>\${WORD}	 |
-<PHP,STRING>\$\{{WORD}\} {
+<PHP,STRING,HEREDOCUMENT>\${WORD} |
+<PHP,STRING,HEREDOCUMENT>\$\{{WORD}\} {
 		struct anchor *a = NULL;
 		const char *p = LEXTEXT + 1;	/* skip '$' */
 		int brace = 0, i = 0;
@@ -166,7 +186,7 @@ WORD		{ALPHA}{ALPHANUM}*
 		} else {
 			i = LEXLENG - 1;
 		}
-		if (symbol && (a = anchor_get(p, i, 'Y', LINENO)) != NULL) {
+		if ((a = anchor_get(p, i, 'Y', LINENO)) != NULL) {
 			echoc('$');
 			if (brace)
 				echoc('{');
@@ -194,13 +214,18 @@ WORD		{ALPHA}{ALPHANUM}*
 	}
 <PHP>[{}]	{ put_brace(LEXTEXT); }
  /* New line */
-\n		DEFAULT_END_OF_LINE_ACTION
+\n		{
+			DEFAULT_END_OF_LINE_ACTION
+			if (pre_here_document == 1) {
+				pre_here_document = 0;
+				yy_push_state(HEREDOCUMENT);
+			}
+		}
 .		{ put_char(LEXTEXT[0]); }
 
 %%
 void
-php_parser_init(ip)
-	FILE *ip;
+php_parser_init(FILE *ip)
 {
 	DEFAULT_BEGIN_OF_FILE_ACTION
 }

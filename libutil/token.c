@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -38,16 +37,16 @@
  * File input method.
  */
 int lineno;
-const unsigned char *sp, *cp, *lp;
+const char *sp, *cp, *lp;
 int crflag;			/* 1: return '\n', 0: doesn't return */
 int cmode;			/* allow token which start with '#' */
 int cppmode;			/* allow '::' as a token */
 int ymode;			/* allow token which start with '%' */
-unsigned char token[MAXTOKEN];
-unsigned char curfile[MAXPATHLEN];
+char token[MAXTOKEN];
+char curfile[MAXPATHLEN];
 int continued_line;		/* previous line ends with '\\' */
 
-static unsigned char ptok[MAXTOKEN];
+static char ptok[MAXTOKEN];
 static int lasttok;
 static FILE *ip;
 static STRBUF *ib;
@@ -59,8 +58,7 @@ static void pushbackchar(void);
  * opentoken:
  */
 int
-opentoken(file)
-	const char *file;
+opentoken(const char *file)
 {
 	/*
 	 * b flag is needed for WIN32 environment. Almost unix ignore it.
@@ -106,12 +104,10 @@ closetoken(void)
  */
 
 int
-nexttoken(interested, reserved)
-	const char *interested;
-	int (*reserved)(const char *, int);
+nexttoken(const char *interested, int (*reserved)(const char *, int))
 {
 	int c;
-	unsigned char *p;
+	char *p;
 	int sharp = 0;
 	int percent = 0;
 
@@ -257,8 +253,7 @@ pushbacktoken(void)
  * Peekc() read ahead following blanks but doesn't chage line.
  */
 int
-peekc(immediate)
-	int immediate;
+peekc(int immediate)
 {
 	int c;
 	long pos;

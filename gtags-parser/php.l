@@ -1,22 +1,21 @@
 %{
 /*
- * Copyright (c) 2003 Tama Communications Corporation
+ * Copyright (c) 2003, 2006 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -26,11 +25,7 @@
 #include <config.h>
 #endif
 #include <stdio.h>
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif
@@ -67,36 +62,23 @@
 #define PHP_LBRACK		'['
 #define PHP_RBRACK		']'
 
-#ifdef HAVE_STDARG_H
 static void debug_print(const char *, ...);
-#else
-static void debug_print();
-#endif
-
 static int level;			/* block nest level */
 static STRBUF *string;			/* string */
+static char end_of_here_document[IDENTLEN+1];
+static int pre_here_document;
 
 /*
  * For debug.
  */
 static void
-#ifdef HAVE_STDARG_H
 debug_print(const char *s, ...)
-#else
-debug_print(s, va_alist)
-	const char *s;
-	va_dcl
-#endif
 {
 	va_list ap;
 
 	if (!debug)
 		return;
-#ifdef HAVE_STDARG_H
 	va_start(ap, s);
-#else
-	va_start(ap);
-#endif
 	(void)vfprintf(stderr, s, ap);
 	va_end(ap);
 }
@@ -138,10 +120,17 @@ NUMBER		-?({L}|{D1}|{D2})
 ALPHA		[a-zA-Z_\x80-\xff]
 ALPHANUM	[a-zA-Z_\x80-\xff0-9]
 WORD		{ALPHA}{ALPHANUM}*
-%start	PHP STRING LITERAL
-%option 8bit caseless noyywrap nounput yylineno prefix="php_"
+%start	PHP STRING LITERAL HEREDOCUMENT
+%option 8bit caseless noyywrap nounput yylineno never-interactive prefix="php_"
 %%
-\n			ECHO;
+\n			{
+				ECHO;
+				if (pre_here_document == 1) {
+					pre_here_document = 0;
+					debug_print("[BEGIN HEREDOCUMENT:%s]\n", end_of_here_document);
+					BEGIN HEREDOCUMENT;
+				}
+			}
  /* Start PHP */
 <INITIAL>"<?="		ECHO; BEGIN PHP;
 <INITIAL>"<?"		ECHO; BEGIN PHP;
@@ -199,10 +188,30 @@ WORD		{ALPHA}{ALPHANUM}*
 <LITERAL>\\.		strbuf_puts(string, LEXTEXT);
 <LITERAL>.		strbuf_putc(string, LEXTEXT[0]);
 
+ /* Here document */
+<PHP><<<{WORD}		{
+				debug_print("<L:%s>", LEXTEXT);
+				/* extract word and save */
+				if (LEXLENG - 3 > IDENTLEN)
+					die("Too long name '%s'.", LEXTEXT + 3);
+				strcpy(end_of_here_document, LEXTEXT + 3);
+				/* begin here document from the next line */
+				pre_here_document = 1;
+			}
+<HEREDOCUMENT>^[ \t]*{WORD} {
+				const char *keyword = strtrim((const char *)LEXTEXT, TRIM_HEAD, NULL);
+				ECHO;
+				if (!strcmp(end_of_here_document, keyword)) {
+					debug_print("[END HEREDOCUMENT]");
+					end_of_here_document[0] = '\0';
+					BEGIN PHP;
+				}
+			}
+
  /* Cast */
 <PHP>\([ \t]*(bool|boolean|int|integer|real|double|float|string|array|object)[ \t]*\)
 			;
-<PHP,STRING>$\{{WORD}\}	{
+<PHP,STRING,HEREDOCUMENT>$\{{WORD}\} {
 				/*
 				 * 0123456	yyleng = 6
 				 * ${abc}\0
@@ -216,7 +225,7 @@ WORD		{ALPHA}{ALPHANUM}*
 
 				return PHP_VARIABLE;
 			}
-<PHP,STRING>${WORD}	{
+<PHP,STRING,HEREDOCUMENT>${WORD} {
 				/*
 				 * 01234	yyleng = 4
 				 * $abc\0
@@ -230,6 +239,8 @@ WORD		{ALPHA}{ALPHANUM}*
 
 				return PHP_VARIABLE;
 			}
+<HEREDOCUMENT>.		ECHO;
+
 <PHP>{NUMBER}		debug_print("<N:%s>", LEXTEXT);
 <PHP>{WORD}		{
 				int id = php_reserved_word(LEXTEXT, LEXLENG);
@@ -258,7 +269,7 @@ WORD		{ALPHA}{ALPHANUM}*
 <PHP>[-+*/%&~^]=?	ECHO;
 <PHP>[=><!]=		ECHO;
 <PHP>[-+&|<>]{2}=?	ECHO;
-<PHP>"<>"|"<<<"		ECHO;
+<PHP>"<>"		ECHO;
 <PHP>"$"		{ ECHO; return PHP_DOLLAR; }
 <PHP>.			ECHO;
 
@@ -267,8 +278,7 @@ WORD		{ALPHA}{ALPHANUM}*
  * php: read PHP file and pickup tag entries.
  */
 void
-php(file)
-	const char *file;
+php(const char *file)
 {
 	int token;
 	int target = (sflag) ? SYM : (rflag) ? REF : DEF;
@@ -279,6 +289,7 @@ php(file)
 		die("'%s' cannot open.", file);
 
 	LEXRESTART(NULL);
+	LEXLINENO = 1;
 	while ((token = LEXLEX()) != 0) {
 		switch (token) {
 		case PHP_DEFINE:

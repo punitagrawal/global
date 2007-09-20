@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005
+ Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
 	Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
@@ -17,8 +17,252 @@ ___________________________________
 
 		----------------------------------
 
-GLOBAL NEWS - User visible changes.
+GNU GLOBAL NEWS - User visible changes.
 At least, you had better search '[INCOMPATIBLE CHANGES]' for each version.
+
+Version 5.6.1 - August 11 2007, by Shigio YAMAGUCHI
+
+[CHANGES]
+* gtags.conf: Added '.git/' to the DEFAULTSKIP list.
+
+[BUG FIXED]
+* global: Global(1) with the -t option didn't print correct line number.
+  Gtags.vim also didn't work correctly due to this bug. This bug was
+  introduced in GLOBAL-5.4.
+
+Version 5.6 - July 6 2007, by Shigio YAMAGUCHI
+
+[INCOMPATIBLE CHANGES]
+* All commands: According to the GNU coding standard, the --version option
+  shows always verbose message without --verbose option.
+
+[CHANGES]
+* Migrated to GNU GPLv3 and GNU LGPLv3.
+* gtags-parser: Added support of assembler directive ".macro" and ".equ".
+
+[BUG FIXED]
+* global(1): Fix memory leak.
+
+Version 5.5 - May 5 2007, by Shigio YAMAGUCHI
+
+* GNU GLOBAL became a BOKINware.
+
+* gtags-parser: Support of 'enum' (java).
+* gtags.el: Changed to work without event-point function.
+
+Version 5.4.1 - March 10 2007, by Shigio YAMAGUCHI
+
+[CHANGES]
+* htags: Added new --item-order option.
+  Specify order of items in the top page. The spec is a string
+  consists of item signs in order. Each sign means as follows:
+  c: caution, s: search form, m: mains, d: definition, f: files.
+  The default is 'csmdf'.
+
+[BUG FIXED]
+* htags: didn't extract some '#include' correctly.
+
+Version 5.4 - January 29 2007, by Shigio YAMAGUCHI
+
+[INCOMPATIBLE CHANGES]
+* Further compression of tag file (format version 5).
+  Though new global can read older tag file since version-5.0, older
+  global cannot read new format. It might say like follows:
+	"GTAGS seems new format. Please install the latest GLOBAL."
+
+[OTHER CHANGES]
+* global: Improved performance when the -x option is not specified.
+* globash.rc: Added new option -l for tag search command (x,r,s,g,P,I,f).
+  This option invokes less(1) directly without tag stack.
+* Verbose messages are unified.
+  P option      file not found
+		<n> files located
+  others        object not found
+		path format: <n> files located
+		other format:<n> objects located
+
+[BUG FIXED]
+* Gtags(1) and global(1) didn't work well in the system root directory('/').
+
+Version 5.3 - November 20 2006, by Shigio YAMAGUCHI
+
+[INCOMPATIBLE CHANGES]
+* global: Changed not to locate other symbols (-s) in GTAGSLIBPATH.
+  This is the original specification of GLOBAL.
+* global: Stop sorting when the -I(--idutils) option specified.
+  The output of gid(idutils) is sorted by the suitable way. Though the order is
+  slightly differ from global(1), it need not be sorted again.
+
+[OTHER CHANGES]
+* global:  Added new option -O(--only-other).
+* htags: Added some new options and new arguments which are synonyms of config variable.
+  This decreases dependence on configration file.
+
+  new option              | config variable
+  ------------------------+-------------------------
+  --disable-grep          | disable_grep
+  --table-list            | table_list
+  --tabs=<n>              | tabs
+  --full-path             | full_path
+
+  new argument            | config variable
+  ------------------------+-------------------------
+  --line-number [columns] | ncol
+  --func-header [position]| definition_header
+  --xhtml [version]       | xhtml_version
+
+	(*=default)
+	position: before, right, *after
+	version: *1.0, 1.1
+
+* htags: Changed to use each 'CVS/Repository' file to generate URLs if it is available.
+* htags: Added '.gitignore' to the default skip file list.
+
+* gtags.el:
+  - Shorten path names in [GTAGS SELECT MODE]:
+    If project directory is specified using 'gtags-visit-rootdir', gtags.el print path
+    using the relative path name from the project directory, else print absolute path name.
+  - Support dynamic completing-read of tag name.
+    gtags-make-complete-list is deprecated. You can enjoy tag name completetion without
+    invoking this command.
+
+[BUG FIXED]
+* gtags: gtags had exited when it encountered dead symbolic link.
+
+Version 5.2 - August 8 2006, by Shigio YAMAGUCHI
+
+* htags: Added new options:
+  - -h(--func-header) option.
+  - -I(--icon) option.
+  - -T(table-flist[=fields]) option.
+  Suggested options:
+	$ htags -vsanohIT
+* htags: Changed the default color of braces from blue to red to make them stand out.
+* htags: Always enable 'Grep pattern' form when the -f(--form) option specified.
+  Removed config variable 'enable_grep' since it became meaningless. Instead, added
+  a new variable 'disable_grep'.
+* htags: Added more profitable tips in file browser.
+  - File        size of bytes
+  - Directory   number of files in the directory.
+
+Version 5.1 - June 10 2006, by Shigio YAMAGUCHI
+
+[INCOMPATIBLE CHANGES]
+* Changed the priority about the --result option to make the format
+  specification easy. The --result option is given to priority more
+  than the -t and -x option. (This option appeared in version 5.0.)
+
+[OTHER CHANGES]
+* Added new program 'gtags-cscope'.
+  Gtags-cscope is a pseudo cscope which implements the line-oriented
+  interface. You can use this command for various clients instead of
+  true cscope.
+* Added new format 'cscope' to the argument of --result=<format>.
+
+Version 5.0 - April 21 2006, by Shigio YAMAGUCHI
+
+[INCOMPATIBLE CHANGES]
+* Moved to new tag format. (GTAGS, GRTAGS, GSYMS, GPATH)
+  The purpose is as follows:
+  o Allows path name including blanks, at least in tag files.
+    (GLOBAL still doesn't support path name which contains blanks.)
+  o Decrease disk space used.
+  o Make tag format simpler.
+  o Realize stable performance.
+
+  Hereafter, older tag format is not supported.
+  Compact format was progressively canceled with the adoption of
+  the new tag format. The -c(--compact) option of gtags(1) was removed.
+
+  The following error messages are displayed in a wrong combination:
+  - older global and new tag file
+    $ global -x main
+    GTAGS seems new format. Please install the latest GLOBAL.
+  - new global and older tag file
+    $ global -x main
+    GTAGS seems older format. Please remake tag files.
+
+  Known problem:
+  - older global and new tag file
+    Global(1) with the -g or -P command will always work as if invoked
+    with the -o option. There is no way to avoid this problem.
+
+New requirement:
+* Added new requirement of plug-in parser
+  Plug-in parser must process arguments in the order they are given
+  in the command line. In each file, any order is acceptable.
+  Exuberant Ctags with the -xu option meets this requirement.
+  (See global.info for the detail.)
+
+Removed options:
+* gtags(1): The -c(--compact) option was removed.
+  Compact format was progressively canceled with the adoption of the new
+  tag format.
+* gtags(1): The -o(--omit-gsyms) option was removed.
+  This option was necessary in the past to use the program in a incompetent
+  machine with a small hard disk. Since most recent machines has powerful
+  CPU and mass hard disk. This options might already be unnecessary.
+* htags(1): The --style-sheet option was removed.
+  This is a really halfway option, and now nobody might need it because
+  the --xhtml option became available.
+
+[OTHER CHANGES]
+New options:
+* global: Added --result=<format> option. Grep format is newly supported.
+
+  <format>: path,ctags,ctags-x,grep
+        
+  conventional option | newly added option
+  --------------------+---------------------
+  (none)              | --result=path
+  -t                  | --result=ctags
+  -x                  | --result=ctags-x
+                      | --result=grep
+        
+  The -t and -x option are given to priority more than the --result
+  option.
+
+Version 4.8.7 - September 30 2005, by Shigio YAMAGUCHI
+
+New options:
+* gtags: New --file file-list option added.
+  Gtags(1) accept a file list specified by --file option.
+
+        % find . -type f -print >/tmp/list
+        % gtags --file=/tmp/list
+        or
+        % find . -type f -print | gtags --file=-
+
+* gtags: New --max-args option added.
+
+Improvement of efficiency:
+* Gtags was improved of performance by changing algorithm of
+  incremental updating. Along with it, the verbose message was
+  greatly changed.
+* Gtags was improved of performance by decreasing the frequency
+  of the parser invoking.
+  Under the influence of it, the verbose message is not necessarily
+  real-time. If you dislike this behavior, use the --max-args
+  option of gtags. You can control the frequency of the invoking
+  with the option. With --max-args=1, the program does the same
+  behavior as older version.
+* Htags was improved of performance by decreasing the frequency
+  of the parser invoking.
+* Htags was improved of performance by omiting flushing temporary
+  files to the disk.
+
+Fixed bugs:
+* Htags didn't treat here document of PHP source code correctly.
+  (<<<WORD)
+* Htags didn't treat HTML part of PHP source code correctly.
+
+Other facilities:
+* Added 'Htags Hyper-text Reference Kit'.
+  The hyper-text generated by htags(1) is available from external
+  programs. This kit helps you to convert the path of the source
+  file into the URL in the hyper-text.
+
+* doc/global.txi: Added the usage of Doxygen using GLOBAL.
 
 Version 4.8.6 - May 12 2005, by Shigio YAMAGUCHI
 

@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -52,8 +51,7 @@ static const char *makeobjdir;		/* obj directory		*/
  * setupvariables: load variables regard to BSD OBJ directory.
  */
 static void
-setupvariables(verbose)
-	int verbose;
+setupvariables(int verbose)
 {
 	const char *p;
 
@@ -86,11 +84,7 @@ setupvariables(verbose)
  * This behavior is same with BSD make(1)'s one.
  */
 int
-gtagsexist(candidate, dbpath, size, verbose)
-	const char *candidate;
-	char *dbpath;
-	int size;
-	int verbose;
+gtagsexist(const char *candidate, char *dbpath, int size, int verbose)
 {
 	char path[MAXPATHLEN+1];
 
@@ -153,11 +147,7 @@ gtagsexist(candidate, dbpath, size, verbose)
  * and exit.
  */
 void
-getdbpath(cwd, root, dbpath, verbose)
-	char *cwd;
-	char *root;
-	char *dbpath;
-	int verbose;
+getdbpath(char *cwd, char *root, char *dbpath, int verbose)
 {
 	struct stat sb;
 	char *p;
@@ -192,7 +182,7 @@ getdbpath(cwd, root, dbpath, verbose)
 		}
 	} else {
 		if (verbose && getenv("GTAGSDBPATH"))
-			fprintf(stderr, "warning: GTAGSDBPATH is ignored becase GTAGSROOT is not set.\n");
+			fprintf(stderr, "warning: GTAGSDBPATH is ignored because GTAGSROOT is not set.\n");
 		/*
 		 * start from current directory to '/' directory.
 		 */
