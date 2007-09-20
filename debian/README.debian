@@ -1,0 +1,53 @@
+
+	GLOBAL for Debian
+	-----------------
+
+See /usr/doc/global/README.gz and README.htmake.gz or the
+relevant man pages for general usage details.
+
+The Debian version of GLOBAL has been configured to use a
+centralised cgi search mechanism I have developed for it.
+If you want to generate searchable html source but don't
+like to have .htaccess files or cgi execution enabled all
+over the place, then consider using 'htmake' in place of
+'htags' to generate your hypertext source.  See the htmake
+manual page for details.
+
+gtags.el for emacs and patches for nvi to enable their use
+with GLOBAL can be found in the ./examples directory.
+
+The global.conf file also found there should be copied to
+/etc/gtags if you wish to make use of it's facilities, but
+at present it is considered 'undocumented' by the
+upstream author.
+
+The systags script has been included in this package by
+request, but the author has also warned that it is
+'not properly generic' yet.
+Thanks to Sergio Talens-Oliag <sto@iti.upv.es> for
+contributing a man page for it.
+
+Lastly, I have also added a -C option for htags which
+produces gzipped html files with a suffix of html.gz
+This makes use of the ghtml.cgi file unnecessary for
+Debian systems, as they should decompress html.gz files
+transparently.
+
+(UPDATE: FreeBSD (the upstream authors platform) does not
+presently deal with html.gz files the same way that Debian
+does, hence htags -c option creates .ghtml files by default.
+The -C option has been added as a convenience for Debian
+users, but this facility may be implemented differently
+in the future.  An alternate option for Debian users is
+to specify html.gz as the default suffix in a global.conf
+file which will override the suffix created with -c, but
+be aware that this may raise platform dependency issues
+in cross platform environments.  We hope this issue will
+be cleanly resolved in the future.) 
+
+Comments, patches, praise, and blathering flames can
+be sent along with suggestions for improvement to
+Ron <ron@microtronics.com.au>
+I hope you find this software as useful as I have.
+
+Sat, 13 Feb 1999 03:18:28 +1030

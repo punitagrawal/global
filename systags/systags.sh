@@ -34,16 +34,22 @@
 # script to make hypertext of kernel source.
 # support OS: FreeBSD, NetBSD, OpenBSD, Linux, GNUmach, GNUhurd
 #
+#	modified by Ron Lee <ron@microtronics.com.au> 19/2/99
+#	to pass -C option to htags.
+#
 while case $1 in
 	-*)
-		if grep '[^-cfgn]' <<! >/dev/null 2>&1; then
+		if grep '[^-cCfgn]' <<! >/dev/null 2>&1; then
 $1
 !
-			echo "usage: systags [-c][-f][-g][-n][dir]"
+			echo "usage: systags [-c|-C][-f][-g][-n][dir]"
 			exit 1
 		fi
 		case $1 in
 		*c*)	cflag=c;;
+		esac
+		case $1 in
+		*C*)    cflag=C;;
 		esac
 		case $1 in
 		*f*)	fflag=f;;

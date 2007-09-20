@@ -31,6 +31,9 @@
  *
  *	gozilla.c				10-Feb-99
  *
+ *	- modified by Ron Lee <ron@microtronics.com.au>         24-Feb-99
+ *	  to make convertpath recognise html.gz and .ghtml
+ *	  suffixes.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,6 +46,7 @@ static void	usage __P((void));
 
 int	main __P((int, char **));
 int	issource __P((char *));
+int	validsuffix __P((STRBUF *));
 int	convertpath __P((char *, char *, char *, STRBUF *));
 int	sendcommand __P((char *));
 
@@ -215,6 +219,22 @@ char	*path;
 
 }
 int
+validsuffix(sb)
+STRBUF	*sb;
+{
+	static const char *s[] = {".html", ".htm", ".html.gz", ".ghtml", NULL};
+	int i=0;
+
+	while(s[i]) {
+		strputs(sb,s[i]);
+		if (test("f", strvalue(sb)))
+			return 1;
+		strpushback(sb, strlen(s[i]));
+		i++;
+	}
+	return 0;
+}
+int
 convertpath(dbpath, htmldir, path, sb)
 char	*dbpath;
 char	*htmldir;
@@ -239,12 +259,7 @@ STRBUF	*sb;
 	strputs(sb, htmldir);
 	strputs(sb, "/S/");
 	strputs(sb, p);
-	strputs(sb, ".html");
-	if (test("f", strvalue(sb)))
-		return 0;
-	strpushback(sb, strlen(".html"));
-	strputs(sb, ".htm");
-	if (test("f", strvalue(sb)))
+	if (validsuffix(sb))
 		return 0;
 	/*
 	 * old style.
@@ -253,12 +268,7 @@ STRBUF	*sb;
 	strputs(sb, "/S/");
 	for (p = path + 1; *p; p++)
 		strputc(sb, (*p == '/') ? ' ' : *p);
-	strputs(sb, ".html");
-	if (test("f", strvalue(sb)))
-		return 0;
-	strpushback(sb, strlen(".html"));
-	strputs(sb, ".htm");
-	if (test("f", strvalue(sb)))
+	if (validsuffix(sb))
 		return 0;
 
 	return -1;

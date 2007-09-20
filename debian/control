@@ -1,0 +1,32 @@
+Source: global
+Section: devel
+Priority: optional
+Maintainer: Ron C. Lee <ron@microtronics.com.au>
+Standards-Version: 2.5.0
+
+Package: global
+Architecture: any
+Depends: ${shlibs:Depends}
+Suggests: lynx | www-browser, apache | httpd
+Description: Source code search and browse.
+ GLOBAL is a source code tag system that works the same way across
+ diverse environments. Currently, it supports the following:
+ .
+    o Shell command line (see 'Global')
+    o nvi editor (see 'Extended nvi using global')
+    o emacs editor (see 'Emacs using global')
+    o Web browser (see 'Hypertext generator')
+    o Elvis editor (see 'Elvis using global')
+ .
+ Supported languages are C/Yacc and Java.
+ You can locate a specified function in the source files and move
+ there easily. It is especially useful for hacking large projects
+ containing many subdirectories, many '#ifdef' and many main()
+ functions, like X or kernel source.
+ .
+ GLOBAL consists of global(1), gtags(1), htags(1),
+ an extended nvi(1), gtags.el and gozilla(1).
+ .
+ This package include the htmake(1) extension which allows GLOBAL's
+ hypertext search function to be implemented from a single central
+ cgi script.

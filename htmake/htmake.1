@@ -1,0 +1,109 @@
+.TH HTMAKE 1 "27 March 1999" "Linux" "GLOBAL cgi Utilities"
+.\" Copyright (c) 1999  Ron Lee.  All rights reserved.
+.\" This text may be distributed under the same terms as the htmake source.
+.\" All copies of this manual must acknowledge the author and include the
+.\" above copyright statement.
+.\"
+.\" In cases of discrepancy the source is authorative.  Duh 8^}
+.SH NAME
+htmake \- create GLOBAL hypertext source searchable by gsearch.cgi
+.SH SYNOPSIS
+.BR htmake " [" "htags options" "] [" --url=base-url ]
+.RI [ destdir ]
+.SH "DESCRIPTION"
+.B htmake
+is a wrapper script that creates searchable hypertext from program 
+source code and records information into a \fBpath database\fP
+needed for a centralised search mechanism.
+.PP
+Prior to using this command you must have installed gsearch.cgi
+using the \fBhtconfig -I\fP option and configured the location
+of the \fBpath database\fP in \fIhtmake.conf\fP
+.PP
+Before you can create the hypertext source you need to execute
+\fBgtags\fP(1) from the root directory of the source tree.
+\fBhtmake\fP is then called from the same place.
+.PP
+\fBhtmake\fP uses \fBhtags\fP(1) to create the hypertext with a
+unique id and \fBhtconfig\fP(1) to make the required entries in
+the \fBpath database\fP.
+.SH OPTIONS
+The following options will be passed to \fBhtags\fP(1) if used.
+.TP
+.B -a
+Make an alphabetical function index.
+.TP
+.B -c
+Compress html. Use gzip(1) with .ghtml suffix.
+.TP
+.B -C
+Compress html. Use gzip(1) with .html.gz suffix.
+.TP
+.B -d \fItagdir\fP, --tags=gtagsdbpath
+Specifies the directory in which GTAGS and GRTAGS exist. The default is the current directory.
+.TP
+.B -h
+Add title header frame.
+.TP
+.B -l
+Make a name tag for each line of hypertext created.
+.TP
+.B -n
+Print out the line numbers.
+.TP
+.B -t title
+The title of this hypertext. Defaults to the last component of the current path.
+.TP
+.B --action=cgi-url
+Specify the location search queries are submitted to.
+Defaults to the value set in \fBhtmake.conf\fP or to
+.br
+.I http://localhost/cgi-bin/gsearch.cgi
+.PP
+The remaining options are more general or are passed to \fBhtconfig\fP(1).
+.TP
+.B --url=base-url
+the base url for your new hypertext source.
+For best results always use absolute url's here.
+.br
+eg. \fIhttp://host/~user/mysource\fP
+.br
+It defaults to \fIfile:/destdir\fP
+.TP
+.I destdir
+The directory in which hypertext is generated.
+The default is \fI./HTML\fP
+.TP
+.B -v, --verbose
+Activate the inbuilt screen saver. Give your phosphors a workout.
+.SH EXAMPLES
+$ cd /usr/src/myprog
+.br
+$ gtags
+.br
+$ htmake
+.PP
+$ cd /usr/src/myprog
+.br
+$ gtags -c
+.br
+$ htmake \-c \-\-url=http://host/~user/prog/HTML \\
+  /home/user/public_html/prog
+.SH FILES
+.I /etc/gtags/htmake.conf
+.br
+.I path database
+.SH BUGS
+As a wrapper \fBhtmake\fP gets to inherit bugs from other software too.
+Isn't life fun.
+.PP
+This is \fIalpha\fP software \- expect anything!
+.SH "SEE ALSO"
+.BR htconfig (1), " htags" (1), " gtags" (1), " global" (1).
+.SH AUTHOR
+Ron Lee <ron@microtronics.com.au>
+.SH CREDITS
+Thanks to Shigio Yamaguchi <shigio@wafu.netgate.net> for creating
+\fBGLOBAL\fP and releasing it as free software.
+.br
+A truly cool productivity tool!

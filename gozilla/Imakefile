@@ -3,9 +3,10 @@ XCOMM Imakefile for gozilla
 XCOMM
 
             INC = ../libutil
+          INCDB = ../libdb
 LOCAL_LIBRARIES = XawClientLibs -L../libdb -lglodb
         DEPLIBS = XawClientDepLibs ../libdb/libglodb.a
-        DEFINES = -DSTANDALONE -DGLOBAL -I$(INC)
+        DEFINES = -DSTANDALONE -DGLOBAL -I$(INC) -I$(INCDB)
 
            SRCS = gozilla.c remote.c test.c getdbpath.c strbuf.c conf.c \
                 mgets.c locatestring.c makepath.c strmake.c pathop.c dbop.c

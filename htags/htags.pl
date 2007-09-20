@@ -32,9 +32,15 @@
 #
 #	htags.pl				29-Mar-99
 #
+#      modified by Ron Lee <ron@microtronics.com.au> 3/4/99
+#      - incorporated -C option to make html.gz files
+#        and eliminate the need for ghtml.cgi on
+#        Debian GNU/Linux systems and others which can be
+#        configured to transparently decompress such files.
+
 $com = $0;
 $com =~ s/.*\///;
-$usage = "usage: $com [-a][-c][-f][-h][-l][-n][-v][-w][-t title][-d tagdir][--action=url][--id=id][dir]\n";
+$usage = "usage: $com [-a][-c|-C][-f][-h][-l][-n][-v][-w][-t title][-d tagdir][--action=url][--id=id][dir]\n";
 #-------------------------------------------------------------------------
 # COMMAND EXISTENCE CHECK
 #-------------------------------------------------------------------------
@@ -302,12 +308,13 @@ while ($ARGV[0] =~ /^-/) {
 		$'id = $1;
 	} elsif ($opt =~ /^--nocgi$/) {
 		$'cgi = 0;
-	} elsif ($opt =~ /[^-acfhlnvwtd]/) {
+	} elsif ($opt =~ /[^-acCfhlnvwtd]/) {
 		print STDERR $usage;
 		exit 1;
 	} else {
 		if ($opt =~ /a/) { $'aflag = 'a'; }
 		if ($opt =~ /c/) { $'cflag = 'c'; }
+		if ($opt =~ /C/) { $'cflag = 'C'; }
 		if ($opt =~ /f/) { $'fflag = 'f'; }
 		if ($opt =~ /h/) { $'hflag = 'h'; }
 		if ($opt =~ /l/) { $'lflag = 'l'; }
@@ -329,6 +336,7 @@ if ($'cflag && !&'usable('gzip')) {
 	print STDERR "Warning: 'gzip' command not found. -c option ignored.\n";
 	$'cflag = '';
 }
+$gzipped_suffix = "html.gz" if ($'cflag eq 'C');
 if (!$title) {
 	@cwd = split('/', &'getcwd);
 	$title = $cwd[$#cwd];
@@ -381,7 +389,7 @@ if ($?) { &'error("cannot traverse directory."); }
 #	HTML/cgi-bin/ghtml.cgi	... unzip script (1)
 #	HTML/.htaccess.skel	... skelton of .htaccess (1)
 #	HTML/help.html		... help file (2)
-#	HTML/$REFS/*		... referencies (3)
+#	HTML/$REFS/*		... references (3)
 #	HTML/$DEFS/*		... definitions (3)
 #	HTML/funcs.html		... function index (4)
 #	HTML/funcs/*		... function index (4)
@@ -403,7 +411,7 @@ mkdir($dist, 0777) || &'error("cannot make directory '$dist'.") if (! -d $dist);
 foreach $d ($SRCS, $INCS, $DEFS, $REFS, 'files', 'funcs') {
 	mkdir("$dist/$d", 0775) || &'error("cannot make HTML directory") if (! -d "$dist/$d");
 }
-if ($'cgi && ($'fflag || $'cflag)) {
+if ($'cgi && ($'fflag || $'cflag eq 'c')) {
 	mkdir("$dist/cgi-bin", 0775) || &'error("cannot make cgi-bin directory") if (! -d "$dist/cgi-bin");
 }
 #
@@ -418,7 +426,7 @@ if ($'cgi && $'fflag) {
 	link("$dbpath/GRTAGS", "$dist/cgi-bin/GRTAGS") || &'copy("$dbpath/GRTAGS", "$dist/cgi-bin/GRTAGS") || &'error("cannot copy GRTAGS.");
 	link("$dbpath/GPATH", "$dist/cgi-bin/GPATH") || &'copy("$dbpath/GPATH", "$dist/cgi-bin/GPATH") || &'error("cannot copy GPATH.");
 }
-if ($'cgi && $'cflag) {
+if ($'cgi && $'cflag eq'c') {
 	&makehtaccess("$dist/.htaccess.skel") || &'error("cannot make .htaccess skelton.");
 	chmod(0644, "$dist/.htaccess.skel") || &'error("cannot chmod .htaccess skelton.");
 	&makeghtml("$dist/cgi-bin/ghtml.cgi") || &'error("cannot make unzip script.");
@@ -502,11 +510,11 @@ print STDERR "[", &'date, "] ", "(8) making hypertext from source code ...\n" if
 &makehtml($dist, $file_total);
 &'clean();
 print STDERR "[", &'date, "] ", "Done.\n" if ($'vflag);
-if ($'vflag && $'cgi && ($'cflag || $'fflag)) {
+if ($'vflag && $'cgi && ($'fflag || $'cflag eq 'c')) {
 	print STDERR "\n";
 	print STDERR "[Information]\n";
 	print STDERR "\n";
-	if ($'cflag) {
+	if ($'cflag eq 'c') {
 		print STDERR " You need to setup http server so that '*.$'gzipped_suffix' are treated\n";
 		print STDERR " as gzipped files. Please see 'HTML/.htaccess.skel'.\n";
 		print STDERR "\n";
@@ -555,7 +563,7 @@ if (\$form{'pattern'} eq '') {
 }
 \$pattern = \$form{'pattern'};
 \$flag = (\$form{'type'} eq 'definition') ? '' : 'r';
-\$words = (\$form{'type'} eq 'definition') ? 'definitions' : 'referencies';
+\$words = (\$form{'type'} eq 'definition') ? 'definitions' : 'references';
 print "<H1><FONT COLOR=#cc0000>\" . \$pattern . \"</FONT></H1>\\n";
 print "Following \$words are matched to above pattern.<HR>\\n";
 \$pattern =~ s/'//g;			# to shut security hole

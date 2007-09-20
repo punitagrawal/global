@@ -1,0 +1,7 @@
+#! /bin/sh
+set -e
+if [ "$1" = "remove" ];
+then
+	rm -f /usr/lib/cgi-bin/gsearch.cgi
+	rm -f /usr/lib/cgi-bin/ghtml.cgi
+fi

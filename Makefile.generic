@@ -1,4 +1,4 @@
-SUBDIR = libdb libutil global gtags gctags btreeop htags
+SUBDIR = libdb libutil global gtags gctags btreeop htags systags
 
 ##### EDIT THESE PARAMETERS ###############################################
 CC     = gcc

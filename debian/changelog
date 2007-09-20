@@ -1,0 +1,53 @@
+global (3.44-2) unstable; urgency=low
+
+  * /usr/lib/cgi-bin is now included in the package,
+      postinst no longer fails if httpd is not installed. Closes #38386
+  * postrm split so that files in /usr/lib/cgi-bin are now removed
+      in prerm allowing dir to be correctly removed if empty.
+  * applied patch to enable build for powerpc arch,
+      Thumbs up to Konstantinos Margaritis..  Closes #37848
+
+ -- Ron C. Lee <ron@microtronics.com.au>  Sun, 18 Apr 1999 15:09:44 +0930
+
+global (3.44-1) unstable; urgency=low
+
+  * Initial release.  My first package too!
+  * there's beer in that somewhere ;-)
+  * htmake released for use with the debian package.
+      - this is not incorporated upstream yet.
+
+ -- Ron C. Lee <ron@microtronics.com.au>  Sat,  3 Apr 1999 22:47:43 +0930
+
+global (3.44-0.8) unstable; urgency=low
+
+  * new upstrem release.
+  * libdb1.85 is now statically linked - ./lib is gone so is ./dbpatches
+  	in it's place we have ./libdb and ./libutil
+  * upstream change - gtags --config now searches /etc/gtags/global.conf
+  	too.  Thanks Shigio ;-)
+  * bugfix ACTION=hidden, superfluous lines removed from htags.pl
+  * upstream bugfix in global.cgi regex.
+  * htmake is now in beta test.
+  * postinst and postrm scripts added
+
+ -- Ron C. Lee <ron@microtronics.com.au>  Sun, 21 Mar 1999 05:12:30 +1030
+
+global (3.43-0.9.2) unstable; urgency=low
+
+  * Initial package.
+  * Upstream Makefile.generic patched to debianise
+  	( to be incorporated by upstream author )
+  * Bugfix - include libdb in gozilla/Imakefile for generic build
+  * systags manpage contributed by Sergio Talens-Oliag <sto@iti.upv.es>
+  	( systags/Makefile.generic patched to include it )
+  * htags patched to include -C option to create html.gz files in place
+    of .ghtml ( as made with -c ) --  Debian handles these much cleaner.
+    systags.sh and manual pages also updated to handle -C option.
+  * patched gozilla - it now works with html.gz and .ghtml files too.
+  * htags tidied to clean perl warnings and undefs in global.cgi
+
+ -- Ron C. Lee <ron@microtronics.com.au>  Sat, 13 Feb 1999 03:18:28 +1030
+
+Local variables:
+mode: debian-changelog
+End:

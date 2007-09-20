@@ -129,9 +129,10 @@ typedef struct __db {
 #define	BTREEMAGIC	0x053162
 #define	BTREEVERSION	3
 
+#define R_DUP		0x01	/* duplicate keys */
+
 /* Structure used to pass parameters to the btree routines. */
 typedef struct {
-#define	R_DUP		0x01	/* duplicate keys */
 	u_long	flags;
 	u_int	cachesize;	/* bytes to cache */
 	int	maxkeypage;	/* maximum keys per page */
@@ -158,11 +159,12 @@ typedef struct {
 	int	lorder;		/* byte order */
 } HASHINFO;
 
+#define R_FIXEDLEN	0x01	/* fixed-length records */
+#define R_NOKEY		0x02	/* key not required */
+#define R_SNAPSHOT	0x04	/* snapshot the input */
+
 /* Structure used to pass parameters to the record routines. */
 typedef struct {
-#define	R_FIXEDLEN	0x01	/* fixed-length records */
-#define	R_NOKEY		0x02	/* key not required */
-#define	R_SNAPSHOT	0x04	/* snapshot the input */
 	u_long	flags;
 	u_int	cachesize;	/* bytes to cache */
 	u_int	psize;		/* page size */
