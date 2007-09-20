@@ -1,0 +1,15 @@
+LIB    = libgloutil.a
+CC     = gcc
+AR     = ar
+CFLAGS = -O -I../libdb
+OBJS   = usable.o gtagsop.o getdbpath.o find.o defined.o conf.o tab.o strmake.o \
+	 pathop.o mgets.o makepath.o locatestring.o dbop.o test.o token.o strbuf.o
+
+all: $(LIB)
+
+$(LIB): $(OBJS)
+	$(AR) cq $(LIB) $(OBJS)
+install:
+	@echo -n
+clean:
+	rm -f $(LIB) $(OBJS)

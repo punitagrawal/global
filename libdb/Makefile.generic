@@ -1,0 +1,17 @@
+LIB    = libglodb.a
+CC     = gcc
+AR     = ar
+CFLAGS = -O
+
+OBJS=	bt_close.o bt_conv.o bt_debug.o bt_delete.o bt_get.o \
+	bt_open.o bt_overflow.o bt_page.o bt_put.o bt_search.o \
+	bt_seq.o bt_split.o bt_utils.o mpool.o db.o
+
+all: $(LIB)
+
+$(LIB): $(OBJS)
+	$(AR) cq $(LIB) $(OBJS)
+install:
+	@echo -n
+clean:
+	rm -f $(LIB) $(OBJS)
