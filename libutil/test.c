@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,14 +32,15 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	test.c					 12-Dec-97
+ *	test.c					 1-Aug-99
  *
  */
 #include <sys/types.h>
 #include <sys/stat.h>
-
+#include <string.h>
 #include <unistd.h>
 
+#include "locatestring.h"
 #include "test.h"
 
 /*
@@ -85,8 +90,20 @@ const char *path;
 				return 0;
 			break;
 		case 'x':
+#ifdef _WIN32
+			/* Look at file extension to determine executability */
+			if (strlen(path) < 5)
+				return 0;
+			if (!S_ISREG(sb.st_mode))
+				return 0;
+			if (!locatestring(path, ".exe", MATCH_AT_LAST|IGNORE_CASE) &&
+				!locatestring(path, ".com", MATCH_AT_LAST|IGNORE_CASE) &&
+				!locatestring(path, ".bat", MATCH_AT_LAST|IGNORE_CASE))
+				return 0;
+#else
 			if (access(path, X_OK) < 0)
 				return 0;
+#endif
 			break;
 		default:
 			break;

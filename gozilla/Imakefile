@@ -2,29 +2,11 @@ XCOMM
 XCOMM Imakefile for gozilla
 XCOMM
 
-            INC = ../libutil
-          INCDB = ../libdb
-LOCAL_LIBRARIES = XawClientLibs -L../libdb -lglodb
-        DEPLIBS = XawClientDepLibs ../libdb/libglodb.a
-        DEFINES = -DSTANDALONE -DGLOBAL -I$(INC) -I$(INCDB)
+LOCAL_LIBRARIES = XawClientLibs -L../libutil -lgloutil -L../libdb -lglodb
+        DEPLIBS = XawClientDepLibs ../libdb/libglodb.a ../libutil/libgloutil.a
+        DEFINES = -DSTANDALONE -DGLOBAL -I../libdb -I../libutil -I../machine
 
-           SRCS = gozilla.c remote.c test.c getdbpath.c strbuf.c conf.c \
-                mgets.c locatestring.c makepath.c strmake.c pathop.c dbop.c
-           OBJS = gozilla.o remote.o test.o getdbpath.o strbuf.o conf.o \
-                mgets.o locatestring.o makepath.o strmake.o pathop.o dbop.o
-
-LinkSourceFile(test.c,$(INC))
-LinkSourceFile(getdbpath.c,$(INC))
-LinkSourceFile(strbuf.c,$(INC))
-LinkSourceFile(conf.c,$(INC))
-LinkSourceFile(mgets.c,$(INC))
-LinkSourceFile(locatestring.c,$(INC))
-LinkSourceFile(makepath.c,$(INC))
-LinkSourceFile(strmake.c,$(INC))
-LinkSourceFile(pathop.c,$(INC))
-LinkSourceFile(dbop.c,$(INC))
-
-../libdb/libglodb.a:
-	(cd ../libdb; make)
+           SRCS = gozilla.c remote.c
+           OBJS = gozilla.o remote.o
 
 ComplexProgramTarget(gozilla)

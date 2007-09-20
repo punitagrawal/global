@@ -1,21 +1,25 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
- * Redilogibution and use in source and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 1. Redilogibutions of source code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 2. Redilogibutions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the dilogibution.
+ *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,13 +32,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	dbop.h					12-Nov-98
+ *	dbop.h					12-Jul-99
  *
  */
 #ifndef _DBOP_H_
 #define _DBOP_H_
 
-#include <sys/param.h>
+#include "gparam.h"
 #include "db.h"
 
 #ifndef LITTLE_ENDIAN
@@ -43,8 +47,6 @@
 #ifndef BIG_ENDIAN
 #define BIG_ENDIAN      4321
 #endif
-
-#define MAXKEYLEN	300
 
 typedef	struct {
 	DB	*db;			/* descripter of DB */
@@ -70,19 +72,11 @@ typedef	struct {
 #define DBOP_KEY	1		/* read key part		*/
 #define DBOP_PREFIX	2		/* prefixed read		*/
 
-#ifndef __P
-#if defined(__STDC__)
-#define __P(protos)     protos
-#else
-#define __P(protos)     ()
-#endif
-#endif
-
-DBOP	*dbop_open __P((const char *, int, int, int));
-char	*dbop_get __P((DBOP *, const char *));
-void	dbop_put __P((DBOP *, const char *, const char *));
-void	dbop_del __P((DBOP *, const char *));
-char	*dbop_first __P((DBOP *, const char *, int));
-char	*dbop_next __P((DBOP *));
-void	dbop_close __P((DBOP *));
+DBOP	*dbop_open(const char *, int, int, int);
+char	*dbop_get(DBOP *, const char *);
+void	dbop_put(DBOP *, const char *, const char *);
+void	dbop_del(DBOP *, const char *);
+char	*dbop_first(DBOP *, const char *, int);
+char	*dbop_next(DBOP *);
+void	dbop_close(DBOP *);
 #endif /* _DBOP_H_ */

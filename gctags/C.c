@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by Shigio Yamaguchi.
- * 4. Neither the name of the author nor the names of its contributors
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
+ * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	C.c					12-Sep-98
+ *	C.c					10-Aug-99
  */
 
 #include <ctype.h>
@@ -41,17 +45,18 @@
 #include "gctags.h"
 #include "defined.h"
 #include "die.h"
-#include "locatestring.h"
 #include "strbuf.h"
 #include "token.h"
 
-static	int	function_definition __P((int));
-static	void	condition_macro __P((int));
-static	int	reserved __P((char *));
+static	int	function_definition(int);
+static	void	condition_macro(int);
+static	int	reserved(char *);
 
 /*
  * #ifdef stack.
  */
+#define MAXPIFSTACK	100
+
 static struct {
 	short start;		/* level when #if block started */
 	short end;		/* level when #if block end */
@@ -210,12 +215,17 @@ C(yacc)
 						PUT(token, lineno, sp);
 				if (c == '\n')
 					pushbacktoken();
+			} else {
+				if (target == SYM)
+					PUT(token, lineno, sp);
 			}
 			break;
 		case CP_INCLUDE:
 		case CP_ERROR:
 		case CP_LINE:
 		case CP_PRAGMA:
+		case CP_WARNING:
+		case CP_IDENT:
 			while ((c = nexttoken(interested, reserved)) != EOF && c != '\n')
 				;
 			break;
@@ -228,7 +238,7 @@ C(yacc)
 		case CP_UNDEF:
 			condition_macro(cc);
 			while ((c = nexttoken(interested, reserved)) != EOF && c != '\n') {
-				if (!((cc == CP_IF || cc == CP_ELIF) && !strcmp(token, "defined")))
+				if (!strcmp(token, "defined"))
 					continue;
 				if (c == SYMBOL && target == SYM)
 					PUT(token, lineno, sp);
@@ -290,6 +300,7 @@ C(yacc)
 				fprintf(stderr, "Warning: Out of function. %8s [+%d %s]\n", token, lineno, curfile);
 			break;
 		default:
+			break;
 		}
 	}
 	strclose(sb);
@@ -324,6 +335,8 @@ int	target;
 		case CP_UNDEF:
 			condition_macro(c);
 			continue;
+		default:
+			break;
 		}
 		if (c == '('/* ) */)
 			brace_level++;
@@ -348,6 +361,8 @@ int	target;
 		case CP_UNDEF:
 			condition_macro(c);
 			continue;
+		default:
+			break;
 		}
 		if (c == SYMBOL || IS_RESERVED(c))
 			isdefine = 1;
@@ -417,6 +432,7 @@ static struct words words[] = {
 	{"#else",	CP_ELSE},
 	{"#endif",	CP_ENDIF},
 	{"#error",	CP_ERROR},
+	{"#ident",	CP_IDENT},
 	{"#if",		CP_IF},
 	{"#ifdef",	CP_IFDEF},
 	{"#ifndef",	CP_IFNDEF},
@@ -424,13 +440,16 @@ static struct words words[] = {
 	{"#line",	CP_LINE},
 	{"#pragma",	CP_PRAGMA},
 	{"#undef",	CP_UNDEF},
+	{"#warning",	CP_WARNING},
 	{"%%",		YACC_SEP},
 	{"%left",	YACC_LEFT},
 	{"%nonassoc",	YACC_NONASSOC},
 	{"%right",	YACC_RIGHT},
 	{"%start",	YACC_START},
+	{"%term",	YACC_TERM},
 	{"%token",	YACC_TOKEN},
 	{"%type",	YACC_TYPE},
+	{"%union",	YACC_UNION},
 	{"%{",		YACC_BEGIN},
 	{"%}",		YACC_END},
 	{"__P",		C___P},

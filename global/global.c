@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	global.c				8-Dec-98
+ *	global.c				18-Aug-99
  *
  */
 
@@ -36,34 +40,36 @@
 #include <sys/stat.h>
 
 #include <ctype.h>
-#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "global.h"
+#include "regex.h"
 
 const char *progname  = "global";		/* command name */
 
-static void	usage __P((void));
-static void	setcom __P((int));
-int	main __P((int, char **));
-void	makefilter __P((char *));
-FILE	*openfilter __P((void));
-void	closefilter __P((FILE *));
-void	completelist __P((char *, char *, char *));
-void	relative_filter __P((STRBUF *, char *, char *));
-void	grep __P((char *));
-void	pathlist __P((char *, char *));
-void	parsefile __P((int, char **, char *, char *, char *, int));
-void	printtag __P((FILE *, char *));
-int	notnamechar __P((char *));
-int	search __P((char *, char *, char *, char *, int));
-int	includepath __P((char *, char *));
+static void	usage(void);
+static void	setcom(int);
+int	main(int, char **);
+void	makefilter(char *);
+FILE	*openfilter(void);
+void	closefilter(FILE *);
+void	completelist(char *, char *, char *);
+void	relative_filter(STRBUF *, char *, char *);
+void	grep(char *);
+void	pathlist(char *, char *);
+void	parsefile(int, char **, char *, char *, char *, int);
+void	printtag(FILE *, char *);
+int	notnamechar(char *);
+int	search(char *, char *, char *, int);
+int	includepath(char *, char *);
 
-char	sortfilter[MAXFILLEN+1];	/* sort filter		*/
-char	pathfilter[MAXFILLEN+1];	/* path convert filter	*/
+char	sort_command[MAXFILLEN+1];	/* sort command		*/
+char	sed_command[MAXFILLEN+1];	/* sed command		*/
+STRBUF	*sortfilter;			/* sort filter		*/
+STRBUF	*pathfilter;			/* path convert filter	*/
 char	*localprefix;			/* local prefix		*/
 int	aflag;				/* [option]		*/
 int	cflag;				/* command		*/
@@ -75,7 +81,7 @@ int	nflag;				/* [option]		*/
 int	pflag;				/* command		*/
 int	Pflag;				/* command		*/
 int	rflag;				/* [option]		*/
-int	sflag;				/* command		*/
+int	sflag;				/* [option]		*/
 int	tflag;				/* [option]		*/
 int	vflag;				/* [option]		*/
 int	xflag;				/* [option]		*/
@@ -84,15 +90,14 @@ int	pfilter;			/* undocumented command	*/
 static void
 usage()
 {
-	fprintf(stderr, "usage:\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n",
-		"global [-alnrtvx] pattern",
-		"global -c [prefix]",
-		"global -f[alnrtx] files",
+	fprintf(stderr, "usage:\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n",
+		"global [-alnrstvx] pattern",
+		"global -c[s] [prefix]",
+		"global -f[alnrstx] files",
 		"global -g[alntvx] pattern",
 		"global -i[v]",
 		"global -p[v]",
-		"global -P[alnt] [pattern]",
-		"global -s[alntvx] pattern");
+		"global -P[alntx] [pattern]");
 	exit(1);
 }
 
@@ -124,6 +129,9 @@ char	*argv[];
 		if (!strcmp(argv[0], "--filter")) {
 			pfilter++;
 			continue;
+		} else if (!strcmp(argv[0], "--version")) {
+			fprintf(stdout, "%s\n", VERSION);
+			exit(0);
 		}
 		for (p = argv[0] + 1; *p; p++) {
 			switch (*p) {
@@ -166,7 +174,6 @@ char	*argv[];
 				break;
 			case 's':
 				sflag++;
-				setcom(*p);
 				break;
 			case 't':
 				tflag++;
@@ -179,10 +186,16 @@ char	*argv[];
 				break;
 			default:
 				usage();
+				break;
 			}
 		}
 	}
 	av = (argc > 0) ? *argv : NULL;
+	/*
+	 * invalid options.
+	 */
+	if (sflag && rflag)
+		die("both of -s and -r are not allowed.");
 	/*
 	 * only -c, -i, -P and -p allows no argment.
 	 */
@@ -195,11 +208,21 @@ char	*argv[];
 			break;
 		default:
 			usage();
+			break;
 		}
 	}
 	/*
-	 * invalid options are just ignored.
+	 * -i and -p cannot have any arguments.
 	 */
+	if (av) {
+		switch (command) {
+		case 'i':
+		case 'p':
+			usage();
+		default:
+			break;
+		}
+	}
 	/*
 	 * remove leading blanks.
 	 */
@@ -255,29 +278,47 @@ char	*argv[];
 		exit(0);
 	}
 	/*
+	 * get command name of sort and sed.
+	 */
+	{
+		STRBUF	*sb = stropen();
+		if (!getconfs("sort_command", sb))
+			die("cannot get sort command name.");
+		strcpy(sort_command, strvalue(sb));
+		strstart(sb);
+		if (!getconfs("sed_command", sb))
+			die("cannot get sed command name.");
+		strcpy(sed_command, strvalue(sb));
+		strclose(sb);
+	}
+	/*
 	 * make sort filter.
 	 */
-	if (sflag && xflag)
-		strcpy(sortfilter, "");
-	else if (tflag)				/* ctags format */
-		strcpy(sortfilter, "sort +0 -1 +1 -2 +2n -3");
-	else if (fflag)
-		strcpy(sortfilter, "sort +2 -3 +1n -2");
-	else if (xflag)				/* print details */
-		strcpy(sortfilter, "sort +0 -1 +2 -3 +1n -2");
-	else					/* print just file name */
-		strcpy(sortfilter, "sort | uniq");
+	sortfilter = stropen();
+	if (!(sflag && xflag)) {
+		strputs(sortfilter, sort_command);
+		strputc(sortfilter, ' ');
+		if (tflag) 			/* ctags format */
+			strputs(sortfilter, "+0 -1 +1 -2 +2n -3");
+		else if (fflag)
+			strputs(sortfilter, "+2 -3 +1n -2");
+		else if (xflag)			/* print details */
+			strputs(sortfilter, "+0 -1 +2 -3 +1n -2");
+		else				/* print just file name */
+			strputs(sortfilter, "-u");
+	}
 	/*
 	 * make path filter.
 	 */
-	if (aflag)				/* absolute path name */
-		sprintf(pathfilter, "sed -e 's!\\.!%s!'", root);
-	else {					/* relative path name */
-		STRBUF	*sb = stropen();
-
-		relative_filter(sb, root, cwd);
-		strcpy(pathfilter, strvalue(sb));
-		strclose(sb);
+	pathfilter = stropen();
+	if (aflag) {				/* absolute path name */
+		strputs(pathfilter, sed_command);
+		strputc(pathfilter, ' ');
+		strputs(pathfilter, "-e \"s@\\.@");
+		strputs(pathfilter, root);
+		strputs(pathfilter, "@\"");
+	} else {				/* relative path name */
+		relative_filter(pathfilter, root, cwd);
 	}
 	/*
 	 * make local prefix.
@@ -314,8 +355,12 @@ char	*argv[];
 	if (gflag) {
 		if (!lflag) 
 			chdir(root);
-		else if (!aflag)
-			sprintf(pathfilter, "sed -e 's!\\./!!'");
+		else if (!aflag) {
+			strstart(pathfilter);
+			strputs(pathfilter, sed_command);
+			strputc(pathfilter, ' ');
+			strputs(pathfilter, "-e \"s@\\./@@\"");
+		}
 		grep(av);
 		exit(0);
 	}
@@ -337,7 +382,7 @@ char	*argv[];
 	/*
 	 * search in current source tree.
 	 */
-	count = search(av, cwd, root, dbpath, db);
+	count = search(av, root, dbpath, db);
 	/*
 	 * search in library path.
 	 */
@@ -350,21 +395,24 @@ char	*argv[];
 		p = buf;
 		while (p) {
 			lib = p;
-			if ((p = locatestring(p, ":", MATCH_FIRST)) != NULL)
+			if ((p = locatestring(p, PATHSEP, MATCH_FIRST)) != NULL)
 				*p++ = 0;
 			if (!gtagsexist(lib, libdbpath))
 				continue;
 			if (!strcmp(dbpath, libdbpath))
 				continue;
-			if (aflag)		/* absolute path name */
-				sprintf(pathfilter, "sed -e 's!\\.!%s!'", lib);
-			else {
-				STRBUF	*sb = stropen();
-				relative_filter(sb, lib, cwd);
-				strcpy(pathfilter, strvalue(sb));
-				strclose(sb);
+			if (aflag) {		/* absolute path name */
+				strstart(pathfilter);
+				strputs(pathfilter, sed_command);
+				strputc(pathfilter, ' ');
+				strputs(pathfilter, "-e \"s@\\.@");
+				strputs(pathfilter, lib);
+				strputs(pathfilter, "@\"");
+			} else {
+				strstart(pathfilter);
+				relative_filter(pathfilter, lib, cwd);
 			}
-			count = search(av, cwd, lib, libdbpath, db);
+			count = search(av, lib, libdbpath, db);
 			if (count > 0) {
 				strcpy(dbpath, libdbpath);
 				break;
@@ -377,7 +425,7 @@ char	*argv[];
 				fprintf(stderr, "%d object located", count);
 			if (count > 1)
 				fprintf(stderr, "%d objects located", count);
-			fprintf(stderr, " (using '%s').\n", makepath(dbpath, dbname(db)));
+			fprintf(stderr, " (using '%s').\n", makepath(dbpath, dbname(db), NULL));
 		} else {
 			fprintf(stderr, "'%s' not found.\n", av);
 		}
@@ -387,7 +435,7 @@ char	*argv[];
 /*
  * makefilter: make filter string.
  *
- *	io)	filter buffer
+ *	o)	filter buffer
  */
 void
 makefilter(filter)
@@ -395,21 +443,21 @@ char	*filter;
 {
 	if (nflag)
 		filter[0] = 0;
-	else if (sortfilter[0] == 0 && pathfilter[0] == 0)
+	else if (!strbuflen(sortfilter) && !strbuflen(pathfilter))
 		filter[0] = 0;
-	else if (sortfilter[0] && pathfilter[0])
-		sprintf(filter, "%s | %s", sortfilter, pathfilter);
-	else if (sortfilter[0])
-		strcpy(filter, sortfilter);
+	else if (strbuflen(sortfilter) && strbuflen(pathfilter))
+		sprintf(filter, "%s | %s", strvalue(sortfilter), strvalue(pathfilter));
+	else if (strbuflen(sortfilter))
+		strcpy(filter, strvalue(sortfilter));
 	else
-		strcpy(filter, pathfilter);
+		strcpy(filter, strvalue(pathfilter));
 }
 /*
  * openfilter: open output filter.
  *
  *	gi)	pathfilter
  *	gi)	sortfilter
- *	r)		output filter
+ *	r)		file pointer for output filter
  */
 FILE	*
 openfilter(void)
@@ -447,12 +495,14 @@ char	*prefix;
 	char	*p;
 	int	flags = GTOP_KEY;
 	GTOP	*gtop;
+	int	db;
 
 	if (prefix && *prefix == 0)	/* In the case global -c '' */
 		prefix = NULL;
 	if (prefix)
 		flags |= GTOP_PREFIX;
-	gtop = gtagsopen(dbpath, root, GTAGS, GTAGS_READ, 0);
+	db = (sflag) ? GSYMS : GTAGS;
+	gtop = gtagsopen(dbpath, root, db, GTAGS_READ, 0);
 	for (p = gtagsfirst(gtop, prefix, flags); p; p = gtagsnext(gtop))
 		(void)fprintf(stdout, "%s\n", p);
 	gtagsclose(gtop);
@@ -460,10 +510,9 @@ char	*prefix;
 /*
  * relative_filter: make relative path filter
  *
- *	i)	sb	string buffer
+ *	o)	sb	buffer for the result
  *	i)	root	the root directory of source tree
  *	i)	cwd	current directory
- *	r) 		relative path filter
  */
 void
 relative_filter(sb, root, cwd)
@@ -485,7 +534,9 @@ char	*cwd;
 	/*
 	 * forward to root.
 	 */
-	strputs(sb, "sed -e 's!\\./!");
+	strputs(sb, sed_command);
+	strputc(sb, ' ');
+	strputs(sb, "-e \"s@\\./@");
 	for (c = branch; *c; c++)
 		if (*c == '/')
 			strputs(sb, "../");
@@ -498,7 +549,7 @@ char	*cwd;
 		strputs(sb, p);
 		strputc(sb, '/');
 	}
-	strputs(sb, "!'");
+	strputs(sb, "@\"");
 	/*
 	 * remove redundancy.
 	 */
@@ -509,9 +560,9 @@ char	*cwd;
 		for (c = branch + 1; ; c++) {
 			if (*c == 0 || *c == '/') {
 				*p = 0;
-				strputs(sb, " -e 's!\\.\\./");
+				strputs(sb, " -e \"s@\\.\\./");
 				strputs(sb, unit);
-				strputs(sb, "/!!'");
+				strputs(sb, "/@@\"");
 				if (*c == 0)
 					break;
 				p = unit;
@@ -611,7 +662,7 @@ char	*pattern;
 	{
 		char	*p, *e = edit;
 		for (p = pattern; *p; p++) {
-			if (*p == '%' || *p == ' ' || *p == '\t') {
+			if (*p == '%' || *p == ' ' || *p == '\t' || *p == '.') {
 				sprintf(e, "%%%02x", *p);
 				e += 3;
 			} else
@@ -672,16 +723,14 @@ char	*dbpath;
 char	*av;
 {
 	FILE	*op;
-	const char *tag = av;
-	char	key[10], *path;
+	char	key[10], *path, *p;
 	regex_t preg;
 	int	i, lim;
 
 	if (av) {
 		if (regcomp(&preg, av, REG_EXTENDED) != 0)
 			die("illegal regular expression.");
-	} else
-		tag = "file";
+	}
 	if (!(op = openfilter()))
 		die("cannot open output filter.");
 	if (pathopen(dbpath, 0) < 0)
@@ -693,10 +742,16 @@ char	*av;
 			continue;
 		if (lflag && !locatestring(path, localprefix, MATCH_AT_FIRST))
 			continue;
-		if (av && regexec(&preg, path + 2, 0, 0, 0) != 0)
+		/*
+		 * skip './' and localprefix because end-user doesn't see it.
+		 */
+		p = (lflag) ? path + strlen(localprefix) : path + 2;
+		if (av && regexec(&preg, p, 0, 0, 0) != 0)
 			continue;
-		if (tflag)
-			fprintf(op, "%s\t%s\t1\n", tag, path);
+		if (xflag)
+			fprintf(op, "path\t1 %s \n", path);
+		else if (tflag)
+			fprintf(op, "path\t%s\t1\n", path);
 		else
 			fprintf(op, "%s\n", path);
 	}
@@ -755,7 +810,7 @@ int	db;
 		 * convert path into relative from root directory of source tree.
 		 */
 		path = realpath(av, buf);
-		if (*path != '/')
+		if (!isabspath(path))
 			die("realpath(3) is not compatible with BSD version.");
 		if (strncmp(path, root, strlen(root))) {
 			fprintf(stderr, "'%s' is out of source tree.\n", path);
@@ -791,16 +846,14 @@ int	db;
  * search: search specified function 
  *
  *	i)	pattern		search pattern
- *	i)	cwd		current directory
  *	i)	root		root of source tree
  *	i)	dbpath		database directory
  *	i)	db		GTAGS,GRTAGS,GSYMS
  *	r)			count of output lines
  */
 int
-search(pattern, cwd, root, dbpath, db)
+search(pattern, root, dbpath, db)
 char	*pattern;
-char	*cwd;
 char	*root;
 char	*dbpath;
 int	db;

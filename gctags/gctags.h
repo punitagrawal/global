@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1998, 1999 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
- * 4. Neither the name of the author nor the names of its contributors
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
+ * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -30,7 +34,6 @@
  *
  *	gctags.h					8-Jan-99
  */
-#include <sys/param.h>
 #include "token.h"
 /*
  * target type.
@@ -70,21 +73,13 @@ struct words {
 
 #define IS_RESERVED(a)  ((a) > 255)
 
-#ifndef __P
-#ifdef __STDC__
-#define __P(protos)	protos
-#else
-#define __P(protos)	()
-#endif
-#endif
-
 #define DBG_PRINT(level, a) dbg_print(level, a)
 
-void    dbg_print __P((int, const char *));
-int	isnotfunction __P((char *));
-int	cmp __P((const void *, const void *));
-void	C __P((int));
-void	Cpp __P((void));
-int	isCpp __P((void));
-void	assembler __P((void));
-void	java __P((void));
+void    dbg_print(int, const char *);
+int	isnotfunction(char *);
+int	cmp(const void *, const void *);
+void	C(int);
+void	Cpp(void);
+int	isCpp(void);
+void	assembler(void);
+void	java(void);

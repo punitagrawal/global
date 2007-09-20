@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,15 +32,16 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	gtagsop.h				23-Dec-97
+ *	gtagsop.h				12-Jul-99
  *
  */
 
 #ifndef _GTOP_H_
 #define _GTOP_H_
 #include <stdio.h>
-#include "dbop.h"
+
 #include "gparam.h"
+#include "dbop.h"
 #include "strbuf.h"
 
 #define VERSIONKEY	" __.VERSION"
@@ -59,6 +64,7 @@
 /* gtagsadd() */
 #define GTAGS_UNIQUE		1	/* compress duplicate lines */
 #define GTAGS_EXTRACTMETHOD	2	/* extract method from class definition */
+#define GTAGS_DEBUG		4	/* print information for debug */
 /* gtagsfirst() */
 #define GTOP_KEY		1	/* read key part */
 #define GTOP_PREFIX		2	/* prefixed read */
@@ -86,24 +92,16 @@ typedef struct {
 	int	lno;			/* integer value of 'lnop' */
 } GTOP;
 
-#ifndef __P
-#if defined(__STDC__)
-#define __P(protos)     protos
-#else
-#define __P(protos)     ()
-#endif
-#endif
-
-const char *dbname __P((int));
-void	makecommand __P((char *, char *, STRBUF *));
-int	formatcheck __P((char *, int));
-GTOP	*gtagsopen __P((char *, char *, int, int, int));
-void	gtagsput __P((GTOP *, char *, char *));
-char	*gtagsget __P((GTOP *, char *));
-void    gtagsadd __P((GTOP *, char *, char *, int));
-void	gtagsdelete __P((GTOP *, char *));
-char	*gtagsfirst __P((GTOP *, char *, int));
-char	*gtagsnext __P((GTOP *));
-void	gtagsclose __P((GTOP *));
+const char *dbname(int);
+void	makecommand(char *, char *, STRBUF *);
+int	formatcheck(char *, int);
+GTOP	*gtagsopen(char *, char *, int, int, int);
+void	gtagsput(GTOP *, char *, char *);
+char	*gtagsget(GTOP *, char *);
+void    gtagsadd(GTOP *, char *, char *, int);
+void	gtagsdelete(GTOP *, char *);
+char	*gtagsfirst(GTOP *, char *, int);
+char	*gtagsnext(GTOP *);
+void	gtagsclose(GTOP *);
 
 #endif /* ! _GTOP_H_ */

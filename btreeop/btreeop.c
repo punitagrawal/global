@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	btreeop.c				12-Nov-98
+ *	btreeop.c				5-Aug-99
  *
  */
 #include <sys/types.h>
@@ -36,23 +40,28 @@
 
 #include <ctype.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "global.h"
+#include "gparam.h"
+#include "die.h"
+#include "dbop.h"
+#include "mgets.h"
+#include "tab.h"
 
 const char *dbdefault = "btree";   	/* default database name */
 const char *progname  = "btreeop";		/* command name */
 
-static void	usage __P((void));
-void	signal_setup __P((void));
-void	onintr __P((int));
-int	main __P((int, char **));
-void	dbwrite __P((DBOP *));
-void	dbkey __P((DBOP *, char *, int));
-void	dbscan __P((DBOP *, char *, int));
-void	dbdel __P((DBOP *, char *, int));
-void	dbbysecondkey __P((DBOP *, int, char *, int));
+static void	usage(void);
+void	signal_setup(void);
+void	onintr(int);
+int	main(int, char **);
+void	dbwrite(DBOP *);
+void	dbkey(DBOP *, char *, int);
+void	dbscan(DBOP *, char *, int);
+void	dbdel(DBOP *, char *, int);
+void	dbbysecondkey(DBOP *, int, char *, int);
 
 #define F_KEY	0
 #define F_DEL	1
@@ -80,10 +89,14 @@ int	signo;
 void
 signal_setup()
 {
-	signal(SIGHUP, onintr);
 	signal(SIGINT, onintr);
-	signal(SIGQUIT, onintr);
 	signal(SIGTERM, onintr);
+#ifdef SIGHUP
+	signal(SIGHUP, onintr);
+#endif
+#ifdef SIGQUIT
+	signal(SIGQUIT, onintr);
+#endif
 }
 
 int
@@ -132,6 +145,7 @@ char	*argv[];
 			break;
 		default:
 			usage();
+			break;
 		}
 	}
 	db_name = (i < argc) ? argv[i] : dbdefault;

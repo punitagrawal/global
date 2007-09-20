@@ -1,3 +1,11 @@
+global (3.54-1) unstable; urgency=low
+
+  * New upstream version.
+  * Many new features/fixes, including C++ support. 
+  * Updated for standards version 3 and FHS compliance. 
+
+ -- Ron C. Lee <ron@microtronics.com.au>  Sat, 13 Nov 1999 08:18:22 +1030
+
 global (3.44-2) unstable; urgency=low
 
   * /usr/lib/cgi-bin is now included in the package,

@@ -1,0 +1,14 @@
+PROG   = htags.pl
+CC     = bcc32
+BINDIR = \usr\bin
+MANDIR = \usr\man
+
+all: $(PROG)
+
+$(PROG):
+	@echo -n
+install:
+	copy $(PROG) $(BINDIR)
+	copy $(PROG).1 $(MANDIR)/man1
+clean:
+	@echo -n

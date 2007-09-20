@@ -35,7 +35,6 @@
 static char sccsid[] = "@(#)mpool.c	8.5 (Berkeley) 7/26/94";
 #endif /* LIBC_SCCS and not lint */
 
-#include <sys/param.h>
 #include <sys/stat.h>
 
 #include <errno.h>
@@ -50,9 +49,9 @@ static char sccsid[] = "@(#)mpool.c	8.5 (Berkeley) 7/26/94";
 #define	__MPOOLINTERFACE_PRIVATE
 #include "mpool.h"
 
-static BKT *mpool_bkt __P((MPOOL *));
-static BKT *mpool_look __P((MPOOL *, pgno_t));
-static int  mpool_write __P((MPOOL *, BKT *));
+static BKT *mpool_bkt(MPOOL *);
+static BKT *mpool_look(MPOOL *, pgno_t);
+static int  mpool_write(MPOOL *, BKT *);
 
 /*
  * mpool_open --
@@ -101,8 +100,8 @@ mpool_open(key, fd, pagesize, maxcache)
 void
 mpool_filter(mp, pgin, pgout, pgcookie)
 	MPOOL *mp;
-	void (*pgin) __P((void *, pgno_t, void *));
-	void (*pgout) __P((void *, pgno_t, void *));
+	void (*pgin)(void *, pgno_t, void *);
+	void (*pgout)(void *, pgno_t, void *);
 	void *pgcookie;
 {
 	mp->pgin = pgin;

@@ -1,19 +1,23 @@
 PROG   = gctags
 CC     = gcc
-LIBS   = -L../libutil -lgloutil -L../libdb -lglodb
-CFLAGS = -O -I../libutil
-DEPLIBS= ../libutil/libgloutil.a
+LIBS   = ../libutil/libgloutil.a ../libdb/libglodb.a ../libregex/libgloregex.a
+CFLAGS = -O -I../libutil -I../libdb -I../libregex -I../machine
 OBJS   = java.o gctags.o assembler.o C.o Cpp.o
 BINDIR = /usr/bin
 MANDIR = /usr/man
 
 all: $(PROG)
 
-$(PROG): $(OBJS) $(DEPLIBS)
+$(PROG): $(OBJS) $(LIBS)
 	$(CC) -o $(PROG) $(OBJS) $(LIBS)
 install:
 	cp $(PROG) $(BINDIR)
 	chmod 755 $(BINDIR)/$(PROG)
+	cp $(PROG).1 $(MANDIR)/man1
+	chmod 644 $(MANDIR)/man1/$(PROG).1
+cygwin_install:
+	cp $(PROG).exe $(BINDIR)
+	chmod 755 $(BINDIR)/$(PROG).exe
 	cp $(PROG).1 $(MANDIR)/man1
 	chmod 644 $(MANDIR)/man1/$(PROG).1
 clean:

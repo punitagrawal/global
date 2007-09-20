@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,43 +32,66 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	usable.c					22-Jun-98
+ *	usable.c				26-Aug-99
  *
  */
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "locatestring.h"
 #include "gparam.h"
+#include "locatestring.h"
 #include "makepath.h"
+#include "path.h"
 #include "test.h"
 #include "usable.h"
 
+#ifdef _WIN32
+static const char *suffix[] = {".exe", ".com", ".bat",};
+#endif
+
 /*
- * usable: check executable or not about the command.
+ * usable: check if command is executable or not.
  *
  *	i)	command
  *	r)		1: executable
  *			0: non executable
  */
-int
+char *
 usable(command)
 char	*command;
 {
 	char	buf[MAXENVLEN+1], *p, *dir;
+	static char path[MAXPATHLEN+1];
+#ifdef _WIN32
+	int	i, lim = sizeof(suffix)/sizeof(char *);
+#endif
 
-	if (*command == '/' || locatestring(command, "./", MATCH_AT_FIRST) || locatestring(command, "../", MATCH_AT_FIRST))
-		return test("fx", command);
-
+	if (isabspath(command) || locatestring(command, "./", MATCH_AT_FIRST)
+		|| locatestring(command, "../", MATCH_AT_FIRST)) {
+		if (test("fx", command)) {
+			strcpy(path, command);
+			return path;
+		}
+		return NULL;
+	}
 	strcpy(buf, getenv("PATH"));
 	p = buf;
 	while (p) {
 		dir = p;
-		if ((p = locatestring(p, ":", MATCH_FIRST)) != NULL)
+		if ((p = locatestring(p, PATHSEP, MATCH_FIRST)) != NULL)
 			*p++ = 0;
-		if (test("fx", makepath(dir, command)))
-			return 1;
+		if (test("fx", makepath(dir, command, NULL))) {
+			strcpy(path, makepath(dir, command, NULL));
+			return path;
+		}
+#if defined(_WIN32)
+		for (i = 0; i < lim; i++)
+			if (test("f", makepath(dir, command, suffix[i]))) {
+				strcpy(path, makepath(dir, command, suffix[i]));
+				return path;
+			}
+#endif
 	}
-	return 0;
+	return NULL;
 }

@@ -38,8 +38,6 @@
 static char sccsid[] = "@(#)bt_close.c	8.7 (Berkeley) 8/17/94";
 #endif /* LIBC_SCCS and not lint */
 
-#include <sys/param.h>
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,7 +47,7 @@ static char sccsid[] = "@(#)bt_close.c	8.7 (Berkeley) 8/17/94";
 #include "db.h"
 #include "btree.h"
 
-static int bt_meta __P((BTREE *));
+static int bt_meta(BTREE *);
 
 /*
  * BT_CLOSE -- Close a btree.

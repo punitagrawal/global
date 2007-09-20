@@ -1,0 +1,15 @@
+LIB    = libgloregex.lib
+CC     = bcc32
+AR     = tlib
+CFLAGS = -I../libdb -I../machine -I../win32
+OBJS   = regcomp.obj regerror.obj regexec.obj regfree.obj
+
+all: $(LIB)
+
+$(LIB): $(OBJS)
+	$(AR) $(LIB) @..\win32\regexobjs
+install:
+	@echo -n
+clean:
+	del *.lib
+	del *.obj

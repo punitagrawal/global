@@ -47,11 +47,11 @@ static char sccsid[] = "@(#)bt_delete.c	8.13 (Berkeley) 7/28/94";
 #include "db.h"
 #include "btree.h"
 
-static int __bt_bdelete __P((BTREE *, const DBT *));
-static int __bt_curdel __P((BTREE *, const DBT *, PAGE *, u_int));
-static int __bt_pdelete __P((BTREE *, PAGE *));
-static int __bt_relink __P((BTREE *, PAGE *));
-static int __bt_stkacq __P((BTREE *, PAGE **, CURSOR *));
+static int __bt_bdelete(BTREE *, const DBT *);
+static int __bt_curdel(BTREE *, const DBT *, PAGE *, u_int);
+static int __bt_pdelete(BTREE *, PAGE *);
+static int __bt_relink(BTREE *, PAGE *);
+static int __bt_stkacq(BTREE *, PAGE **, CURSOR *);
 
 /*
  * __bt_delete
@@ -150,7 +150,7 @@ __bt_stkacq(t, hp, c)
 	EPG *e;
 	EPGNO *parent;
 	PAGE *h;
-	indx_t index;
+	indx_t index = 0;
 	pgno_t pgno;
 	recno_t nextpg, prevpg;
 	int exact, level;

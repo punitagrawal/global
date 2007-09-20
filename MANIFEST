@@ -7,7 +7,6 @@ Makefile		Makefile for BSD.
 Makefile.inc		A part of Makefile for BSD.
 Makefile.generic	Makefile for generic UNIX(including BSD).
 README			Readme (introduction and usage).
-VERSION			Version number.
 btreeop/		Btreeop command directory.
 gctags/			Extended ctags command directory.
 global/			Global command directory.
@@ -17,8 +16,11 @@ gtags/			Gtags command directory.
 gzshrc			Gzsh start up file.
 htags/			Htags command directory.
 libdb/			DB(3) 1.85 library.
+libregex/		REGEX(3) library.
 libutil/		Utility library.
 systags/		Script for kernel.
 gtags.el		Gtags mode for Emacs.
 nvi-1.66.diff		Patch for nvi 1.66.
 nvi-1.79.diff		Patch for nvi 1.79.
+VERSION			Version number.
+win32/			Items for WIN32 build.

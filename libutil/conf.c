@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,47 +32,32 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	conf.c					23-Mar-99
+ *	conf.c					25-Aug-99
  *
  */
-#include <sys/param.h>
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "gparam.h"
 #include "conf.h"
 #include "die.h"
-#include "gparam.h"
 #include "locatestring.h"
 #include "makepath.h"
 #include "mgets.h"
 #include "strbuf.h"
 #include "strmake.h"
 #include "test.h"
-/*
- * Access library for global.conf (.globalrc).
- * File format is a subset of XXXcap (termcap, printcap) file.
- */
-#define	GTAGSCONF	"/etc/global.conf"
-#define	DEBIANCONF	"/etc/gtags/global.conf"
-#define GTAGSRC		".globalrc"
-#define DEFAULTLABEL	"default"
-#ifdef GTAGSCPP
-#define DEFAULTSUFFIXES	"c,h,y,c++,cc,cpp,cxx,hxx,C,H,s,S,java"
-#else
-#define DEFAULTSUFFIXES	"c,h,y,s,S,java"
-#endif
-#define DEFAULTSKIP	"y.tab.c,y.tab.h,SCCS/,RCS/,CVS/"
 
 static FILE	*fp;
 static char	*line;
 static int	allowed_nest_level = 8;
 static int	opened;
 
-static void	trim __P((char *));
-static char	*readrecord __P((const char *));
-static void	includelabel __P((STRBUF *, const char *, int));
+static void	trim(char *);
+static char	*readrecord(const char *);
+static void	includelabel(STRBUF *, const char *, int);
 
 static void
 trim(l)
@@ -156,8 +145,8 @@ configpath() {
 			config[0] = 0;
 		else
 			strcpy(config, p);
-	} else if ((p = getenv("HOME")) && test("r", makepath(p, GTAGSRC)))
-		strcpy(config, makepath(p, GTAGSRC));
+	} else if ((p = getenv("HOME")) && test("r", makepath(p, GTAGSRC, NULL)))
+		strcpy(config, makepath(p, GTAGSRC, NULL));
 	else if (test("r", GTAGSCONF))
 		strcpy(config, GTAGSCONF);
 	else if (test("r", DEBIANCONF))
@@ -195,9 +184,19 @@ openconf()
 		strputc(sb, ':');
 		strputs(sb, "format=standard:");
 		strputs(sb, "extractmethod:");
+#ifdef _WIN32
+		strputs(sb, "GTAGS=gctags.exe %s:");
+		strputs(sb, "GRTAGS=gctags.exe -r %s:");
+		strputs(sb, "GSYMS=gctags.exe -s %s:");
+		strputs(sb, "sort_command=sort.exe:");
+		strputs(sb, "sed_command=sed.exe:");
+#else
 		strputs(sb, "GTAGS=gctags %s:");
 		strputs(sb, "GRTAGS=gctags -r %s:");
 		strputs(sb, "GSYMS=gctags -s %s:");
+		strputs(sb, "sort_command=sort:");
+		strputs(sb, "sed_command=sed:");
+#endif /* _WIN32 */
 		line = strdup(strvalue(sb));
 		if (!line)
 			die("short of memory.");
@@ -270,9 +269,12 @@ STRBUF	*sb;
 		if (exist && sb)
 			strputc(sb, ',');		
 		exist = 1;
-		for (p += strlen(buf); *p && *p != ':'; p++)
+		for (p += strlen(buf); *p && *p != ':'; p++) {
+			if (*p == '\\')	/* quoted charactor */
+				p++;
 			if (sb)
 				strputc(sb, *p);
+		}
 		if (!all)
 			break;
 	}
@@ -288,6 +290,20 @@ STRBUF	*sb;
 		} else if (!strcmp(name, "skip")) {
 			if (sb)
 				strputs(sb, DEFAULTSKIP);
+		} else if (!strcmp(name, "sort_command")) {
+			if (sb)
+#ifdef _WIN32
+				strputs(sb, "sort.exe");
+#else
+				strputs(sb, "sort");
+#endif
+		} else if (!strcmp(name, "sed_command")) {
+			if (sb)
+#ifdef _WIN32
+				strputs(sb, "sed.exe");
+#else
+				strputs(sb, "sed");
+#endif
 		} else
 			exist = 0;
 	}

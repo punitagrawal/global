@@ -12,7 +12,8 @@ build:
 # make GLOBAL
 	-$(MAKE) -f Makefile.generic gen
 #	$(MAKE) CFLAGS="-O2 -g -Wall -I../lib"   3.43 make
-	$(MAKE) CFLAGS="-O2 -g -Wall -I../libutil -I../libdb"
+#	$(MAKE) CFLAGS="-O2 -g -Wall -I../libutil -I../libdb"	3.44 make
+	$(MAKE) CFLAGS="-O2 -g -Wall -I../libutil -I../libdb -I../libregex -I../machine"
 # make gozilla
 	cd gozilla && $(XMKMF) && $(MAKE)
 	touch build
@@ -23,7 +24,7 @@ clean:
 	-$(MAKE) clean bsd
 # clean gozilla
 	-cd gozilla && $(MAKE) clean;
-	-rm -f gozilla/Makefile*
+	-rm -f gozilla/Makefile
 	-rm -f `find . -name "*~"`
 	-rm -rf debian/tmp debian/files* core debian/substvars
 
@@ -46,7 +47,8 @@ binary-arch: checkroot build
 	set -e; cd htmake; $(MAKE) install DESTDIR=`pwd`/../debian/tmp/usr;
 # Must have debmake installed for this to work. Otherwise please copy
 # /usr/bin/debstd into the debian directory and change debstd to debian/debstd
-	debstd HISTORY README 
+# Don't scan for manpages, regex(3) is already in manpages-dev
+	debstd -m HISTORY README 
 	dpkg-gencontrol
 	chown -R root.root debian/tmp
 	chmod -R go=rX debian/tmp

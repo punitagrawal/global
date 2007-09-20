@@ -514,6 +514,7 @@ version 3.3	Rewriting gctags(1) and some bug fix. [13-Sep-98]
 
 		  Thanks to Bert Gijsbers for his investigation.
 
+	---
 	Extended ctags has been completely replaced with new gctags.
 	Thanks to Ken Arnold and the other people who developped BSD ctags(1).
 	Without it, GLOBAL had never been here.
@@ -612,11 +613,161 @@ version 3.44	some minor changes for portability and security [22-Mar-99]
 	global.conf
 		- fullpath parameter added. (for htags)
 		- normal_suffix parameter added. (for htags)
-	libdb/	- db(3) 1.85 imported to keep machine and platform independency
-		  in generic make. 'dbpatches' already has been applied.
+	libdb/	- db(3) 1.85 was imported to keep machine and platform
+		  independency in generic make. 'dbpatches' already has been
+		  applied.
 	gctags	- NENTRY() in asemmbler source code supported. (for NetBSD)
 	htags	- --action=url, --id=id and --nocgi options added to realize
 		  a safe cgi script.
 
 		  Thanks to Ron Lee for his design and implementation of
-		  a safe cgi mechanism.
+		  'a safe cgi mechanism'.
+
+version 3.5	Support of C++, XEmacs and WIN32 ready. [23-Aug-99]
+
+	[fixed]
+	gozilla	- coudn't treat old style hypertext tree.
+	gtags	- corrupted database when interrupted.
+	global	- -Pl '^pattern' in subdirectory didn't work.
+	libutil	- mgets destroyed memory.
+
+		  Thanks to IWAMURO Motonori for his bug report and fix patch.
+
+		- getdirs doesn't work when undefined USEFIND.
+
+		  Thanks to Dan Fandrich for his bug report and fix patch.
+	
+	gctags	- core dumped on some .C or .h files.
+
+		  Thanks to Yann Dirson for his bug report.
+
+		- couldn't pick up macro definition with no argment.
+
+	[added]
+	gtags, global, htags, gozilla, gtags.el
+		- C++ support added.
+	gtags, gctags, global, htags, btreeop
+		- WIN32 Borland C++ (4.5 or 5.0) support added.
+
+		  Thanks to Dan Fandrich for his port.
+
+	gtags.el
+		- XEmacs support added.
+
+		  Thanks to
+			Klaus Borchers
+			okabe katsuyuki
+			Toshiyasu KOJIMA
+			MORIOKA Tomohiko
+		  for their advice about xemacs.
+
+		- gtags-find-file(ESC-l) command added.
+	htags	- symbol search support was added with -f option.
+	global.conf
+		- quoted char '\' became available. You can use it like this.
+		  '...:GTAGS=c\:/usr/bin/specialtag.exe:...'
+		- sort and sed command became parameterized.
+	gozilla	- https, ftp, nntp, mailto and about protocols were added.
+	All files
+		- copyright notice of Tama Communications Corporation.
+	gctags/C.c
+		- recognize #ident and #warning.
+	gctags/assembler.c
+		- recognize C_LABEL(x) and SYMBOL_NAME(x)
+	libregex/ - regex(3) imported.
+
+	[changed]
+	systags.sh
+		- parameter for gtags was changed from -owv to -wv.
+	global	- -s option allowed with -c and -f command.
+	All files
+		- statement of license agreement 3.
+		  Shigio Yamaguchi ->
+			Tama Communications Corporation and its contributors.
+		- My mail address
+		- delete #include <sys/param.h> for compatibility.
+		- delete __P() macro. It was for K&R C compiler.
+	VERSION	- version number was moved to libutil/version.h.
+	some files
+		- some statements have been changed for generic UNIX.
+
+		  Thanks to Marco Corvi for his information about
+		  Digital Unix 4.0C.
+
+		  Thnaks to Koen Hufkens for his information about
+		  HP-UX 10.x.
+
+	libdb/db.h, gozilla/Imakefile
+		- slightly chagned for Debian GNU/Linux + powerpc.
+
+		  Thanks to Ron Lee and Debian's porters for their patch.
+
+	libutil/find.c
+		- USEFIND undefined by default.
+	gozilla	- specify -raise option.
+	htags	- rewrite header #!/usr/bin/perl -> #!/usr/bin/env perl
+	---
+	Dan Fandrich ported Global-3.44 into WIN32 environment.
+	I have included his codes into this version (3.5) and altered them
+	for some (mainly licensing) reasons, so any bugs in this area
+	are therefore my fault, not Dan's.
+
+version 3.51	Support of Cygwin32. [26-Aug-99]
+
+	[added]
+	gtags, gctags, global, htags, btreeop
+		- Cygwin tools environment support added.
+
+		  Thanks to David Aspinwall for his port.
+
+	---
+	David Aspinwall ported Global-3.44 into cygwin32 environment.
+	I have merged his codes and Dan Fandrich's WIN32 code into this
+	version (3.51). So any bugs in this area are therefore my fault,
+	not David's.
+
+version 3.52	Support of gozilla in WIN32 environment [29-Aug-99]
+
+	[fixed]
+	gctags	- hanged when reading unix style text file in WIN32 environment.
+		  (In Borland C, lseek() doesn't work to text file.)
+	htags	- quotation error in global.cgi.
+
+	[added]
+	WIN32 support of gozilla
+		- Only for Borland C compiler.
+
+version 3.53	Improved gtags.el and slightly modified [17-Sep-99]
+
+	[added]
+	compat.h- Macro for Solaris added.
+
+		  Thanks to
+			Paul Lew
+			Dirk Schultheis
+			Yoshinori TOMITA
+		  for thier advice.
+
+	gtags, htags, gctags
+		- --version option added.
+
+		  Thanks to Marty Leisner for his advice.
+
+	FAQ	- new faq added.
+
+	[changed]
+	gtags.el- ESC-t and ESC-r use current token as a default tag.
+		- ESC-t and ESC-r use mini-buffer history.
+
+		Thanks to Jun Obama for his patch.
+
+	Makefile.bsd, Makefile.inc
+		- description about libregex.a was deleted because BSD
+		  has it in libc.
+
+version 3.54	a couple of bugs fixed [3-Nov-99]
+
+	[fixed]
+	gctags	- gctags  - couldn't treat comment (/* ... */) that
+		  include multi-byte character.
+	htags	- index wasn't generated for large project.

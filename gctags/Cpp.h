@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by Shigio Yamaguchi.
- * 4. Neither the name of the author nor the names of its contributors
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
+ * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	Cpp.h						19-Dec-98
+ *	Cpp.h						26-Jun-99
  */
 #define CPP___P		1001
 #define CPP_ASM		1002
@@ -94,9 +98,10 @@
 #define CP_UNDEF	2011
 #define CP_ENDIF	2012
 #define CP_LINE		2013
+#define CP_WARNING	2014
+#define CP_IDENT	2015
 
 #define IS_CPPTOKEN(c)	(c > 1000 && c < 2001)
 #define IS_CPTOKEN(c)	(c > 2000 && c < 3001)
-#define MAXPIFSTACK	100
 #define MAXCOMPLETENAME 1024            /* max size of complete name of class */
 #define MAXCLASSSTACK   10              /* max size of class stack */

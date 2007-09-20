@@ -29,8 +29,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- *	@(#)compat.h	8.13 (Berkeley) 2/21/94
  */
 
 #ifndef	_COMPAT_H_
@@ -39,14 +37,28 @@
 #include <sys/types.h>
 
 /*
- * If your system doesn't typedef u_long, u_short, or u_char, change
- * the 0 to a 1.
+ * For Borland C++ Compiler and VC++ Compiler.
  */
-#if 0
-typedef unsigned char	u_char;		/* 4.[34]BSD names. */
+#if defined(_WIN32) && !defined(__CYGWIN__)
+typedef unsigned char	u_char;
 typedef unsigned int	u_int;
 typedef unsigned long	u_long;
 typedef unsigned short	u_short;
+typedef	signed char		  int8_t;
+typedef	unsigned char		u_int8_t;
+typedef	short			  int16_t;
+typedef	unsigned short		u_int16_t;
+typedef	int			  int32_t;
+typedef	unsigned int		u_int32_t;
+#endif
+
+/*
+ * For Solaris.
+ */
+#if defined(sun) && defined(__SVR4)
+typedef	unsigned char		 u_int8_t;
+typedef	unsigned short		u_int16_t;
+typedef	unsigned int		u_int32_t;
 #endif
 
 /* If your system doesn't typedef size_t, change the 0 to a 1. */
@@ -55,15 +67,16 @@ typedef unsigned int	size_t;		/* POSIX, 4.[34]BSD names. */
 #endif
 
 /* If your system doesn't typedef ssize_t, change the 0 to a 1. */
-#if 0
+#if 0 || (defined(_WIN32) && !defined(__CYGWIN__))
 typedef	int		ssize_t;	/* POSIX names. */
+typedef char *		caddr_t;
 #endif
 
 /*
  * If your system doesn't have the POSIX type for a signal mask,
  * change the 0 to a 1.
  */
-#if 0					/* POSIX 1003.1 signal mask type. */
+#if 0 || (defined(_WIN32) && !defined(__CYGWIN__))
 typedef unsigned int	sigset_t;
 #endif
 
@@ -81,6 +94,9 @@ typedef unsigned int	sigset_t;
  * long enough to create the file and unlink it.  All of this stuff is
  * intended to use old-style BSD calls to fake POSIX 1003.1 calls.
  */
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#define NO_POSIX_SIGNALS
+#endif
 #ifdef	NO_POSIX_SIGNALS
 #define	sigemptyset(set)	(*(set) = 0)
 #define	sigfillset(set)		(*(set) = ~(sigset_t)0, 0)
@@ -163,6 +179,14 @@ static int __sigtemp;		/* For the use of sigprocmask */
 #define	O_SHLOCK	0
 #endif
 
+#ifndef O_BINARY	/* UNIX systems don't often have or need this */
+#define O_BINARY 0
+#endif
+
+#ifndef O_NONBLOCK	/* Win32 systems doesn't have or need this */
+#define	O_NONBLOCK	0
+#endif
+
 #ifndef EFTYPE
 #define	EFTYPE		EINVAL		/* POSIX 1003.1 format errno. */
 #endif
@@ -219,13 +243,12 @@ static int __sigtemp;		/* For the use of sigprocmask */
 #define	S_ISFIFO(m)	((m & 0170000) == 0010000)	/* fifo */
 #endif
 #ifndef S_ISLNK				/* BSD POSIX 1003.1 extensions */
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#define S_ISLNK(m)	(0)
+#else
 #define	S_ISLNK(m)	((m & 0170000) == 0120000)	/* symbolic link */
 #define	S_ISSOCK(m)	((m & 0170000) == 0140000)	/* socket */
 #endif
-
-/* The type of a va_list. */
-#ifndef _BSD_VA_LIST_			/* 4.4BSD #define. */
-#define	_BSD_VA_LIST_	char *
 #endif
 
 #endif /* !_COMPAT_H_ */

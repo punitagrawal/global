@@ -1,0 +1,19 @@
+How to install in WIN32 environment.
+
+You need Borland C++ compiler 5.0 in C:\bc5.
+
+C:\global>win32\makeall[RET]
+          ~~~~~~~~~~~~~~~~~~
+C:\global>win32\install[RET]
+          ~~~~~~~~~~~~~~~~~~
+C:\global>mkdir \tmp[RET]
+          ~~~~~~~~~~~~~~~
+C:\global>win32\clean[RET]
+          ~~~~~~~~~~~~~~~~
+You need perl command when using htags.pl.
+You can get win32-perl at Active STATE. See 'http://www.activestate.com/'.
+
+Also, you need UNIX compatible sed and sort.
+Please read win32.txt by Dan Fandrich for more information.
+
+Global 3.5 has been tested under Windows NT 4.0 with Borland C++ 5.02.

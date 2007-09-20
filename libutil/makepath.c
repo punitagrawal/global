@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,10 +32,12 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	makepath.c				15-May-98
+ *	makepath.c				3-Aug-99
  *
  */
-#include <sys/param.h>
+#include <string.h>
+
+#include "gparam.h"
 #include "die.h"
 #include "makepath.h"
 #include "strbuf.h"
@@ -42,12 +48,14 @@ static STRBUF	*sb;
  *
  *	i)	dir	directory
  *	i)	file	file
+ *	i)	suffix	suffix(optional)
  *	r)		path
  */
 char	*
-makepath(dir, file)
+makepath(dir, file, suffix)
 const char *dir;
 const char *file;
+const char *suffix;
 {
 	int	length;
 
@@ -60,7 +68,12 @@ const char *file;
 	strunputc(sb, '/');
 	strputc(sb, '/');
 	strputs(sb, file);
+	if (suffix) {
+		if (*suffix != '.')
+			strputc(sb, '.');
+		strputs(sb, suffix);
+	}
 	if ((length = strlen(strvalue(sb))) > MAXPATHLEN)
-		die1("path name too long. '%s'\n", dir);
+		die1("path name too long. '%s'\n", strvalue(sb));
 	return strvalue(sb);
 }

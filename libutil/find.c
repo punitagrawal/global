@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,34 +32,33 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	find.c					1-May-98
+ *	find.c					18-Aug-99
  *
  */
 /*
  * USEFIND	use find(1) to traverse directory tree.
  *		Otherwise, use dirent(3) library.
  */
-#define USEFIND
-
-#include <sys/param.h>
-
+/* #define USEFIND */
 #include <assert.h>
 #include <ctype.h>
 #ifndef USEFIND
+#include <sys/types.h>
 #include <dirent.h>
-#ifndef BSD4_4
+#ifndef BSD4_4		/* BSD's dirent(3) need not stat(2) */
 #include <sys/stat.h>
 #endif
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
-#include <regex.h>
+#include <string.h>
+#include <unistd.h>
 
+#include "gparam.h"
+#include "regex.h"
 #include "conf.h"
 #include "die.h"
 #include "find.h"
-#include "gparam.h"
 #include "locatestring.h"
 #include "makepath.h"
 #include "strbuf.h"
@@ -73,8 +76,9 @@
 static regex_t	skip_area;
 static regex_t	*skip = &skip_area;
 static int	opened;
+static int	retval;
 
-static void	trim __P((char *));
+static void	trim(char *);
 
 /*
  * trim: remove blanks and '\'.
@@ -168,7 +172,8 @@ findopen()
 		/*
 		 * compile regular expression.
 		 */
-		if (regcomp(skip, reg, REG_EXTENDED|REG_NEWLINE) != 0)
+		retval = regcomp(skip, reg, REG_EXTENDED|REG_NEWLINE);
+		if (retval != 0)
 			die("cannot compile regular expression.");
 		strclose(sbb);
 	} else {
@@ -243,9 +248,17 @@ STRBUF  *sb;
 	while ((dp = readdir(dirp)) != NULL) {
 #ifdef BSD4_4
 		if (dp->d_namlen == 1 && dp->d_name[0] == '.')
+#else
+		if (!strcmp(dp->d_name, "."))
+#endif
 			continue;
+#ifdef BSD4_4
 		if (dp->d_namlen == 2 && dp->d_name[0] == '.' && dp->d_name[1] == '.')
+#else
+		if (!strcmp(dp->d_name, ".."))
+#endif
 			continue;
+#ifdef BSD4_4
 		if (dp->d_type == DT_DIR)
 			strputc(sb, 'd');
 		else if (dp->d_type == DT_REG)
@@ -256,10 +269,17 @@ STRBUF  *sb;
 			strputc(sb, ' ');
 		strnputs(sb, dp->d_name, (int)dp->d_namlen);
 #else
-		if (stat(path, &st) < 0) {
-			fprintf(stderr, "cannot stat '%s'. (Ignored)\n", path);
+#ifdef _WIN32
+		if (stat(makepath(dir, dp->d_name, NULL), &st) < 0) {
+			fprintf(stderr, "cannot stat '%s'. (Ignored)\n", dp->d_name);
 			continue;
 		}
+#else
+		if (lstat(makepath(dir, dp->d_name, NULL), &st) < 0) {
+			fprintf(stderr, "cannot lstat '%s'. (Ignored)\n", dp->d_name);
+			continue;
+		}
+#endif /* _WIN32 */
 		if (S_ISDIR(st.st_mode))
 			strputc(sb, 'd');
 		else if (S_ISREG(st.st_mode))
@@ -317,25 +337,29 @@ findopen()
 		trim(skiplist);
 	}
 	{
-		char    *p;
+		char    *suffp;
 
 		strstart(sb);
-		strputc(sb, '(');       /* ) */
-		for (p = sufflist; p; ) {
-			char    *suffp = p;
-			if ((p = locatestring(p, ",", MATCH_FIRST)) != NULL)
-				*p++ = 0;
-			strputs(sb, "\\.");
-			strputs(sb, suffp);
-			strputc(sb, '$');
-			if (p)
-				strputc(sb, '|');
+		strputs(sb, "\\.(");       /* ) */
+		for (suffp = sufflist; suffp; ) {
+			char    *p;
+
+			for (p = suffp; *p && *p != ','; p++) {
+				strputc(sb, '\\');
+				strputc(sb, *p);
+			}
+			if (!*p)
+				break;
+			assert(*p == ',');
+			strputc(sb, '|');
+			suffp = ++p;
 		}
-		strputc(sb, ')');
+		strputs(sb, ")$");
 		/*
 		 * compile regular expression.
 		 */
-		if (regcomp(suff, strvalue(sb), REG_EXTENDED) != 0)
+		retval = regcomp(suff, strvalue(sb), REG_EXTENDED);
+		if (retval != 0)
 			die("cannot compile regular expression.");
 	}
 	if (skiplist) {
@@ -364,7 +388,8 @@ findopen()
 		/*
 		 * compile regular expression.
 		 */
-		if (regcomp(skip, strvalue(sb), REG_EXTENDED) != 0)
+		retval = regcomp(skip, strvalue(sb), REG_EXTENDED);
+		if (retval != 0)
 			die("cannot compile regular expression.");
 	} else {
 		skip = (regex_t *)0;
@@ -388,12 +413,14 @@ int	*length;
 
 			curp->p += strlen(curp->p) + 1;
 			if (type == 'f' || type == 'l') {
-				char	*path = makepath(dir, unit);
+				char	*path = makepath(dir, unit, NULL);
 				if (regexec(suff, path, 0, 0, 0) != 0)
 					continue;
 				if (skip && regexec(skip, path, 0, 0, 0) == 0)
 					continue;
 				strcpy(val, path);
+				if (length)
+					*length = strlen(val);
 				return val;
 			}
 			if (type == 'd') {

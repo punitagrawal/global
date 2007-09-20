@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998 Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999
+ *            Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999
+ *            Tama Communications Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,11 +14,12 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by Shigio Yamaguchi.
+ *      This product includes software developed by Tama Communications
+ *      Corporation and its contributors.
  * 4. Neither the name of the author nor the names of any co-contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	gtagsop.c				12-Nov-98
+ *	gtagsop.c				19-Aug-99
  *
  */
 #include <assert.h>
@@ -36,20 +40,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
+#include "conf.h"
+#include "gparam.h"
 #include "dbop.h"
 #include "die.h"
 #include "gtagsop.h"
 #include "locatestring.h"
 #include "makepath.h"
 #include "mgets.h"
+#include "path.h"
 #include "pathop.h"
 #include "strbuf.h"
 #include "strmake.h"
 #include "tab.h"
 
-static char	*genrecord __P((GTOP *));
-static int	belongto __P((GTOP *, char *, char *));
+static char	*genrecord(GTOP *);
+static int	belongto(GTOP *, char *, char *);
 
 static int	support_version = 2;	/* acceptable format version   */
 static const char *tagslist[] = {"GTAGS", "GRTAGS", "GSYMS"};
@@ -199,7 +207,7 @@ int	flags;
 	/*
 	 * allow duplicate records.
 	 */
-	gtop->dbop = dbop_open(makepath(dbpath, dbname(db)), dbmode, 0644, DBOP_DUP);
+	gtop->dbop = dbop_open(makepath(dbpath, dbname(db), NULL), dbmode, 0644, DBOP_DUP);
 	if (gtop->dbop == NULL) {
 		if (dbmode == 1)
 			die1("cannot make %s.", dbname(db));
@@ -340,7 +348,7 @@ char	*record;
  *	i)	gtop	descripter of GTOP
  *	i)	comline	tag command line
  *	i)	path	source file
- *	i)	flags	GTAGS_UNIQUE, GTAGS_EXTRACTMETHOD
+ *	i)	flags	GTAGS_UNIQUE, GTAGS_EXTRACTMETHOD, GTAGS_DEBUG
  */
 void
 gtagsadd(gtop, comline, path, flags)
@@ -352,7 +360,19 @@ int	flags;
 	char	*tagline;
 	FILE	*ip;
 	STRBUF	*sb = stropen();
+	char	sort_command[MAXFILLEN+1];
+	char	sed_command[MAXFILLEN+1];
 
+	/*
+	 * get command name of sort and sed.
+	 */
+	if (!getconfs("sort_command", sb))
+		die("cannot get sort command name.");
+	strcpy(sort_command, strvalue(sb));
+	strstart(sb);
+	if (!getconfs("sed_command", sb))
+		die("cannot get sed command name.");
+	strcpy(sed_command, strvalue(sb));
 	/*
 	 * add path index if not yet.
 	 */
@@ -360,6 +380,7 @@ int	flags;
 	/*
 	 * make command line.
 	 */
+	strstart(sb);
 	makecommand(comline, path, sb);
 	/*
 	 * Compact format.
@@ -369,16 +390,25 @@ int	flags;
 
 		if ((pno = pathget(path)) == NULL)
 			die1("GPATH is corrupted.('%s' not found)", path);
-		strputs(sb, "| sed 's!");
+		strputs(sb, "| ");
+		strputs(sb, sed_command);
+		strputc(sb, ' ');
+		strputs(sb, "\"s@");
 		strputs(sb, path);
-		strputs(sb, "!");
+		strputs(sb, "@");
 		strputs(sb, pno);
-		strputs(sb, "!'");
+		strputs(sb, "@\"");
 	}
-	if (gtop->format & GTAGS_COMPACT)
-		strputs(sb, "| sort +0 -1 +1n -2");
+	if (gtop->format & GTAGS_COMPACT) {
+		strputs(sb, "| ");
+		strputs(sb, sort_command);
+		strputc(sb, ' ');
+		strputs(sb, "+0 -1 +1n -2");
+	}
 	if (flags & GTAGS_UNIQUE)
-		strputs(sb, "| uniq");
+		strputs(sb, " -u");
+	if (flags & GTAGS_DEBUG)
+		fprintf(stderr, "[DBG] executing '%s'\n", strvalue(sb));
 	if (!(ip = popen(strvalue(sb), "r")))
 		die1("cannot execute '%s'.", strvalue(sb));
 	while ((tagline = mgets(ip, NULL, MGETS_TAILCUT)) != NULL) {

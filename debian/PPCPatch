@@ -4,6 +4,8 @@ This is a small fix that enabled me to to compile global 3.44 on
 powerpc.
 	- Konstantinos Margaritis
 
+(NB: this is no longer a Debian patch, it has been merged upstream - Ron)
+
 diff -ruN global-3.44.orig/gozilla/Imakefile global-3.44/gozilla/Imakefile
 --- global-3.44.orig/gozilla/Imakefile  Wed Feb 17 19:34:27 1999
 +++ global-3.44/gozilla/Imakefile       Mon May 17 12:05:15 1999
