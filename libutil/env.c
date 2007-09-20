@@ -1,21 +1,20 @@
 /*
- * Copyright (c) 2003 Tama Communications Corporation
+ * Copyright (c) 2003, 2005 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -37,6 +36,8 @@
 #include "env.h"
 #include "strbuf.h"
 
+extern char **environ;
+
 /*
  * set_env: put environment variable.
  *
@@ -44,10 +45,11 @@
  *	i)	val	value
  */
 void
-set_env(var, val)
-	const char *var;
-	const char *val;
+set_env(const char *var, const char *val)
 {
+/*
+ * sparc-sun-solaris2.6 doesn't have setenv(3).
+ */
 #ifdef HAVE_PUTENV
 	STRBUF *sb = strbuf_open(0);
 
@@ -71,4 +73,19 @@ get_home_directory(void)
 #else
 	return getenv("HOME");
 #endif
+}
+
+/*
+ * env_size: calculate the size of area used by environment.
+ */
+int
+env_size(void)
+{
+	char **e;
+	int size = 0;
+
+	for (e = environ; *e != NULL; e++)
+		size += strlen(*e) + 1;
+
+	return size;
 }

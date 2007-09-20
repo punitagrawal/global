@@ -1,22 +1,21 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
- *	Tama Communications Corporation
+ * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+ *      2006, 2007 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -40,9 +39,11 @@
 #include <sys/param.h>
 #include <time.h>
 
+#include "checkalloc.h"
 #include "getopt.h"
 #include "regex.h"
 #include "global.h"
+#include "anchor.h"
 #include "cache.h"
 #include "common.h"
 #include "htags.h"
@@ -54,7 +55,7 @@ void src2html(const char *, const char *, int);
 int makedupindex(void);
 int makedefineindex(const char *, int, STRBUF *);
 int makefileindex(const char *, STRBUF *);
-void makeincludeindex();
+void makeincludeindex(void);
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #define mkdir(path,mode) mkdir(path)
@@ -66,7 +67,7 @@ void makeincludeindex();
  */
 int w32 = W32;				/* Windows32 environment	*/
 const char *www = "http://www.gnu.org/software/global/";
-int file_count = 0;
+int html_count = 0;
 int sep = '/';
 const char *save_config;
 const char *save_argv;
@@ -77,13 +78,22 @@ char distpath[MAXPATHLEN];
 char gtagsconf[MAXPATHLEN];
 char datadir[MAXPATHLEN];
 
-char sort_path[MAXFILLEN];
 char gtags_path[MAXFILLEN];
 char global_path[MAXFILLEN];
-char findcom[MAXFILLEN];
+int gtags_exist[GTAGLIM];
 const char *null_device = NULL_DEVICE;
 const char *tmpdir = "/tmp";
 
+/*
+ * Order of items in the top page (This should be customisable variable in the future).
+ *
+ * 'c': caution
+ * 's': search form
+ * 'm': mains
+ * 'd': definitions
+ * 'f': files
+ */
+char *item_order = "csmdf";
 /*
  * options
  */
@@ -91,8 +101,9 @@ int aflag;				/* --alphabet(-a) option	*/
 int cflag;				/* --compact(-c) option		*/
 int fflag;				/* --form(-f) option		*/
 int Fflag;				/* --frame(-F) option		*/
-int nflag;				/* --line-number(-n) option	*/
 int gflag;				/* --gtags(-g) option		*/
+int Iflag;				/* --icon(-I) option		*/
+int nflag;				/* --line-number(-n) option	*/
 int Sflag;				/* --secure-cgi(-S) option	*/
 int qflag;
 int vflag;				/* --verbose(-v) option		*/
@@ -103,14 +114,13 @@ int show_help;				/* --help command		*/
 int show_version;			/* --version command		*/
 int caution;				/* --caution option		*/
 int dynamic;				/* --dynamic(-D) option		*/
-int symbol;				/* --symbol(-s) option		*/
+int symbol;				/* --symbol(-s) option          */
 int statistics;				/* --statistics option		*/
 
 int copy_files;				/* 1: copy tag files		*/
-int no_map_file;			/* 1: doesn't make map file	*/
 int no_order_list;			/* 1: doesn't use order list	*/
 int other_files;			/* 1: list other files		*/
-int enable_grep;			/* 1: enable grep		*/
+int enable_grep = 1;			/* 1: enable grep		*/
 int enable_idutils;			/* 1: enable idutils		*/
 int enable_xhtml;			/* 1: enable XHTML		*/
 
@@ -118,8 +128,8 @@ const char *action_value;
 const char *id_value;
 const char *cgidir;
 const char *main_func = "main";
-const char *style_sheet;
 const char *cvsweb_url;
+int use_cvs_module;
 const char *cvsweb_cvsroot;
 const char *gtagslabel;
 const char *title;
@@ -181,21 +191,42 @@ const char *dir_icon  = "dir";
 const char *c_icon = "c";
 const char *file_icon = "text";
 
+const char *icon_files[] = {
+	"first",
+	"last",
+	"left",
+	"right",
+	"top",
+	"bottom",
+	"n_first",
+	"n_last",
+	"n_left",
+	"n_right",
+	"n_top",
+	"n_bottom",
+	"index",
+	"help",
+	"back",
+	"dir",
+	"c",
+	"text",
+	"pglobe"
+};
 /*
  * Configuration parameters.
  */
 int ncol = 4;				/* columns of line number	*/
 int tabs = 8;				/* tab skip			*/
-char stabs[8];				/* tab skip (string)		*/
+int flist_fields = 5;			/* fields number of file list	*/
 int full_path = 0;			/* file index format		*/
 int map_file = 1;			/* 1: create MAP file		*/
-const char *icon_list = NULL;		/* use icon list		*/
 const char *icon_suffix = "png";	/* icon suffix (jpg, png etc)	*/
 const char *icon_spec = "border='0' align='top'";/* parameter in IMG tag*/
 const char *prolog_script = NULL;	/* include script at first	*/
 const char *epilog_script = NULL;	/* include script at last	*/
 int show_position = 0;			/* show current position	*/
 int table_list = 0;			/* tag list using table tag	*/
+int table_flist = 0;			/* file list using table tag	*/
 int colorize_warned_line = 0;		/* colorize warned line		*/
 const char *script_alias = "/cgi-bin";	/* script alias of WWW server	*/
 const char *gzipped_suffix = "ghtml";	/* suffix of gzipped html file	*/
@@ -211,40 +242,68 @@ const char *include_file_suffixes = "h,hxx,hpp,H,inc.php";
 static const char *langmap = DEFAULTLANGMAP;
 
 static struct option const long_options[] = {
+	/*
+	 * These options have long name and short name.
+	 * We throw them to the processing of short options.
+	 */
         {"alphabet", no_argument, NULL, 'a'},
         {"compact", no_argument, NULL, 'c'},
-        {"dynamic", no_argument, NULL, 'D'},
         {"dbpath", required_argument, NULL, 'd'},
+        {"dynamic", no_argument, NULL, 'D'},
         {"form", no_argument, NULL, 'f'},
         {"frame", no_argument, NULL, 'F'},
+        {"func-header", optional_argument, NULL, 'h'},
         {"gtags", no_argument, NULL, 'g'},
+        {"icon", no_argument, NULL, 'I'},
+        {"line-number", optional_argument, NULL, 'n'},
         {"main-func", required_argument, NULL, 'm'},
-        {"line-number", no_argument, NULL, 'n'},
         {"other", no_argument, NULL, 'o'},
-        {"symbol", no_argument, NULL, 's'},
         {"secure-cgi", required_argument, NULL, 'S'},
+        {"symbol", no_argument, NULL, 's'},
+        {"table-flist", optional_argument, NULL, 'T'},
         {"title", required_argument, NULL, 't'},
         {"verbose", no_argument, NULL, 'v'},
         {"warning", no_argument, NULL, 'w'},
-        {"xhtml", no_argument, NULL, 'x'},
+        {"xhtml", optional_argument, NULL, 'x'},
 
-        /* long name only */
-        {"action", required_argument, NULL, 1},
-        {"cvsweb", required_argument, NULL, 1},
-        {"cvsweb-cvsroot", required_argument, NULL, 1},
+        /*
+	 * The following are long name only.
+	 */
+	/* flag value */
         {"caution", no_argument, &caution, 1},
         {"debug", no_argument, &debug, 1},
-        {"gtagsconf", required_argument, NULL, 1},
-        {"gtagslabel", required_argument, NULL, 1},
-        {"id", required_argument, NULL, 1},
-        {"nocgi", no_argument, NULL, 1},
-        {"no-map-file", no_argument, &no_map_file, 1},
-        {"insert-header", required_argument, NULL, 1},
-        {"insert-footer", required_argument, NULL, 1},
+        {"disable-grep", no_argument, &enable_grep, 0},
+        {"full-path", no_argument, &full_path, 1},
+        {"nocgi", no_argument, &cgi, 0},
+        {"no-map-file", no_argument, &map_file, 0},
         {"statistics", no_argument, &statistics, 1},
-        {"style-sheet", required_argument, NULL, 1},
+        {"table-list", no_argument, &table_list, 1},
         {"version", no_argument, &show_version, 1},
         {"help", no_argument, &show_help, 1},
+
+	/* accept value */
+#define OPT_ACTION		128
+#define OPT_CVSWEB		129
+#define OPT_CVSWEB_CVSROOT	130
+#define OPT_GTAGSCONF		131
+#define OPT_GTAGSLABEL		132
+#define OPT_NCOL		133
+#define OPT_ID			134
+#define OPT_INSERT_FOOTER	135
+#define OPT_INSERT_HEADER	136
+#define OPT_ITEM_ORDER		137
+#define OPT_TABS		138
+        {"action", required_argument, NULL, OPT_ACTION},
+        {"cvsweb", required_argument, NULL, OPT_CVSWEB},
+        {"cvsweb-cvsroot", required_argument, NULL, OPT_CVSWEB_CVSROOT},
+        {"gtagsconf", required_argument, NULL, OPT_GTAGSCONF},
+        {"gtagslabel", required_argument, NULL, OPT_GTAGSLABEL},
+        {"ncol", required_argument, NULL, OPT_NCOL},
+        {"id", required_argument, NULL, OPT_ID},
+        {"insert-footer", required_argument, NULL, OPT_INSERT_FOOTER},
+        {"insert-header", required_argument, NULL, OPT_INSERT_HEADER},
+        {"item-order", required_argument, NULL, OPT_ITEM_ORDER},
+        {"tabs", required_argument, NULL, OPT_TABS},
         { 0 }
 };
 
@@ -277,8 +336,7 @@ clean(void)
  * This handler is set up in signal_setup().
  */
 static void
-suddenly(signo)
-        int signo;
+suddenly(int signo)
 {
         signo = 0;      /* to satisfy compiler */
 
@@ -303,15 +361,25 @@ signal_setup(void)
 }
 
 /*
+ * make directory in the dist directory.
+ */
+static void
+make_directory_in_distpath(const char *name)
+{
+	const char *path = makepath(distpath, name, NULL);
+
+	if (!test("d", path))
+		if (mkdir(path, 0775))
+			die("cannot make directory '%s'.", path);
+}
+/*
  * generate_file: generate file with replacing macro.
  *
  *	i)	dist	directory where the file should be created
  *	i)	file	file name
  */
 static void
-generate_file(dist, file)
-	const char *dist;
-	const char *file;
+generate_file(const char *dist, const char *file)
 {
 	regex_t preg;
 	regmatch_t pmatch[2];
@@ -326,7 +394,6 @@ generate_file(dist, file)
 		/* dynamic initialization */
                 {"@page_begin@", NULL},
                 {"@page_end@", NULL},
-                {"@lineno_anchor@", NULL},
 
 		/* static initialization */
                 {"@body_begin@", body_begin},
@@ -339,10 +406,7 @@ generate_file(dist, file)
                 {"@message_end@", message_end},
                 {"@verbatim_begin@", verbatim_begin},
                 {"@verbatim_end@", verbatim_end},
-                {"@global_path@", global_path},
-                {"@gtags_path@", gtags_path},
                 {"@normal_suffix@", normal_suffix},
-                {"@tabs@", stabs},
                 {"@hr@", hr},
                 {"@br@", br},
                 {"@HTML@", HTML},
@@ -355,7 +419,6 @@ generate_file(dist, file)
 
 	tab[0].value = gen_page_begin("Result", SUBDIR);
 	tab[1].value = gen_page_end();
-	tab[2].value = gen_name_string("L$.");
 	/*
 	 * construct regular expression.
 	 */
@@ -381,7 +444,7 @@ generate_file(dist, file)
 		die("cannot create file '%s'.", file);
 	strbuf_reset(sb);
 	/*
-	 * Read templete file and evaluate macros.
+	 * Read template file and evaluate macros.
 	 */
 	while ((_ = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
 		const char *p;
@@ -420,16 +483,14 @@ generate_file(dist, file)
 	fclose(ip);
 	strbuf_close(sb);
 	regfree(&preg);
-	file_count++;
+	html_count++;
 }
 
 /*
  * makeprogram: make CGI program
  */
 static void
-makeprogram(cgidir, file)
-	const char *cgidir;
-	const char *file;
+makeprogram(const char *cgidir, const char *file)
 {
 	generate_file(cgidir, file);
 }
@@ -437,8 +498,7 @@ makeprogram(cgidir, file)
  * makebless: make bless.sh file.
  */
 static void
-makebless(file)
-	const char *file;
+makebless(const char *file)
 {
 	const char *save = action;
 	action = saction;
@@ -452,9 +512,7 @@ makebless(file)
  *	i)	file	file name
  */
 static void
-makeghtml(cgidir, file)
-	const char *cgidir;
-	const char *file;
+makeghtml(const char *cgidir, const char *file)
 {
 	FILE *op;
 
@@ -471,8 +529,7 @@ makeghtml(cgidir, file)
  * makerebuild: make rebuild script
  */
 static void
-makerebuild(file)
-	const char *file;
+makerebuild(const char *file)
 {
 	FILE *op;
 
@@ -493,10 +550,9 @@ makerebuild(file)
  * makehelp: make help file
  */
 static void
-makehelp(file)
-	const char *file;
+makehelp(const char *file)
 {
-	const char **label = icon_list ? anchor_comment : anchor_label;
+	const char **label = Iflag ? anchor_comment : anchor_label;
 	const char **icons = anchor_icons;
 	const char **msg   = anchor_msg;
 	int n, last = 7;
@@ -510,10 +566,11 @@ makehelp(file)
 	fputs(header_begin, op);
 	fputs("Usage of Links", op);
 	fputs_nl(header_end, op);
-	fputs(verbatim_begin, op);
+	if (!Iflag)
+		fputs(verbatim_begin, op);
 	fputs("/* ", op);
 	for (n = 0; n <= last; n++) {
-		if (icon_list) {
+		if (Iflag) {
 			fputs(gen_image(CURRENT, icons[n], label[n]), op);
 			if (n < last)
 				fputc(' ', op);
@@ -524,11 +581,14 @@ makehelp(file)
 	if (show_position)
 		fprintf(op, "[+line file]");
 	fputs(" */", op);
-	fputs_nl(verbatim_end, op);
+	if (!Iflag)
+		fputs_nl(verbatim_end, op);
+	else
+		fputc('\n', op);
 	fputs_nl(define_list_begin, op);
 	for (n = 0; n <= last; n++) {
 		fputs(define_term_begin, op);
-		if (icon_list) {
+		if (Iflag) {
 			fputs(gen_image(CURRENT, icons[n], label[n]), op);
 		} else {
 			fprintf(op, "[%s]", label[n]);
@@ -550,7 +610,7 @@ makehelp(file)
 	fputs_nl(body_end, op);
 	fputs_nl(gen_page_end(), op);
 	fclose(op);
-	file_count++;
+	html_count++;
 }
 /*
  * makesearchpart: make search part
@@ -561,10 +621,7 @@ makehelp(file)
  *	r)		html
  */
 static char *
-makesearchpart(action, id, target)
-	const char *action;
-	const char *id;
-	const char *target;
+makesearchpart(const char *action, const char *id, const char *target)
 {
 	STATIC_STRBUF(sb);
 
@@ -598,7 +655,6 @@ makesearchpart(action, id, target)
 	}
 	strbuf_puts(sb, gen_input_radio("type", "path", 0, "Look for path name which matches to the specified pattern."));
 	strbuf_puts(sb, target ? "Path" : "Path name");
-	strbuf_puts_nl(sb, br);
 	if (enable_grep) {
 		strbuf_puts(sb, gen_input_radio("type", "grep", 0, "Retrieve lines which matches to the specified pattern."));
 		strbuf_puts_nl(sb, target ? "Grep" : "Grep pattern");
@@ -607,11 +663,19 @@ makesearchpart(action, id, target)
 		strbuf_puts(sb, gen_input_radio("type", "idutils", 0, "Retrieve lines which matches to the specified pattern using idutils(1)."));
 		strbuf_puts_nl(sb, target ? "Id" : "Id pattern");
 	}
+	strbuf_puts_nl(sb, br);
 	strbuf_puts(sb, gen_input_checkbox("icase", "1", "Ignore case distinctions in the pattern."));
 	strbuf_puts_nl(sb, target ? "Icase" : "Ignore case");
 	if (other_files) {
 		strbuf_puts(sb, gen_input_checkbox("other", "1", "Files other than the source code are also retrieved."));
 		strbuf_puts_nl(sb, target ? "Other" : "Other files");
+	}
+	if (other_files && !target) {
+		strbuf_puts_nl(sb, br);
+		strbuf_puts(sb, "('Other files' is effective only to 'Path name'");
+		if (enable_grep)
+			strbuf_puts(sb, " and 'Grep pattern'");
+		strbuf_puts_nl(sb, ".)");
 	}
 	strbuf_puts_nl(sb, gen_form_end());
 	return strbuf_value(sb);
@@ -624,10 +688,7 @@ makesearchpart(action, id, target)
  *	i)	index	common part
  */
 static void
-makeindex(file, title, index)
-	const char *file;
-	const char *title;
-	const char *index;
+makeindex(const char *file, const char *title, const char *index)
 {
 	FILE *op;
 
@@ -635,7 +696,7 @@ makeindex(file, title, index)
 	if (!op)
 		die("cannot make file '%s'.", file);
 	if (Fflag) {
-		fputs_nl(gen_frameset_page_begin(title), op);
+		fputs_nl(gen_page_frameset_begin(title), op);
 		fputs_nl(gen_frameset_begin("cols='200,*'"), op);
 		if (fflag) {
 			fputs_nl(gen_frameset_begin("rows='33%,33%,*'"), op);
@@ -670,7 +731,7 @@ makeindex(file, title, index)
 		fputs_nl(gen_page_end(), op);
 	}
 	fclose(op);
-	file_count++;
+	html_count++;
 }
 /*
  * makemainindex: make main index
@@ -679,9 +740,7 @@ makeindex(file, title, index)
  *	i)	index	common part
  */
 static void
-makemainindex(file, index)
-	const char *file;
-	const char *index;
+makemainindex(const char *file, const char *index)
 {
 	FILE *op;
 
@@ -698,7 +757,7 @@ makemainindex(file, index)
 	fputs_nl(body_end, op);
 	fputs_nl(gen_page_end(), op);
 	fclose(op);
-	file_count++;
+	html_count++;
 }
 /*
  * makesearchindex: make search html
@@ -706,8 +765,7 @@ makemainindex(file, index)
  *	i)	file	file name
  */
 static void
-makesearchindex(file)
-	const char *file;
+makesearchindex(const char *file)
 {
 	FILE *op;
 
@@ -720,14 +778,13 @@ makesearchindex(file)
 	fputs_nl(body_end, op);
 	fputs_nl(gen_page_end(), op);
 	fclose(op);
-	file_count++;
+	html_count++;
 }
 /*
  * makehtaccess: make .htaccess skeleton file.
  */
 static void
-makehtaccess(file)
-	const char *file;
+makehtaccess(const char *file)
 {
 	FILE *op;
 
@@ -755,64 +812,68 @@ makehtaccess(file)
  *	i)	total	number of files.
  */
 static void
-makehtml(total)
-	int total;
+makehtml(int total)
 {
-	FILE *ip;
-	const char *_;
+	GFIND *gp;
+	FILE *anchor_stream;
+	const char *path;
 	int count = 0;
-	char command[MAXFILLEN], path[MAXPATHLEN];
-	STRBUF *sb = strbuf_open(0);
 
-	if (other_files && !dynamic)
-		snprintf(command, sizeof(command), "%s --other | gnusort -t / -k 2", findcom);
-	else
-		strlimcpy(command, findcom, sizeof(command));
-	ip = popen(command, "r");
-	if (!ip)
-		die("cannot execute command '%s'.", command);
-	while ((_ = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
-		int notsource = 0;
-		const char *p;
-
-		if (*_ == ' ') {
-			if (!other_files)
-				continue;
-			_++;
-			if (test("b", _)) {
-				if (wflag)
-					warning("'%s' is binary file. (skipped)", _);
-				continue;
-			}
-			notsource = 1;
-		}
-		count++;
-		_ += 2;
-		p = _;
-		message(" [%d/%d] converting %s", count, total, p);
-		p = path2fid(p);
-		snprintf(path, sizeof(path), "%s/%s/%s.%s", distpath, SRCS, p, HTML);
-		src2html(_, path, notsource);
+	/*
+	 * Create anchor stream for anchor_load().
+	 */
+	anchor_stream = tmpfile();
+	gp = gfind_open(dbpath, NULL, other_files ? GPATH_BOTH : GPATH_SOURCE);
+	while ((path = gfind_read(gp)) != NULL) {
+		if (gp->type == GPATH_OTHER)
+			fputc(' ', anchor_stream);
+		fputs(path, anchor_stream);
+		fputc('\n', anchor_stream);
 	}
-	if (pclose(ip) != 0)
-		die("cannot traverse directory.(%s)", command);
-	strbuf_close(sb);
+	gfind_close(gp);
+	/*
+	 * Prepare anchor stream for anchor_load().
+	 */
+	anchor_prepare(anchor_stream);
+	/*
+	 * For each path in GPATH, convert the path into HTML file.
+	 */
+	gp = gfind_open(dbpath, NULL, other_files ? GPATH_BOTH : GPATH_SOURCE);
+	while ((path = gfind_read(gp)) != NULL) {
+		char html[MAXPATHLEN];
+
+		if (gp->type == GPATH_OTHER && !other_files)
+			continue;
+		/*
+		 * load tags belonging to the path.
+		 * The path must be start "./".
+		 */
+		anchor_load(path);
+
+		count++;
+		path += 2;		/* remove './' at the head */
+		message(" [%d/%d] converting %s", count, total, path);
+		snprintf(html, sizeof(html), "%s/%s/%s.%s", distpath, SRCS, path2fid(path), HTML);
+		src2html(path, html, gp->type == GPATH_OTHER);
+	}
+	gfind_close(gp);
 }
 /*
  * copy file.
  */
 static void
-copyfile(from, to)
-	const char *from;
-	const char *to;
+copyfile(const char *from, const char *to)
 {
 	int ip, op, size;
 	char buf[8192];
 
-	ip = open(from, O_RDONLY);
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+	ip = open(from, O_RDONLY|O_BINARY);
 	if (ip < 0)
 		die("cannot open input file '%s'.", from);
-	op = open(to, O_WRONLY|O_CREAT|O_TRUNC, 0775);
+	op = open(to, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0775);
 	if (op < 0)
 		die("cannot create output file '%s'.", to);
 	while ((size = read(ip, buf, sizeof(buf))) != 0) {
@@ -825,28 +886,6 @@ copyfile(from, to)
 	close(ip);
 }
 /*
- * duplicate file.
- * By default, htags uses link system call without making a copy.
- */
-static void
-duplicatefile(file, from, to)
-	const char *file;
-	const char *from;
-	const char *to;
-{
-	char from_path[MAXPATHLEN];
-	char to_path[MAXPATHLEN];
-
-	snprintf(from_path, sizeof(from_path), "%s/%s", from, file);
-	snprintf(to_path, sizeof(to_path), "%s/%s", to, file);
-        if (copy_files) {
-                copyfile(from_path, to_path);
-	} else {
-                if (link(from_path, to_path) < 0)
-                        copyfile(from_path, to_path);
-	}
-}
-/*
  * makecommonpart: make a common part for mains.html and index.html
  *
  *	i)	title
@@ -855,93 +894,122 @@ duplicatefile(file, from, to)
  *	r)	index	common part
  */
 static char *
-makecommonpart(title, defines, files)
-	const char *title;
-	const char *defines;
-	const char *files;
+makecommonpart(const char *title, const char *defines, const char *files)
 {
 	FILE *ip;
 	STRBUF *sb = strbuf_open(0);
 	STRBUF *ib = strbuf_open(0);
-	char command[MAXFILLEN];
-	const char *_;
+	char buf[MAXFILLEN];
+	const char *tips = "Go to the GLOBAL project page.";
+	const char *_, *item;
 
 	strbuf_puts(sb, title_begin);
 	strbuf_puts(sb, title);
 	strbuf_puts_nl(sb, title_end);
 	strbuf_puts_nl(sb, gen_div_begin("right"));
 	strbuf_sprintf(sb, "Last updated %s%s\n", now(), br);
-	strbuf_sprintf(sb, "This hypertext was generated by %sGLOBAL-%s%s.%s\n",
-		gen_href_begin_with_title_target(NULL, www, NULL, NULL, "Go to the GLOBAL project page.", "_top"),
-		get_version(),
-		gen_href_end(),
-		br);
+	if (Iflag) {
+		snprintf(buf, sizeof(buf), "Powered by GLOBAL-%s.", get_version());
+		strbuf_puts(sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, tips,"_top"));
+		strbuf_puts(sb, gen_image(CURRENT, "pglobe", buf));
+		strbuf_puts(sb, gen_href_end());
+		strbuf_puts(sb, br);
+	} else {
+		strbuf_sprintf(sb, "Powered by %sGLOBAL-%s%s.%s\n",
+			gen_href_begin_with_title_target(NULL, www, NULL, NULL, tips, "_top"),
+			get_version(),
+			gen_href_end(),
+			br);
+	}
 	strbuf_puts_nl(sb, gen_div_end());
 	strbuf_puts_nl(sb, hr);
-	if (caution) {
-		strbuf_puts_nl(sb, caution_begin);
-		strbuf_sprintf(sb, "<font size='+2' color='red'>CAUTION</font>%s\n", br);
-		strbuf_sprintf(sb, "This hypertext consist of %d files.\n", file_count);
-		strbuf_puts_nl(sb, "Please don't download whole hypertext using hypertext copy tools.");
-		strbuf_puts_nl(sb, "Our network cannot afford such traffic.");
-		strbuf_puts_nl(sb, "Instead, you can generate same thing in your computer using");
-		strbuf_puts(sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, NULL, "_top"));
-		strbuf_puts(sb, "GLOBAL source code tag system");
-		strbuf_puts_nl(sb, gen_href_end());
-		strbuf_puts_nl(sb, "Thank you.");
-		strbuf_puts_nl(sb, caution_end);
-		strbuf_sprintf(sb, "\n%s\n", hr);
-	}
-	if (fflag) {
-		strbuf_puts(sb, makesearchpart(action, id, NULL));
-		strbuf_puts_nl(sb, hr);
-	}
-	strbuf_sprintf(sb, "%sMAINS%s\n", header_begin, header_end);
+	/*
+	 * Print items according to the value of variable 'item_order'.
+	 */
+	for (item = item_order; *item; item++) {
+		switch (*item) {
+		case 'c':
+			if (caution) {
+				strbuf_puts_nl(sb, caution_begin);
+				strbuf_sprintf(sb, "<font size='+2' color='red'>CAUTION</font>%s\n", br);
+				strbuf_sprintf(sb, "This hypertext consist of %d files.\n", html_count);
+				strbuf_puts_nl(sb, "Please don't download whole hypertext using hypertext copy tools.");
+				strbuf_puts_nl(sb, "Our network cannot afford such traffic.");
+				strbuf_puts_nl(sb, "Instead, you can generate same thing in your computer using");
+				strbuf_puts(sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, NULL, "_top"));
+				strbuf_puts(sb, "GLOBAL source code tag system");
+				strbuf_puts_nl(sb, gen_href_end());
+				strbuf_puts_nl(sb, "Thank you.");
+				strbuf_puts_nl(sb, caution_end);
+				strbuf_sprintf(sb, "\n%s\n", hr);
+			}
+			break;
+		case 's':
+			if (fflag) {
+				strbuf_puts(sb, makesearchpart(action, id, NULL));
+				strbuf_puts_nl(sb, hr);
+			}
+			break;
+		case 'm':
+			strbuf_sprintf(sb, "%sMAINS%s\n", header_begin, header_end);
 
-	snprintf(command, sizeof(command), "%s -nx %s | gnusort -k 1,1 -k 3,3 -k 2,2n", global_path, main_func);
-        ip = popen(command, "r");
-        if (!ip)
-                die("cannot execute command '%s'.", command);
-	strbuf_puts_nl(sb, gen_list_begin());
-	while ((_ = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL) {
-		strbuf_puts_nl(sb, gen_list_body(SRCS, _));
-	}
-	strbuf_puts_nl(sb, gen_list_end());
-	if (pclose(ip) != 0)
-		die("cannot execute command '%s'.", command);
-	strbuf_puts_nl(sb, hr);
-	if (aflag && !Fflag) {
-		strbuf_puts(sb, header_begin);
-		strbuf_puts(sb, title_define_index);
-		strbuf_puts_nl(sb, header_end);
-		strbuf_puts(sb, defines);
-	} else {
-		strbuf_puts(sb, header_begin);
-		strbuf_puts(sb, gen_href_begin(NULL, "defines", normal_suffix, NULL));
-		strbuf_puts(sb, title_define_index);
-		strbuf_puts(sb, gen_href_end());
-		strbuf_puts_nl(sb, header_end);
-	}
-	strbuf_puts_nl(sb, hr);
-	if (Fflag) {
-		strbuf_puts(sb, header_begin);
-		strbuf_puts(sb, gen_href_begin(NULL, "files", normal_suffix, NULL));
-		strbuf_puts(sb, title_file_index);
-		strbuf_puts(sb, gen_href_end());
-		strbuf_puts_nl(sb, header_end);
-	} else {
-		strbuf_puts(sb, header_begin);
-		strbuf_puts(sb, title_file_index);
-		strbuf_puts_nl(sb, header_end);
-		if (!no_order_list)
-			strbuf_puts_nl(sb, list_begin);
-		strbuf_puts(sb, files);
-		if (!no_order_list) {
-			strbuf_puts_nl(sb, list_end);
-		} else {
-			strbuf_puts_nl(sb, br);
+			snprintf(buf, sizeof(buf), "%s -x --nofilter=path %s", global_path, main_func);
+			ip = popen(buf, "r");
+			if (!ip)
+				die("cannot execute command '%s'.", buf);
+			strbuf_puts_nl(sb, gen_list_begin());
+			while ((_ = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL) {
+				strbuf_puts_nl(sb, gen_list_body(SRCS, _));
+			}
+			strbuf_puts_nl(sb, gen_list_end());
+			if (pclose(ip) != 0)
+			die("cannot execute command '%s'.", buf);
+			strbuf_puts_nl(sb, hr);
+			break;
+		case 'd':
+			if (aflag && !Fflag) {
+				strbuf_puts(sb, header_begin);
+				strbuf_puts(sb, title_define_index);
+				strbuf_puts_nl(sb, header_end);
+				strbuf_puts(sb, defines);
+			} else {
+				strbuf_puts(sb, header_begin);
+				strbuf_puts(sb, gen_href_begin(NULL, "defines", normal_suffix, NULL));
+				strbuf_puts(sb, title_define_index);
+				strbuf_puts(sb, gen_href_end());
+				strbuf_puts_nl(sb, header_end);
+			}
+			strbuf_puts_nl(sb, hr);
+			break;
+		case 'f':
+			if (Fflag) {
+				strbuf_puts(sb, header_begin);
+				strbuf_puts(sb, gen_href_begin(NULL, "files", normal_suffix, NULL));
+				strbuf_puts(sb, title_file_index);
+				strbuf_puts(sb, gen_href_end());
+				strbuf_puts_nl(sb, header_end);
+			} else {
+				strbuf_puts(sb, header_begin);
+				strbuf_puts(sb, title_file_index);
+				strbuf_puts_nl(sb, header_end);
+				if (table_flist)
+					strbuf_puts_nl(sb, flist_begin);
+				else if (!no_order_list)
+					strbuf_puts_nl(sb, list_begin);
+				strbuf_puts(sb, files);
+				if (table_flist)
+					strbuf_puts_nl(sb, flist_end);
+				else if (!no_order_list)
+					strbuf_puts_nl(sb, list_end);
+				else
+					strbuf_puts_nl(sb, br);
+				strbuf_puts_nl(sb, hr);
+			}
+			break;
+		default:
+			warning("unknown item '%c'. (Ignored)", *item);
+			break;
 		}
-		strbuf_puts_nl(sb, hr);
 	}
 	strbuf_close(ib);
 
@@ -959,18 +1027,12 @@ basic_check(void)
 	/*
 	 * COMMAND EXISTENCE CHECK
 	 */
-	if (!(p = usable("gnusort")))
-		die("gnusort command required but not found.");
-	strlimcpy(sort_path, p, sizeof(sort_path));
 	if (!(p = usable("gtags")))
 		die("gtags command required but not found.");
 	strlimcpy(gtags_path, p, sizeof(gtags_path));
 	if (!(p = usable("global")))
 		die("global command required but not found.");
 	strlimcpy(global_path, p, sizeof(global_path));
-
-	snprintf(findcom, sizeof(findcom), "%s --find", gtags_path);
-
 	/*
 	 * Temporary directory.
 	 */
@@ -983,9 +1045,7 @@ basic_check(void)
  * load configuration variables.
  */
 static void
-configuration(argc, argv)
-	int argc;
-	char *argv[];
+configuration(int argc, char **argv)
 {
 	STRBUF *sb = strbuf_open(0);
 	int i, n;
@@ -999,28 +1059,24 @@ configuration(argc, argv)
 		char *confpath = NULL;
 		char *label = NULL;
 		char *opt_gtagsconf = "--gtagsconf";
-		int leng_gtagsconf = strlen(opt_gtagsconf);
 		char *opt_gtagslabel = "--gtagslabel";
-		int leng_gtagslabel = strlen(opt_gtagslabel);
 
 		for (i = 1; i < argc; i++) {
-			if (!strncmp(argv[i], opt_gtagsconf, leng_gtagsconf)) {
-				if (!strcmp(argv[i], opt_gtagsconf)) {
+			if ((p = locatestring(argv[i], opt_gtagsconf, MATCH_AT_FIRST))) {
+				if (*p == '\0') {
 					if (++i >= argc)
 						die("%s needs an argument.", opt_gtagsconf);
 					confpath = argv[i];
 				} else {
-					p = argv[i] + leng_gtagsconf;
 					if (*p++ == '=' && *p)
 						confpath = p;
 				}
-			} else if (!strncmp(argv[i], opt_gtagslabel, leng_gtagslabel)) {
-				if (!strcmp(argv[i], opt_gtagslabel)) {
+			} else if ((p = locatestring(argv[i], opt_gtagslabel, MATCH_AT_FIRST))) {
+				if (*p == '\0') {
 					if (++i >= argc)
 						die("%s needs an argument.", opt_gtagslabel);
 					label = argv[i];
 				} else {
-					p = argv[i] + leng_gtagslabel;
 					if (*p++ == '=' && *p)
 						label = p;
 				}
@@ -1047,31 +1103,28 @@ configuration(argc, argv)
 	strlimcpy(datadir, strbuf_value(sb), sizeof(datadir));
 	if (getconfn("ncol", &n)) {
 		if (n < 1 || n > 10)
-			warning("parameter 'ncol' ignored becase the value (=%d) is too large or too small.", n);
+			warning("parameter 'ncol' ignored because the value (=%d) is too large or too small.", n);
 		else
 			ncol = n;
 	}
 	if (getconfn("tabs", &n)) {
 		if (n < 1 || n > 32)
-			warning("parameter 'tabs' ignored becase the value (=%d) is too large or too small.", n);
+			warning("parameter 'tabs' ignored because the value (=%d) is too large or too small.", n);
 		else
 			tabs = n;
 	}
-	snprintf(stabs, sizeof(stabs), "%d", tabs);
-	strbuf_reset(sb);
-	if (getconfs("gzipped_suffix", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		gzipped_suffix = p;
+	if (getconfn("flist_fields", &n)) {
+		if (n < 1)
+			warning("parameter 'flist_fields' ignored because the value (=%d) is too large or too small.", n);
+		else
+			flist_fields = n;
 	}
 	strbuf_reset(sb);
-	if (getconfs("normal_suffix", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		normal_suffix = p;
-	}
+	if (getconfs("gzipped_suffix", sb))
+		gzipped_suffix = check_strdup(strbuf_value(sb));
+	strbuf_reset(sb);
+	if (getconfs("normal_suffix", sb))
+		normal_suffix = check_strdup(strbuf_value(sb));
 	strbuf_reset(sb);
 	if (getconfs("definition_header", sb)) {
 		p = strbuf_value(sb);
@@ -1086,86 +1139,55 @@ configuration(argc, argv)
 	}
 	if (getconfb("other_files"))
 		other_files = 1;
-	if (getconfb("enable_grep"))
-		enable_grep = 1;
+	if (getconfb("disable_grep"))
+		enable_grep = 0;
 	if (getconfb("enable_idutils"))
 		enable_idutils = 1;
 	if (getconfb("full_path"))
 		full_path = 1;
 	if (getconfb("table_list"))
 		table_list = 1;
+	if (getconfb("table_flist"))
+		table_flist = 1;
 	if (getconfb("no_order_list"))
 		no_order_list = 1;
 	if (getconfb("copy_files"))
 		copy_files = 1;
 	if (getconfb("no_map_file"))
-		no_map_file = 1;
+		map_file = 0;
 	strbuf_reset(sb);
-	if (getconfs("icon_list", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		icon_list = p;
-	}
+	if (getconfs("icon_spec", sb))
+		icon_spec = check_strdup(strbuf_value(sb));
 	strbuf_reset(sb);
-	if (getconfs("icon_spec", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		icon_spec = p;
-	}
+	if (getconfs("icon_suffix", sb))
+		icon_suffix = check_strdup(strbuf_value(sb));
 	strbuf_reset(sb);
-	if (getconfs("icon_suffix", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		icon_suffix = p;
-	}
+	if (getconfs("prolog_script", sb))
+		prolog_script = check_strdup(strbuf_value(sb));
 	strbuf_reset(sb);
-	if (getconfs("prolog_script", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		prolog_script = p;
-	}
-	strbuf_reset(sb);
-	if (getconfs("epilog_script", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		epilog_script = p;
-	}
+	if (getconfs("epilog_script", sb))
+		epilog_script = check_strdup(strbuf_value(sb));
 	if (getconfb("show_position"))
 		show_position = 1;
 	if (getconfb("colorize_warned_line"))
 		colorize_warned_line = 1;
 	strbuf_reset(sb);
 	if (getconfs("script_alias", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		/* remove the last '/' */
 		q = p + strlen(p) - 1;
 		if (*q == '/')
 			*q = '\0';
 		script_alias = p;
 	}
-	if (getconfb("symbols"))	/* for backward compatibility */
-		symbol = 1;
-	if (getconfb("symbol"))
-		symbol = 1;
 	if (getconfb("dynamic"))
 		dynamic = 1;
 	strbuf_reset(sb);
 	if (getconfs("body_begin", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		strbuf_reset(sb);
 		if (getconfs("body_end", sb)) {
-			q = strdup(strbuf_value(sb));
-			if (q == NULL)
-				die("short of memory.");
+			q = check_strdup(strbuf_value(sb));
 			body_begin = p;
 			body_end = q;
 		} else {
@@ -1174,14 +1196,10 @@ configuration(argc, argv)
 	}
 	strbuf_reset(sb);
 	if (getconfs("table_begin", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		strbuf_reset(sb);
 		if (getconfs("table_end", sb)) {
-			q = strdup(strbuf_value(sb));
-			if (q == NULL)
-				die("short of memory.");
+			q = check_strdup(strbuf_value(sb));
 			table_begin = p;
 			table_end = q;
 		} else {
@@ -1190,14 +1208,10 @@ configuration(argc, argv)
 	}
 	strbuf_reset(sb);
 	if (getconfs("title_begin", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		strbuf_reset(sb);
 		if (getconfs("title_end", sb)) {
-			q = strdup(strbuf_value(sb));
-			if (q == NULL)
-				die("short of memory.");
+			q = check_strdup(strbuf_value(sb));
 			title_begin = p;
 			title_end = q;
 		} else {
@@ -1206,14 +1220,10 @@ configuration(argc, argv)
 	}
 	strbuf_reset(sb);
 	if (getconfs("comment_begin", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		strbuf_reset(sb);
 		if (getconfs("comment_end", sb)) {
-			q = strdup(strbuf_value(sb));
-			if (q == NULL)
-				die("short of memory.");
+			q = check_strdup(strbuf_value(sb));
 			comment_begin = p;
 			comment_end = q;
 		} else {
@@ -1222,14 +1232,10 @@ configuration(argc, argv)
 	}
 	strbuf_reset(sb);
 	if (getconfs("sharp_begin", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		strbuf_reset(sb);
 		if (getconfs("sharp_end", sb)) {
-			q = strdup(strbuf_value(sb));
-			if (q == NULL)
-				die("short of memory.");
+			q = check_strdup(strbuf_value(sb));
 			sharp_begin = p;
 			sharp_end = q;
 		} else {
@@ -1238,14 +1244,10 @@ configuration(argc, argv)
 	}
 	strbuf_reset(sb);
 	if (getconfs("brace_begin", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		strbuf_reset(sb);
 		if (getconfs("brace_end", sb)) {
-			q = strdup(strbuf_value(sb));
-			if (q == NULL)
-				die("short of memory.");
+			q = check_strdup(strbuf_value(sb));
 			brace_begin = p;
 			brace_end = q;
 		} else {
@@ -1254,14 +1256,10 @@ configuration(argc, argv)
 	}
 	strbuf_reset(sb);
 	if (getconfs("reserved_begin", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		strbuf_reset(sb);
 		if (getconfs("reserved_end", sb)) {
-			q = strdup(strbuf_value(sb));
-			if (q == NULL)
-				die("short of memory.");
+			q = check_strdup(strbuf_value(sb));
 			reserved_begin = p;
 			reserved_end = q;
 		} else {
@@ -1270,14 +1268,10 @@ configuration(argc, argv)
 	}
 	strbuf_reset(sb);
 	if (getconfs("position_begin", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		strbuf_reset(sb);
 		if (getconfs("position_end", sb)) {
-			q = strdup(strbuf_value(sb));
-			if (q == NULL)
-				die("short of memory.");
+			q = check_strdup(strbuf_value(sb));
 			position_begin = p;
 			position_end = q;
 		} else {
@@ -1286,14 +1280,10 @@ configuration(argc, argv)
 	}
 	strbuf_reset(sb);
 	if (getconfs("warned_line_begin", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
+		p = check_strdup(strbuf_value(sb));
 		strbuf_reset(sb);
 		if (getconfs("warned_line_end", sb)) {
-			q = strdup(strbuf_value(sb));
-			if (q == NULL)
-				die("short of memory.");
+			q = check_strdup(strbuf_value(sb));
 			warned_line_begin = p;
 			warned_line_end = q;
 		} else {
@@ -1301,43 +1291,25 @@ configuration(argc, argv)
 		}
 	}
 	strbuf_reset(sb);
-	if (getconfs("include_file_suffixes", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		include_file_suffixes = p;
-	}
+	if (getconfs("include_file_suffixes", sb))
+		include_file_suffixes = check_strdup(strbuf_value(sb));
 	strbuf_reset(sb);
-	if (getconfs("langmap", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		langmap = p;
-	}
+	if (getconfs("langmap", sb))
+		langmap = check_strdup(strbuf_value(sb));
 	strbuf_reset(sb);
-	if (getconfs("xhtml_version", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		xhtml_version = p;
-	}
+	if (getconfs("xhtml_version", sb))
+		xhtml_version = check_strdup(strbuf_value(sb));
 	/* insert htags_options into the head of ARGSV array. */
 	strbuf_reset(sb);
-	if (getconfs("htags_options", sb)) {
-		p = strdup(strbuf_value(sb));
-		if (p == NULL)
-			die("short of memory.");
-		htags_options = p;
-	}
+	if (getconfs("htags_options", sb))
+		htags_options = check_strdup(strbuf_value(sb));
 	strbuf_close(sb);
 }
 /*
  * save_environment: save configuration data and arguments.
  */
 static void
-save_environment(argc, argv)
-	int argc;
-	char *argv[];
+save_environment(int argc, char **argv)
 {
 	char command[MAXFILLEN];
 	STRBUF *sb = strbuf_open(0);
@@ -1377,7 +1349,6 @@ save_environment(argc, argv)
 	 */
 	{
 		char *opt_gtagsconf = "--gtagsconf";
-		int leng_gtagsconf = strlen(opt_gtagsconf);
 
 		for (i = 1; i < argc; i++) {
 			char *blank;
@@ -1386,8 +1357,8 @@ save_environment(argc, argv)
 			 * skip --gtagsconf because it is already read
 			 * as config value.
 			 */
-			if (!strncmp(argv[i], opt_gtagsconf, leng_gtagsconf)) {
-				if (!strcmp(argv[i], opt_gtagsconf))
+			if ((p = locatestring(argv[i], opt_gtagsconf, MATCH_AT_FIRST))) {
+				if (*p == '\0')
 					i++;
 				continue;
 			}
@@ -1406,13 +1377,11 @@ save_environment(argc, argv)
 }
 
 char **
-append_options(argc, argv)
-	int *argc;
-	char *argv[];
+append_options(int *argc, char **argv)
 {
 
 	STRBUF *sb = strbuf_open(0);
-	const char *p, *opt = strdup(htags_options);
+	const char *p, *opt = check_strdup(htags_options);
 	int count = 1;
 	int quote = 0;
 	const char **newargv;
@@ -1444,9 +1413,7 @@ append_options(argc, argv)
 			strbuf_putc(sb, *p);
 		}
 	}
-	newargv = (const char **)malloc(sizeof(char *) * (*argc + count + 1));
-	if (!newargv)
-		die("Short of memory.");
+	newargv = (const char **)check_malloc(sizeof(char *) * (*argc + count + 1));
 	newargv[i++] = argv[0];
 	p = strbuf_value(sb);
 	while (count--) {
@@ -1467,11 +1434,9 @@ append_options(argc, argv)
 	return argv;
 }
 int
-main(argc, argv)
-        int argc;
-        char *argv[];
+main(int argc, char **argv)
 {
-	const char *path, *av = NULL;
+	const char *av = NULL;
 	int func_total, file_total;
         char arg_dbpath[MAXPATHLEN];
 	const char *index = NULL;
@@ -1488,35 +1453,45 @@ main(argc, argv)
 	save_environment(argc, argv);
 
 	/*
- 	 * insert htags_options at the head of argv.
+	 * insert htags_options at the head of argv.
 	 */
 	if (htags_options)
 		argv = append_options(&argc, argv);
 
-	while ((optchar = getopt_long(argc, argv, "acd:DfFgm:noqsS:t:vwx", long_options, &option_index)) != EOF) {
+	while ((optchar = getopt_long(argc, argv, "acd:DfFghIm:noqsS:t:Tvwx", long_options, &option_index)) != EOF) {
 		switch (optchar) {
-                case 0:
-                case 1:
-			if (!strcmp("action", long_options[option_index].name))
-                                action_value = optarg;
-			else if (!strcmp("nocgi", long_options[option_index].name))
-                                cgi = 0;
-			else if (!strcmp("id", long_options[option_index].name))
-                                id_value = optarg;
-			else if (!strcmp("cvsweb", long_options[option_index].name))
-                                cvsweb_url = optarg;
-			else if (!strcmp("cvsweb-cvsroot", long_options[option_index].name))
-                                cvsweb_cvsroot = optarg;
-			else if (!strcmp("gtagsconf", long_options[option_index].name))
-				;	/*  --gtagsconf is estimated only once. */
-			else if (!strcmp("gtagslabel", long_options[option_index].name))
-				;	/* --gtagslabel is estimated only once. */
-			else if (!strcmp("style-sheet", long_options[option_index].name))
-                                style_sheet = optarg;
-			else if (!strcmp("insert-header", long_options[option_index].name))
-				insert_header = optarg;
-			else if (!strcmp("insert-footer", long_options[option_index].name))
-				insert_footer = optarg;
+		case 0:
+			/* already flags set */
+			break;
+		case OPT_ACTION:
+			action_value = optarg;
+			break;
+		case OPT_CVSWEB:
+			cvsweb_url = optarg;
+			break;
+		case OPT_CVSWEB_CVSROOT:
+			cvsweb_cvsroot = optarg;
+			break;
+		case OPT_GTAGSCONF:	/* --gtagsconf is estimated only once. */
+		case OPT_GTAGSLABEL:	/* --gtagslabel is estimated only once. */
+			break;
+		case OPT_ID:
+			id_value = optarg;
+			break;
+		case OPT_INSERT_FOOTER:
+			insert_footer = optarg;
+			break;
+		case OPT_INSERT_HEADER:
+			insert_header = optarg;
+			break;
+		case OPT_ITEM_ORDER:
+			item_order = optarg;
+			break;
+		case OPT_TABS:
+			if (atoi(optarg) > 0)
+				tabs = atoi(optarg);
+			else
+				die("--tabs option requires numeric value.");
                         break;
                 case 'a':
                         aflag++;
@@ -1536,14 +1511,36 @@ main(argc, argv)
                 case 'F':
                         Fflag++;
                         break;
+                case 'g':
+                        gflag++;
+                        break;
+                case 'h':
+			definition_header = AFTER_HEADER;
+			if (optarg) {
+				if (!strcmp(optarg, "before"))
+					definition_header = BEFORE_HEADER;
+				else if (!strcmp(optarg, "right"))
+					definition_header = RIGHT_HEADER;
+				else if (!strcmp(optarg, "after"))
+					definition_header = AFTER_HEADER;
+				else
+					die("The option value of --func-header must be one of 'before', 'right' and 'after'.");
+			}
+                        break;
+                case 'I':
+                        Iflag++;
+                        break;
                 case 'm':
 			main_func = optarg;
                         break;
                 case 'n':
                         nflag++;
-                        break;
-                case 'g':
-                        gflag++;
+			if (optarg) {
+				if (atoi(optarg) > 0)
+					ncol = atoi(optarg);
+				else
+					die("The option value of --line-number must be numeric.");
+			}
                         break;
                 case 'o':
 			other_files = 1;
@@ -1554,6 +1551,15 @@ main(argc, argv)
                 case 'S':
 			Sflag++;
 			cgidir = optarg;
+                        break;
+                case 'T':
+			table_flist = 1;
+			if (optarg) {
+				if (atoi(optarg) > 0)
+					flist_fields = atoi(optarg);
+				else
+					die("The option value of the --table-flist must be numeric.");
+			}
                         break;
                 case 't':
 			title = optarg;
@@ -1570,6 +1576,12 @@ main(argc, argv)
                         break;
 		case 'x':
 			enable_xhtml = 1;
+			if (optarg) {
+				if (!strcmp("1.0", optarg) || !strcmp("1.1", optarg))
+					xhtml_version = optarg;
+				else
+					die("The option value of the --xhtml must be '1.0' or '1.1'.");
+			}
                         break;
                 default:
                         usage();
@@ -1580,8 +1592,6 @@ main(argc, argv)
 		die("page header file '%s' not found.", insert_header);
 	if (insert_footer && !test("fr", insert_footer))
 		die("page footer file '%s' not found.", insert_footer);
-	if (no_map_file)
-		map_file = 0;
         argc -= optind;
         argv += optind;
         if (!av)
@@ -1589,6 +1599,7 @@ main(argc, argv)
 
 	if (debug)
 		setdebug();
+	settabs(tabs);					/* setup tab skip */
         if (qflag) {
                 setquiet();
 		vflag = 0;
@@ -1650,24 +1661,8 @@ main(argc, argv)
 	}
 	if (dynamic && Sflag)
 		die("Current implementation doesn't allow both -D(--dynamic) and the -S(--secure-cgi).");
-	if (style_sheet) {
-		char buf[MAXBUFLEN];
-		STRBUF *sb = strbuf_open(0);
-		FILE *ip = fopen(style_sheet, "r");
-
-		if (ip) {
-			while (fgets(buf, sizeof(buf), ip)) {
-				if (*buf != '\t' && *buf != '<')
-					strbuf_putc(sb, '\t');
-				strbuf_puts(sb, buf);
-			}
-			fclose(ip);
-		};
-		style_sheet = strbuf_value(sb);
-		/* Doesn't close string buffer. */
-	}
-	if (icon_list && !test("f", icon_list))
-		die("icon_list '%s' not found.", icon_list);
+	if (cvsweb_url && test("d", "CVS"))
+		use_cvs_module = 1;
 	/*
 	 * decide directory in which we make hypertext.
 	 */
@@ -1702,10 +1697,31 @@ main(argc, argv)
 	if (id_value) {
 		id = id_value;
 	}
-	if (!test("r", makepath(dbpath, dbname(GTAGS), NULL)) || !test("r", makepath(dbpath, dbname(GRTAGS), NULL)))
-		die("GTAGS and/or GRTAGS not found. Htags needs both of them.");
-	if (symbol && !test("r", makepath(dbpath, dbname(GSYMS), NULL)))
-		die("-s(--symbol) option needs GSYMS tag file.");
+	/*
+	 * Existence check of tag files.
+	 */
+	{
+		int i;
+		const char *path;
+		GTOP *gtop;
+
+		for (i = GPATH; i < GTAGLIM; i++) {
+			path = makepath(dbpath, dbname(i), NULL);
+			gtags_exist[i] = test("fr", path);
+		}
+		if (!gtags_exist[GPATH] || !gtags_exist[GTAGS])
+			die("GPATH and/or GTAGS not found. Please reexecute htags with the -g option.");
+		if (!symbol)
+			gtags_exist[GSYMS] = 0;
+		else if (!gtags_exist[GSYMS])
+			die("the -s(--symbol) option needs GSYMS. Please reexecute htags with the -g option.");
+		/*
+		 * version check.
+		 * Do nothing, but the version of tag file will be checked.
+		 */
+		gtop = gtags_open(dbpath, cwdpath, GTAGS, GTAGS_READ);
+		gtags_close(gtop);
+	}
 	/*
 	 * make dbpath absolute.
 	 */
@@ -1714,6 +1730,16 @@ main(argc, argv)
 		if (realpath(dbpath, buf) == NULL)
 			die("cannot get realpath of dbpath.");
 		strlimcpy(dbpath, buf, sizeof(dbpath));
+	}
+	/*
+	 * The older version (4.8.7 or former) of GPATH doesn't have files
+         * other than source file. The oflag requires new version of GPATH.
+	 */
+	if (other_files) {
+		GFIND *gp = gfind_open(dbpath, NULL, 0);
+		if (gp->version < 2)
+			die("GPATH is old format. Please remake it by invoking gtags(1).");
+		gfind_close(gp);
 	}
 	/*
 	 * for global(1) and gtags(1).
@@ -1776,45 +1802,28 @@ main(argc, argv)
 	 * (0) make directories
 	 */
 	message("[%s] (0) making directories ...", now());
-	{
-		int mode = 0775;
-		char *dirs[] = {"files", "defines", SRCS, DEFS, REFS, INCS, INCREFS, SYMS};
-
-		int i, lim = sizeof(dirs) / sizeof(char *);
-
-		if (!test("d", distpath)) {
-			if (mkdir(distpath, 0777) < 0)
-				die("cannot make directory '%s'.", distpath);
-		}
-		for (i = 0; i < lim; i++) {
-			char *p = dirs[i];
-			/*
-			 * dynamic mode doesn't require these directories.
-			 */
-			if (dynamic)
-				if (!strcmp(p, DEFS) || !strcmp(p, REFS) || !strcmp(p, SYMS))
-					continue;
-			if (!symbol)
-				if (!strcmp(p, SYMS))
-					continue;
-			path = makepath(distpath, p, NULL);
-			if (!test("d", path))
-				if (mkdir(path, mode))
-					die("cannot make '%s' directory.", p);
-		}
-		if (cgi && (fflag || cflag || dynamic)) {
-			path = makepath(distpath, "cgi-bin", NULL);
-			if (!test("d", path))
-				if (mkdir(path, mode) < 0)
-					die("cannot make cgi-bin directory.");
-		}
+	if (!test("d", distpath))
+		if (mkdir(distpath, 0777) < 0)
+			die("cannot make directory '%s'.", distpath);
+	make_directory_in_distpath("files");
+	make_directory_in_distpath("defines");
+	make_directory_in_distpath(SRCS);
+	make_directory_in_distpath(INCS);
+	make_directory_in_distpath(INCREFS);
+	if (!dynamic) {
+		make_directory_in_distpath(DEFS);
+		make_directory_in_distpath(REFS);
+		if (symbol)
+			make_directory_in_distpath(SYMS);
 	}
+	if (cgi && (fflag || cflag || dynamic))
+		make_directory_in_distpath("cgi-bin");
+	if (Iflag)
+		make_directory_in_distpath("icons");
 	/*
 	 * (1) make CGI program
 	 */
 	if (cgi && (fflag || dynamic)) {
-		int i;
-
 		if (cgidir) {
 			message("[%s] (1) making CGI program ...", now());
 			makeprogram(cgidir, "global.cgi");
@@ -1828,21 +1837,6 @@ main(argc, argv)
 		makebless("bless.sh");
 		if (chmod(makepath(distpath, "bless.sh", NULL), 0640) < 0)
 			die("cannot chmod bless script.");
-		/*
-		 * replace G*** tag files.
-		 */
-		for (i = GPATH; i < GTAGLIM; i++) {
-			const char *name = dbname(i);
-
-			if (test("f", makepath(dbpath, name, NULL))) {
-				char path[MAXPATHLEN];
-
-				snprintf(path, sizeof(path), "%s/cgi-bin/%s", distpath, name);
-				unlink(path);
-				snprintf(path, sizeof(path), "%s/cgi-bin", distpath);
-				duplicatefile(name, dbpath, path);
-			}
-		}
 	} else {
 		message("[%s] (1) making CGI program ...(skipped)", now());
 	}
@@ -1909,7 +1903,7 @@ main(argc, argv)
 		end_time = time(NULL);
 		message("Total %d files.", file_total);
 		T_makefileindex = end_time - start_time;
-		file_count += file_total;
+		html_count += file_total;
 		/*
 		 * [#] make include file index.
 		 */
@@ -1967,7 +1961,7 @@ main(argc, argv)
 	end_all_time = time(NULL);
 	message("[%s] Done.", now());
 	T_all = end_all_time - start_all_time;
-	if (vflag && cgi && (cflag || fflag)) {
+	if (vflag && cgi && (cflag || fflag || dynamic)) {
 		message("\n[Information]\n");
 		if (cflag) {
 			message(" Your system may need to be setup to decompress *.%s files.", gzipped_suffix);
@@ -1976,18 +1970,28 @@ main(argc, argv)
 			message(" gzipped files. (Please see 'HTML/.htaccess')\n");
 		}
 		if (fflag || dynamic) {
-			const char *path = (*action == '/') ? makepath("DOCUMENT_ROOT", action, NULL) : makepath("HTML", action, NULL);
+			const char *format = " You need to setup http server so that %s is executed as a CGI script.";
 
-			message(" You need to setup http server so that %s", path);
-			message(" is executed as a CGI script. (DOCUMENT_ROOT means WWW server's data root.)\n");
+			if (*action == '/') {
+				message(format, makepath("DOCUMENT_ROOT", action, NULL));
+				message(" (DOCUMENT_ROOT means WWW server's data root.)");
+			} else {
+				message(format, makepath("HTML", action, NULL));
+			}
 		}
 		message(" Good luck!\n");
 	}
-	/* This is not supported. */
-	if (icon_list && test("f", icon_list)) {
-		char command[MAXFILLEN];
-		snprintf(command, sizeof(command), "tar xzf %s -C %s", icon_list, distpath);
-		system(command);
+	if (Iflag) {
+		char src[MAXPATHLEN], dst[MAXPATHLEN];
+		int i, count = sizeof(icon_files) / sizeof(char *);
+
+		for (i = 0; i < count; i++) {
+			snprintf(src, sizeof(src), "%s/gtags/icons/%s.%s", datadir, icon_files[i], icon_suffix);
+			snprintf(dst, sizeof(dst), "%s/icons/%s.%s", distpath, icon_files[i], icon_suffix);
+			if (!test("f", src))
+				die("Icon file '%s' not found.", src);
+			copyfile(src, dst);
+		}
 	}
 	/*
 	 * Print statistics information.

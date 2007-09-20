@@ -1,20 +1,21 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2002, 2003, 2004
+ * Copyright (c) 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2006
  *	Tama Communications Corporation
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
+ * This file is part of GNU GLOBAL.
  *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -28,6 +29,14 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shellapi.h>
+/*
+ * Don't remove the following code which seems meaningless.
+ * Since WIN32 has another SLIST_ENTRY, we removed the definition
+ * so as not to cause the conflict.
+ */
+#ifdef SLIST_ENTRY
+#undef SLIST_ENTRY
+#endif
 #endif
 
 #include "global.h"
@@ -41,21 +50,25 @@ const char *gozillarc = ".gozillarc";
 #ifdef __DJGPP__
 const char *dos_gozillarc = "_gozillarc";
 #endif
+STRHASH *sh;
 
+static void load_alias(void);
 static const char *alias(const char *);
 int main(int, char **);
 void getdefinitionURL(const char *, STRBUF *);
 void getURL(const char *, STRBUF *);
 int isprotocol(const char *);
-int issource(const char *);
 int convertpath(const char *, const char *, const char *, STRBUF *);
-#if !defined(_WIN32) && !defined(__DJGPP__)
-void sendbrowser(const char *, const char *);
-#endif
-
+void makefileurl(const char *, int, STRBUF *);
+void show_page_by_url(const char *, const char *);
 #ifndef isblank
 #define isblank(c)	((c) == ' ' || (c) == '\t')
 #endif
+
+char cwd[MAXPATHLEN+1];
+char root[MAXPATHLEN+1];
+char dbpath[MAXPATHLEN+1];
+
 int bflag;
 int pflag;
 int qflag;
@@ -81,10 +94,7 @@ help(void)
 }
 
 /*
- * alias: get alias value.
- *
- *	i)	alias_name	alias name
- *	r)			its value
+ * load_alias: load alias value.
  *
  * [$HOME/.gozillarc]
  * +-----------------------
@@ -92,16 +102,16 @@ help(void)
  * |f = file:/usr/share/xxx.html
  * |www	http://www.xxx.yyy/
  */
-static const char *
-alias(alias_name)
-	const char *alias_name;
+static void
+load_alias(void)
 {
 	FILE *ip;
 	STRBUF *sb = strbuf_open(0);
 	char *p;
-	const char *alias = NULL;
 	int flag = STRBUF_NOCRLF;
+	struct sh_entry *ent;
 
+	sh = strhash_open(10);
 	if (!(p = get_home_directory()))
 		goto end;
 	if (!test("r", makepath(p, gozillarc, NULL)))
@@ -130,32 +140,64 @@ alias(alias_name)
 		while (*p && isalnum(*p))	/* get name */
 			p++;
 		*p++ = 0;
-		if (!strcmp(alias_name, name)) {
-			while (*p && isblank(*p))	/* skip spaces */
+		while (*p && isblank(*p))	/* skip spaces */
+			p++;
+		if (*p == '=' || *p == ':') {
+			p++;
+			while (*p && isblank(*p))/* skip spaces */
 				p++;
-			if (*p == '=' || *p == ':') {
-				p++;
-				while (*p && isblank(*p))/* skip spaces */
-					p++;
-			}
-			value = p;
-			while (*p && !isblank(*p))	/* get value */
-				p++;
-			*p = 0;
-			alias = strmake(value, "");
-			break;
 		}
+		value = p;
+		while (*p && !isblank(*p))	/* get value */
+			p++;
+		*p = 0;
+		ent = strhash_assign(sh, name, 1);
+		if (ent->value)
+			(void)free(ent->value);
+		ent->value = check_strdup(value);
 	}
 	fclose(ip);
 end:
 	strbuf_close(sb);
-	return alias;
+}
+/*
+ * alias: get alias value.
+ *
+ *	i)	alias_name	alias name
+ *	r)			its value
+ */
+static const char *
+alias(const char *alias_name)
+{
+	struct sh_entry *ent = strhash_assign(sh, alias_name, 0);
+	return ent ? ent->value : NULL;
 }
 
+/*
+ * locate_HTMLdir: locate HTML directory made by htags(1).
+ *
+ *	r)		HTML directory
+ */
+static const char *
+locate_HTMLdir(void)
+{
+	static char htmldir[MAXPATHLEN+1];
+
+	if (test("d", makepath(dbpath, "HTML", NULL)))
+		strlimcpy(htmldir, makepath(dbpath, "HTML", NULL), sizeof(htmldir));
+	else if (test("d", makepath(root, "HTML", NULL)))
+		strlimcpy(htmldir, makepath(root, "HTML", NULL), sizeof(htmldir));
+	else if (test("d", makepath(root, "html/HTML", NULL)))
+		/* Doxygen makes HTML in doxygen's html directory. */
+		strlimcpy(htmldir, makepath(root, "html/HTML", NULL), sizeof(htmldir));
+	else
+		die("hypertext not found. See htags(1).");
+	if (vflag)
+		fprintf(stdout, "HTML directory '%s'.\n", htmldir);
+	return (const char *)htmldir;
+}
 int
-main(argc, argv)
-	int argc;
-	char *argv[];
+main(int argc, char **argv)
 {
 	char c;
 	const char *p, *browser = NULL, *definition = NULL;
@@ -208,10 +250,24 @@ main(argc, argv)
 	}
 	if (show_version)
 		version(progname, vflag);
+	/*
+	 * Load aliases from .gozillarc.
+	 */
+	load_alias();
+
+	/*
+	 * Decide browser.
+	 */
 	if (!browser && getenv("BROWSER"))
 		browser = getenv("BROWSER");
+	if (!browser && alias("BROWSER"))
+		browser = alias("BROWSER");
 	if (!browser)
 		browser = "mozilla";
+
+	/*
+	 * Replace alias name.
+	 */
 	if (definition == NULL) {
 		if (argc == 0)
 			usage();
@@ -227,62 +283,25 @@ main(argc, argv)
 	/*
 	 * Get URL.
 	 */
-	if (definition)
-		getdefinitionURL(definition, URL);
-	else if (isprotocol(strbuf_value(arg)))
+	if (!definition && isprotocol(strbuf_value(arg))) {
 		strbuf_puts(URL, strbuf_value(arg));
-	else
-		getURL(strbuf_value(arg), URL);
+	} else {
+		getdbpath(cwd, root, dbpath, 0);
+		if (definition)
+			getdefinitionURL(definition, URL);
+		else
+			getURL(strbuf_value(arg), URL);
+	}
 	if (pflag) {
 		fprintf(stdout, "%s\n", strbuf_value(URL));
 		if (vflag)
 			fprintf(stdout, "using browser '%s'.\n", browser);
 		exit(0);
 	}
-#ifdef _WIN32
-	if (ShellExecute(NULL, NULL, browser, strbuf_value(URL), NULL, SW_SHOWNORMAL) <= (HINSTANCE)32)
-		die("Cannot load %s (error = 0x%04x).", browser, GetLastError());
-#else
-#ifndef __DJGPP__
 	/*
-	 * send a command to browser.
+	 * Show URL's page.
 	 */
-	if (locatestring(browser, "mozilla", MATCH_AT_LAST)
-		|| locatestring(browser, "netscape", MATCH_AT_LAST)
-		|| locatestring(browser, "netscape-remote", MATCH_AT_LAST))
-	{
-		sendbrowser(browser, strbuf_value(URL));
-	}
-	/*
-	 * execute generic browser.
-	 */
-	else
-#endif /* !__DJGPP__ */
-	{
-		char com[MAXFILLEN+1];
-
-#ifdef __DJGPP__
-		char *path;
-		/*
-		 * assume a Windows browser if it's not on the path.
-		 */
-		if (!(path = usable(browser)))
-		{
-			/*
-			 * START is an internal command in XP, external in 9X.
-			 */
-			if (!(path = usable("start")))
-				path = "cmd /c start";
-			snprintf(com, sizeof(com), "%s %s \"%s\"", path, browser, strbuf_value(URL));
-		}
-		else
-			snprintf(com, sizeof(com), "%s \"%s\"", path, strbuf_value(URL));
-#else
-		snprintf(com, sizeof(com), "%s \"%s\"", browser, strbuf_value(URL));
-#endif /* !__DJGPP__ */
-		system(com);
-	}
-#endif /* _WIN32 */
+	show_page_by_url(browser, strbuf_value(URL));
 	exit(0);
 }
 
@@ -293,31 +312,16 @@ main(argc, argv)
  *	o)	URL	URL begin with 'file:'
  */
 void
-getdefinitionURL(arg, URL)
-	const char *arg;
-	STRBUF *URL;
+getdefinitionURL(const char *arg, STRBUF *URL)
 {
-	char cwd[MAXPATHLEN+1];
-	char root[MAXPATHLEN+1];
-	char dbpath[MAXPATHLEN+1];
-	char htmldir[MAXPATHLEN+1];
-	char *path, *p;
+	const char *path;
+	char *p;
 	STRBUF *sb = NULL;
 	DBOP *dbop = NULL;
 	SPLIT ptable;
 	int status = -1;
+	const char *htmldir = locate_HTMLdir();
 
-	/*
-	 * get current, root and dbpath directory.
-	 * if GTAGS not found, getdbpath doesn't return.
-	 */
-	getdbpath(cwd, root, dbpath, 0);
-	if (test("d", makepath(dbpath, "HTML", NULL)))
-		strlimcpy(htmldir, makepath(dbpath, "HTML", NULL), sizeof(htmldir));
-	else if (test("d", makepath(root, "HTML", NULL)))
-		strlimcpy(htmldir, makepath(root, "HTML", NULL), sizeof(htmldir));
-	else
-		die("hypertext not found. See htags(1).");
 	path = makepath(htmldir, "MAP.db", NULL);
 	if (test("f", path))
 		dbop = dbop_open(path, 0, 0, 0);
@@ -355,88 +359,42 @@ getdefinitionURL(arg, URL)
 		die("definition %s not found.", arg);
 	strbuf_reset(URL);
 	/*
-	 * Make URL.
-	 *
-	 * c:/dir/a.html => file://c|/dir/a.html
+	 * convert path into URL.
 	 */
-#if _WIN32 || __DJGPP__
-	if (htmldir[1] == ':')
-		htmldir[1] = '|';
-#endif
-	strbuf_sprintf(URL, "file://%s/%s", htmldir, ptable.part[1].start);
+	makefileurl(makepath(htmldir, ptable.part[1].start, NULL), 0, URL);
 	recover(&ptable);
 	if (sb != NULL)
 		strbuf_close(sb);
 }
 /*
- * getURL: get specified URL.
+ * getURL: get URL of the specified file.
  *
- *	i)	arg	definition name
+ *	i)	file	file name
  *	o)	URL	URL begin with 'file:'
  */
 void
-getURL(arg, URL)
-	const char *arg;
-	STRBUF *URL;
+getURL(const char *file, STRBUF *URL)
 {
-	char cwd[MAXPATHLEN+1];
-	char root[MAXPATHLEN+1];
-	char dbpath[MAXPATHLEN+1];
-	char htmldir[MAXPATHLEN+1];
 	char *abspath, *p;
 	char buf[MAXPATHLEN+1];
+	STRBUF *sb = strbuf_open(0);
+	const char *htmldir = locate_HTMLdir();
 
-	if (!test("f", arg) && !test("d", NULL))
-		die("path '%s' not found.", arg);
-	if (!(abspath = realpath(arg, buf)))
-		die("cannot make absolute path name. realpath(%s) failed.", arg);
+	if (!test("f", file) && !test("d", file))
+		die("path '%s' not found.", file);
+	if (!(abspath = realpath(file, buf)))
+		die("cannot make absolute path name. realpath(%s) failed.", file);
 	if (!isabspath(abspath))
 		die("realpath(3) is not compatible with BSD version.");
-	if (issource(abspath)) {
-		STRBUF *sb = strbuf_open(0);
-		/*
-		 * get current, root and dbpath directory.
-		 * if GTAGS not found, getdbpath doesn't return.
-		 */
-		getdbpath(cwd, root, dbpath, 0);
-		if (test("d", makepath(dbpath, "HTML", NULL)))
-			strlimcpy(htmldir, makepath(dbpath, "HTML", NULL), sizeof(htmldir));
-		else if (test("d", makepath(root, "HTML", NULL)))
-			strlimcpy(htmldir, makepath(root, "HTML", NULL), sizeof(htmldir));
-		else
-			die("hypertext not found. See htags(1).");
-		/*
-		 * convert path into hypertext.
-		 */
-		p = abspath + strlen(root);
-		if (convertpath(dbpath, htmldir, p, sb) == -1)
-			die("cannot find the hypertext.");
-		p = strbuf_value(sb);
-		/*
-		 * Make URL.
-		 *
-		 * c:/dir/a.html => file://c|/dir/a.html
-		 */
-#if _WIN32 || __DJGPP__
-		if (p[1] == ':')
-			p[1] = '|';
-#endif
-		strbuf_sprintf(URL, "file://%s", p);
-		if (linenumber)
-			strbuf_sprintf(URL, "#%d", linenumber);
-		strbuf_close(sb);
-	} else {
-		/*
-		 * Make URL.
-		 *
-		 * c:/dir/a.html => file://c|/dir/a.html
-		 */
-#if _WIN32 || __DJGPP__
-		if (abspath[1] == ':')
-			abspath[1] = '|';
-#endif
-		strbuf_sprintf(URL, "file://%s", abspath);
-	}
+	/*
+	 * convert path into URL.
+	 */
+	p = abspath + strlen(root);
+	if (convertpath(dbpath, htmldir, p, sb) == 0)
+		makefileurl(strbuf_value(sb), linenumber, URL);
+	else
+		makefileurl(abspath, 0, URL);
+	strbuf_close(sb);
 }
 /*
  * isprotocol: return 1 if url has a procotol.
@@ -445,12 +403,11 @@ getURL(arg, URL)
  *	r)		1: protocol, 0: file
  */
 int
-isprotocol(url)
-	const char *url;
+isprotocol(const char *url)
 {
 	const char *p;
 
-	if (!strncmp(url, "file:", 5))
+	if (locatestring(url, "file:", MATCH_AT_FIRST))
 		return 1;
 	/*
 	 * protocol's style is like http://xxx.
@@ -465,40 +422,6 @@ isprotocol(url)
 	return 0;
 }
 /*
- * issource: return 1 if path is a source file.
- *
- *	i)	path	path
- *	r)		1: source file, 0: not source file
- */
-int
-issource(path)
-	const char *path;
-{
-	STRBUF *sb = strbuf_open(0);
-	char *p;
-	char suff[MAXPATHLEN+1];
-	int retval = 0;
-
-	if (!getconfs("suffixes", sb)) {
-		strbuf_close(sb);
-		return 0;
-	}
-	suff[0] = '.';
-	for (p = strbuf_value(sb); p; ) {
-		char *unit = p;
-		if ((p = locatestring(p, ",", MATCH_FIRST)) != NULL)
-			*p++ = 0;
-		strlimcpy(&suff[1], unit, sizeof(suff) - 1);
-		if (locatestring(path, suff, MATCH_AT_LAST)) {
-			retval = 1;
-			break;
-		}
-	}
-	strbuf_close(sb);
-	return retval;
-
-}
-/*
  * convertpath: convert source file into hypertext path.
  *
  *	i)	dbpath	dbpath
@@ -508,11 +431,7 @@ issource(path)
  *	r)		0: normal, -1: error
  */
 int
-convertpath(dbpath, htmldir, path, sb)
-	const char *dbpath;
-	const char *htmldir;
-	const char *path;
-	STRBUF *sb;
+convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *sb)
 {
 	static const char *suffix[] = {".html", ".htm"};
 	static const char *gz = ".gz";
@@ -525,13 +444,13 @@ convertpath(dbpath, htmldir, path, sb)
 	/*
 	 * new style.
 	 */
-	if (gpath_open(dbpath, 0, 0) == 0) {
+	if (gpath_open(dbpath, 0) == 0) {
 		char key[MAXPATHLEN+1];
 		int tag1 = strbuf_getlen(sb);
 
 		strlimcpy(key, "./", sizeof(key));
 		strcat(key, path + 1);
-		p = gpath_path2fid(key);
+		p = gpath_path2fid(key, NULL);
 		if (p == NULL) {
 			gpath_close();
 			return -1;
@@ -568,31 +487,101 @@ convertpath(dbpath, htmldir, path, sb)
 	}
 	return -1;
 }
-#if !defined(_WIN32) && !defined(__DJGPP__)
 /*
- * sendbrowser: send message to mozilla.
+ * makefileurl: make url which start with 'file:'.
  *
- *	i)	browser {mozilla|netscape}
- *	i)	url	URL
+ *	i)	path	path name (absolute)
+ *	i)	line	!=0: line number
+ *	o)	url	URL
  *
+ * makefileurl('/dir/a.html', 10)   => 'file:///dir/a.html#L10'
+ *
+ * (Windows32 environment)
+ * makefileurl('c:/dir/a.html', 10) => 'file://c|/dir/a.html#L10'
  */
 void
-sendbrowser(browser, url)
-	const char *browser;
-	const char *url;
+makefileurl(const char *path, int line, STRBUF *url)
 {
-	int pid;
-	char com[1024], *path;
-
-	if (!(path = usable(browser)))
-		die("%s not found in your path.", browser);
-	snprintf(com, sizeof(com), "openURL(%s)", url);
-	if ((pid = fork()) < 0) {
-		die("cannot load mozilla (fork).");
-	} else if (pid == 0) {
-		(void)close(1);
-		execlp(path, browser, "-remote", com, NULL);
-		die("cannot load %s (execlp).", browser);
+	strbuf_puts(url, "file://");
+#if _WIN32 || __DJGPP__
+	/*
+	 * copy drive name. (c: -> c|)
+	 */
+	if (isalpha(*path) && *(path+1) == ':') {
+		strbuf_putc(url, *path);
+		strbuf_putc(url, '|');
+		path += 2;
+	}
+#endif
+	strbuf_puts(url, path);
+	if (line) {
+		strbuf_puts(url, "#L");
+		strbuf_putn(url, line);
 	}
 }
-#endif /* !_WIN32 and !__DJGPP__ */
+/*
+ * show_page_by_url: show page by url
+ *
+ *	i)	browser browser name
+ *	i)	url	URL
+ */
+#if defined(_WIN32)
+/* Windows32 version */
+void
+show_page_by_url(const char *browser, const char *url)
+{
+	if (ShellExecute(NULL, NULL, browser, url, NULL, SW_SHOWNORMAL) <= (HINSTANCE)32)
+		die("Cannot load %s (error = 0x%04x).", browser, GetLastError());
+}
+#elif defined(__DJGPP__)
+/* DJGPP version */
+void
+show_page_by_url(const char *browser, const char *url)
+{
+	char com[MAXFILLEN+1];
+	char *path;
+
+	/*
+	 * assume a Windows browser if it's not on the path.
+	 */
+	if (!(path = usable(browser))) {
+		/*
+		 * START is an internal command in XP, external in 9X.
+		 */
+		if (!(path = usable("start")))
+			path = "cmd /c start";
+		snprintf(com, sizeof(com), "%s %s \"%s\"", path, browser, url);
+	} else {
+		snprintf(com, sizeof(com), "%s \"%s\"", path, url);
+	}
+	system(com);
+}
+#else
+/* UNIX version */
+void
+show_page_by_url(const char *browser, const char *url)
+{
+	char com[1024];
+
+	/*
+	 * Browsers which have openURL() command.
+	 */
+	if (locatestring(browser, "mozilla", MATCH_AT_LAST) ||
+	    locatestring(browser, "netscape", MATCH_AT_LAST) ||
+	    locatestring(browser, "netscape-remote", MATCH_AT_LAST))
+	{
+		char *path;
+
+		if (!(path = usable(browser)))
+			die("%s not found in your path.", browser);
+		snprintf(com, sizeof(com), "%s -remote \"openURL(%s)\"", path, url);
+	}
+	/*
+	 * Generic browser.
+	 */
+	else {
+		snprintf(com, sizeof(com), "%s \"%s\"", browser, url);
+	}
+	system(com);
+}
+#endif

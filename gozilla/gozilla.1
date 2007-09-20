@@ -1,5 +1,5 @@
 .\" This file is generated automatically by convert.pl from gozilla/manual.in.
-.TH GOZILLA 1 "May 2004" "GNU Project"
+.TH GOZILLA 1 "July 2006" "GNU Project"
 .SH NAME
 gozilla \- force mozilla to display specified source file.
 .SH SYNOPSIS
@@ -9,11 +9,12 @@ gozilla \- force mozilla to display specified source file.
 .br
 .SH DESCRIPTION
 \fBGozilla\fP force mozilla to display specified source
-file as a hypertext.
+file as a hypertext. \fBGozilla\fP can be used with other
+browsers like firefox and epiphany.
 .PP
-In advance of using this command, [1] you must execute \fBgtags\fP(1)
+In advance of using this command, you must execute \fBgtags\fP(1)
 and \fBhtags\fP(1) at the root directory of the source tree
-to make tag files, and [2] execute mozilla in you computer.
+to make tag files.
 Then you can execute gozilla at anywhere in the source tree.
 .PP
 First form:
@@ -24,6 +25,10 @@ Second form:
 .br
 You can specify definition name directly. Definition name must exist 
 in \'GTAGS\' tag file.
+.PP
+Some browsers require you to load it before executing \fBgozilla\fP.
+Whether or not \fBgozilla\fP waits for exiting of browser depends
+on browser.
 .SH OPTIONS
 The following options are available:
 .TP
@@ -33,9 +38,7 @@ function reference is exist.  If you execute \fBhtags\fP(1)
 with \fB-l\fP option, you can specify any line.
 .TP
 \fB-b\fP \fIbrowser\fP
-browser to use. By default, it is assumed mozilla.
-If you specify another browser, \fBgozilla\fP waits for
-exiting of the browser.
+browser to use. By default, it is assumed \fBmozilla\fP.
 .TP
 \fB-p\fP
 just print generated target URL.
@@ -82,9 +85,16 @@ browser to use. By default, it is assumed mozilla.
 .nf
 	$ gtags
 	$ htags
-	$ mozilla &
 	$ global -x main
 	main              82 ctags.c          main(argc, argv)
+	$ mozilla &
+	$ gozilla +82 ctags.c
+.PP
+	$ firefox &
+	$ gozilla -b firefox +82 ctags.c
+.PP
+	$ setenv BROWSER 'epiphany --new-tab'
+	$ epiphany &
 	$ gozilla +82 ctags.c
 .fi
 .SH DIAGNOSTICS
@@ -93,6 +103,8 @@ browser to use. By default, it is assumed mozilla.
 \fBglobal\fP(1),
 \fBgtags\fP(1),
 \fBhtags\fP(1),
+\fBfirefox\fP(1),
+\fBepiphany\fP(1),
 \fBmozilla\fP(1).
 .PP
 GNU GLOBAL source code tag system
@@ -103,9 +115,6 @@ GNU GLOBAL source code tag system
 .SH BUGS
 \fBGozilla\fP can treat not only source file but also normal file,
 directory, HTML file and even URL, because it is omnivorous.
-.PP
-I don't know whether or not \fBgozilla\fP works well in Windows32
-environment.
 .SH AUTHORS
 Tama Communications Corporation.
 .SH HISTORY

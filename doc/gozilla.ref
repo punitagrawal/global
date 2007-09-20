@@ -9,11 +9,12 @@ gozilla [-b browser][-p] -d name@*
 @end quotation
 @unnumberedsubsec DESCRIPTION
 Gozilla force mozilla to display specified source
-file as a hypertext.
+file as a hypertext. Gozilla can be used with other
+browsers like firefox and epiphany.
 
-In advance of using this command, [1] you must execute gtags(1)
+In advance of using this command, you must execute gtags(1)
 and htags(1) at the root directory of the source tree
-to make tag files, and [2] execute mozilla in you computer.
+to make tag files.
 Then you can execute gozilla at anywhere in the source tree.
 
 First form:@*
@@ -23,6 +24,9 @@ Second form:@*
 You can specify definition name directly. Definition name must exist 
 in @file{GTAGS} tag file.
 
+Some browsers require you to load it before executing gozilla.
+Whether or not gozilla waits for exiting of browser depends
+on browser.
 @unnumberedsubsec OPTIONS
 The following options are available:
 @table @asis
@@ -32,8 +36,6 @@ function reference is exist.  If you execute htags(1)
 with @samp{-l} option, you can specify any line.
 @item @samp{-b} browser
 browser to use. By default, it is assumed mozilla.
-If you specify another browser, gozilla waits for
-exiting of the browser.
 @item @samp{-p}
 just print generated target URL.
 @item file
@@ -72,9 +74,16 @@ browser to use. By default, it is assumed mozilla.
 @example
 	$ gtags
 	$ htags
-	$ mozilla &
 	$ global -x main
 	main              82 ctags.c          main(argc, argv)
+	$ mozilla &
+	$ gozilla +82 ctags.c
+
+	$ firefox &
+	$ gozilla -b firefox +82 ctags.c
+
+	$ setenv BROWSER 'epiphany --new-tab'
+	$ epiphany &
 	$ gozilla +82 ctags.c
 @end example
 @unnumberedsubsec DIAGNOSTICS
@@ -83,6 +92,8 @@ Gozilla exits with a non 0 value if an error occurred, 0 otherwise.
 global(1),
 gtags(1),
 htags(1),
+firefox(1),
+epiphany(1),
 mozilla(1).
 
 GNU GLOBAL source code tag system@*
@@ -92,9 +103,6 @@ Gozilla means 'Global for mozilla'.
 @unnumberedsubsec BUGS
 Gozilla can treat not only source file but also normal file,
 directory, HTML file and even URL, because it is omnivorous.
-
-I don't know whether or not gozilla works well in Windows32
-environment.
 @unnumberedsubsec AUTHORS
 Tama Communications Corporation.
 @unnumberedsubsec HISTORY

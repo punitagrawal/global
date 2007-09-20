@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -29,7 +28,6 @@
 #endif
 #include "cache.h"
 #include "common.h"
-#include "queue.h"
 #include "global.h"
 #include "htags.h"
 
@@ -42,51 +40,6 @@ static const char *dirs[]    = {NULL, DEFS,         REFS,        SYMS};
 static const char *kinds[]   = {NULL, "definition", "reference", "symbol"};
 static const char *options[] = {NULL, "",           "r",         "s"};
 
-static char command[MAXFILLEN];
-
-/*
- * Open duplicate object index file.
- *
- *	i)	db	tag type(GTAGS, GRTAGS, GSYMS)
- *	r)	op	file pointer
- */
-static FILE *
-open_dup_file(db, count)
-	int db;
-	int count;
-{
-	char path[MAXPATHLEN];
-	FILE *op;
-
-	snprintf(path, sizeof(path), "%s/%s/%d.%s", distpath, dirs[db], count, HTML);
-	if (cflag) {
-		snprintf(command, sizeof(command), "gzip -c >%s", path);
-		op = popen(command, "w");
-		if (op == NULL)
-			die("cannot execute command '%s'.", command);
-	} else {
-		op = fopen(path, "w");
-		if (op == NULL)
-			die("cannot create file '%s'.", path);
-	}
-	return op;
-}
-/*
- * Close duplicate object index file.
- *
- *	i)	op	file pointer
- */
-static void
-close_dup_file(op)
-	FILE *op;
-{
-	if (cflag) {
-		if (pclose(op) != 0)
-			die("'%s' failed.", command);
-	} else {
-		fclose(op);
-	}
-}
 /*
  * Make duplicate object index.
  *
@@ -98,10 +51,12 @@ int
 makedupindex(void)
 {
 	STRBUF *sb = strbuf_open(0);
+	STRBUF *command = strbuf_open(0);
 	int definition_count = 0;
 	char srcdir[MAXPATHLEN];
 	int db;
 	char buf[1024];
+	FILEOP *fileop = NULL;
 	FILE *op = NULL;
 	FILE *ip = NULL;
 
@@ -112,15 +67,28 @@ makedupindex(void)
 		int writing = 0;
 		int count = 0;
 		int entry_count = 0;
-		char *ctags_x, tag[IDENTLEN], prev[IDENTLEN], first_line[MAXBUFLEN], command[MAXFILLEN];
+		char *ctags_x, tag[IDENTLEN], prev[IDENTLEN], first_line[MAXBUFLEN];
 
-		if (!symbol && db == GSYMS)
+		if (gtags_exist[db] == 0)
 			continue;
 		prev[0] = 0;
 		first_line[0] = 0;
-		snprintf(command, sizeof(command), "global -xn%s%s \".*\" | gtags --sort", dynamic ? "n" : "", option);
-		if ((ip = popen(command, "r")) == NULL)
-			die("cannot execute command '%s'.", command);
+		/*
+		 * construct command line.
+		 */
+		strbuf_reset(command);
+		strbuf_sprintf(command, "%s -x%s --nofilter=path", global_path, option);
+		/*
+		 * Optimization when the --dynamic option is specified.
+		 */
+		if (dynamic) {
+			strbuf_puts(command, " --nosource");
+			if (db != GSYMS)
+				strbuf_puts(command, " --nofilter=sort");
+		}
+		strbuf_puts(command, " \".*\"");
+		if ((ip = popen(strbuf_value(command), "r")) == NULL)
+			die("cannot execute command '%s'.", strbuf_value(command));
 		while ((ctags_x = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
 			SPLIT ptable;
 
@@ -140,8 +108,8 @@ makedupindex(void)
 						fputs_nl(gen_list_end(), op);
 						fputs_nl(body_end, op);
 						fputs_nl(gen_page_end(), op);
-						close_dup_file(op);
-						file_count++;
+						close_file(fileop);
+						html_count++;
 					}
 					writing = 0;
 					/*
@@ -152,7 +120,7 @@ makedupindex(void)
 				}				
 				/* single entry */
 				if (first_line[0]) {
-					if (split(first_line, 3, &ptable) < 3) {
+					if (split(first_line, 4, &ptable) < 4) {
 						recover(&ptable);
 						die("too small number of parts.(2)\n'%s'", ctags_x);
 					}
@@ -172,7 +140,11 @@ makedupindex(void)
 				/* duplicate entry */
 				if (first_line[0]) {
 					if (!dynamic) {
-						op = open_dup_file(db, count);
+						char path[MAXPATHLEN+1];
+
+						snprintf(path, sizeof(path), "%s/%s/%d.%s", distpath, dirs[db], count, HTML);
+						fileop = open_output_file(path, cflag);
+						op = get_descripter(fileop);
 						fputs_nl(gen_page_begin(tag, SUBDIR), op);
 						fputs_nl(body_begin, op);
 						fputs_nl(gen_list_begin(), op);
@@ -191,14 +163,14 @@ makedupindex(void)
 		if (db == GTAGS)
 			definition_count = count;
 		if (pclose(ip) != 0)
-			die("'%s' failed.", command);
+			die("'%s' failed.", strbuf_value(command));
 		if (writing) {
 			if (!dynamic) {
 				fputs_nl(gen_list_end(), op);
 				fputs_nl(body_end, op);
 				fputs_nl(gen_page_end(), op);
-				close_dup_file(op);
-				file_count++;
+				close_file(fileop);
+				html_count++;
 			}
 			/*
 			 * cache record: " <file id> <entry number>"
@@ -209,7 +181,7 @@ makedupindex(void)
 		if (first_line[0]) {
 			SPLIT ptable;
 
-			if (split(first_line, 3, &ptable) < 3) {
+			if (split(first_line, 4, &ptable) < 4) {
 				recover(&ptable);
 				die("too small number of parts.(3)\n'%s'", ctags_x);
 			}
@@ -219,5 +191,6 @@ makedupindex(void)
 		}
 	}
 	strbuf_close(sb);
+	strbuf_close(command);
 	return definition_count;
 }

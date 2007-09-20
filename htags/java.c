@@ -429,19 +429,18 @@ char *yytext;
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -481,6 +480,7 @@ char *yytext;
 
 #define YY_NO_TOP_STATE 1
 #define YY_STACK_USED 1
+#define YY_NEVER_INTERACTIVE 1
 #line 485 "java.c"
 
 /* Macros after this point can all be overridden by user definitions in
@@ -635,7 +635,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 62 "java.l"
+#line 61 "java.l"
 
  /* Comment */
 #line 642 "java.c"
@@ -724,54 +724,54 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 64 "java.l"
+#line 63 "java.l"
 { echos(comment_begin); ECHO; yy_push_state(C_COMMENT); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 65 "java.l"
+#line 64 "java.l"
 { ECHO; echos(comment_end); yy_pop_state(); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 66 "java.l"
+#line 65 "java.l"
 { put_char(LEXTEXT[0]); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 67 "java.l"
+#line 66 "java.l"
 { echos(comment_begin); ECHO; yy_push_state(CPP_COMMENT); }
 	YY_BREAK
 /* String */
 case 5:
 YY_RULE_SETUP
-#line 70 "java.l"
+#line 69 "java.l"
 { ECHO; yy_push_state(STRING); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 71 "java.l"
+#line 70 "java.l"
 { ECHO; yy_pop_state(); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 72 "java.l"
+#line 71 "java.l"
 { put_char(LEXTEXT[0]); put_char(LEXTEXT[1]); }
 	YY_BREAK
 /* Literal */
 case 8:
 YY_RULE_SETUP
-#line 75 "java.l"
+#line 74 "java.l"
 { ECHO; yy_push_state(LITERAL); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 76 "java.l"
+#line 75 "java.l"
 { ECHO; yy_pop_state(); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 77 "java.l"
+#line 76 "java.l"
 { put_char(LEXTEXT[0]); put_char(LEXTEXT[1]); }
 	YY_BREAK
 case 11:
@@ -779,7 +779,7 @@ case 11:
 yy_c_buf_p = yy_cp = yy_bp + 6;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 79 "java.l"
+#line 78 "java.l"
 {
 		int c = 0;
 
@@ -794,12 +794,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 91 "java.l"
+#line 90 "java.l"
 ECHO;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 92 "java.l"
+#line 91 "java.l"
 {
 		if (java_reserved_word(LEXTEXT, LEXLENG))
 			put_reserved_word(LEXTEXT);
@@ -816,23 +816,23 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 105 "java.l"
+#line 104 "java.l"
 { put_brace(LEXTEXT); }
 	YY_BREAK
 /* New line */
 case 15:
 YY_RULE_SETUP
-#line 107 "java.l"
+#line 106 "java.l"
 DEFAULT_END_OF_LINE_ACTION
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 108 "java.l"
+#line 107 "java.l"
 { put_char(LEXTEXT[0]); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 110 "java.l"
+#line 109 "java.l"
 ECHO;
 	YY_BREAK
 #line 839 "java.c"
@@ -1730,11 +1730,10 @@ int main()
 	return 0;
 	}
 #endif
-#line 110 "java.l"
+#line 109 "java.l"
 
 void
-java_parser_init(ip)
-	FILE *ip;
+java_parser_init(FILE *ip)
 {
 	DEFAULT_BEGIN_OF_FILE_ACTION
 	BEGIN JAVA;

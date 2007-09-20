@@ -10,16 +10,18 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-SUBDIRS= libdb libglibc libutil gnusort gtags-parser global gozilla gtags htags doc
-
-EXTRA_DIST = FAQ LICENSE \
-	gtags.conf gtags.el nvi-1.79-gtags.diff reconf.sh globash.rc \
-	convert.pl gtags.pl gtags.vim
+SUBDIRS = libglibc libutil
+if !USE_DB185_COMPAT
+        SUBDIRS += libdb
+endif
+SUBDIRS += gtags-parser global gozilla gtags htags htags-refkit gtags-cscope doc icons
 
 gtagsdir = ${datadir}/gtags
 gtags_DATA = AUTHORS COPYING ChangeLog FAQ INSTALL LICENSE NEWS README THANKS \
         globash.rc gtags.conf gtags.el gtags.pl gtags.vim nvi-1.79-gtags.diff \
-	htags/bless.sh.tmpl htags/global.cgi.tmpl htags/style.css
+	BOKIN_MODEL BOKIN_MODEL_FAQ DONORS
+
+EXTRA_DIST = ${gtags_DATA} reconf.sh convert.pl
 
 # If you would like to install gtags.el to the lisp directory then uncomment
 # the following line.

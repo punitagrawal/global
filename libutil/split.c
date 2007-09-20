@@ -3,19 +3,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -31,7 +30,7 @@
  *              +------------------------------------------------------
  *         line |main         100    ./main.c        main(argc, argv)\n
  *
- * The result of split().
+ * The result of split(line, 4, &list):
  *
  *              +------------------------------------------------------
  * list    line |main\0       100\0  ./main.c\0      main(argc, argv)\n
@@ -55,6 +54,22 @@
  * | save    | |
  * +---------+ =
  *
+ * The result of split(line, 2, &list):
+ *
+ *              +------------------------------------------------------
+ * list    line |main\0       100    ./main.c        main(argc, argv)\n
+ * +---------+   ^   ^        ^
+ * |npart=2  |   |   |        |
+ * +---------+   |   |        |
+ * | start  *----+   |        |
+ * | end    *--------+        |
+ * | save ' '|                |
+ * +---------+                |
+ * | start  *-----------------+
+ * | end    *--+
+ * | save    | |
+ * +---------+ =
+ *
  * The result of recover().
  *              +------------------------------------------------------
  *         line |main         100    ./main.c        main(argc, argv)\n
@@ -73,10 +88,7 @@
  *	r)		part count
  */
 int
-split(line, npart, list)
-	char *line;
-	int npart;
-	SPLIT *list;
+split(char *line, int npart, SPLIT *list)
 {
 	char *s = line;
 	struct part *part = &list->part[0];
@@ -118,8 +130,7 @@ split(line, npart, list)
  *	io)	list	split table
  */
 void
-recover(list)
-	SPLIT *list;
+recover(SPLIT *list)
 {
 	int i, c;
 	for (i = 0; i < list->npart; i++) {
@@ -131,8 +142,7 @@ recover(list)
  * split_dump: dump split structure.
  */
 void
-split_dump(list)
-	SPLIT *list;
+split_dump(SPLIT *list)
 {
 	int i;
 	struct part *part;

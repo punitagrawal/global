@@ -7,19 +7,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -46,8 +45,7 @@
  *	r)		1: absolute, 0: not absolute
  */
 int
-isabspath(p)
-	const char *p;
+isabspath(const char *p)
 {
 	if (p[0] == '/')
 		return 1;
@@ -69,8 +67,7 @@ isabspath(p)
  * Note: canonpath rewrite argument buffer.
  */
 char *
-canonpath(path)
-	char *path;
+canonpath(char *path)
 {
 #ifdef __DJGPP__
 	char *p;
@@ -154,9 +151,7 @@ canonpath(path)
  * realpath: get the complete path
  */
 char *
-realpath(in_path, out_path)
-	const char *in_path;
-	char *out_path;
+realpath(const char *in_path, char *out_path)
 {
 #ifdef __DJGPP__
 	/*

@@ -1,22 +1,21 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+ * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -34,6 +33,7 @@
 #include "anchor.h"
 #include "htags.h"
 
+static XARGS *anchor_input[GTAGLIM];
 static struct anchor *table;
 static VARRAY *vb;
 
@@ -44,8 +44,7 @@ static struct anchor *CURRENT;
 
 /* compare routine for qsort(3) */
 static int
-cmp(s1, s2)
-	const void *s1, *s2;
+cmp(const void *s1, const void *s2)
 {
 	return ((struct anchor *)s1)->lineno - ((struct anchor *)s2)->lineno;
 }
@@ -57,19 +56,53 @@ static int LAST;
 static struct anchor *CURRENTDEF;
 
 /*
- * anchor_load: load anchor table
+ * anchor_prepare: setup input stream.
  *
- *	i)	file	file name
+ *	i)	anchor_stream	file pointer of path list
  */
 void
-anchor_load(file)
-	const char *file;
+anchor_prepare(FILE *anchor_stream)
 {
-	char command[MAXFILLEN];
-	const char *options[] = {NULL, "", "r", "s"};
-	STRBUF *sb = strbuf_open(0);
-	FILE *ip;
-	int i, db;
+	/*
+	 * Option table:
+	 * We use blank string as null option instead of null string("")
+	 * not to change the command length. This length influences
+	 * the number of arguments in the xargs processing.
+	 */
+	char *options[] = {NULL, " ", "r", "s"};
+	char comline[MAXFILLEN];
+	int db;
+
+	for (db = GTAGS; db < GTAGLIM; db++) {
+		anchor_input[db] = NULL;
+		/*
+		 * Htags(1) should not use gtags-parser(1) directly;
+		 * it should use global(1) with the -f option instead.
+		 * Because gtags-parser is part of the implementation of
+		 * gtags(1) and global(1), and htags is only an application
+		 * program which uses global(1). If htags depends on
+		 * gtags-parser, it will become difficult to change the
+		 * implementation of gtags and global.
+		 *
+		 * Though the output of global -f is not necessarily sorted
+		 * by the path, it is guaranteed that the records concerning
+		 * the same file are consecutive.
+		 */
+		if (gtags_exist[db] == 1) {
+			snprintf(comline, sizeof(comline), "%s -f%s --nofilter=path", global_path, options[db]);
+			anchor_input[db] = xargs_open_with_file(comline, 0, anchor_stream);
+		}
+	}
+}
+/*
+ * anchor_load: load anchor table
+ *
+ *	i)	path	path name
+ */
+void
+anchor_load(const char *path)
+{
+	int db;
 
 	FIRST = LAST = 0;
 	end = CURRENT = NULL;
@@ -80,18 +113,16 @@ anchor_load(file)
 		varray_reset(vb);
 
 	for (db = GTAGS; db < GTAGLIM; db++) {
+		XARGS *xp;
 		char *ctags_x;
 
-		if (!symbol && db == GSYMS)
+		if ((xp = anchor_input[db]) == NULL)
 			continue;
 		/*
-		 * Setup input stream.
+		 * Read from input stream until it reaches end of file
+		 * or the line of another file appears.
 		 */
-		snprintf(command, sizeof(command), "global -fn%s \"%s\"", options[db], file);
-		ip = popen(command, "r");
-		if (ip == NULL)
-			die("cannot execute command '%s'.", command);
-		while ((ctags_x = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
+		while ((ctags_x = xargs_read(xp)) != NULL) {
 			SPLIT ptable;
 			struct anchor *a;
 			int type;
@@ -100,26 +131,34 @@ anchor_load(file)
 				recover(&ptable);
 				die("too small number of parts in anchor_load().\n'%s'", ctags_x);
 			}
+			if (!locatestring(ptable.part[PART_PATH].start, "./", MATCH_AT_FIRST)) {
+				recover(&ptable);
+				die("The output of parser is illegal.\n%s", ctags_x);
+			}
+			if (strcmp(ptable.part[PART_PATH].start, path) != 0) {
+				recover(&ptable);
+				xargs_unread(xp);
+				break;
+			}
 			if (db == GTAGS) {
-				const char *p;
+				char *p;
 
 				for (p = ptable.part[PART_LINE].start; *p && isspace((unsigned char)*p); p++)
 					;
 				if (!*p) {
 					recover(&ptable);
-					die("The output of global is illegal.\n%s", p);
+					die("The output of parser is illegal.\n%s", ctags_x);
 				}
 				type = 'D';
 				if (*p == '#') {
 					for (p++; *p && isspace((unsigned char)*p); p++)
 						;
 					if (*p) {
-						if (!strncmp(p, "define", sizeof("define") - 1))
-							type = 'M';
-						else if (!strncmp(p, "undef", sizeof("undef") - 1))
+						if (locatestring(p, "define", MATCH_AT_FIRST) ||
+						    locatestring(p, "undef", MATCH_AT_FIRST))
 							type = 'M';
 					}
-				} else if (!strncmp(p, "typedef", sizeof("typedef") - 1))
+				} else if (locatestring(p, "typedef", MATCH_AT_FIRST))
 					type = 'T';
 			}  else if (db == GRTAGS)
 				type = 'R';
@@ -133,14 +172,15 @@ anchor_load(file)
 			settag(a, ptable.part[PART_TAG].start);
 			recover(&ptable);
 		}
-		if (pclose(ip) != 0)
-			die("command '%s' failed.", command);
+		if (ctags_x == NULL) {
+			xargs_close(anchor_input[db]);
+			anchor_input[db] = NULL;
+		}
 	}
-	strbuf_close(sb);
 	if (vb->length == 0) {
 		table = NULL;
 	} else {
-		int used = vb->length;
+		int i, used = vb->length;
 		/*
 		 * Sort by lineno.
 		 */
@@ -223,11 +263,7 @@ anchor_next(void)
  *			!=0: D, M, T, R, Y
  */
 struct anchor *
-anchor_get(name, length, type, lineno)
-	const char *name;
-	int length;
-	int type;
-	int lineno;
+anchor_get(const char *name, int length, int type, int lineno)
 {
 	struct anchor *p = curp ? curp : start;
 
@@ -257,8 +293,7 @@ anchor_get(name, length, type, lineno)
  *	r)		1: definition, 0: not definition
  */
 int
-define_line(lineno)
-	int lineno;
+define_line(int lineno)
 {
 	struct anchor *p = curp ? curp : start;
 
@@ -284,8 +319,7 @@ define_line(lineno)
  *		(previous, next, first, last, top, bottom)
  */
 int *
-anchor_getlinks(lineno)
-	int lineno;
+anchor_getlinks(int lineno)
 {
 	static int ref[A_SIZE];
 	int i;
@@ -333,9 +367,7 @@ anchor_getlinks(lineno)
 	return ref;
 }
 void
-anchor_dump(op, lineno)
-	FILE *op;
-	int lineno;
+anchor_dump(FILE *op, int lineno)
 {
 	struct anchor *a;
 

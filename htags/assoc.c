@@ -3,19 +3,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -23,6 +22,8 @@
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif
+
+#include "checkalloc.h"
 #include "die.h"
 #include "htags.h"
 #include "assoc.h"
@@ -35,6 +36,18 @@
  *	ASSOC *b = assoc_open('b');
  *
  * This is for internal use.
+ *
+ * [Why we don't use invisible db file for associate array?]
+ *
+ * Dbopen() with NULL path name creates invisible db file. It is useful
+ * for many applications but I didn't use it because:
+ *
+ * 1. Temporary db file might grow up to hundreds of mega bytes or more.
+ *    If the file is invisible, the administrator of the machine cannot
+ *    understand why file system is full though there is no large file.
+ *    We shouldn't make invisible, huge temporary db file.
+ * 2. It is difficult for us to debug programs using unnamed, invisible
+ *    temporary db file.
  */
 /*
  * get temporary file name.
@@ -43,8 +56,7 @@
  *      r)              temporary file name
  */
 static const char *
-get_tmpfile(uniq)
-        int uniq;
+get_tmpfile(int uniq)
 {
         static char path[MAXPATHLEN];
         int pid = getpid();
@@ -60,14 +72,11 @@ get_tmpfile(uniq)
  *	r)		descriptor
  */
 ASSOC *
-assoc_open(c)
-	int c;
+assoc_open(int c)
 {
-	ASSOC *assoc = (ASSOC *)malloc(sizeof(ASSOC));
+	ASSOC *assoc = (ASSOC *)check_malloc(sizeof(ASSOC));
 	const char *tmpfile = get_tmpfile(c);
 
-	if (!assoc)
-		die("short of memory.");
 	assoc->dbop = dbop_open(tmpfile, 1, 0600, DBOP_REMOVE);
 
 	if (assoc->dbop == NULL)
@@ -80,8 +89,7 @@ assoc_open(c)
  *	i)	assoc	descriptor
  */
 void
-assoc_close(assoc)
-	ASSOC *assoc;
+assoc_close(ASSOC *assoc)
 {
 	if (assoc == NULL)
 		return;
@@ -98,10 +106,7 @@ assoc_close(assoc)
  *	i)	value	value
  */
 void
-assoc_put(assoc, name, value)
-	ASSOC *assoc;
-	const char *name;
-	const char *value;
+assoc_put(ASSOC *assoc, const char *name, const char *value)
 {
 	if (assoc->dbop == NULL)
 		abort();
@@ -115,9 +120,7 @@ assoc_put(assoc, name, value)
  *	r)		value
  */
 const char *
-assoc_get(assoc, name)
-	ASSOC *assoc;
-	const char *name;
+assoc_get(ASSOC *assoc, const char *name)
 {
 	if (assoc->dbop == NULL)
 		abort();

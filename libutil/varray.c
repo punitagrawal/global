@@ -3,19 +3,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -25,6 +24,7 @@
 #include <stdlib.h>
 #endif
 #include <stdio.h>
+#include "checkalloc.h"
 #include "die.h"
 #include "varray.h"
 
@@ -84,14 +84,10 @@ static int debug = 0;
  *	r)	vb	VARRAY structure
  */
 VARRAY *
-varray_open(size, expand)
-	int size;
-	int expand;
+varray_open(int size, int expand)
 {
-	VARRAY *vb = (VARRAY *)malloc(sizeof(VARRAY));
+	VARRAY *vb = (VARRAY *)check_calloc(sizeof(VARRAY), 1);
 
-	if (vb == NULL)
-		die("short of memory.");
 	if (size < 1)
 		die("varray_open: size < 1.");
 	if (expand < 0)
@@ -115,10 +111,7 @@ varray_open(size, expand)
  * This procedure doesn't operate the contents of the array.
  */
 void *
-varray_assign(vb, index, force)
-	VARRAY *vb;
-	int index;
-	int force;
+varray_assign(VARRAY *vb, int index, int force)
 {
 	if (index < 0)
 		die("varray_assign: illegal index value.");
@@ -144,9 +137,9 @@ varray_assign(vb, index, force)
 		 * Therefore, we cannot use realloc(NULL, ...).
 		 */
 		if (vb->vbuf == NULL)
-			vb->vbuf = (char *)malloc(vb->size * vb->alloced);
+			vb->vbuf = (char *)check_malloc(vb->size * vb->alloced);
 		else
-			vb->vbuf = (char *)realloc(vb->vbuf, vb->size * vb->alloced);
+			vb->vbuf = (char *)check_realloc(vb->vbuf, vb->size * vb->alloced);
 		if (debug)
 			fprintf(stderr, "Expanded: from %d to %d.\n", old_alloced, vb->alloced);
 	}
@@ -162,8 +155,7 @@ varray_assign(vb, index, force)
  * This procedure doesn't operate the contents of the array.
  */
 void *
-varray_append(vb)
-	VARRAY *vb;
+varray_append(VARRAY *vb)
 {
 	return varray_assign(vb, vb->length, 1);
 }
@@ -173,8 +165,7 @@ varray_append(vb)
  *	i)	vb	VARRAY structure
  */
 void
-varray_reset(vb)
-	VARRAY	*vb;
+varray_reset(VARRAY *vb)
 {
 	vb->length = 0;
 }
@@ -184,8 +175,7 @@ varray_reset(vb)
  *	i)	vb	VARRAY structure
  */
 void
-varray_close(vb)
-	VARRAY	*vb;
+varray_close(VARRAY *vb)
 {
 	if (vb) {
 		if (vb->vbuf)

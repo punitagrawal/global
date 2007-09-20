@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005
+ Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
 	Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
@@ -18,6 +18,202 @@ ___________________________________
 		----------------------------------
 
 ChangeLog about GNU GLOBAL
+
+July 6 2007, by Shigio YAMAGUCHI
+
+	* Migrated to GPLv3 and LGPLv3.
+	* gtags.conf.in: Migrated to simple all-permissive license.
+
+May 5 2007, by Shigio YAMAGUCHI
+
+	* New files: BOKIN_MODEL, BOKIN_MODEL_FAQ, DONORS
+
+March 10 2007, Shigio YAMAGUCHI
+
+	* gtags.el: Added (provide 'gtags).
+	* libutil/env.c: Use putenv(3) if it is avaiable else use setenv(3).
+	  Some systems don't have setenv(3).
+
+January 29 2007, Shigio YAMAGUCHI
+
+	* Further compression of tag file (format version 5).
+	  - Tag name is compressed.
+	  - Each line number might be expressed as difference from the previous
+	    line number except for the head.
+	  	ex: 11,3,2 means '11 14 16'.
+	  - In addition, successive line numbers are expressed as range (n1-n2).
+	  	ex: 11-3 means '11 12 13 14'.
+
+	* global(1): Sort filter was moved from the output filter to the input filter.
+
+	   ( input )     |    ( m a i n )      |      ( o u t p u t )
+	   gtagsop       |      global         |  tagsort   |  pathconvert
+	  ---------------+---------------------+------------+--------------
+	   expand tag +------------+             sort tag     convert path
+				   |                 |
+	       +-------------------------------------+
+	       v                   v
+	   sort tag        expand tag                         convert path
+
+	  Instead, the processing of expanding tag was moved to the main module.
+	  This improves the performance when compact format is used, since
+	  sorting is done before expanding.
+
+	  Recent architecture (GLOBAL-5.0 - 5.3)
+
+	  +===========================================+
+	  |global(write)->[sort filter]->[path filter]|->[stdout]
+	  +===========================================+
+	 
+	  New architecture (GLOBAL-5.4 -)
+	  
+	  +===========================================+
+	  |[sort filter]->global(write)->[path filter]|->[stdout]
+	  +===========================================+
+
+	* Removed some code which call the following method:
+	  putenv utimes
+		They are not natural method today.
+	  pread pwrite
+		They are risky since they are not used so much and are not
+		often so tested.  It was found that the pread and pwrite in cygwin
+		are buggy. Though it is not our business, user is not guilty too.
+	  strdup
+		It is not needed since we use check_strdup() instead.
+	* Added some new modules.
+	  pool - allocate and free memory for temporary use.
+	  fileop - operation for opening and closing file.
+	* Added some new methods.
+	  strmake module - strcmp_withterm()
+	* Removed some modules.
+	  global/filter, libutil/tagsort
+	* idset module:
+	  - Added new functions idset_first(), idset_next() and idset_empty().
+	  - Changed bitmask from char(8 bits) to integer (maybe 32 or 64 bits)
+	    to improve performance.
+
+November 20 2006, Shigio YAMAGUCHI
+
+	* gtags.el:
+	  - gtags-make-complete-list is deprecated.
+	    Added gtags-completing-gtags, gtags-completing-gsyms and gtags-completing.
+	  - Throw away the output of gozilla in 'gtags-display-browser'.
+
+August 8 2006, Shigio YAMAGUCHI
+
+	* htags/fileindex.c: Rewritten using recursive call instead of stack structures.
+	* gozilla.c: Fixed getURL() according to new GPATH.
+	* Replaced malloc(), realloc() and stdup() with check_xxxx() functions.
+	* Added icon files (icons/*png).
+
+June 10 2006, Shigio YAMAGUCHI
+
+	* Recovered original texinfo file names (.txi -> .texi).
+
+April 21 2006, Shigio YAMAGUCHI
+
+	Change in tag format:
+	* Moved to new tag format. New tag format is as follows.
+	  GTAGS (with compress option)
+		<file id> <tag name> <line number> <compressed line image>
+	  GRTAGS, GSYMS (with compact option)
+		<file id> <tag name> <line number>[,...]
+	* Now, GPATH has path names of not only source files but
+	  also other text files. The following commands no longer
+	  traverse file system. They read GPATH instead.
+		global(1) with the --other option.
+		htags(1) with the --other option.
+
+	Change in architecture:
+	* Changed the filtering architecture of global(1).
+	
+	  Old architecture (- GLOBAL-4.7.8)
+
+	  process1          process2       process3
+	  +=============+  +===========+  +===========+
+	  |global(write)|->|sort filter|->|path filter|->[stdout]
+	  +=============+  +===========+  +===========+
+	
+	  New architecture (GLOBAL-5.0 -)
+
+	  1 process
+	  +============================================+
+	  |global(write) ->[sort filter]->[path filter]|->[stdout]
+	  +============================================+
+	
+	  For the convenience of debugging, the old architecture is
+	  also available. If macro EXTERNAL_FILTER is defined in filter.c
+	  old architecture is selected.
+
+	  The following options are also offered. (These options will be
+	  deleted perhaps sooner or later.)
+
+	    gtags --path={absolute|relative} --format={path|ctags|ctags-x|grep}
+	    gtags --sort --format={path|ctags|ctags-x|grep} [--unique]
+	    global --nofilter=[{path|sort}]
+	    global --filter=[{path|sort}]
+	    global --nosource
+	
+	  Moved the processing by which various formats are generated from
+	  the main body of global(1) to the path filter. The main body
+	  generates only two formats: path and ctags-x.
+	  Path filter generates various formats which are given by the
+	  --result=<format> option.
+
+	Change in CGI mechanism:
+	* The 'cgi-bin/' directory which generated by htags(1) doesn't
+	  have any tag files. CGI script uses the tag files in the root
+	  directory of a source project instead.
+
+	New modules:
+	* Added strhash module (strhash.c and strhash.h) to libutil.
+	  Replaced the hash mechanism for compact format with this module.
+	* Added xargs module (xargs.c and xargs.h) to libutil.
+	  Replaced the xargs(1) like mechanism with this module.
+	* Added pathconvert module (pathconvert.c and pathconvert.h) to libutil.
+	  This module composes a part of an internal pipeline.
+	* Added tagsort module (tagsort.c and tagsort.h) to libutil.
+	  Replaced external sort filter (gnusort) with internal one
+	  (tagsort module). Gnusort was removed. As a result, GLOBAL
+	  became free from dependence on external commands.
+	* Included GLIBC files obstack.c, obstack.h, hash-string.c and
+	  hash-string.h.
+
+	Internal options:
+	* Removed two hidden options, --find and --other from gtags(1),
+	  since they are no longer used.
+	* Added new internal format 'ctags-xid' of global(1).
+	  The anchor generation method of the global.cgi was changed.
+	  Global.cgi script was modified to use the --result=ctags-xid
+	  option of global(1)
+	* Removed the -cc, -ccc, -cccc option of gtags(1).
+	  These options were undocumented and only for testing.
+	* Removed two hidden options, --find and --other from gtags(1),
+	  since they are no longer used.
+
+	Coding style:
+	* End of support of K&R.
+	* Changed function declarations to ANSI C style.
+
+September 30 2005, Shigio YAMAGUCHI
+
+        * Updated GNU Free Documentation License.(1.1->1.2)
+        * Updated doc/texinfo.tex using texinfo-4.8.
+        * BSD advertising clause was deleted, according to the declaration
+          by UCB.
+        * Added new module idset.
+        * Added new function exec_line_limit() in env.c.
+        * Added new function find_open_filelist() for the --file=xxx option.
+          Find_read() and find_close() is shared by both find_open_filelist()
+          and find_open().
+        * Added new config option --with-db185-compat[=DIR].
+          This is not for normal use, but for debugging.
+        * Decreased use of popen() by moving the conversion from tabs to
+          spaces into htags.
+        * Reimplemented 'gtags --sort' without gnusort.
+        * The default cache size was changed from 500000 to 5000000.
+          Though I was assuming the machine equipped with 32-64MB,
+          in a recent machine, even small one has 256-512MB memory.
 
 May 12 2005, Shigio YAMAGUCHI
 

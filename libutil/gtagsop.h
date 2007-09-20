@@ -1,22 +1,21 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2001
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2005, 2006, 2007
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _GTOP_H_
@@ -26,11 +25,15 @@
 
 #include "gparam.h"
 #include "dbop.h"
+#include "idset.h"
 #include "strbuf.h"
+#include "strhash.h"
+#include "varray.h"
 
-#define VERSIONKEY	" __.VERSION"
 #define COMPACTKEY	" __.COMPACT"
-#define PATHINDEXKEY	" __.PATHINDEX"
+#define COMPRESSKEY	" __.COMPRESS"
+#define COMPLINEKEY	" __.COMPLINE"
+#define COMPNAMEKEY	" __.COMPNAME"
 
 #define GPATH		0
 #define GTAGS		1
@@ -42,58 +45,74 @@
 #define GTAGS_CREATE	1
 #define GTAGS_MODIFY	2
 
-/* gtagsopen() */
-#define GTAGS_STANDARD		0	/* standard format */
-#define GTAGS_COMPACT		1	/* compact format */
-#define GTAGS_PATHINDEX		2	/* use path index */
-/* gtags_add() */
-#define GTAGS_UNIQUE		1	/* compress duplicate lines */
-#define GTAGS_EXTRACTMETHOD	2	/* extract method from class definition */
+/* gtags_open() */
+#define GTAGS_COMPACT		1	/* compact option */
+#define GTAGS_COMPRESS		2	/* compression option */
+#define GTAGS_COMPLINE		4	/* compression option for line number */
+#define GTAGS_COMPNAME		8	/* compression option for line number */
+#define GTAGS_EXTRACTMETHOD	16	/* extract method from class definition */
 #define GTAGS_DEBUG		65536	/* print information for debug */
 /* gtags_first() */
 #define GTOP_KEY		1	/* read key part */
-#define GTOP_PREFIX		2	/* prefixed read */
-#define GTOP_NOSOURCE		4	/* don't read source file */
+#define GTOP_PATH		2	/* read path part */
+#define GTOP_PREFIX		4	/* prefixed read */
 #define GTOP_NOREGEX		8	/* don't use regular expression */
 #define GTOP_IGNORECASE		16	/* ignore case distinction */
 #define GTOP_BASICREGEX		32	/* use basic regular expression */
+#define GTOP_NOSORT		64	/* don't sort */
+
+/*
+ * This entry corresponds to one raw record.
+ */
+typedef struct {
+	const char *tagline;
+	const char *path;
+	const char *tag;
+	int lineno;
+} GTP;
 
 typedef struct {
 	DBOP *dbop;			/* descripter of DBOP */
 	int format_version;		/* format version */
-	int format;			/* GTAGS_STANDARD, GTAGS_COMPACT */
+	int format;			/* GTAGS_COMPACT, GTAGS_COMPRESS */
 	int mode;			/* mode */
 	int db;				/* 0:GTAGS, 1:GRTAGS, 2:GSYMS */
 	int openflags;			/* flags value of gtags_open() */
 	int flags;			/* flags */
 	char root[MAXPATHLEN+1];	/* root directory of source tree */
 	/*
+	 * Stuff for GTOP_PATH.
+	 */
+	int path_count;
+	int path_index;
+	char **path_array;
+	/*
+	 * Stuff for segment_read().
+	 */
+	int gtp_count;
+	int gtp_index;
+	GTP *gtp_array;
+	GTP gtp;
+	POOL *segment_pool;
+	VARRAY *vb;
+	char cur_tagname[IDENTLEN+1];	/* current tag name */
+	/*
 	 * Stuff for compact format
 	 */
-	int opened;			/* whether or not file opened */
-	char *line;			/* current record */
-	char tag[IDENTLEN+1];		/* current tag */
-	char prev_tag[IDENTLEN+1];	/* previous tag */
-	char path[MAXPATHLEN+1];	/* current path */
-	char prev_path[MAXPATHLEN+1];	/* previous path */
+	char cur_path[MAXPATHLEN+1];	/* current path */
 	STRBUF *sb;			/* string buffer */
-	STRBUF *ib;			/* input buffer */
 	FILE *fp;			/* descriptor of 'path' */
-	const char *lnop;		/* current line number */
-	int lno;			/* integer value of 'lnop' */
+	/* used for compact format and path name only read */
+	STRHASH *path_hash;
+
 } GTOP;
 
 const char *dbname(int);
-void makecommand(const char *, const char *, STRBUF *);
-void formatcheck(const char *, int);
-int notnamechar(const char *);
-GTOP *gtags_open(const char *, const char *, int, int, int);
+GTOP *gtags_open(const char *, const char *, int, int);
 void gtags_put(GTOP *, const char *, const char *);
-const char *gtags_get(GTOP *, const char *);
-void gtags_add(GTOP *, const char *, const char *, int);
-void gtags_delete(GTOP *, const char *);
-const char *gtags_first(GTOP *, const char *, int);
-const char *gtags_next(GTOP *);
+void gtags_delete(GTOP *, IDSET *);
+GTP *gtags_first(GTOP *, const char *, int);
+GTP *gtags_next(GTOP *);
 void gtags_close(GTOP *);
 
 #endif /* ! _GTOP_H_ */

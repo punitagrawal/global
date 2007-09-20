@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -72,8 +71,7 @@ static int namespacelevel;	/* namespace block level */
  * Cpp: read C++ file and pickup tag entries.
  */
 void
-Cpp(file)
-	const char *file;
+Cpp(const char *file)
 {
 	int c, cc;
 	int savelevel;
@@ -340,7 +338,7 @@ Cpp(file)
 					}
 				}
 				if (c == EOF && wflag)
-					warning("templete <...> isn't closed. [+%d %s].", lineno, curfile);
+					warning("template <...> isn't closed. [+%d %s].", lineno, curfile);
 			}
 			break;
 		case CPP_OPERATOR:
@@ -533,8 +531,7 @@ Cpp(file)
  *	r)	target type
  */
 static void
-process_attribute(target)
-	int target;
+process_attribute(int target)
 {
 	int brace = 0;
 	int c;
@@ -566,8 +563,7 @@ process_attribute(target)
  *	r)	target type
  */
 static int
-function_definition(target)
-	int target;
+function_definition(int target)
 {
 	int c;
 	int brace_level;
@@ -660,9 +656,7 @@ function_definition(target)
  *	i)	target	current target
  */
 static void
-condition_macro(cc, target)
-	int cc;
-	int target;
+condition_macro(int cc, int target)
 {
 	cur = &pifstack[piflevel];
 	if (cc == SHARP_IFDEF || cc == SHARP_IFNDEF || cc == SHARP_IF) {
@@ -728,8 +722,7 @@ condition_macro(cc, target)
  *	r)		0: not data type, 1: data type
  */
 static int
-seems_datatype(token)
-	const char *token;
+seems_datatype(const char *token)
 {
 	int length = strlen(token);
 	const char *p = token + length;

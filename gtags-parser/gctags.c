@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -65,7 +64,6 @@ int sflag;			/* -s: collect symbols */
 int tflag;			/* -t: treat typedefs, structs, unions, and enums. */
 int wflag;			/* -w: warning message */
 int vflag;			/* -v: verbose mode */
-int do_check;
 int show_version;
 int show_help;
 int debug;
@@ -103,8 +101,7 @@ static struct lang_entry lang_switch[] = {
  *      r)              language entry
  */
 static struct lang_entry *
-get_lang_entry(lang)
-        const char *lang;
+get_lang_entry(const char *lang)
 {
         int i, size = sizeof(lang_switch) / sizeof(struct lang_entry);
 
@@ -137,7 +134,6 @@ help(void)
 }
 static struct option const long_options[] = {
 	{"begin-block", no_argument, NULL, 'b'},
-	{"check", no_argument, &do_check, 1},
 	{"define", no_argument, NULL, 'd'},
 	{"end-block", no_argument, NULL, 'e'},
 	{"no-tags", no_argument, NULL, 'n'},
@@ -156,9 +152,7 @@ static struct option const long_options[] = {
 };
 
 int
-main(argc, argv)
-	int argc;
-	char **argv;
+main(int argc, char **argv)
 {
 	char *p;
 	int optchar;
@@ -209,10 +203,6 @@ main(argc, argv)
 		version(NULL, vflag);
 	else if (show_help)
 		help();
-	else if (do_check) {
-		fprintf(stdout, "Part of GLOBAL\n");
-		exit(0);
-	}
 	/*
 	 * If langmap is not passed as argument, environment variable
 	 * GTAGSLANGMAP should be checked. Gtags(1) call gtags-parser
@@ -255,14 +245,11 @@ main(argc, argv)
 		for (tablesize = 0; (p = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL; tablesize++)
 			strbuf_puts0(sb, p);
 		fclose(ip);
-		if ((words = (struct words *)malloc(sizeof(struct words) * tablesize)) == NULL)
-			die("short of memory.");
+		words = (struct words *)check_malloc(sizeof(struct words) * tablesize);
 		/*
 		 * Don't free *p.
 		 */
-		p = (char *)malloc(strbuf_getlen(sb) + 1);
-		if (p == NULL)
-			die("short of memory.");
+		p = (char *)check_malloc(strbuf_getlen(sb) + 1);
 		memcpy(p, strbuf_value(sb), strbuf_getlen(sb) + 1);
 		for (i = 0; i < tablesize; i++) {
 			words[i].name = p;
@@ -303,15 +290,13 @@ main(argc, argv)
 }
 
 int
-cmp(s1, s2)
-	const void *s1, *s2;
+cmp(const void *s1, const void *s2)
 {
 	return strcmp(((struct words *)s1)->name, ((struct words *)s2)->name);
 }
 
 int
-isnotfunction(name)
-	char *name;
+isnotfunction(char *name)
 {
 	struct words tmp;
 	struct words *result;
@@ -324,9 +309,7 @@ isnotfunction(name)
 }
 
 void
-dbg_print(level, s)
-	int level;
-	const char *s;
+dbg_print(int level, const char *s)
 {
 	if (!debug)
 		return;

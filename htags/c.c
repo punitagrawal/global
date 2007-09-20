@@ -480,19 +480,18 @@ char *yytext;
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -508,7 +507,6 @@ char *yytext;
 #include "global.h"
 #include "anchor.h"
 #include "incop.h"
-#include "path2url.h"
 #include "common.h"
 #include "htags.h"
 #include "../gtags-parser/c_res.h"
@@ -541,7 +539,8 @@ static int brace_level;
 
 #define YY_NO_TOP_STATE 1
 #define YY_STACK_USED 1
-#line 545 "c.c"
+#define YY_NEVER_INTERACTIVE 1
+#line 544 "c.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -695,10 +694,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 69 "c.l"
+#line 67 "c.l"
 
  /* Backslash-newline */
-#line 702 "c.c"
+#line 701 "c.c"
 
 	if ( yy_init )
 		{
@@ -784,29 +783,29 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 71 "c.l"
+#line 69 "c.l"
 DEFAULT_BACKSLASH_NEWLINE_ACTION
 	YY_BREAK
 /* Comment */
 
 case 2:
 YY_RULE_SETUP
-#line 75 "c.l"
+#line 73 "c.l"
 { echos(comment_begin); ECHO; yy_push_state(C_COMMENT); }
 	YY_BREAK
 
 case 3:
 YY_RULE_SETUP
-#line 77 "c.l"
+#line 75 "c.l"
 { ECHO; echos(comment_end); yy_pop_state(); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 78 "c.l"
+#line 76 "c.l"
 { put_char(LEXTEXT[0]); }
 	YY_BREAK
 case YY_STATE_EOF(C_COMMENT):
-#line 79 "c.l"
+#line 77 "c.l"
 {
 		if (wflag)
 			unexpected_eof(LINENO);
@@ -816,7 +815,7 @@ case YY_STATE_EOF(C_COMMENT):
 
 case 5:
 YY_RULE_SETUP
-#line 85 "c.l"
+#line 83 "c.l"
 { echos(comment_begin); ECHO; yy_push_state(CPP_COMMENT); }
 	YY_BREAK
 
@@ -824,43 +823,43 @@ YY_RULE_SETUP
 
 case 6:
 YY_RULE_SETUP
-#line 90 "c.l"
+#line 88 "c.l"
 { ECHO; yy_push_state(STRING); }
 	YY_BREAK
 
 case 7:
 YY_RULE_SETUP
-#line 92 "c.l"
+#line 90 "c.l"
 { ECHO; yy_pop_state(); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 93 "c.l"
+#line 91 "c.l"
 { put_char(LEXTEXT[0]); put_char(LEXTEXT[1]); }
 	YY_BREAK
 /* Literal */
 
 case 9:
 YY_RULE_SETUP
-#line 97 "c.l"
+#line 95 "c.l"
 { ECHO; yy_push_state(LITERAL); }
 	YY_BREAK
 
 case 10:
 YY_RULE_SETUP
-#line 99 "c.l"
+#line 97 "c.l"
 { ECHO; yy_pop_state(); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 100 "c.l"
+#line 98 "c.l"
 { put_char(LEXTEXT[0]); put_char(LEXTEXT[1]); }
 	YY_BREAK
 /* Preprocessing directive */
 
 case 12:
 YY_RULE_SETUP
-#line 104 "c.l"
+#line 102 "c.l"
 {
 		int c;
 
@@ -911,7 +910,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 151 "c.l"
+#line 149 "c.l"
 {
 		if ((last_directive = c_reserved_sharp(LEXTEXT, LEXLENG)) != 0)
 			put_macro(LEXTEXT);
@@ -926,7 +925,7 @@ YY_RULE_SETUP
 /* Null directive */
 case 14:
 YY_RULE_SETUP
-#line 162 "c.l"
+#line 160 "c.l"
 { put_macro(LEXTEXT); }
 	YY_BREAK
 
@@ -934,7 +933,7 @@ YY_RULE_SETUP
 
 case 15:
 YY_RULE_SETUP
-#line 167 "c.l"
+#line 165 "c.l"
 {
 		if (c_reserved_yacc(LEXTEXT, LEXLENG))
 			put_reserved_word(LEXTEXT);
@@ -947,7 +946,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 176 "c.l"
+#line 174 "c.l"
 {
 		struct anchor *a = anchor_get(LEXTEXT, LEXLENG, 0, LINENO);
 
@@ -961,49 +960,49 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 186 "c.l"
+#line 184 "c.l"
 { put_brace(LEXTEXT); brace_level = 1; yy_push_state(BRACED_CODE); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 187 "c.l"
+#line 185 "c.l"
 { put_brace(LEXTEXT); if (wflag) missing_left("{", LINENO); }
 	YY_BREAK
 
 case 19:
 YY_RULE_SETUP
-#line 189 "c.l"
+#line 187 "c.l"
 { put_brace(LEXTEXT); brace_level++; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 190 "c.l"
+#line 188 "c.l"
 { put_brace(LEXTEXT); if (--brace_level == 0) yy_pop_state(); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 191 "c.l"
+#line 189 "c.l"
 { put_reserved_word(LEXTEXT); yy_push_state(YACC_PROLOGUE); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 192 "c.l"
+#line 190 "c.l"
 { put_reserved_word(LEXTEXT); yy_pop_state(); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 193 "c.l"
+#line 191 "c.l"
 { put_reserved_word(LEXTEXT); BEGIN YACC_RULES; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 194 "c.l"
+#line 192 "c.l"
 { put_reserved_word(LEXTEXT); BEGIN C; }
 	YY_BREAK
 case YY_STATE_EOF(YACC_DECLARATIONS):
 case YY_STATE_EOF(YACC_PROLOGUE):
 case YY_STATE_EOF(BRACED_CODE):
-#line 195 "c.l"
+#line 193 "c.l"
 {
 		if (wflag)
 			unexpected_eof(LINENO);
@@ -1013,14 +1012,14 @@ case YY_STATE_EOF(BRACED_CODE):
 
 case 25:
 YY_RULE_SETUP
-#line 202 "c.l"
+#line 200 "c.l"
 ECHO;
 	YY_BREAK
 
 
 case 26:
 YY_RULE_SETUP
-#line 205 "c.l"
+#line 203 "c.l"
 {
 		if (c_reserved_word(LEXTEXT, LEXLENG))
 			put_reserved_word(LEXTEXT);
@@ -1043,27 +1042,27 @@ YY_RULE_SETUP
 
 case 27:
 YY_RULE_SETUP
-#line 224 "c.l"
+#line 222 "c.l"
 { put_brace(LEXTEXT); }
 	YY_BREAK
 
 /* New line */
 case 28:
 YY_RULE_SETUP
-#line 228 "c.l"
+#line 226 "c.l"
 DEFAULT_END_OF_LINE_ACTION
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 229 "c.l"
+#line 227 "c.l"
 { put_char(LEXTEXT[0]); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 231 "c.l"
+#line 229 "c.l"
 ECHO;
 	YY_BREAK
-#line 1067 "c.c"
+#line 1066 "c.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(C):
 case YY_STATE_EOF(CPP_COMMENT):
@@ -1958,11 +1957,10 @@ int main()
 	return 0;
 	}
 #endif
-#line 231 "c.l"
+#line 229 "c.l"
 
 void
-c_parser_init(ip)
-	FILE *ip;
+c_parser_init(FILE *ip)
 {
 	newline_terminate_string = 1;
 	DEFAULT_BEGIN_OF_FILE_ACTION
@@ -1970,8 +1968,7 @@ c_parser_init(ip)
 }
 
 void
-yacc_parser_init(ip)
-	FILE *ip;
+yacc_parser_init(FILE *ip)
 {
 	newline_terminate_string = 1;
 	DEFAULT_BEGIN_OF_FILE_ACTION

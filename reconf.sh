@@ -4,19 +4,18 @@
 #
 # This file is part of GNU GLOBAL.
 #
-# GNU GLOBAL is free software; you can redistribute it and/or modify
+# This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-#
-# GNU GLOBAL is distributed in the hope that it will be useful,
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#
+# 
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Usage:
 #
@@ -53,7 +52,7 @@ for p in `echo $prog`; do
 	done
 	case $found in
 	0)	echo "*** Program '$p' not found."
-		echo "Please install automake and autoconf."
+		echo "Please install `echo $p | sed 's/autoreconf/automake and autoconf/'`."
 		exit 1;;
 	esac
 done
@@ -87,8 +86,8 @@ done
 )
 
 echo "- Collecting reference manuals ..."
-commands="global gtags htags gtags-parser gozilla";
-perl ./convert.pl --menu $commands > doc/reference.txi
+commands="global gtags htags gtags-parser gozilla gtags-cscope";
+perl ./convert.pl --menu $commands > doc/reference.texi
 for d in `echo $commands`; do
 	perl ./convert.pl --info $d/manual.in > doc/$d.ref
 	echo "+ doc/$d.ref"

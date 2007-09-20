@@ -4,19 +4,18 @@
  *
  * This file is part of GNU GLOBAL.
  *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -36,21 +35,56 @@ extern int debug;
 #include "locatestring.h"
 
 /*
+
+String locator: usage and memory status
+
+        'v': result pointer
+ 
+string = "ABC XYZ XYZ ABC"
+
+pointer = locatestring(string, "XYZ", MATCH_FIRST);
+             v
+        "ABC XYZ XYZ ABC"
+
+pointer = locatestring(string, "XYZ", MATCH_LAST);
+                 v
+        "ABC XYZ XYZ ABC"
+
+pointer = locatestring(string, "XYZ", MATCH_AT_FIRST);
+
+        "ABC XYZ XYZ ABC" (nothing pointed)
+
+pointer = locatestring(string, "ABC", MATCH_AT_FIRST);
+            v
+        "ABC XYZ XYZ ABC" (point the following character)
+
+pointer = locatestring(string, "ABC", MATCH_AT_LAST);
+                     v
+        "ABC XYZ XYZ ABC"
+
+pointer = locatestring(string, "ABC XYZ XYZ ABC", MATCH_COMPLETE);
+         v
+        "ABC XYZ XYZ ABC"
+
+pointer = locatestring(string, "xyZ", MATCH_FIRST|IGNORE_CASE);
+             v
+        "ABC XYZ XYZ ABC"
+
+ */
+
+/*
  * strincmp: strncmp with ignoring case.
  *
  *	Interface is same with strncmp.
  */
 static int
-strincmp(string, pattern, len)
-	const char *string;
-	const char *pattern;
-	size_t len;
+strincmp(const char *string, const char *pattern, size_t len)
 {
 	unsigned char s, p;
 
 	while (len--) {
-		s = tolower(*string++);
-		p = tolower(*pattern++);
+		s = tolower((unsigned char)*string++);
+		p = tolower((unsigned char)*pattern++);
 		if (s != p)
 			return s - p;
 		if (s == 0)
@@ -77,19 +111,14 @@ strincmp(string, pattern, len)
  *
  * This function is made to avoid compatibility problems.
  */
-int	(*cmpfunc)(char *, char*, int);
-
 char *
-locatestring(string, pattern, flag)
-	const char *string;
-	const char *pattern;
-	int flag;
+locatestring(const char *string, const char *pattern, int flag)
 {
 	int c = *pattern;
 	int plen = strlen(pattern);
 	const char *p = NULL;
 	int slen;
-	int (*cmpfunc) ();
+	int (*cmpfunc) (const char *, const char*, size_t);
 #ifdef DEBUG
 	FILE *dbg = stderr;
 	const char *pre = string;

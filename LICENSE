@@ -7,27 +7,31 @@ ___________________________________
 
 GNU GLOBAL source code tag system is covered by the followings:
 
-    Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
-	Tama Communications Corporation
+    Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+	2006, 2007 Tama Communications Corporation
 
-    GNU GLOBAL is free software; you can redistribute it and/or modify
+    This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2, or (at your option)
-    any later version.
-
-    GNU GLOBAL is distributed in the hope that it will be useful,
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
+    
     You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 nvi-1.79-gtags.diff
 
-     This file is placed into the public domain by the author,
-     Shigio YAMAGUCHI
+    This file is placed into the public domain by the author,
+    1998, 2000 Shigio YAMAGUCHI
+
+Htags Hyper-text Reference Kit (htags_path2url.c):
+
+    This file is placed into the public domain by the author,
+    2005 Tama Communications Corporation.
 
 Getopt for GNU (getopt.c getopt.h getopt1.c):
 
@@ -46,7 +50,7 @@ Getopt for GNU (getopt.c getopt.h getopt1.c):
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 
 REGEX library:
      Extended regular expression matching and search library,
@@ -70,30 +74,6 @@ REGEX library:
      write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
      Boston, MA  02110-1301  USA  */
 
-GNU sort:
-   sort - sort lines of text (with all kinds of options).
-   Copyright (C) 88, 1991-1999 Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
-
-   Written December 1988 by Mike Haertel.
-   The author may be reached (Email) at the address mike@gnu.ai.mit.edu,
-   or (US mail) as Mike Haertel c/o Free Software Foundation.
-
-   n E. Hansen added NLS support in 1997.
-
 DB library:
 
      Copyright (c) 1991, 1993, 1994
@@ -110,11 +90,7 @@ DB library:
      2. Redistributions in binary form must reproduce the above copyright
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
-     3. All advertising materials mentioning features or use of this software
-        must display the following acknowledgement:
-          This product includes software developed by the University of
-          California, Berkeley and its contributors.
-     4. Neither the name of the University nor the names of its contributors
+     3. Neither the name of the University nor the names of its contributors
         may be used to endorse or promote products derived from this software
         without specific prior written permission.
 
@@ -130,31 +106,41 @@ DB library:
      OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
      SUCH DAMAGE.
 
-Additional notes for BSD-license
-drived from <ftp://ftp.cs.berkeley.edu/pub/4bsd/README.Impt.License.Change>.
+Icon files by Kevin Hughes.
 
-     July 22, 1999
+     [apache_1.3.1/icons/README]
 
-     To All Licensees, Distributors of Any Version of BSD:
+     Public Domain Icons
 
-     As you know, certain of the Berkeley Software Distribution ("BSD") source
-     code files require that further distributions of products containing all or
-     portions of the software, acknowledge within their advertising materials
-     that such products contain software developed by UC Berkeley and its
-     contributors.
+     These icons were originally made for Mosaic for X and have been
+     included in the NCSA httpd and Apache server distributions in the
+     past. They are in the public domain and may be freely included in any
+     application. The originals were done by Kevin Hughes (kevinh@eit.com).
 
-     Specifically, the provision reads:
+     Many thanks to Andy Polyakov for tuning the icon colors and adding a
+     few new images. If you'd like to contribute additions or ideas to
+     this set, please let me know.
 
-     "     * 3. All advertising materials mentioning features or use of this software
-           *    must display the following acknowledgement:
-           *    This product includes software developed by the University of
-           *    California, Berkeley and its contributors."
+     The distribution site for these icons is at:
 
-     Effective immediately, licensees and distributors are no longer required to
-     include the acknowledgement within advertising materials.  Accordingly, the
-     foregoing paragraph of those BSD Unix files containing it is hereby deleted
-     in its entirety.
+          http://www.eit.com/goodies/www.icons/
 
-     William Hoskins
-     Director, Office of Technology Licensing
-     University of California, Berkeley
+     Kevin Hughes
+     September 11, 1995
+
+Icon files by GNOME Foundation.
+
+     [gnome-1.4/gnome-libs-1.2.13/README]
+
+     *
+     * Licensing
+     *
+     
+        The GNOME libraries (libgnome, libgnomeui, gtk-xmhtml, zvt, vfs)
+     are released under the terms of the LGPL license, read the file
+     COPYING.LIB for more information.
+
+Icon file by Tama Communications Corporation (icons/pglobe.png).
+
+    This file is placed into the public domain by the author,
+    2006 Tama Communications Corporation.

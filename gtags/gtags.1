@@ -1,9 +1,9 @@
 .\" This file is generated automatically by convert.pl from gtags/manual.in.
-.TH GTAGS 1 "April 2005" "GNU Project"
+.TH GTAGS 1 "January 2007" "GNU Project"
 .SH NAME
 gtags \- create tag files for global.
 .SH SYNOPSIS
-\fBgtags\fP [-c][-i][-I][-o][-P][-q][-v][-w][\fIdbpath\fP]
+\fBgtags\fP [-iIqvw][-f \fIfile\fP][-n \fInumber\fP][\fIdbpath\fP]
 .br
 .SH DESCRIPTION
 \fBGtags\fP recursively collect the source files under
@@ -28,12 +28,17 @@ Other files are searched for C style definitions.
 .SH OPTIONS
 The following options are available:
 .TP
-\fB-c\fP, \fB--compact\fP
-Make tag files with compact format.
-.TP
-\fB--config\fP \fIname\fP
+\fB--config\fP[=\fIname\fP]
 Show the value of config variable \fIname\fP.
 If \fIname\fP is not specified then show whole of config entry.
+.TP
+\fB-f\fP, \fB--file\fP \fIfile\fP
+Read from \fIfile\fP a list of file names which should be
+considered as the candidate of source files.
+By default, all files under the current directory are
+considered as the candidate.
+If \fIfile\fP is \'-\', read from standard input.
+File names must be separated by newline.
 .TP
 \fB--gtagsconf\fP \fIfile\fP
 Load user's configuration from \fIfile\fP.
@@ -47,15 +52,12 @@ Update tag files incrementally. You had better use
 \fBglobal\fP(1) with the -u option.
 .TP
 \fB-I\fP, \fB--idutils\fP
-Make index files for \fBid-utils\fP(1).
+Make index files for \fBidutils\fP(1).
 .TP
-\fB--info\fP \fIinfo\fP
-Pass info string to external system.
-Currently you can use it with -P option.
-.TP
-\fB-o\fP, \fB--omit-gsyms\fP
-Suppress making \'GSYMS\' file.
-Use this option if you don't use -s option of \fBglobal\fP(1).
+\fB-n\fP, \fB--max-args\fP \fInumber\fP
+Maximum number of arguments for \fBgtags-parser\fP(1).
+By default, gtags invokes the parser with arguments
+as a lot as possible to decrease the frequency of invoking.
 .TP
 \fB-q\fP, \fB--quiet\fP
 Quiet mode.
@@ -136,10 +138,6 @@ Suffixes of target source file.
 As a special exception, \fBgtags\fP collect values from multiple suffixes variables.
 This variable is obsoleted. If the langmap variable is defined
 \fBgtags\fP no longer refers this.
-.TP
-format(standard|compact)
-Format of tag files. The default is standard.
-Compact format is same to \fB-c\fP(\fB--compact\fP).
 .TP
 icase_path(boolean)
 Ignore case distinctions in the path.

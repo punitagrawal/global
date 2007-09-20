@@ -13,11 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
+ * 3. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -65,13 +61,15 @@ static int bt_meta(BTREE *);
  *
  * Parameters:
  *	dbp:	pointer to access method
+ *	abandon: 1: don't sync, 0: sync
  *
  * Returns:
  *	RET_ERROR, RET_SUCCESS
  */
 int
-__bt_close(dbp)
+__bt_close(dbp, abandon)
 	DB *dbp;
+	int abandon;
 {
 	BTREE *t;
 	int fd;
@@ -85,7 +83,12 @@ __bt_close(dbp)
 	}
 
 	/* Sync the tree. */
-	if (__bt_sync(dbp, 0) == RET_ERROR)
+	/*
+	 * If abandon flag is set, omit writing to the disk.
+	 * Since the writing spend much time, you should use this flag
+	 * when you remove the file after closing.
+	 */
+	if (!abandon && __bt_sync(dbp, 0) == RET_ERROR)
 		return (RET_ERROR);
 
 	/* Close the memory pool. */

@@ -1,5 +1,5 @@
-/* C code produced by gperf version 3.0.1 */
-/* Command-line: gperf --language=C --struct-type --slot-name=name --hash-fn-name=c_hash --lookup-fn-name=c_lookup  */
+/* ANSI-C code produced by gperf version 3.0.3 */
+/* Command-line: gperf --language=ANSI-C --struct-type --slot-name=name --hash-fn-name=c_hash --lookup-fn-name=c_lookup  */
 /* Computed positions: -k'1-2,4,6-9,12,14' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -26,7 +26,7 @@
       && ('w' == 119) && ('x' == 120) && ('y' == 121) && ('z' == 122) \
       && ('{' == 123) && ('|' == 124) && ('}' == 125) && ('~' == 126))
 /* The character set is not based on ISO-646.  */
-error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
+#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
 
 
@@ -130,20 +130,21 @@ error "gperf generated tables don't work with this execution character set. Plea
 #define YACC_PREC	4026
 #define YACC_PRINTER	4027
 #define YACC_PURE_PARSER	4028
-#define YACC_RIGHT	4029
-#define YACC_SKELETON	4030
-#define YACC_START	4031
-#define YACC_TOKEN	4032
-#define YACC_TOKEN_TABLE	4033
-#define YACC_TYPE	4034
-#define YACC_UNION	4035
-#define YACC_VERBOSE	4036
-#define YACC_YACC	4037
-#define YACC_BEGIN	4038
-#define YACC_END	4039
+#define YACC_REQUIRE	4029
+#define YACC_RIGHT	4030
+#define YACC_SKELETON	4031
+#define YACC_START	4032
+#define YACC_TOKEN	4033
+#define YACC_TOKEN_TABLE	4034
+#define YACC_TYPE	4035
+#define YACC_UNION	4036
+#define YACC_VERBOSE	4037
+#define YACC_YACC	4038
+#define YACC_BEGIN	4039
+#define YACC_END	4040
 struct keyword { char *name; int token; };
 
-#define TOTAL_KEYWORDS 130
+#define TOTAL_KEYWORDS 131
 #define MIN_WORD_LENGTH 2
 #define MAX_WORD_LENGTH 24
 #define MIN_HASH_VALUE 3
@@ -158,9 +159,7 @@ inline
 #endif
 #endif
 static unsigned int
-c_hash (str, len)
-     register const char *str;
-     register unsigned int len;
+c_hash (register const char *str, register unsigned int len)
 {
   static unsigned short asso_values[] =
     {
@@ -175,7 +174,7 @@ c_hash (str, len)
       353, 353, 353, 353, 353, 353, 353, 353, 353, 353,
       353, 353, 353, 353, 353,   0,  30,   0,  80,  30,
        10,   0,   5,  50,  65,   5, 353,   5, 105, 115,
-        0,  30,  75, 353,  50,  30,   5,  25,   0,   0,
+        0,  30,  75,   0,  50,  30,   5,  25,   0,   0,
        15,  65, 353,  50, 353,  35, 353, 353, 353, 353,
       353, 353, 353, 353, 353, 353, 353, 353, 353, 353,
       353, 353, 353, 353, 353, 353, 353, 353, 353, 353,
@@ -233,11 +232,12 @@ c_hash (str, len)
 
 #ifdef __GNUC__
 __inline
+#ifdef __GNUC_STDC_INLINE__
+__attribute__ ((__gnu_inline__))
+#endif
 #endif
 struct keyword *
-c_lookup (str, len)
-     register const char *str;
-     register unsigned int len;
+c_lookup (register const char *str, register unsigned int len)
 {
   static struct keyword wordlist[] =
     {
@@ -357,7 +357,8 @@ c_lookup (str, len)
       {""}, {""},
       {"break", C_BREAK},
       {"%right", YACC_RIGHT},
-      {""}, {""},
+      {""},
+      {"%require", YACC_REQUIRE},
       {"%nondeterministic-parser", YACC_NONDETERMINISTIC_PARSER},
       {"%left", YACC_LEFT},
       {"%no-default_prec", YACC_NO_DEFAULT_PREC},
@@ -459,22 +460,16 @@ c_lookup (str, len)
   return 0;
 }
 
-int c_reserved_word(const char *, int);
 int
-c_reserved_word(str, len)
-	const char *str;
-	int len;
+c_reserved_word(const char *str, int len)
 {
 	struct keyword *keyword;
 
 	keyword = c_lookup(str, len);
 	return (keyword && IS_RESERVED_WORD(keyword->token)) ? keyword->token : 0;
 }
-int c_reserved_sharp(const char *, int);
 int
-c_reserved_sharp(str, len)
-	const char *str;
-	int len;
+c_reserved_sharp(const char *str, int len)
 {
 	struct keyword *keyword;
 
@@ -484,11 +479,8 @@ c_reserved_sharp(str, len)
 	keyword = c_lookup(str, len);
 	return (keyword && IS_RESERVED_SHARP(keyword->token)) ? keyword->token : 0;
 }
-int c_reserved_yacc(const char *, int);
 int
-c_reserved_yacc(str, len)
-	const char *str;
-	int len;
+c_reserved_yacc(const char *str, int len)
 {
 	struct keyword *keyword;
 

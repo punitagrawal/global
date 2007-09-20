@@ -8,7 +8,7 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
-/* Define to 1 if you have the `alloca' function. */
+/* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
 /* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
@@ -24,46 +24,18 @@
 /* Define to 1 if you have the `bzero' function. */
 #undef HAVE_BZERO
 
-/* Define to 1 if you have the declaration of `free', and to 0 if you don't.
-   */
-#undef HAVE_DECL_FREE
-
-/* Define to 1 if you have the declaration of `lseek', and to 0 if you don't.
-   */
-#undef HAVE_DECL_LSEEK
-
-/* Define to 1 if you have the declaration of `malloc', and to 0 if you don't.
-   */
-#undef HAVE_DECL_MALLOC
-
-/* Define to 1 if you have the declaration of `memchr', and to 0 if you don't.
-   */
-#undef HAVE_DECL_MEMCHR
-
-/* Define to 1 if you have the declaration of `realloc', and to 0 if you
-   don't. */
-#undef HAVE_DECL_REALLOC
-
-/* Define to 1 if you have the declaration of `stpcpy', and to 0 if you don't.
-   */
-#undef HAVE_DECL_STPCPY
-
-/* Define to 1 if you have the declaration of `strstr', and to 0 if you don't.
-   */
-#undef HAVE_DECL_STRSTR
-
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
-
-/* Define to 1 if you have the `doprnt' function. */
-#undef HAVE_DOPRNT
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
 /* Define to 1 if you have the `getcwd' function. */
 #undef HAVE_GETCWD
+
+/* Define to 1 if you have the `getc_unlocked' function. */
+#undef HAVE_GETC_UNLOCKED
 
 /* Define if you use home-etc facility. */
 #undef HAVE_HOME_ETC_H
@@ -80,9 +52,6 @@
 /* Define to 1 if you have the `lstat' function. */
 #undef HAVE_LSTAT
 
-/* Define to 1 if you have the `malloc' function. */
-#undef HAVE_MALLOC
-
 /* Define to 1 if you have the `memcmp' function. */
 #undef HAVE_MEMCMP
 
@@ -98,11 +67,11 @@
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
 
+/* Define to 1 if you have the `putc_unlocked' function. */
+#undef HAVE_PUTC_UNLOCKED
+
 /* Define to 1 if you have the `putenv' function. */
 #undef HAVE_PUTENV
-
-/* Define to 1 if you have the `realloc' function. */
-#undef HAVE_REALLOC
 
 /* Define to 1 if you have the `rindex' function. */
 #undef HAVE_RINDEX
@@ -122,15 +91,6 @@
 /* Define to 1 if you have the `strchr' function. */
 #undef HAVE_STRCHR
 
-/* Define to 1 if you have the `strdup' function. */
-#undef HAVE_STRDUP
-
-/* Define to 1 if you have the `strerror' function. */
-#undef HAVE_STRERROR
-
-/* Define to 1 if you have the `strerror_r' function. */
-#undef HAVE_STRERROR_R
-
 /* Define to 1 if you have the `strftime' function. */
 #undef HAVE_STRFTIME
 
@@ -145,10 +105,6 @@
 
 /* Define to 1 if `st_blksize' is member of `struct stat'. */
 #undef HAVE_STRUCT_STAT_ST_BLKSIZE
-
-/* Define to 1 if your `struct stat' has `st_blksize'. Deprecated, use
-   `HAVE_STRUCT_STAT_ST_BLKSIZE' instead. */
-#undef HAVE_ST_BLKSIZE
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
@@ -169,12 +125,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
-
-/* Define to 1 if you have the `utimes' function. */
-#undef HAVE_UTIMES
-
-/* Define to 1 if you have the `vprintf' function. */
-#undef HAVE_VPRINTF
 
 /* Name of package */
 #undef PACKAGE
@@ -223,12 +173,20 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
+/* Define if you use DB1.85 compatible API. */
+#undef USE_DB185_COMPAT
+
 /* Version number of package */
 #undef VERSION
 
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
 #undef WORDS_BIGENDIAN
+
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
 
 /* Define to `char *' if <sys/types.h> does not define. */
 #undef caddr_t
