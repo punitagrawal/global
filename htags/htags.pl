@@ -33,7 +33,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-#	htags.pl				3-Nov-99
+#	htags.pl				23-Dec-99
 #
 $com = $0;
 $com =~ s/.*\///;
@@ -1690,9 +1690,8 @@ sub get {
 # close: close cache
 #
 sub close {
-	local($dbm);
-
-	dbmclose(%CACH);
-	chop($dbm = `echo $CACH*`);
-	unlink($dbm);
+	if ($CACH) {
+		dbmclose(%CACH);
+		unlink("$CACH.db", "$CACH.pag", "$CACH.dir");
+	}
 }

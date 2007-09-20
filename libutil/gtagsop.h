@@ -32,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	gtagsop.h				12-Jul-99
+ *      gtagsop.c                               12-Dec-99
  *
  */
 
@@ -48,10 +48,11 @@
 #define COMPACTKEY	" __.COMPACT"
 #define PATHINDEXKEY	" __.PATHINDEX"
 
-#define GTAGS		0
-#define GRTAGS		1
-#define GSYMS		2
-#define GTAGLIM		3
+#define GPATH		0
+#define GTAGS		1
+#define GRTAGS		2
+#define GSYMS		3
+#define GTAGLIM		4
 
 #define	GTAGS_READ	0
 #define GTAGS_CREATE	1
@@ -95,6 +96,7 @@ typedef struct {
 const char *dbname(int);
 void	makecommand(char *, char *, STRBUF *);
 int	formatcheck(char *, int);
+int	notnamechar(char *);
 GTOP	*gtagsopen(char *, char *, int, int, int);
 void	gtagsput(GTOP *, char *, char *);
 char	*gtagsget(GTOP *, char *);

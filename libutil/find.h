@@ -32,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	find.h					12-Jul-99
+ *      btreeop.h                               12-Dec-99
  *
  */
 
@@ -43,5 +43,8 @@ int	issource(char *);
 void	findopen(void);
 char	*findread(int *);
 void	findclose(void);
+void	gfindopen(char *, char *);
+char	*gfindread(void);
+void	gfindclose(void);
 
 #endif /* ! _FIND_H_ */

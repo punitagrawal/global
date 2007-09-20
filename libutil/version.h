@@ -32,13 +32,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	version.h				3-Nov-99
+ *	version.h				12-Dec-99
  *
  */
 
 #ifndef _VERSION_H_
 #define _VERSION_H_
 
-#define VERSION	"3.54"
+#define VERSION	"3.55"
 
 #endif /* ! _VERSION_H_ */

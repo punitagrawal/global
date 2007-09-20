@@ -32,12 +32,12 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	find.c					18-Aug-99
+ *      find.c                                  12-Dec-99
  *
  */
 /*
- * USEFIND	use find(1) to traverse directory tree.
- *		Otherwise, use dirent(3) library.
+ * USEFIND      use find(1) to traverse directory tree.
+ *              Otherwise, use dirent(3) library.
  */
 /* #define USEFIND */
 #include <assert.h>
@@ -45,7 +45,7 @@
 #ifndef USEFIND
 #include <sys/types.h>
 #include <dirent.h>
-#ifndef BSD4_4		/* BSD's dirent(3) need not stat(2) */
+#ifndef BSD4_4          /* BSD's dirent(3) need not stat(2) */
 #include <sys/stat.h>
 #endif
 #endif
@@ -469,4 +469,48 @@ findclose(void)
 			break;
 	opened = 0;
 }
-#endif /* !USEFIND */
+#endif /* USEFIND */
+
+/*
+ * gfindxxx() does what is almost same with findxxx() but much faster,
+ * because gfindxxx() use GPATH (file index).
+ * If GPATH exist then you should use this.
+ */
+#include "dbop.h"
+#include "gtagsop.h"
+
+static DBOP	*dbop;
+static int      opened;
+static int      first;
+static char	prefix[MAXPATHLEN+1];
+
+void
+gfindopen(dbpath, local)
+char	*dbpath;
+char	*local;
+{
+	assert(opened == 0);
+	assert(first == 0);
+	dbop = dbop_open(makepath(dbpath, dbname(GPATH), NULL), 0, 0, 0);
+	if (dbop == NULL)
+		die("GPATH not found.");
+	strcpy(prefix, (local) ? local : "./");
+	opened = 1;
+	first = 1;
+}
+char	*
+gfindread()
+{
+	assert(opened == 1);
+	if (first) {
+		first = 0;
+		return dbop_first(dbop, prefix, NULL, DBOP_KEY | DBOP_PREFIX);
+	}
+	return dbop_next(dbop);
+}
+void
+gfindclose(void)
+{
+	dbop_close(dbop);
+	opened = first = 0;
+}
