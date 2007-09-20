@@ -1,3 +1,12 @@
+global (4.0.1-2) unstable; urgency=medium
+
+  * actually install gtags.el in the correct place this time,
+    and fixed *lots* of bugs inherited from the examples in
+    debian-emacs-policy which I stupidly trusted to be basically
+    sound - Closes: #74036
+
+ -- Ron C. Lee <ron@debian.org>  Thu,  5 Oct 2000 22:18:52 +0930
+
 global (4.0.1-1) unstable; urgency=low
 
   * New upstream version.

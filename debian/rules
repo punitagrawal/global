@@ -34,7 +34,7 @@ install:
 		&& $(MAKE) install \
 			DESTDIR=`pwd`/../debian/$(package)/usr \
 			MANDIR=`pwd`/../debian/$(package)/usr/share/man
-	cp -p gtags.el `pwd`/debian/$(package)/usr/share/emacs/site-lisp
+	cp -p gtags.el `pwd`/debian/$(package)/usr/share/emacs/site-lisp/$(package)
 
 
 binary-indep: build install

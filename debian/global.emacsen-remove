@@ -8,7 +8,7 @@ echo remove/${PACKAGE}: Handling removal of emacsen flavor ${FLAVOR}
 if [ ${FLAVOR} != emacs ]
 then
 	echo emacsen-common: purging byte-compiled files for ${FLAVOR}
-	rm -f /usr/share/${FLAVOR}/site-lisp/${PACKAGE}/*.elc
+	rm -rf /usr/share/${FLAVOR}/site-lisp/${PACKAGE}
 fi
 exit 0;
 
