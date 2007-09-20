@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2002
+ * Copyright (c) 2002
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -21,16 +19,33 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _LOCATESTRING_H_
-#define _LOCATESTRING_H_
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include "die.h"
+#include "strlimcpy.h"
 
-#define MATCH_FIRST	0
-#define MATCH_AT_FIRST	1
-#define MATCH_LAST	2
-#define MATCH_AT_LAST	3
-#define MATCH_COMPLETE	4
-#define IGNORE_CASE	8
+/*
+ * strlimcpy: copy string with limit.
+ *
+ *	o)	dist	distination string
+ *	i)	source	source string
+ *	i)	limit	size of dist
+ *
+ * NOTE: This function is similar to strlcpy of OpenBSD but is different
+ * because strlimcpy abort when it beyond the limit.
+ */
+void
+strlimcpy(dist, source, limit)
+char *dist;
+const char *source;
+const int limit;
+{
+	int n = (int)limit;
+	char *d = dist;
 
-char	*locatestring(const char *, const char *, int);
-
-#endif /* ! _LOCATESTRING_H_ */
+	while (n--)
+		if (!(*d++ = *source++))
+			return;
+	die("buffer overflow. strlimcpy(dist, '%s', %d).", source, limit);
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
  * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
@@ -41,13 +41,14 @@
 #include "locatestring.h"
 #include "makepath.h"
 #include "strbuf.h"
+#include "strlimcpy.h"
 #include "strmake.h"
 #include "test.h"
 #include "usable.h"
 
 static FILE	*fp;
 static STRBUF	*ib;
-static char	*line;
+static char	*confline;
 /*
  * 8 level nested tc= or include= is allowed.
  */
@@ -114,33 +115,43 @@ static char	*
 readrecord(label)
 const char *label;
 {
-	char	*line, *p, *q;
+	char	*p;
 	int	flag = STRBUF_NOCRLF;
 	int	count = 0;
 
 	rewind(fp);
-	while ((line = strbuf_fgets(ib, fp, flag)) != NULL) {
+	while ((p = strbuf_fgets(ib, fp, flag)) != NULL) {
 		count++;
+		/*
+		 * ignore \<new line>.
+		 */
 		flag &= ~STRBUF_APPEND;
-		if (*line == '#' || *line == '\0')
+		if (*p == '#' || *p == '\0')
 			continue;
 		if (strbuf_unputc(ib, '\\')) {
 			flag |= STRBUF_APPEND;
 			continue;
 		}
-		trim(line);
-		for (p = line;;) {
-			if ((q = strmake(p, "|:")) == NULL)
+		trim(p);
+		for (;;) {
+			char *candidate;
+			/*
+			 * pick up candidate.
+			 */
+			if ((candidate = strmake(p, "|:")) == NULL)
 				die("invalid config file format (line %d).", count);
-			if (!strcmp(label, q)) {
-				if (!(p = locatestring(line, ":", MATCH_FIRST)))
-					die("invalid config file format (line %d).", line);
-				line = strdup(p);
-				if (!line)
+			if (!strcmp(label, candidate)) {
+				if (!(p = locatestring(p, ":", MATCH_FIRST)))
+					die("invalid config file format (line %d).", strbuf_value(ib));
+				p = strdup(p);
+				if (!p)
 					die("short of memory.");
-				return line;
+				return p;
 			}
-			p += strlen(q);
+			/*
+			 * locate next candidate.
+			 */
+			p += strlen(candidate);
 			if (*p == ':')
 				break;
 			else if (*p == '|')
@@ -149,6 +160,9 @@ const char *label;
 				die("invalid config file format (line %d).", count);
 		}
 	}
+	/*
+	 * config line not found.
+	 */
 	return NULL;
 }
 /*
@@ -171,15 +185,15 @@ int	level;
 	if (!(savep = p = readrecord(label)))
 		die("label '%s' not found.", label);
 	while ((q = locatestring(p, ":include=", MATCH_FIRST)) || (q = locatestring(p, ":tc=", MATCH_FIRST))) {
-		char	inclabel[MAXPROPLEN+1], *c = inclabel;
+		STRBUF *inc = strbuf_open(0);
 
 		strbuf_nputs(sb, p, q - p);
 		q = locatestring(q, "=", MATCH_FIRST) + 1;
-		while (*q && *q != ':')
-			*c++ = *q++;
-		*c = 0;
-		includelabel(sb, inclabel, level);
+		for (; *q && *q != ':'; q++)
+			strbuf_putc(inc, *q);
+		includelabel(sb, strbuf_value(inc), level);
 		p = q;
+		strbuf_close(inc);
 	}
 	strbuf_puts(sb, p);
 	free(savep);
@@ -192,19 +206,26 @@ configpath() {
 	static char config[MAXPATHLEN+1];
 	char *p;
 
-	if ((p = getenv("HOME")) && test("r", makepath(p, GTAGSRC, NULL)))
-		strncpy(config, makepath(p, GTAGSRC, NULL), sizeof(config));
+	/*
+	 * at first, check environment variable GTAGSCONF.
+	 */
+	if (getenv("GTAGSCONF") != NULL)
+		strlimcpy(config, getenv("GTAGSCONF"), sizeof(config));
+	/*
+	 * if GTAGSCONF not set then check standard config files.
+	 */
+	else if ((p = getenv("HOME")) && test("r", makepath(p, GTAGSRC, NULL)))
+		strlimcpy(config, makepath(p, GTAGSRC, NULL), sizeof(config));
 	else if (test("r", GTAGSCONF))
-		strncpy(config, GTAGSCONF, sizeof(config));
+		strlimcpy(config, GTAGSCONF, sizeof(config));
 	else if (test("r", OLD_GTAGSCONF))
-		strncpy(config, OLD_GTAGSCONF, sizeof(config));
+		strlimcpy(config, OLD_GTAGSCONF, sizeof(config));
 	else if (test("r", DEBIANCONF))
-		strncpy(config, DEBIANCONF, sizeof(config));
+		strlimcpy(config, DEBIANCONF, sizeof(config));
 	else if (test("r", OLD_DEBIANCONF))
-		strncpy(config, OLD_DEBIANCONF, sizeof(config));
+		strlimcpy(config, OLD_DEBIANCONF, sizeof(config));
 	else
 		return NULL;
-	config[sizeof(config) - 1] = '\0';
 	return config;
 }
 /*
@@ -223,24 +244,23 @@ openconf()
 	opened = 1;
 
 	/*
-	 * if GTAGSCONF not set then check standard config files.
-	 */
-	if ((config = getenv("GTAGSCONF")) == NULL)
-		config = configpath();
-	/*
 	 * if config file not found then return default value.
 	 */
-	if (!config) {
+	if (!(config = configpath())) {
 		if (vflag)
 			fprintf(stderr, " Using default configuration.\n");
-		line = "";
+		confline = strdup("");
+		if (!confline)
+			die("short of memory.");
 	}
 	/*
 	 * if it doesn't start with '/' then assumed config value itself.
 	 */
 	else if (*config != '/') {
-		line = strdup(config);
-		if (!locatestring(line, ":", MATCH_FIRST))
+		confline = strdup(config);
+		if (!confline)
+			die("short of memory.");
+		if (!locatestring(confline, ":", MATCH_FIRST))
 			die("GTAGSCONF must be absolute path name.");
 	}
 	/*
@@ -265,7 +285,9 @@ openconf()
 		ib = strbuf_open(MAXBUFLEN);
 		sb = strbuf_open(0);
 		includelabel(sb, label, 0);
-		line = strdup(strbuf_value(sb));
+		confline = strdup(strbuf_value(sb));
+		if (!confline)
+			die("short of memory.");
 		strbuf_close(ib);
 		strbuf_close(sb);
 		fclose(fp);
@@ -274,7 +296,7 @@ openconf()
 	 * make up lacked variables.
 	 */
 	sb = strbuf_open(0);
-	strbuf_puts(sb, line);
+	strbuf_puts(sb, confline);
 	strbuf_unputc(sb, ':');
 	if (!getconfs("suffixes", NULL)) {
 		strbuf_puts(sb, ":suffixes=");
@@ -306,13 +328,13 @@ openconf()
 #endif /* _WIN32 */
 		strbuf_puts(sb, ":GTAGS=");
 		strbuf_puts(sb, path);
-		strbuf_puts(sb, " %s");
+		strbuf_puts(sb, " -dt %s");
 		strbuf_puts(sb, ":GRTAGS=");
 		strbuf_puts(sb, path);
-		strbuf_puts(sb, " -r %s");
+		strbuf_puts(sb, " -dtr %s");
 		strbuf_puts(sb, ":GSYMS=");
 		strbuf_puts(sb, path);
-		strbuf_puts(sb, " -s %s");
+		strbuf_puts(sb, " -dts %s");
 	}
 	if (!getconfs("sort_command", NULL))
 		strbuf_puts(sb, ":sort_command=sort");
@@ -320,11 +342,11 @@ openconf()
 		strbuf_puts(sb, ":sed_command=sed");
 	strbuf_unputc(sb, ':');
 	strbuf_putc(sb, ':');
-	line = strdup(strbuf_value(sb));
-	strbuf_close(sb);
-	if (!line)
+	confline = strdup(strbuf_value(sb));
+	if (!confline)
 		die("short of memory.");
-	trim(line);
+	strbuf_close(sb);
+	trim(confline);
 	return;
 }
 /*
@@ -345,7 +367,7 @@ int	*num;
 	if (!opened)
 		openconf();
 	snprintf(buf, sizeof(buf), ":%s#", name);
-	if ((p = locatestring(line, buf, MATCH_FIRST)) != NULL) {
+	if ((p = locatestring(confline, buf, MATCH_FIRST)) != NULL) {
 		p += strlen(buf);
 		if (num != NULL)
 			*num = atoi(p);
@@ -375,7 +397,7 @@ STRBUF	*sb;
 	if (!strcmp(name, "suffixes") || !strcmp(name, "skip"))
 		all = 1;
 	snprintf(buf, sizeof(buf), ":%s=", name);
-	p = line;
+	p = confline;
 	while ((p = locatestring(p, buf, MATCH_FIRST)) != NULL) {
 		if (exist && sb)
 			strbuf_putc(sb, ',');		
@@ -406,7 +428,7 @@ const char *name;
 	if (!opened)
 		openconf();
 	snprintf(buf, sizeof(buf), ":%s:", name);
-	if (locatestring(line, buf, MATCH_FIRST) != NULL)
+	if (locatestring(confline, buf, MATCH_FIRST) != NULL)
 		return 1;
 	return 0;
 }
@@ -418,14 +440,14 @@ getconfline()
 {
 	if (!opened)
 		openconf();
-	return line;
+	return confline;
 }
 void
 closeconf()
 {
 	if (!opened)
 		return;
-	free(line);
-	line = NULL;
+	free(confline);
+	confline = NULL;
 	opened = 0;
 }

@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2002
+ * Copyright (c) 2002
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -21,16 +19,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _LOCATESTRING_H_
-#define _LOCATESTRING_H_
+#ifndef _SPLIT_H_
+#define _SPLIT_H_
 
-#define MATCH_FIRST	0
-#define MATCH_AT_FIRST	1
-#define MATCH_LAST	2
-#define MATCH_AT_LAST	3
-#define MATCH_COMPLETE	4
-#define IGNORE_CASE	8
+int	split(char *, int, int, char **);
 
-char	*locatestring(const char *, const char *, int);
-
-#endif /* ! _LOCATESTRING_H_ */
+#endif /* ! _SPLIT_H_ */

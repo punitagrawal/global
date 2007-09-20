@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
  * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
@@ -38,7 +38,9 @@
 #include "makepath.h"
 #include "path.h"
 #include "gpathop.h"
+#include "split.h"
 #include "strbuf.h"
+#include "strlimcpy.h"
 #include "strmake.h"
 #include "tab.h"
 #include "test.h"

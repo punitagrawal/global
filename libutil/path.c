@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001
+ * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
  * #ifdef __DJGPP__
  * Contributed by Jason Hood <jadoxa@yahoo.com.au>, 2001.
@@ -38,7 +38,9 @@
 #include <fcntl.h>			/* for _USE_LFN */
 #endif
 
+#include "gparam.h"
 #include "path.h"
+#include "strlimcpy.h"
 
 /*
  * isabspath: whether absolute path or not
@@ -96,7 +98,7 @@ char *path;
 			regs.h.cl = 0;
 			intdos(&regs, &regs);
 			p = basename(path);
-			strcpy(filename, p);
+			strlimcpy(filename, p, sizeof(filename));
 			*p = 0;
 			regs.x.ax = 0x7160;
 			regs.h.cl = 2;
@@ -152,7 +154,7 @@ char *out_path;
 	 * be a mixture of long and short components.
 	 */
 	if (_USE_LFN) {
-		strcpy(out_path, in_path);
+		strlimcpy(out_path, in_path, MAXPATHLEN);
 		canonpath(out_path);
 	} else
 		_fixpath(in_path, out_path);

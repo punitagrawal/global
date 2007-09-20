@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
  * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
@@ -45,6 +45,7 @@
 
 #include "global.h"
 #include "regex.h"
+#include "strlimcpy.h"
 #include "usable.h"
 #include "const.h"
 
@@ -358,7 +359,7 @@ char	*argv[];
 		if (!locatestring(strbuf_value(sb), ".exe", MATCH_LAST))
 			strbuf_puts(sb, ".exe");
 #endif
-		strcpy(sort_command, strbuf_value(sb));
+		strlimcpy(sort_command, strbuf_value(sb), sizeof(sort_command));
 		strbuf_close(sb);
 	}
 	/*
@@ -385,17 +386,25 @@ char	*argv[];
 	/*
 	 * make sort filter.
 	 */
-	sortfilter = strbuf_open(0);
-	strbuf_puts(sortfilter, sort_command);
-	strbuf_putc(sortfilter, ' ');
-	if (tflag) 			/* ctags format */
-		strbuf_puts(sortfilter, "+0 -1 +1 -2 +2n -3");
-	else if (fflag)
-		strbuf_setlen(sortfilter, 0);
-	else if (xflag)			/* print details */
-		strbuf_puts(sortfilter, "+0 -1 +2 -3 +1n -2");
-	else 				/* print just a file name */
-		strbuf_puts(sortfilter, "-u");
+	{
+		int unique = 0;
+
+		sortfilter = strbuf_open(0);
+		strbuf_puts(sortfilter, sort_command);
+		strbuf_putc(sortfilter, ' ');
+		if (sflag) {
+			strbuf_puts(sortfilter, "-u");
+			unique = 1;
+		}
+		if (tflag) 			/* ctags format */
+			strbuf_puts(sortfilter, " +0 -1 +1 -2 +2n -3");
+		else if (fflag)
+			strbuf_setlen(sortfilter, 0);
+		else if (xflag)			/* print details */
+			strbuf_puts(sortfilter, " +0 -1 +2 -3 +1n -2");
+		else if (!unique)		/* print just a file name */
+			strbuf_puts(sortfilter, " -u");
+	}
 	/*
 	 * make path filter.
 	 */
@@ -485,7 +494,7 @@ char	*argv[];
 			strbuf_puts(pathfilter, cwd);
 			count = search(av, lib, libdbpath, db);
 			if (count > 0 && !Tflag) {
-				strcpy(dbpath, libdbpath);
+				strlimcpy(dbpath, libdbpath, sizeof(dbpath));
 				break;
 			}
 		}

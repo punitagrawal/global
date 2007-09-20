@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001
+ * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -39,6 +39,7 @@
 #include "gtagsop.h"
 #include "makepath.h"
 #include "gpathop.h"
+#include "strlimcpy.h"
 
 static DBOP	*dbop;
 static int	_nextkey;
@@ -127,8 +128,6 @@ char *
 gpath_path2fid(path)
 const char *path;
 {
-	char	*id;
-
 	assert(opened == 1);
 	return dbop_get(dbop, path);
 }
@@ -193,7 +192,7 @@ gpath_nextkey(void)
 void
 gpath_close(void)
 {
-	char	buf[10];
+	char	fid[32];
 
 	assert(opened == 1);
 	opened = 0;
@@ -201,9 +200,9 @@ gpath_close(void)
 		dbop_close(dbop);
 		return;
 	}
-	snprintf(buf, sizeof(buf), "%d", _nextkey);
+	snprintf(fid, sizeof(fid), "%d", _nextkey);
 	if (_mode == 1 || _mode == 2)
-		dbop_update(dbop, NEXTKEY, buf, "0");
+		dbop_update(dbop, NEXTKEY, fid, "0");
 	dbop_close(dbop);
 	if (_mode == 1)
 		created = 1;
@@ -240,7 +239,7 @@ char	*local;
 	free(path);
 	if (gfind_dbop == NULL)
 		die("GPATH not found.");
-	strcpy(gfind_prefix, (local) ? local : "./");
+	strlimcpy(gfind_prefix, (local) ? local : "./", sizeof(gfind_prefix));
 	gfind_opened = 1;
 	gfind_first = 1;
 }

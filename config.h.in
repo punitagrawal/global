@@ -1,39 +1,57 @@
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
-/*
- * Copyright (c) 2000
- *             Tama Communications Corporation. All rights reserved.
- *
- * This file is part of GNU GLOBAL.
- *
- * GNU GLOBAL is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * GNU GLOBAL is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+/* Define if using alloca.c.  */
+#undef C_ALLOCA
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define to one of _getb67, GETB67, getb67 for Cray-2 and Cray-YMP systems.
+   This function is required for alloca.c support on those systems.  */
+#undef CRAY_STACKSEG_END
+
+/* Define if you have alloca, as a function or macro.  */
+#undef HAVE_ALLOCA
+
+/* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
+#undef HAVE_ALLOCA_H
+
+/* Define if your struct stat has st_blksize.  */
+#undef HAVE_ST_BLKSIZE
+
+/* Define if you have the strftime function.  */
+#undef HAVE_STRFTIME
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef off_t
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
+/* If using the C implementation of alloca, define if you know the
+   direction of stack growth for your system; otherwise it will be
+   automatically deduced at run-time.
+ STACK_DIRECTION > 0 => grows toward higher addresses
+ STACK_DIRECTION < 0 => grows toward lower addresses
+ STACK_DIRECTION = 0 => direction of growth unknown
  */
+#undef STACK_DIRECTION
+
+/* Define if the `S_IS*' macros in <sys/stat.h> do not work properly.  */
+#undef STAT_MACROS_BROKEN
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if your processor stores words with the most significant
+   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
+#undef WORDS_BIGENDIAN
 
 /* Define to `default' if you have type */
 #undef int32_t
-
-/* Define to `default' if you have type */
-#undef u_char
-
-/* Define to `default' if you have type */
-#undef u_int
-
-/* Define to `default' if you have type */
-#undef u_long
-
-/* Define to `default' if you have type */
-#undef u_short
 
 /* Define to `default' if you have type */
 #undef int8_t
@@ -61,9 +79,6 @@
 
 /* Define to `default' if you have type */
 #undef caddr_t
-
-/* Define to `default' if you have type */
-#undef sigset_t
 
 /* Define if your struct dirent has dp_d_namlen.  */
 #undef HAVE_DP_D_NAMLEN
@@ -80,158 +95,63 @@
 /* Define if your system have grep(1). */
 #undef HAVE_GREP
 
-/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
-   systems. This function is required for `alloca.c' support on those systems.
-   */
-#undef CRAY_STACKSEG_END
+/* Define for current machine architecture. */
+#undef WORDS_BIGENDIAN
 
-/* Define if using `alloca.c'. */
-#undef C_ALLOCA
+/* The number of bytes in a char.  */
+#undef SIZEOF_CHAR
 
-/* Define if you have `alloca', as a function or macro. */
-#undef HAVE_ALLOCA
+/* The number of bytes in a int.  */
+#undef SIZEOF_INT
 
-/* Define if you have <alloca.h> and it should be used (not on Ultrix). */
-#undef HAVE_ALLOCA_H
+/* The number of bytes in a short.  */
+#undef SIZEOF_SHORT
 
-/* Define if you have the <dirent.h> header file, and it defines `DIR'. */
-#undef HAVE_DIRENT_H
-
-/* Define if you have the `getcwd' function. */
+/* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
 
-/* Define if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
-
-/* Define if you have the <limits.h> header file. */
-#undef HAVE_LIMITS_H
-
-/* Define if you have the `lstat' function. */
+/* Define if you have the lstat function.  */
 #undef HAVE_LSTAT
 
-/* Define if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
-/* Define if you have the <ndir.h> header file, and it defines `DIR'. */
-#undef HAVE_NDIR_H
-
-/* Define if you have the `putenv' function. */
+/* Define if you have the putenv function.  */
 #undef HAVE_PUTENV
 
-/* Define if you have the `snprintf' function. */
+/* Define if you have the snprintf function.  */
 #undef HAVE_SNPRINTF
 
-/* Define if you have the <stdarg.h> header file. */
-#undef HAVE_STDARG_H
-
-/* Define if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
-
-/* Define if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
-
-/* Define if you have the `strdup' function. */
+/* Define if you have the strdup function.  */
 #undef HAVE_STRDUP
 
-/* Define if you have the `strftime' function. */
-#undef HAVE_STRFTIME
+/* Define if you have the utimes function.  */
+#undef HAVE_UTIMES
 
-/* Define if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
+/* Define if you have the <dirent.h> header file.  */
+#undef HAVE_DIRENT_H
 
-/* Define if you have the <string.h> header file. */
+/* Define if you have the <limits.h> header file.  */
+#undef HAVE_LIMITS_H
+
+/* Define if you have the <ndir.h> header file.  */
+#undef HAVE_NDIR_H
+
+/* Define if you have the <stdarg.h> header file.  */
+#undef HAVE_STDARG_H
+
+/* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
 
-/* Define if `st_blksize' is member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_BLKSIZE
-
-/* Define if your `struct stat' has `st_blksize'. Deprecated, use
-   `HAVE_STRUCT_STAT_ST_BLKSIZE' instead. */
-#undef HAVE_ST_BLKSIZE
-
-/* Define if you have the <sys/dir.h> header file, and it defines `DIR'. */
+/* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
 
-/* Define if you have the <sys/ndir.h> header file, and it defines `DIR'. */
+/* Define if you have the <sys/ndir.h> header file.  */
 #undef HAVE_SYS_NDIR_H
 
-/* Define if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
-
-/* Define if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
-
-/* Define if you have the <unistd.h> header file. */
+/* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
-
-/* Define if you have the `utimes' function. */
-#undef HAVE_UTIMES
 
 /* Name of package */
 #undef PACKAGE
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#undef RETSIGTYPE
-
-/* The size of a `char', as computed by sizeof. */
-#undef SIZEOF_CHAR
-
-/* The size of a `int', as computed by sizeof. */
-#undef SIZEOF_INT
-
-/* The size of a `short', as computed by sizeof. */
-#undef SIZEOF_SHORT
-
-/* If using the C implementation of alloca, define if you know the
-   direction of stack growth for your system; otherwise it will be
-   automatically deduced at run-time.
-        STACK_DIRECTION > 0 => grows toward higher addresses
-        STACK_DIRECTION < 0 => grows toward lower addresses
-        STACK_DIRECTION = 0 => direction of growth unknown */
-#undef STACK_DIRECTION
-
-/* Define if the `S_IS*' macros in <sys/stat.h> do not work properly. */
-#undef STAT_MACROS_BROKEN
-
-/* Define if you have the ANSI C header files. */
-#undef STDC_HEADERS
-
 /* Version number of package */
 #undef VERSION
 
-/* Define if your processor stores words with the most significant byte first
-   (like Motorola and SPARC, unlike Intel and VAX). */
-#undef WORDS_BIGENDIAN
-
-/* Define to `char *' if <sys/types.h> does not define. */
-#undef caddr_t
-
-/* Define to empty if `const' does not conform to ANSI C. */
-#undef const
-
-/* Define to `short' if <sys/types.h> does not define. */
-#undef int16_t
-
-/* Define to `int' if <sys/types.h> does not define. */
-#undef int32_t
-
-/* Define to `signed char' if <sys/types.h> does not define. */
-#undef int8_t
-
-/* Define to `long' if <sys/types.h> does not define. */
-#undef off_t
-
-/* Define to `unsigned' if <sys/types.h> does not define. */
-#undef size_t
-
-/* Define to `int' if <sys/types.h> does not define. */
-#undef ssize_t
-
-/* Define to `unsigned short' if <sys/types.h> does not define. */
-#undef u_int16_t
-
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-#undef u_int32_t
-
-/* Define to `unsigned char' if <sys/types.h> does not define. */
-#undef u_int8_t

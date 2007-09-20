@@ -1,4 +1,4 @@
-This is global.info, produced by makeinfo version 4.0 from global.texi.
+This is global.info, produced by makeinfo version 4.2 from global.texi.
 
 INFO-DIR-SECTION Miscellaneous
 START-INFO-DIR-ENTRY
@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU GLOBAL source code tag system
 *********************************
 
-   This manual documents version 4.4 of the GNU GLOBAL source code tag
+   This manual documents version 4.5 of the GNU GLOBAL source code tag
 system.
 
 * Menu:

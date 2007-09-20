@@ -1,3 +1,10 @@
+global (4.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * Closes: #136357  (Fixed upstream and/or unreproducable)
+
+ -- Ron Lee <ron@debian.org>  Mon, 15 Jul 2002 19:23:11 -0700
+
 global (4.4-1) unstable; urgency=high
 
   * Security fix for html form exploit.

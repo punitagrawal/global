@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001
+ * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -49,6 +49,7 @@
 #include "path.h"
 #include "gpathop.h"
 #include "strbuf.h"
+#include "strlimcpy.h"
 #include "strmake.h"
 #include "tab.h"
 
@@ -346,7 +347,7 @@ int	flags;
 	 */
 	if (gtop->format & GTAGS_COMPACT) {
 		assert(root != NULL);
-		strcpy(gtop->root, root);
+		strlimcpy(gtop->root, root, sizeof(gtop->root));
 		if (gtop->mode == GTAGS_READ)
 			gtop->ib = strbuf_open(MAXBUFLEN);
 		else
@@ -361,6 +362,8 @@ int	flags;
  *	i)	tag	tag name
  *	i)	record	ctags -x image
  *	i)	fid	file id.
+ *
+ * NOTE: If format is GTAGS_COMPACT then this function is destructive.
  */
 void
 gtags_put(gtop, tag, record, fid)
@@ -369,9 +372,9 @@ char	*tag;
 char	*record;
 char	*fid;
 {
-	char	*p, *q;
-	char	lno[32];
-	char	path[MAXPATHLEN+1];
+#define PARTS 4
+	char *line, *path;
+	char *parts[PARTS];
 
 	if (gtop->format == GTAGS_STANDARD) {
 		/* entab(record); */
@@ -381,21 +384,10 @@ char	*fid;
 	/*
 	 * gtop->format & GTAGS_COMPACT
 	 */
-	p = record;				/* ignore $1 */
-	while (*p && !isspace(*p))
-		p++;
-	while (*p && isspace(*p))
-		p++;
-	q = lno;				/* lno = $2 */
-	while (*p && !isspace(*p))
-		*q++ = *p++;
-	*q = 0;
-	while (*p && isspace(*p))
-		p++;
-	q = path;				/* path = $3 */
-	while (*p && !isspace(*p))
-		*q++ = *p++;
-	*q = 0;
+	if (split(record, '\t', PARTS, parts) != PARTS)
+		die("illegal format.");
+	line = parts[1];
+	path = parts[2];
 	/*
 	 * First time, it occurs, because 'prev_tag' and 'prev_path' are NULL.
 	 */
@@ -403,9 +395,9 @@ char	*fid;
 		if (gtop->prev_tag[0]) {
 			dbop_put(gtop->dbop, gtop->prev_tag, strbuf_value(gtop->sb), gtop->prev_fid);
 		}
-		strcpy(gtop->prev_tag, tag);
-		strcpy(gtop->prev_path, path);
-		strcpy(gtop->prev_fid, fid);
+		strlimcpy(gtop->prev_tag, tag, sizeof(gtop->prev_tag));
+		strlimcpy(gtop->prev_path, path, sizeof(gtop->prev_path));
+		strlimcpy(gtop->prev_fid, fid, sizeof(gtop->prev_fid));
 		/*
 		 * Start creating new record.
 		 */
@@ -414,10 +406,10 @@ char	*fid;
 		strbuf_putc(gtop->sb, ' ');
 		strbuf_puts(gtop->sb, path);
 		strbuf_putc(gtop->sb, ' ');
-		strbuf_puts(gtop->sb, lno);
+		strbuf_puts(gtop->sb, line);
 	} else {
 		strbuf_putc(gtop->sb, ',');
-		strbuf_puts(gtop->sb, lno);
+		strbuf_puts(gtop->sb, line);
 	}
 }
 /*
@@ -435,32 +427,29 @@ char	*comline;
 char	*path;
 int	flags;
 {
-	char	*tagline;
+	char	*ctags_x;
 	FILE	*ip;
 	STRBUF	*sb = strbuf_open(0);
 	STRBUF	*ib = strbuf_open(MAXBUFLEN);
-	char	sort_command[MAXFILLEN+1];
-	char	sed_command[MAXFILLEN+1];
+	STRBUF	*sort_command = strbuf_open(0);
+	STRBUF	*sed_command = strbuf_open(0);
 	char	*fid;
 
 	/*
 	 * get command name of sort and sed.
 	 */
-	if (!getconfs("sort_command", sb))
+	if (!getconfs("sort_command", sort_command))
 		die("cannot get sort command name.");
 #if defined(_WIN32) || defined(__DJGPP__)
-	if (!locatestring(strbuf_value(sb), ".exe", MATCH_LAST))
-		strbuf_puts(sb, ".exe");
+	if (!locatestring(strbuf_value(sort_command), ".exe", MATCH_LAST))
+		strbuf_puts(sort_command, ".exe");
 #endif
-	strcpy(sort_command, strbuf_value(sb));
-	strbuf_reset(sb);
-	if (!getconfs("sed_command", sb))
+	if (!getconfs("sed_command", sed_command))
 		die("cannot get sed command name.");
 #if defined(_WIN32) || defined(__DJGPP__)
-	if (!locatestring(strbuf_value(sb), ".exe", MATCH_LAST))
-		strbuf_puts(sb, ".exe");
+	if (!locatestring(strbuf_value(sed_command), ".exe", MATCH_LAST))
+		strbuf_puts(sed_command, ".exe");
 #endif
-	strcpy(sed_command, strbuf_value(sb));
 	/*
 	 * add path index if not yet.
 	 */
@@ -468,7 +457,6 @@ int	flags;
 	/*
 	 * make command line.
 	 */
-	strbuf_reset(sb);
 	makecommand(comline, path, sb);
 	/*
 	 * get file id.
@@ -483,7 +471,7 @@ int	flags;
 	 */
 	if (gtop->format & GTAGS_PATHINDEX) {
 		strbuf_puts(sb, "| ");
-		strbuf_puts(sb, sed_command);
+		strbuf_puts(sb, strbuf_value(sed_command));
 		strbuf_putc(sb, ' ');
 		strbuf_puts(sb, "\"s@");
 		strbuf_puts(sb, path);
@@ -493,7 +481,7 @@ int	flags;
 	}
 	if (gtop->format & GTAGS_COMPACT) {
 		strbuf_puts(sb, "| ");
-		strbuf_puts(sb, sort_command);
+		strbuf_puts(sb, strbuf_value(sort_command));
 		strbuf_putc(sb, ' ');
 		strbuf_puts(sb, "+0 -1 +1n -2");
 	}
@@ -503,13 +491,13 @@ int	flags;
 		fprintf(stderr, "gtags_add() executing '%s'\n", strbuf_value(sb));
 	if (!(ip = popen(strbuf_value(sb), "r")))
 		die("cannot execute '%s'.", strbuf_value(sb));
-	while ((tagline = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL) {
+	while ((ctags_x = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL) {
 		char	*tag, *p;
 
 		strbuf_trim(ib);
-		if (formatcheck(tagline, gtop->format) < 0)
-			die("invalid parser output.\n'%s'", tagline);
-		tag = strmake(tagline, " \t");		 /* tag = $1 */
+		if (formatcheck(ctags_x, gtop->format) < 0)
+			die("invalid parser output.\n'%s'", ctags_x);
+		tag = strmake(ctags_x, " \t");		 /* tag = $1 */
 		/*
 		 * extract method when class method definition.
 		 *
@@ -524,9 +512,11 @@ int	flags;
 			else if ((p = locatestring(tag, "::", MATCH_LAST)) != NULL)
 				tag = p + 2;
 		}
-		gtags_put(gtop, tag, tagline, fid);
+		gtags_put(gtop, tag, ctags_x, fid);
 	}
 	pclose(ip);
+	strbuf_close(sort_command);
+	strbuf_close(sed_command);
 	strbuf_close(sb);
 	strbuf_close(ib);
 }
@@ -626,7 +616,7 @@ int	flags;
 {
 	int	dbflags = 0;
 	char	*line;
-	char    buf[IDENTLEN+1], *p;
+	char    prefix[IDENTLEN+1], *p;
 	regex_t *preg = &reg;
 	char	*key;
 	int	regflags = REG_EXTENDED;
@@ -647,13 +637,12 @@ int	flags;
 		preg = NULL;
 	} else if (isregex(pattern) && regcomp(preg, pattern, regflags) == 0) {
 		if (!(flags & GTOP_IGNORECASE) && *pattern == '^' && *(p = pattern + 1) && !isregexchar(*p)) {
-			char    *prefix = buf;
+			int i = 0;
 
-			*prefix++ = *p++;
-			while (*p && !isregexchar(*p))
-				*prefix++ = *p++;
-			*prefix = 0;
-			key = buf;
+			while (*p && !isregexchar(*p) && i < IDENTLEN)
+				prefix[i++] = *p++;
+			prefix[i] = '\0';
+			key = prefix;
 			dbflags |= DBOP_PREFIX;
 		} else {
 			key = NULL;
@@ -757,7 +746,7 @@ GTOP	*gtop;
 			*q = 0;
 			if ((name = gpath_fid2path(path)) == NULL)
 				die("GPATH is corrupted.('%s' not found)", path);
-			strcpy(gtop->path, name);
+			strlimcpy(gtop->path, name, sizeof(gtop->path));
 		} else {
 			q = gtop->path;
 			while (!isspace(*p))

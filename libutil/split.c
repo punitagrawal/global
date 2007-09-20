@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2002
+ * Copyright (c) 2002
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -21,16 +19,51 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _LOCATESTRING_H_
-#define _LOCATESTRING_H_
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
-#define MATCH_FIRST	0
-#define MATCH_AT_FIRST	1
-#define MATCH_LAST	2
-#define MATCH_AT_LAST	3
-#define MATCH_COMPLETE	4
-#define IGNORE_CASE	8
+/*
+ * split: split a string into pieces
+ *
+ *	i)	s	string
+ *	i)	sep	separator
+ *	i)	max	max parts
+ *	o)	parts	parts pointer table
+ *	r)		number of parts
+ */
+int
+split(s, sep, max, parts)
+char *s;
+int sep;
+int max;
+char *parts[];
+{
+	char *p;
+	int count = 0;
 
-char	*locatestring(const char *, const char *, int);
-
-#endif /* ! _LOCATESTRING_H_ */
+	if (sep == ' ' || sep == '\t') {
+		while (1) {
+			while (*s && isspace(*s))
+				s++;
+			if (*s == '\0')
+				break;
+			parts[count++] = s;
+			while (*s && !isspace(*s))
+				s++;
+			if (*s == '\0' || count >= max)
+				break;
+			*s++ = '\0';
+		}
+	} else {
+		while (1) {
+			parts[count++] = s;
+			while (*s && *s != sep)
+				s++;
+			if (*s == '\0' || count >= max)
+				break;
+			*s++ = '\0';
+		}
+	}
+	return count;
+}

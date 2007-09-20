@@ -1,4 +1,4 @@
-This is global.info, produced by makeinfo version 4.0 from global.texi.
+This is global.info, produced by makeinfo version 4.2 from global.texi.
 
 INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
@@ -21,7 +21,7 @@ Free Documentation License".
 Indirect:
 global.info-1: 747
 global.info-2: 50374
-global.info-3: 82963
+global.info-3: 84313
 
 Tag Table:
 (Indirect)
@@ -80,10 +80,10 @@ Node: Reference55410
 Node: global55958
 Node: gtags62338
 Node: htags67950
-Node: gctags73964
-Node: gozilla76949
-Node: btreeop79574
-Node: GNU Free Documentation License82963
-Node: Index101689
+Node: gctags74740
+Node: gozilla78107
+Node: btreeop80924
+Node: GNU Free Documentation License84313
+Node: Index103038
 
 End Tag Table
