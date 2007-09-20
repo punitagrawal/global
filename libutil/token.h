@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1998, 1999, 2000, 2003
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -29,31 +27,31 @@
 
 #define SYMBOL		0
 
-extern unsigned char     *sp, *cp, *lp;
-extern int      lineno;
-extern int	crflag;
-extern int	cmode;
-extern int	cppmode;
-extern int	ymode;
-extern unsigned char	token[MAXTOKEN];
-extern unsigned char	curfile[MAXPATHLEN];
+extern const unsigned char *sp, *cp, *lp;
+extern int lineno;
+extern int crflag;
+extern int cmode;
+extern int cppmode;
+extern int ymode;
+extern unsigned char token[MAXTOKEN];
+extern unsigned char curfile[MAXPATHLEN];
+extern int continued_line;
 
 #define nextchar() \
 	(cp == NULL ? \
 		((sp = cp = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) == NULL ? \
 			EOF : \
 			(lineno++, *cp == 0 ? \
-				lp = cp, cp = NULL, '\n' : \
+				(lp = cp, cp = NULL, continued_line = 0, '\n') : \
 				*cp++)) : \
-		(*cp == 0 ? (lp = cp, cp = NULL, '\n') : *cp++))
+		(*cp == 0 ? (lp = cp, cp = NULL, continued_line = 0, '\n') : *cp++))
 #define atfirst (sp && sp == (cp ? cp - 1 : lp))
 
-int	opentoken(char *);
-void	rewindtoken(void);
-void	closetoken(void);
-int	nexttoken(const char *, int (*)(char *));
-void	pushbacktoken(void);
-int	peekc(int);
-int     atfirst_exceptspace(void);
+int opentoken(const char *);
+void closetoken(void);
+int nexttoken(const char *, int (*)(const char *, int));
+void pushbacktoken(void);
+int peekc(int);
+int atfirst_exceptspace(void);
 
 #endif /* ! _TOKEN_H_ */

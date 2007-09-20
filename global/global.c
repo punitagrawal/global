@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -45,66 +43,64 @@
 
 #include "global.h"
 #include "regex.h"
-#include "strlimcpy.h"
-#include "usable.h"
 #include "const.h"
 
-static void	usage(void);
-static void	help(void);
-static void	setcom(int);
-int	main(int, char **);
-void	makefilter(STRBUF *);
-FILE	*openfilter(void);
-void	closefilter(FILE *);
-void	completion(char *, char *, char *);
-void	idutils(char *, char *);
-void	grep(char *, char *);
-void	pathlist(char *, char *);
-void	parsefile(int, char **, char *, char *, char *, int);
-void	printtag(FILE *, char *);
-int	search(char *, char *, char *, int);
-int	includepath(char *, char *);
-void	ffformat(char *, int, char *);
+static void usage(void);
+static void help(void);
+static void setcom(int);
+int main(int, char **);
+void makefilter(STRBUF *);
+FILE *openfilter(void);
+void closefilter(FILE *);
+void completion(const char *, const char *, const char *);
+void idutils(const char *, const char *);
+void grep(const char *);
+void pathlist(const char *, const char *);
+void parsefile(int, char **, const char *, const char *, const char *, int);
+void printtag(FILE *, const char *);
+int search(const char *, const char *, const char *, int);
+int includepath(const char *, const char *);
+void ffformat(char *, int, const char *);
 
-char	sort_command[MAXFILLEN+1];	/* sort command		*/
-STRBUF	*sortfilter;			/* sort filter		*/
-STRBUF	*pathfilter;			/* path convert filter	*/
-char	*localprefix;			/* local prefix		*/
-int	aflag;				/* [option]		*/
-int	cflag;				/* command		*/
-int	fflag;				/* command		*/
-int	gflag;				/* command		*/
-int	iflag;				/* [option]		*/
-int	Iflag;				/* command		*/
-int	lflag;				/* [option]		*/
-int	nflag;				/* [option]		*/
-int	oflag;				/* [option]		*/
-int	pflag;				/* command		*/
-int	Pflag;				/* command		*/
-int	qflag;				/* [option]		*/
-int	rflag;				/* [option]		*/
-int	sflag;				/* [option]		*/
-int	tflag;				/* [option]		*/
-int	Tflag;				/* [option]		*/
-int	uflag;				/* command		*/
-int	vflag;				/* [option]		*/
-int	xflag;				/* [option]		*/
-int	show_version;
-int	show_help;
-int	show_filter;			/* undocumented command */
-int	use_tagfiles;
-int	debug;
-char	*extra_options;
+STRBUF *sortfilter;			/* sort filter		*/
+STRBUF *pathfilter;			/* path convert filter	*/
+const char *localprefix;		/* local prefix		*/
+int aflag;				/* [option]		*/
+int cflag;				/* command		*/
+int fflag;				/* command		*/
+int gflag;				/* command		*/
+int Gflag;				/* [option]		*/
+int iflag;				/* [option]		*/
+int Iflag;				/* command		*/
+int lflag;				/* [option]		*/
+int nflag;				/* [option]		*/
+int oflag;				/* [option]		*/
+int pflag;				/* command		*/
+int Pflag;				/* command		*/
+int qflag;				/* [option]		*/
+int rflag;				/* [option]		*/
+int sflag;				/* [option]		*/
+int tflag;				/* [option]		*/
+int Tflag;				/* [option]		*/
+int uflag;				/* command		*/
+int vflag;				/* [option]		*/
+int xflag;				/* [option]		*/
+int show_version;
+int show_help;
+int show_filter;			/* undocumented command */
+int use_tagfiles;
+int debug;
+const char *extra_options;
 
 static void
-usage()
+usage(void)
 {
 	if (!qflag)
 		fputs(usage_const, stderr);
 	exit(2);
 }
 static void
-help()
+help(void)
 {
 	fputs(usage_const, stdout);
 	fputs(help_const, stdout);
@@ -114,11 +110,14 @@ help()
 static struct option const long_options[] = {
 	{"absolute", no_argument, NULL, 'a'},
 	{"completion", no_argument, NULL, 'c'},
+	{"regexp", required_argument, NULL, 'e'},
 	{"file", no_argument, NULL, 'f'},
 	{"local", no_argument, NULL, 'l'},
 	{"nofilter", no_argument, NULL, 'n'},
 	{"grep", no_argument, NULL, 'g'},
+	{"basic-regexp", no_argument, NULL, 'G'},
 	{"ignore-case", no_argument, NULL, 'i'},
+	{"idutils", optional_argument, NULL, 'I'},
 	{"other", no_argument, NULL, 'o'},
 	{"print-dbpath", no_argument, NULL, 'p'},
 	{"path", no_argument, NULL, 'P'},
@@ -134,17 +133,16 @@ static struct option const long_options[] = {
 
 	/* long name only */
 	{"debug", no_argument, &debug, 1},
-	{"idutils", optional_argument, &Iflag, 1},
 	{"version", no_argument, &show_version, 1},
 	{"help", no_argument, &show_help, 1},
 	{"filter", no_argument, &show_filter, 1},
 	{ 0 }
 };
 
-static int	command;
+static int command;
 static void
 setcom(c)
-int	c;
+	int c;
 {
 	if (command == 0)
 		command = c;
@@ -153,20 +151,20 @@ int	c;
 }
 int
 main(argc, argv)
-int	argc;
-char	*argv[];
+	int argc;
+	char *argv[];
 {
-	char	*av;
-	int	count;
-	int	db;
-	int	optchar;
-	int	option_index = 0;
-	char	cwd[MAXPATHLEN+1];		/* current directory	*/
-	char	root[MAXPATHLEN+1];		/* root of source tree	*/
-	char	dbpath[MAXPATHLEN+1];		/* dbpath directory	*/
-	char	*gtags;
+	const char *av = NULL;
+	int count;
+	int db;
+	int optchar;
+	int option_index = 0;
+	char cwd[MAXPATHLEN+1];			/* current directory	*/
+	char root[MAXPATHLEN+1];		/* root of source tree	*/
+	char dbpath[MAXPATHLEN+1];		/* dbpath directory	*/
+	const char *gtags;
 
-	while ((optchar = getopt_long(argc, argv, "acifgGIlnopPqrstTuvx", long_options, &option_index)) != EOF) {
+	while ((optchar = getopt_long(argc, argv, "ace:ifgGIlnopPqrstTuvx", long_options, &option_index)) != EOF) {
 		switch (optchar) {
 		case 0:
 			if (!strcmp("idutils", long_options[option_index].name))
@@ -178,6 +176,9 @@ char	*argv[];
 		case 'c':
 			cflag++;
 			setcom(optchar);
+			break;
+		case 'e':
+			av = optarg;
 			break;
 		case 'f':
 			fflag++;
@@ -193,6 +194,9 @@ char	*argv[];
 		case 'g':
 			gflag++;
 			setcom(optchar);
+			break;
+		case 'G':
+			Gflag++;
 			break;
 		case 'i':
 			iflag++;
@@ -250,7 +254,12 @@ char	*argv[];
 
 	argc -= optind;
 	argv += optind;
-	av = (argc > 0) ? *argv : NULL;
+	/*
+	 * At first, we pickup pattern from -e option. If it is not found
+	 * then use argument which is not option.
+	 */
+	if (!av)
+		av = (argc > 0) ? *argv : NULL;
 
 	if (show_version)
 		version(av, vflag);
@@ -288,6 +297,8 @@ char	*argv[];
 	}
 	if (fflag)
 		lflag = 0;
+	if (tflag)
+		xflag = 0;
 	/*
 	 * remove leading blanks.
 	 */
@@ -306,13 +317,12 @@ char	*argv[];
 	 */
 	getdbpath(cwd, root, dbpath, (pflag && vflag));
 	if (Iflag && !test("f", makepath(root, "ID", NULL)))
-		die("You must have idutils's index at the root of source tree.");
+		die("You must have id-utils's index at the root of source tree.");
 	/*
 	 * print dbpath or rootdir.
 	 */
 	if (pflag) {
-		char *dir = (rflag) ? root : dbpath;
-		fprintf(stdout, "%s\n", dir);
+		fprintf(stdout, "%s\n", (rflag) ? root : dbpath);
 		exit(0);
 	}
 	/*
@@ -349,20 +359,6 @@ char	*argv[];
 		exit(0);
 	}
 	/*
-	 * get command name of sort.
-	 */
-	{
-		STRBUF	*sb = strbuf_open(0);
-		if (!getconfs("sort_command", sb))
-			die("cannot get sort command name.");
-#if defined(_WIN32) || defined(__DJGPP__)
-		if (!locatestring(strbuf_value(sb), ".exe", MATCH_LAST))
-			strbuf_puts(sb, ".exe");
-#endif
-		strlimcpy(sort_command, strbuf_value(sb), sizeof(sort_command));
-		strbuf_close(sb);
-	}
-	/*
 	 * make local prefix.
 	 */
 	if (lflag) {
@@ -388,20 +384,29 @@ char	*argv[];
 	 */
 	{
 		int unique = 0;
+		const char *sort;
 
+		/*
+		 * We cannot depend on the command PATH, because global(1)
+		 * might be called from WWW server. Since usable() looks for
+		 * the command in BINDIR directory first, gnusort need not
+		 * be in command PATH.
+		 */
+		sort = usable("sort");
+		if (!sort)
+			die("sort not found.");
 		sortfilter = strbuf_open(0);
-		strbuf_puts(sortfilter, sort_command);
-		strbuf_putc(sortfilter, ' ');
+		strbuf_puts(sortfilter, sort);
 		if (sflag) {
-			strbuf_puts(sortfilter, "-u");
+			strbuf_puts(sortfilter, " -u");
 			unique = 1;
 		}
 		if (tflag) 			/* ctags format */
-			strbuf_puts(sortfilter, " +0 -1 +1 -2 +2n -3");
+			strbuf_puts(sortfilter, " -k 1,1 -k 2,2 -k 3,3n");
 		else if (fflag)
 			strbuf_setlen(sortfilter, 0);
 		else if (xflag)			/* print details */
-			strbuf_puts(sortfilter, " +0 -1 +2 -3 +1n -2");
+			strbuf_puts(sortfilter, " -k 1,1 -k 3,3 -k 2,2n");
 		else if (!unique)		/* print just a file name */
 			strbuf_puts(sortfilter, " -u");
 	}
@@ -411,9 +416,12 @@ char	*argv[];
 	pathfilter = strbuf_open(0);
 	strbuf_puts(pathfilter, gtags);
 	if (aflag)	/* absolute path name */
-		strbuf_puts(pathfilter, " --absolute ");
+		strbuf_puts(pathfilter, " --absolute");
 	else		/* relative path name */
-		strbuf_puts(pathfilter, " --relative ");
+		strbuf_puts(pathfilter, " --relative");
+	if (xflag || tflag)
+		strbuf_puts(pathfilter, " --cxref");
+	strbuf_putc(pathfilter, ' ');
 	strbuf_puts(pathfilter, root);
 	strbuf_putc(pathfilter, ' ');
 	strbuf_puts(pathfilter, cwd);
@@ -429,7 +437,7 @@ char	*argv[];
 		exit(0);
 	}
 	/*
-	 * exec lid(idutils).
+	 * exec lid(id-utils).
 	 */
 	if (Iflag) {
 		chdir(root);
@@ -441,13 +449,14 @@ char	*argv[];
 	 */
 	if (gflag) {
 		chdir(root);
-		grep(av, dbpath);
+		grep(av);
 		exit(0);
 	}
 	/*
 	 * locate the path including the pattern in a source tree.
 	 */
 	if (Pflag) {
+		chdir(root);
 		pathlist(dbpath, av);
 		exit(0);
 	}
@@ -467,9 +476,9 @@ char	*argv[];
 	 * search in library path.
 	 */
 	if (getenv("GTAGSLIBPATH") && (count == 0 || Tflag) && !lflag && !rflag) {
-		STRBUF  *sb = strbuf_open(0);
-		char	libdbpath[MAXPATHLEN+1];
-		char	*p, *lib;
+		STRBUF *sb = strbuf_open(0);
+		char libdbpath[MAXPATHLEN+1];
+		char *p, *lib;
 
 		strbuf_puts(sb, getenv("GTAGSLIBPATH"));
 		p = strbuf_value(sb);
@@ -486,9 +495,12 @@ char	*argv[];
 			strbuf_reset(pathfilter);
 			strbuf_puts(pathfilter, gtags);
 			if (aflag)	/* absolute path name */
-				strbuf_puts(pathfilter, " --absolute ");
+				strbuf_puts(pathfilter, " --absolute");
 			else		/* relative path name */
-				strbuf_puts(pathfilter, " --relative ");
+				strbuf_puts(pathfilter, " --relative");
+			if (xflag || tflag)
+				strbuf_puts(pathfilter, " --cxref");
+			strbuf_putc(pathfilter, ' ');
 			strbuf_puts(pathfilter, lib);
 			strbuf_putc(pathfilter, ' ');
 			strbuf_puts(pathfilter, cwd);
@@ -524,7 +536,7 @@ char	*argv[];
  */
 void
 makefilter(sb)
-STRBUF	*sb;
+	STRBUF *sb;
 {
 	if (!nflag) {
 		strbuf_puts(sb, strbuf_value(sortfilter));
@@ -540,11 +552,11 @@ STRBUF	*sb;
  *	gi)	sortfilter
  *	r)		file pointer for output filter
  */
-FILE	*
+FILE *
 openfilter(void)
 {
-	FILE	*op;
-	STRBUF  *sb = strbuf_open(0);
+	FILE *op;
+	STRBUF *sb = strbuf_open(0);
 
 	makefilter(sb);
 	if (strbuf_getlen(sb) == 0)
@@ -556,10 +568,11 @@ openfilter(void)
 }
 void
 closefilter(op)
-FILE	*op;
+	FILE *op;
 {
 	if (op != stdout)
-		pclose(op);
+		if (pclose(op) != 0)
+			die("terminated abnormally.");
 }
 /*
  * completion: print completion list of specified prefix
@@ -570,14 +583,14 @@ FILE	*op;
  */
 void
 completion(dbpath, root, prefix)
-char	*dbpath;
-char	*root;
-char	*prefix;
+	const char *dbpath;
+	const char *root;
+	const char *prefix;
 {
-	char	*p;
-	int	flags = GTOP_KEY;
-	GTOP	*gtop;
-	int	db;
+	const char *p;
+	int flags = GTOP_KEY;
+	GTOP *gtop;
+	int db;
 
 	flags |= GTOP_NOREGEX;
 	if (prefix && *prefix == 0)	/* In the case global -c '' */
@@ -586,102 +599,91 @@ char	*prefix;
 		flags |= GTOP_PREFIX;
 	db = (sflag) ? GSYMS : GTAGS;
 	gtop = gtags_open(dbpath, root, db, GTAGS_READ, 0);
-	for (p = gtags_first(gtop, prefix, flags); p; p = gtags_next(gtop))
-		(void)fprintf(stdout, "%s\n", p);
+	for (p = gtags_first(gtop, prefix, flags); p; p = gtags_next(gtop)) {
+		fputs(p, stdout);
+		fputc('\n', stdout);
+	}
 	gtags_close(gtop);
 }
 /*
  * printtag: print a tag's line
  *
  *	i)	op	output stream
- *	i)	bp	tag's line
+ *	i)	line	tag's line
  */
 void
-printtag(op, bp)
-FILE	*op;
-char	*bp;
+printtag(op, line)
+	FILE *op;
+	const char *line;		/* virtually const */
 {
-	if (tflag) {
-		char	buf[MAXBUFLEN+1];
-		char	lno[20], *l = lno;
-		char	*p = bp;
-		char	*q = buf;
+	if (xflag) {
+		fputs(line, op);
+	} else {
+		SPLIT ptable;
+		int n;
 
-		while (*p && !isspace(*p))
-			*q++ = *p++;
-		*q++ = '\t';
-		for (; *p && isspace(*p); p++)
-			;
-		while (*p && isdigit(*p))
-			*l++ = *p++;
-		*l = 0;
-		for (; *p && isspace(*p); p++)
-			;
-		while (*p && !isspace(*p))
-			*q++ = *p++;
-		*q++ = '\t';
-		l = lno;
-		while (*l)
-			*q++ = *l++;
-		*q = 0;
-		fprintf(op, "%s\n", buf); 
-	} else if (!xflag) {
-		char	*p = locatestring(bp, "./", MATCH_FIRST);
+		/*
+		 * Split tag line.
+		 */
+		n = split((char *)line, 4, &ptable);
 
-		if (p == NULL)
-			die("invalid tag format (path not found).");
-		fputs(strmake(p, " \t"), op);
-		(void)putc('\n', op);
-	} else
-		fprintf(op, "%s\n", bp); 
+		if (tflag) {
+			fputs(ptable.part[0].start, op);	/* tag */
+			(void)putc('\t', op);
+			fputs(ptable.part[2].start, op);	/* path */
+			(void)putc('\t', op);
+			fputs(ptable.part[1].start, op);	/* line number */
+		} else {
+			fputs(ptable.part[2].start, op);	/* path */
+		}
+		recover(&ptable);
+	}
+	fputc('\n', op);
 }
 /*
- * idutils:  lid(idutils) pattern
+ * idutils:  lid(id-utils) pattern
  *
  *	i)	pattern	POSIX regular expression
  *	i)	dbpath	GTAGS directory
  */
 void
 idutils(pattern, dbpath)
-char	*pattern;
-char	*dbpath;
+	const char *pattern;
+	const char *dbpath;
 {
-	FILE	*ip, *op;
-	STRBUF	*ib = strbuf_open(0);
-	char	edit[IDENTLEN+1];
-	char    *line, *p, *path, *lno;
-	int     linenum, count, editlen;
-	char	*lid;
+	FILE *ip, *op;
+	STRBUF *ib = strbuf_open(0);
+	char edit[IDENTLEN+1];
+	const char *path, *lno, *lid;
+	int linenum, count;
+	char *p, *line;
 
 	lid = usable("lid");
 	if (!lid)
-		die("lid(idutils) not found.");
+		die("lid(id-utils) not found.");
 	/*
 	 * convert spaces into %FF format.
 	 */
 	ffformat(edit, sizeof(edit), pattern);
-	editlen = strlen(edit);
 	/*
 	 * make lid command line.
 	 */
 	strbuf_puts(ib, lid);
-	strbuf_putc(ib, ' ');
-	strbuf_puts(ib, "--separator=newline ");
+	strbuf_puts(ib, " --separator=newline");
 	if (!tflag && !xflag)
-		strbuf_puts(ib, "--result=filenames --key=none ");
+		strbuf_puts(ib, " --result=filenames --key=none");
 	else
-		strbuf_puts(ib, "--result=grep ");
+		strbuf_puts(ib, " --result=grep");
 	if (iflag)
-		strbuf_puts(ib, "--ignore-case ");
+		strbuf_puts(ib, " --ignore-case");
 	if (extra_options) {
-		strbuf_puts(ib, extra_options);
 		strbuf_putc(ib, ' ');
+		strbuf_puts(ib, extra_options);
 	}
-	strbuf_putc(ib, '\'');
-	strbuf_puts(ib, pattern);
-	strbuf_putc(ib, '\'');
+	strbuf_putc(ib, ' ');
+	strbuf_puts(ib, quote_string(pattern));
 	if (debug)
-		fprintf(stderr, "idutils: %s\n", strbuf_value(ib));
+		fprintf(stderr, "id-utils: %s\n", strbuf_value(ib));
 	if (!(ip = popen(strbuf_value(ib), "r")))
 		die("cannot execute '%s'.", strbuf_value(ib));
 	if (!(op = openfilter()))
@@ -694,7 +696,7 @@ char	*dbpath;
 		while (*p && *p != ':')
 			p++;
 		if ((xflag || tflag) && !*p)
-			die("invalid lid(idutils) output format. '%s'", line);
+			die("invalid lid(id-utils) output format. '%s'", line);
 		*p++ = 0;
 		if (lflag) {
 			if (!locatestring(path, localprefix + 2, MATCH_AT_FIRST))
@@ -712,11 +714,11 @@ char	*dbpath;
 		while (*p && isdigit(*p))
 			p++;
 		if (*p != ':')
-			die("invalid grep output format. '%s'", line);
+			die("invalid lid(id-utils) output format. '%s'", line);
 		*p++ = 0;
 		linenum = atoi(lno);
 		if (linenum <= 0)
-			die("invalid grep output format. '%s'", line);
+			die("invalid lid(id-utils) output format. '%s'", line);
 		/*
 		 * print out.
 		 */
@@ -730,7 +732,8 @@ char	*dbpath;
 					edit, linenum, buf, p);
 		}
 	}
-	pclose(ip);
+	if (pclose(ip) < 0)
+		die("terminated abnormally.");
 	closefilter(op);
 	strbuf_close(ib);
 	if (vflag) {
@@ -740,141 +743,43 @@ char	*dbpath;
 			fprintf(stderr, "%d object located", count);
 		if (count > 1)
 			fprintf(stderr, "%d objects located", count);
-		fprintf(stderr, " (using idutils index in '%s').\n", dbpath);
+		fprintf(stderr, " (using id-utils index in '%s').\n", dbpath);
 	}
 }
 /*
  * grep: grep pattern
  *
  *	i)	pattern	POSIX regular expression
- *	i)	dbpath	GTAGS directory
  */
-#if defined(HAVE_XARGS) && defined(HAVE_GREP)
 void
-grep(pattern, dbpath)
-char	*pattern;
-char	*dbpath;
+grep(pattern)
+	const char *pattern;
 {
-	FILE	*ip, *op;
-	STRBUF	*ib = strbuf_open(0);
-	char	edit[IDENTLEN+1];
-	char    *line, *p, *path, *lno;
-	int     linenum, count, editlen;
-	char	*gtags;
-
-	/*
-	 * convert spaces into %FF format.
-	 */
-	ffformat(edit, sizeof(edit), pattern);
-	editlen = strlen(edit);
-	/*
-	 * make grep command line.
-	 * (/dev/null needed when single argument specified.)
-	 */
-	gtags = usable("gtags");
-	if (!gtags)
-		die("gtags command not found.");
-	strbuf_puts(ib, gtags);
-	strbuf_puts(ib, " --find ");
-	if (oflag)
-		strbuf_puts(ib, "--other ");
-	if (lflag)
-		strbuf_puts(ib, localprefix);
-	strbuf_puts(ib, "| xargs grep ");
-	if (!tflag && !xflag)
-		strbuf_puts(ib, "-l ");
-	else
-		strbuf_puts(ib, "-n ");
-	if (iflag)
-		strbuf_puts(ib, "-i ");
-	strbuf_putc(ib, '\'');
-	strbuf_puts(ib, pattern);
-	strbuf_putc(ib, '\'');
-	strbuf_puts(ib, " /dev/null");
-	if (debug)
-		fprintf(stderr, "grep: %s\n", strbuf_value(ib));
-	if (!(ip = popen(strbuf_value(ib), "r")))
-		die("cannot execute '%s'.", strbuf_value(ib));
-	if (!(op = openfilter()))
-		die("cannot open output filter.");
-	count = 0;
-	while ((line = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL) {
-		p = line;
-		/* extract filename */
-		path = p;
-		while (*p && *p != ':')
-			p++;
-		if ((xflag || tflag) && !*p)
-			die("invalid grep output format. '%s'", line);
-		*p++ = 0;
-		count++;
-		if (!xflag && !tflag) {
-			fprintf(op, "%s\n", path);
-			continue;
-		}
-		/* extract line number */
-		while (*p && isspace(*p))
-			p++;
-		lno = p;
-		while (*p && isdigit(*p))
-			p++;
-		if (*p != ':')
-			die("invalid grep output format. '%s'", line);
-		*p++ = 0;
-		linenum = atoi(lno);
-		if (linenum <= 0)
-			die("invalid grep output format. '%s'", line);
-		/*
-		 * print out.
-		 */
-		if (tflag)
-			fprintf(op, "%s\t%s\t%d\n",
-				edit, path, linenum);
-		else if (!xflag)
-			fprintf(op, "%s\n", path);
-		else
-			fprintf(op, "%-16s %4d %-16s %s\n",
-				edit, linenum, path, p);
-	}
-	pclose(ip);
-	closefilter(op);
-	strbuf_close(ib);
-	if (vflag) {
-		if (count == 0)
-			fprintf(stderr, "object not found");
-		if (count == 1)
-			fprintf(stderr, "%d object located", count);
-		if (count > 1)
-			fprintf(stderr, "%d objects located", count);
-		fprintf(stderr, " (no index used).\n");
-	}
-}
-#else /* HAVE_XARGS && HAVE_GREP */
-void
-grep(pattern, dbpath)
-char	*pattern;
-char	*dbpath;
-{
-	FILE	*op, *fp;
-	STRBUF	*ib = strbuf_open(MAXBUFLEN);
-	char	*path;
-	char	edit[IDENTLEN+1];
-	char	*buffer;
-	int	linenum, count, editlen;
+	FILE *op, *fp;
+	STRBUF *ib = strbuf_open(MAXBUFLEN);
+	const char *path, *p;
+	char edit[IDENTLEN+1];
+	const char *buffer;
+	int linenum, count;
+	int flags = 0;
 	regex_t	preg;
 
 	/*
 	 * convert spaces into %FF format.
 	 */
 	ffformat(edit, sizeof(edit), pattern);
-	editlen = strlen(edit);
 
-	if (regcomp(&preg, pattern, REG_EXTENDED) != 0)
+	if (!Gflag)
+		flags |= REG_EXTENDED;
+	if (iflag)
+		flags |= REG_ICASE;
+	if (regcomp(&preg, pattern, flags) != 0)
 		die("invalid regular expression.");
 	if (!(op = openfilter()))
 		die("cannot open output filter.");
 	count = 0;
-	for (gfind_open(dbpath, localprefix); (path = gfind_read()) != NULL; ) {
+	for (vfind_open(localprefix, oflag); (p = vfind_read()) != NULL; ) {
+		path = (*p == ' ') ? ++p : p;
 		if (!(fp = fopen(path, "r")))
 			die("cannot open file '%s'.", path);
 		linenum = 0;
@@ -886,7 +791,8 @@ char	*dbpath;
 					fprintf(op, "%s\t%s\t%d\n",
 						edit, path, linenum);
 				else if (!xflag) {
-					fprintf(op, "%s\n", path);
+					fputs(path, op);
+					fputc('\n', op);
 					break;
 				} else {
 					fprintf(op, "%-16s %4d %-16s %s\n",
@@ -896,7 +802,7 @@ char	*dbpath;
 		}
 		fclose(fp);
 	}
-	gfind_close();
+	vfind_close();
 	closefilter(op);
 	strbuf_close(ib);
 	regfree(&preg);
@@ -910,7 +816,6 @@ char	*dbpath;
 		fprintf(stderr, " (no index used).\n");
 	}
 }
-#endif /* HAVE_XARGS && HAVE_GREP */
 /*
  * pathlist: print candidate path list.
  *
@@ -918,17 +823,19 @@ char	*dbpath;
  */
 void
 pathlist(dbpath, av)
-char	*dbpath;
-char	*av;
+	const char *dbpath;
+	const char *av;
 {
-	FILE	*op;
-	char	*path, *p;
+	FILE *op;
+	const char *path, *p;
 	regex_t preg;
-	int	count;
+	int count;
 
 	if (av) {
-		int	flags = REG_EXTENDED;
+		int flags = 0;
 
+		if (!Gflag)
+			flags |= REG_EXTENDED;
 		if (iflag || getconfb("icase_path"))
 			flags |= REG_ICASE;
 #ifdef _WIN32
@@ -938,11 +845,12 @@ char	*av;
 			die("invalid regular expression.");
 	}
 	if (!localprefix)
-		localprefix = "./";
+		localprefix = ".";
 	if (!(op = openfilter()))
 		die("cannot open output filter.");
 	count = 0;
-	for (gfind_open(dbpath, localprefix); (path = gfind_read()) != NULL; ) {
+	for (vfind_open(localprefix, oflag); (p = vfind_read()) != NULL; ) {
+		path = (*p == ' ') ? ++p : p;
 		/*
 		 * skip localprefix because end-user doesn't see it.
 		 */
@@ -953,11 +861,13 @@ char	*av;
 			fprintf(op, "path\t1 %s \n", path);
 		else if (tflag)
 			fprintf(op, "path\t%s\t1\n", path);
-		else
-			fprintf(op, "%s\n", path);
+		else {
+			fputs(path, op);
+			fputc('\n', op);
+		}
 		count++;
 	}
-	gfind_close();
+	vfind_close();
 	closefilter(op);
 	if (av)
 		regfree(&preg);
@@ -983,38 +893,26 @@ char	*av;
  */
 void
 parsefile(argc, argv, cwd, root, dbpath, db)
-int	argc;
-char	**argv;
-char	*cwd;
-char	*root;
-char	*dbpath;
-int	db;
+	int argc;
+	char **argv;
+	const char *cwd;
+	const char *root;
+	const char *dbpath;
+	int db;
 {
-	char	buf[MAXPATHLEN+1], *path;
-	char	*p;
-	FILE	*ip, *op;
-	char	*parser, *av;
-	int	count;
-	STRBUF  *sb = strbuf_open(0);
-	STRBUF	*com = strbuf_open(0);
-	STRBUF  *ib = strbuf_open(MAXBUFLEN);
+	char buf[MAXPATHLEN+1], *path;
+	const char *p;
+	FILE *ip, *op;
+	const char *parser, *av;
+	int count;
+	STRBUF *sb = strbuf_open(0);
+	STRBUF *com = strbuf_open(0);
+	STRBUF *ib = strbuf_open(MAXBUFLEN);
 
 	/*
 	 * teach parser where is dbpath.
 	 */
-#ifdef HAVE_PUTENV
-	{
-		char *env = (char *)malloc(strlen("GTAGSDBPATH=")+strlen(dbpath)+1);
-
-		if (!env)	
-			die("short of memory.");
-		strcpy(env, "GTAGSDBPATH=");
-		strcat(env, dbpath);
-		putenv(env);
-	}
-#else
-	setenv("GTAGSDBPATH", dbpath, 1);
-#endif /* HAVE_PUTENV */
+	set_env("GTAGSDBPATH", dbpath);
 
 	/*
 	 * get parser.
@@ -1075,7 +973,8 @@ int	db;
 			count++;
 			printtag(op, p);
 		}
-		pclose(ip);
+		if (pclose(ip) < 0)
+			die("terminated abnormally.");
 		if (chdir(cwd) < 0)
 			die("cannot move to '%s' directory.", cwd);
 	}
@@ -1105,17 +1004,17 @@ int	db;
  */
 int
 search(pattern, root, dbpath, db)
-char	*pattern;
-char	*root;
-char	*dbpath;
-int	db;
+	const char *pattern;
+	const char *root;
+	const char *dbpath;
+	int db;
 {
-	char	*p;
-	int	count = 0;
-	FILE	*op;
-	GTOP	*gtop;
-	int	flags = 0;
-	STRBUF	*sb = NULL;
+	const char *p;
+	int count = 0;
+	FILE *op;
+	GTOP *gtop;
+	int flags = 0;
+	STRBUF *sb = NULL;
 
 	/*
 	 * open tag file.
@@ -1138,9 +1037,11 @@ int	db;
 		}
 		flags |= GTOP_IGNORECASE;
 	}
+	if (Gflag)
+		flags |= GTOP_BASICREGEX;
 	for (p = gtags_first(gtop, pattern, flags); p; p = gtags_next(gtop)) {
 		if (lflag) {
-			char	*q;
+			const char *q;
 			/* locate start point of a path */
 			q = locatestring(p, "./", MATCH_FIRST);
 			if (!locatestring(q, localprefix, MATCH_AT_FIRST))
@@ -1164,11 +1065,11 @@ int	db;
  */
 int
 includepath(line, path)
-char	*line;
-char	*path;
+	const char *line;
+	const char *path;
 {
-	char	*p;
-	int	length;
+	const char *p;
+	int length;
 
 	if (!(p = locatestring(line, "./", MATCH_FIRST)))
 		die("invalid tag format (path not found).");
@@ -1189,11 +1090,12 @@ char	*path;
  */
 void
 ffformat(to, size, from)
-char	*to;
-int	size;
-char	*from;
+	char *to;
+	int size;
+	const char *from;
 {
-	char	*p, *e = to;
+	const char *p;
+	char *e = to;
 
 	for (p = from; *p; p++) {
 		if (*p == '%' || *p == ' ' || *p == '\t') {

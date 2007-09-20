@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2002, 2005
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -30,6 +28,11 @@
 #else
 #include <strings.h>
 #endif
+#ifdef HAVE_STDARG_H 
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
 
 /* #define STRBUF_LINK */
 
@@ -45,13 +48,37 @@ typedef struct _strbuf {
 	struct _strbuf *next;
 	struct _strbuf *prev;
 #endif
-	char	*name;
-	char	*sbuf;
-	char	*endp;
-	char	*curp;
-	int	sbufsize;
-	int	alloc_failed;
+	char *name;
+	char *sbuf;
+	char *endp;
+	char *curp;
+	int sbufsize;
+	int alloc_failed;
 } STRBUF;
+
+/*
+ * STATIC_STRBUF(sb):
+ *
+ * This macro is used for static string buffer which is suitable for
+ * work area and(or) return value of function. The area allocated once
+ * is repeatedly used though the area is never released.
+ * You must call strbuf_clear(sb) every time before using.
+ * You must not call strbuf_close(sb) for it.
+ *
+ * Usage:
+ *      function(...) {
+ *              STATIC_STRBUF(sb);
+ *
+ *              strbuf_clear(sb);
+ *              ...
+ *		strbuf_puts(sb, "xxxxx");
+ *              ...
+ *              return strbuf_value(sb);
+ *      }
+ */
+#define STATIC_STRBUF(sb) static STRBUF __##sb, *sb = &__##sb
+
+#define strbuf_empty(sb) (sb->sbufsize == 0)
 
 #define strbuf_putc(sb, c)	do {\
 	if (!sb->alloc_failed) {\
@@ -60,21 +87,15 @@ typedef struct _strbuf {
 		*sb->curp++ = c;\
 	}\
 } while (0)
-#define strbuf_nputs(sb, s, len) do {\
-	unsigned int _length = len;\
-	if (!sb->alloc_failed) {\
-		if (sb->curp + _length > sb->endp)\
-			__strbuf_expandbuf(sb, _length);\
-		strncpy(sb->curp, s, _length);\
-		sb->curp += _length;\
-	}\
-} while (0)
-#define strbuf_puts(sb, s) strbuf_nputs(sb, s, strlen(s))
-#define strbuf_puts0(sb, s) strbuf_nputs(sb, s, strlen(s) + 1)
 
 #define strbuf_reset(sb) do {\
 	sb->curp = sb->sbuf;\
 	sb->alloc_failed = 0;\
+} while (0)
+
+#define strbuf_puts0(sb, s) do {\
+	strbuf_puts(sb, s);\
+	strbuf_putc(sb, '\0');\
 } while (0)
 
 #define strbuf_getlen(sb) (sb->curp - sb->sbuf)
@@ -90,20 +111,31 @@ typedef struct _strbuf {
 #define strbuf_lastchar(sb) (*(sb->curp - 1))
 
 #ifdef DEBUG
-void	strbuf_dump(char *);
+void strbuf_dump(char *);
 #endif
-void	__strbuf_expandbuf(STRBUF *, int);
-STRBUF	*strbuf_open(int);
-void	strbuf_putn(STRBUF *, int);
-int	strbuf_unputc(STRBUF *, int);
-char	*strbuf_value(STRBUF *);
-void	strbuf_trim(STRBUF *);
-void	strbuf_close(STRBUF *);
-char    *strbuf_fgets(STRBUF *, FILE *, int);
+void __strbuf_expandbuf(STRBUF *, int);
+STRBUF *strbuf_open(int);
+void strbuf_clear(STRBUF *);
+void strbuf_nputs(STRBUF *, const char *, int);
+void strbuf_puts(STRBUF *, const char *);
+void strbuf_puts_nl(STRBUF *, const char *);
+void strbuf_putn(STRBUF *, int);
+int strbuf_unputc(STRBUF *, int);
+char *strbuf_value(STRBUF *);
+void strbuf_trim(STRBUF *);
+void strbuf_close(STRBUF *);
+char *strbuf_fgets(STRBUF *, FILE *, int);
+#ifdef HAVE_STDARG_H
+void strbuf_sprintf(STRBUF *sb, const char *s, ...);
+#else
+void strbuf_sprintf();
+#endif
+STRBUF *strbuf_open_tempbuf();
+void strbuf_release_tempbuf(STRBUF *);
 #ifdef STRBUF_LINK
-void	strbuf_setname(STRBUF *, char *);
-STRBUF	*strbuf_getbuf(char *);
-void	strbuf_closeall();
+void strbuf_setname(STRBUF *, const char *);
+STRBUF *strbuf_getbuf(const char *);
+void strbuf_closeall();
 #endif
 
 #endif /* ! _STRBUF_H */

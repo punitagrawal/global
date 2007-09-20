@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 1999, 2000
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1999, 2000 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -24,6 +23,7 @@
 
 extern const char *progname;
 
-void	version(const char *, const int);
+char *get_version();
+void version(const char *, const int);
 
 #endif /* ! _VERSION_H_ */

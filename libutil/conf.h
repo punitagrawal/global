@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1998, 1999, 2000, 2001, 2002, 2003
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifndef _CONF_H_
@@ -33,16 +31,17 @@
 #define OLD_GTAGSCONF   "/etc/global.conf"	/* for compatibility */
 #define DEBIANCONF      "/etc/gtags/gtags.conf"
 #define OLD_DEBIANCONF  "/etc/gtags/global.conf"/* for compatibility */
-#define GTAGSRC         ".globalrc"
+#define GTAGSRC 	".globalrc"
+#ifdef __DJGPP__
+#define DOS_GTAGSRC	"_globalrc"
+#endif
 #define DEFAULTLABEL    "default"
-#define DEFAULTSUFFIXES "c,h,y,c++,cc,cpp,cxx,hxx,C,H,s,S,java"
-#define DEFAULTSKIP     "GPATH,GTAGS,GRTAGS,GSYMS,HTML/,tags,TAGS,ID,y.tab.c,y.tab.h,SCCS/,RCS/,CVS/,CVSROOT/,.deps/"
 
-void	openconf(void);
-int	getconfn(const char *, int *);
-int	getconfs(const char *, STRBUF *);
-int	getconfb(const char *);
-char	*getconfline(void);
-void	closeconf(void);
+void openconf(void);
+int getconfn(const char *, int *);
+int getconfs(const char *, STRBUF *);
+int getconfb(const char *);
+const char *getconfline(void);
+void closeconf(void);
 
 #endif /* ! _CONF_H_ */

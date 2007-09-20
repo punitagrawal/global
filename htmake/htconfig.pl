@@ -188,14 +188,14 @@ $url =~ s/\/$//;
 $suffix = 'html';
 if ($url && &usable('lynx')) {
 	$page = `lynx -source $url/mains.html 2>&1`;
-	$id = $1 if ($page =~ /NAME=id\sVALUE=(\w+)>/);
+	$id = $1 if ($page =~ /name='id'\svalue='(\w+)'>/);
 	$suffix = 'ghtml' if ($page =~ /ghtml/);
 	$suffix = 'html.gz' if ($page =~ /html\.gz/);
 } elsif (-e "$actiondir/mains.html") {
 	$url = 'file:' . &realpath($actiondir) unless $url;
 	open(FH,"<$actiondir/mains.html") or &error("Cannot open $actiondir/mains.html");
 	while(<FH>) {
-		$id = $1 if /NAME=id\sVALUE=(\w+)>/;
+		$id = $1 if /name='id'\svalue='(\w+)'>/;
 		$suffix = 'ghtml' if /ghtml/;
 		$suffix = 'html.gz' if /html\.gz/;
 	}

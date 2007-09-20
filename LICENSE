@@ -7,10 +7,8 @@ ___________________________________
 
 GNU GLOBAL source code tag system is covered by the followings:
 
-    Copyright (c) 1996, 1997, 1998, 1999
-                Shigio Yamaguchi. All rights reserved.
-    Copyright (c) 1999, 2000, 2001, 2002
-                Tama Communications Corporation. All rights reserved.
+    Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+	Tama Communications Corporation
 
     GNU GLOBAL is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,12 +22,12 @@ GNU GLOBAL source code tag system is covered by the followings:
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 
 nvi-1.79-gtags.diff
 
      This file is placed into the public domain by the author,
-     Shigio Yamaguchi
+     Shigio YAMAGUCHI
 
 Getopt for GNU (getopt.c getopt.h getopt1.c):
 
@@ -69,8 +67,32 @@ REGEX library:
 
      You should have received a copy of the GNU Library General Public
      License along with the GNU C Library; see the file COPYING.LIB.  If not,
-     write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-     Boston, MA 02111-1307, USA.  */
+     write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+     Boston, MA  02110-1301  USA  */
+
+GNU sort:
+   sort - sort lines of text (with all kinds of options).
+   Copyright (C) 88, 1991-1999 Free Software Foundation, Inc.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+
+   Written December 1988 by Mike Haertel.
+   The author may be reached (Email) at the address mike@gnu.ai.mit.edu,
+   or (US mail) as Mike Haertel c/o Free Software Foundation.
+
+   n E. Hansen added NLS support in 1997.
 
 DB library:
 

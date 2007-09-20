@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifndef _GLOBAL_H_
@@ -26,14 +24,19 @@
 
 #include "gparam.h"
 #include "abs2rel.h"
+#include "char.h"
 #include "conf.h"
+#include "date.h"
 #include "dbop.h"
 #include "defined.h"
 #include "die.h"
+#include "env.h"
 #include "find.h"
 #include "getdbpath.h"
 #include "gtagsop.h"
 #include "is_unixy.h"
+#include "langmap.h"
+#include "linetable.h"
 #include "locatestring.h"
 #include "makepath.h"
 #include "path.h"
@@ -47,5 +50,7 @@
 #include "token.h"
 #include "usable.h"
 #include "version.h"
+#include "varray.h"
+#include "vfind.h"
 
 #endif /* ! _GLOBAL_H_ */

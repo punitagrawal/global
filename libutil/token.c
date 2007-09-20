@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1998, 1999, 2000, 2002, 2003
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -39,28 +37,30 @@
 /*
  * File input method.
  */
-int	lineno;
-unsigned char	*sp, *cp, *lp;
-int	crflag;			/* 1: return '\n', 0: doesn't return */
-int	cmode;			/* allow token which start with '#' */
-int	cppmode;		/* allow '::' as a token */
-int	ymode;			/* allow token which start with '%' */
-unsigned char	token[MAXTOKEN];
-unsigned char	curfile[MAXPATHLEN];
+int lineno;
+const unsigned char *sp, *cp, *lp;
+int crflag;			/* 1: return '\n', 0: doesn't return */
+int cmode;			/* allow token which start with '#' */
+int cppmode;			/* allow '::' as a token */
+int ymode;			/* allow token which start with '%' */
+unsigned char token[MAXTOKEN];
+unsigned char curfile[MAXPATHLEN];
+int continued_line;		/* previous line ends with '\\' */
 
-static	unsigned char ptok[MAXTOKEN];
-static	int lasttok;
-static	FILE *ip;
-static	STRBUF *ib;
+static unsigned char ptok[MAXTOKEN];
+static int lasttok;
+static FILE *ip;
+static STRBUF *ib;
 
-static	void pushbackchar(void);
+#define tlen	(p - &token[0])
+static void pushbackchar(void);
 
 /*
  * opentoken:
  */
 int
 opentoken(file)
-	char	*file;
+	const char *file;
 {
 	/*
 	 * b flag is needed for WIN32 environment. Almost unix ignore it.
@@ -69,23 +69,16 @@ opentoken(file)
 		return 0;
 	ib = strbuf_open(MAXBUFLEN);
 	strlimcpy(curfile, file, sizeof(curfile));
-	sp = cp = lp = NULL; ptok[0] = 0; lineno = 0;
+	sp = cp = lp = NULL; ptok[0] = '\0'; lineno = 0;
+	crflag = cmode = cppmode = ymode = 0;
+	continued_line = 0;
 	return 1;
-}
-/*
- * rewindtoken:
- */
-void
-rewindtoken()
-{
-	sp = cp = lp = NULL; ptok[0] = 0; lineno = 0;
-	rewind(ip);
 }
 /*
  * closetoken:
  */
 void
-closetoken()
+closetoken(void)
 {
 	strbuf_close(ib);
 	fclose(ip);
@@ -94,37 +87,38 @@ closetoken()
 /*
  * nexttoken: get next token
  *
- *	i)	interested	interested special charactor
- *				if NULL then all charactor.
+ *	i)	interested	interested special character
+ *				if NULL then all character.
  *	i)	reserved	converter from token to token number
  *				if this is specified, nexttoken() return
  *				word number, else return symbol.
  *	r)	EOF(-1)	end of file
  *		c ==0		symbol ('tok' has the value.)
- *		c < 256		interested special charactor
+ *		c < 256		interested special character
  *		c > 1000	reserved word
  *
  * nexttoken() doesn't return followings.
  *
  * o comment
- * o space (' ', '\t', '\f')
+ * o space (' ', '\t', '\f', '\v', '\r')
  * o quoted string ("...", '.')
+ * o number
  */
 
 int
 nexttoken(interested, reserved)
 	const char *interested;
-	int (*reserved)(char *);
+	int (*reserved)(const char *, int);
 {
-	int	c;
-	char	*p;
-	int	sharp = 0;
-	int	percent = 0;
+	int c;
+	unsigned char *p;
+	int sharp = 0;
+	int percent = 0;
 
 	/* check push back buffer */
 	if (ptok[0]) {
 		strlimcpy(token, ptok, sizeof(token));
-		ptok[0] = 0;
+		ptok[0] = '\0';
 		return lasttok;
 	}
 
@@ -134,7 +128,7 @@ nexttoken(interested, reserved)
 			while ((c = nextchar()) != EOF && isspace(c))
 				;
 		else
-			while ((c = nextchar()) != EOF && (c == ' ' || c == '\t' || c == '\f'))
+			while ((c = nextchar()) != EOF && isspace(c) && c != '\n')
 				;
 		if (c == EOF || c == '\n')
 			break;
@@ -168,9 +162,10 @@ nexttoken(interested, reserved)
 			} else
 				pushbackchar();
 		} else if (c == '\\') {
-			(void)nextchar();
+			if (nextchar() == '\n')
+				continued_line = 1;
 		} else if (isdigit(c)) {		/* digit */
-			while ((c = nextchar()) != EOF && (c == '.' || isdigit(c) || isalpha(c)))
+			while ((c = nextchar()) != EOF && (c == '.' || isalnum(c)))
 				;
 			pushbackchar();
 		} else if (c == '#' && cmode) {
@@ -180,9 +175,9 @@ nexttoken(interested, reserved)
 				*p++ = c;
 				*p++ = nextchar();
 				*p   = 0;
-				if (reserved && (c = (*reserved)(token)) == 0)
+				if (reserved && (c = (*reserved)(token, tlen)) == 0)
 					break;
-			} else if (atfirst_exceptspace()) {
+			} else if (!continued_line && atfirst_exceptspace()) {
 				sharp = 1;
 				continue;
 			}
@@ -192,7 +187,7 @@ nexttoken(interested, reserved)
 				*p++ = c;
 				*p++ = nextchar();
 				*p   = 0;
-				if (reserved && (c = (*reserved)(token)) == 0)
+				if (reserved && (c = (*reserved)(token, tlen)) == 0)
 					break;
 			}
 		} else if (c == '%' && ymode) {
@@ -203,7 +198,7 @@ nexttoken(interested, reserved)
 				if ((c = peekc(1)) == '%' || c == '{' || c == '}') {
 					*p++ = nextchar();
 					*p   = 0;
-					if (reserved && (c = (*reserved)(token)) != 0)
+					if (reserved && (c = (*reserved)(token, tlen)) != 0)
 						break;
 				} else if (!isspace(c)) {
 					percent = 1;
@@ -218,6 +213,11 @@ nexttoken(interested, reserved)
 			} else if (percent) {
 				percent = 0;
 				*p++ = '%';
+			} else if (c == 'L') {
+				int tmp = peekc(1);
+
+				if (tmp == '\"' || tmp == '\'')
+					continue;
 			}
 			for (*p++ = c; (c = nextchar()) != EOF && (c & 0x80 || isalnum(c) || c == '_'); *p++ = c)
 				;
@@ -226,8 +226,9 @@ nexttoken(interested, reserved)
 			if (c != EOF)
 				pushbackchar();
 			/* convert token string into token number */
+			c = SYMBOL;
 			if (reserved)
-				c = (*reserved)(token);
+				c = (*reserved)(token, tlen);
 			break;
 		} else {				/* special char */
 			if (interested == NULL || strchr(interested, c))
@@ -244,7 +245,7 @@ nexttoken(interested, reserved)
  *	following nexttoken() return same token again.
  */
 void
-pushbacktoken()
+pushbacktoken(void)
 {
 	strlimcpy(ptok, token, sizeof(ptok));
 }
@@ -257,10 +258,10 @@ pushbacktoken()
  */
 int
 peekc(immediate)
-	int	immediate;
+	int immediate;
 {
-	int	c;
-	long	pos;
+	int c;
+	long pos;
 
 	if (cp != NULL) {
 		if (immediate)
@@ -291,23 +292,23 @@ peekc(immediate)
  *	|      # define
  */
 int
-atfirst_exceptspace()
+atfirst_exceptspace(void)
 {
-	char	*start = sp;
-	char	*end = cp ? cp - 1 : lp;
+	const char *start = sp;
+	const char *end = cp ? cp - 1 : lp;
 
 	while (start < end && *start && isspace(*start))
 		start++;
 	return (start == end) ? 1 : 0;
 }
 /*
- * pushbackchar: push back charactor.
+ * pushbackchar: push back character.
  *
- *	following nextchar() return same charactor again.
+ *	following nextchar() return same character again.
  * 
  */
 static void
-pushbackchar()
+pushbackchar(void)
 {
         if (sp == NULL)
                 return;         /* nothing to do */

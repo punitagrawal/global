@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,24 +16,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
-/*
- * If find(1) is available the use it to traverse directory tree.
- * Otherwise use dirent(3).
- */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 #include <assert.h>
 #include <ctype.h>
-#ifndef HAVE_FIND
+#ifdef HAVE_DIRENT_H
 #include <sys/types.h>
 #include <dirent.h>
-#ifndef HAVE_DP_D_TYPE
 #include <sys/stat.h>
-#endif
 #endif
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -52,6 +44,8 @@
 
 #include "gparam.h"
 #include "regex.h"
+
+#include "char.h"
 #include "conf.h"
 #include "die.h"
 #include "find.h"
@@ -62,35 +56,37 @@
 #include "strlimcpy.h"
 
 /*
- * usage of ?findxxx()
+ * usage of find_xxx()
  *
- *	?findopen();
- *	while (path = ?findread()) {
+ *	find_open(NULL);
+ *	while (path = find_read()) {
  *		...
  *	}
- *	?findclose();
+ *	find_close();
  *
  */
-static regex_t	skip_area;
-static regex_t	*skip;			/* regex for skipping units */
-static regex_t	suff_area;
-static regex_t	*suff = &suff_area;	/* regex for suffixes */
+static regex_t skip_area;
+static regex_t *skip;			/* regex for skipping units */
+static regex_t suff_area;
+static regex_t *suff = &suff_area;	/* regex for suffixes */
 static STRBUF *list;
 static int list_count;
 static char **listarray;		/* list for skipping full path */
-static int	opened;
-static int	retval;
+static int opened;
+static int retval;
 
-static void	trim(char *);
-extern int	debug;
+static void trim(char *);
+#ifdef DEBUG
+extern int debug;
+#endif
 /*
  * trim: remove blanks and '\'.
  */
 static void
 trim(s)
-char	*s;
+	char *s;
 {
-	char	*p;
+	char *p;
 
 	for (p = s; *s; s++) {
 		if (isspace(*s))
@@ -108,11 +104,11 @@ char	*s;
  *	go)	suff	regular expression for source files.
  */
 static void
-prepare_source()
+prepare_source(void)
 {
-	STRBUF	*sb = strbuf_open(0);
-	char	*sufflist = NULL;
-	int	flags = REG_EXTENDED;
+	STRBUF *sb = strbuf_open(0);
+	char *sufflist = NULL;
+	int flags = REG_EXTENDED;
 
 	/*
 	 * load icase_path option.
@@ -130,15 +126,16 @@ prepare_source()
 		die("short of memory.");
 	trim(sufflist);
 	{
-		char    *suffp;
+		const char *suffp;
 
 		strbuf_reset(sb);
 		strbuf_puts(sb, "\\.(");       /* ) */
 		for (suffp = sufflist; suffp; ) {
-			char    *p;
+			const char *p;
 
 			for (p = suffp; *p && *p != ','; p++) {
-				strbuf_putc(sb, '\\');
+				if (!isalnum(*p))
+					strbuf_putc(sb, '\\');
 				strbuf_putc(sb, *p);
 			}
 			if (!*p)
@@ -152,8 +149,10 @@ prepare_source()
 		 * compile regular expression.
 		 */
 		retval = regcomp(suff, strbuf_value(sb), flags);
+#ifdef DEBUG
 		if (debug)
 			fprintf(stderr, "find regex: %s\n", strbuf_value(sb));
+#endif
 		if (retval != 0)
 			die("cannot compile regular expression.");
 	}
@@ -169,13 +168,13 @@ prepare_source()
  *	go)	list_count count of skip list.
  */
 static void
-prepare_skip()
+prepare_skip(void)
 {
 	char *skiplist;
 	STRBUF *reg = strbuf_open(0);
 	int reg_count = 0;
 	char *p, *q;
-	int     flags = REG_EXTENDED|REG_NEWLINE;
+	int flags = REG_EXTENDED|REG_NEWLINE;
 
 	/*
 	 * load icase_path option.
@@ -211,7 +210,7 @@ prepare_skip()
 	 */
 	strbuf_putc(reg, '(');	/* ) */
 	for (p = skiplist; p; ) {
-		char    *skipf = p;
+		char *skipf = p;
 		if ((p = locatestring(p, ",", MATCH_FIRST)) != NULL)
 			*p++ = 0;
 		if (*skipf == '/') {
@@ -221,7 +220,7 @@ prepare_skip()
 			reg_count++;
 			strbuf_putc(reg, '/');
 			for (q = skipf; *q; q++) {
-				if (*q == '.')
+				if (isregexchar(*q))
 					strbuf_putc(reg, '\\');
 				strbuf_putc(reg, *q);
 			}
@@ -239,8 +238,10 @@ prepare_skip()
 		 */
 		skip = &skip_area;
 		retval = regcomp(skip, strbuf_value(reg), flags);
+#ifdef DEBUG
 		if (debug)
 			fprintf(stderr, "skip regex: %s\n", strbuf_value(reg));
+#endif
 		if (retval != 0)
 			die("cannot compile regular expression.");
 	} else {
@@ -249,20 +250,28 @@ prepare_skip()
 	if (list_count > 0) {
 		int i;
 		listarray = (char **)malloc(sizeof(char *) * list_count);
+		if (listarray == NULL)
+			die("short of memory.");
 		p = strbuf_value(list);
+#ifdef DEBUG
 		if (debug)
 			fprintf(stderr, "skip list: ");
+#endif
 		for (i = 0; i < list_count; i++) {
+#ifdef DEBUG
 			if (debug) {
 				fprintf(stderr, "%s", p);
 				if (i + 1 < list_count)
 					fputc(',', stderr);
 			}
+#endif
 			listarray[i] = p;
 			p += strlen(p) + 1;
 		}
+#ifdef DEBUG
 		if (debug)
 			fputc('\n', stderr);
+#endif
 	}
 	strbuf_close(reg);
 	free(skiplist);
@@ -275,9 +284,9 @@ prepare_skip()
  */
 int
 skipthisfile(path)
-char *path;
+	const char *path;
 {
-	char *first, *last;
+	const char *first, *last;
 	int i;
 
 	/*
@@ -306,18 +315,13 @@ char *path;
 	}
 	return 0;
 }
-#ifndef HAVE_FIND
-/*----------------------------------------------------------------------*/
-/* dirent version findxxx()						*/
-/*----------------------------------------------------------------------*/
-#define STACKSIZE 50
-static  char    dir[MAXPATHLEN+1];		/* directory path */
-static  struct {
-	STRBUF  *sb;
-	char    *dirp, *start, *end, *p;
-} stack[STACKSIZE], *topp, *curp;		/* stack */
 
-static int getdirs(char *, STRBUF *);
+#define STACKSIZE 50
+static  char dir[MAXPATHLEN+1];			/* directory path */
+static  struct {
+	STRBUF *sb;
+	char *dirp, *start, *end, *p;
+} stack[STACKSIZE], *topp, *curp;		/* stack */
 
 /*
  * getdirs: get directory list
@@ -332,41 +336,20 @@ static int getdirs(char *, STRBUF *);
  */
 static int
 getdirs(dir, sb)
-char    *dir;
-STRBUF  *sb;
+	const char *dir;
+	STRBUF *sb;
 {
-	DIR     *dirp;
+	DIR *dirp;
 	struct dirent *dp;
-#ifndef HAVE_DP_D_TYPE
 	struct stat st;
-#endif
 
 	if ((dirp = opendir(dir)) == NULL)
 		return -1;
 	while ((dp = readdir(dirp)) != NULL) {
-#ifdef HAVE_DP_D_NAMLEN
-		if (dp->d_namlen == 1 && dp->d_name[0] == '.')
-#else
 		if (!strcmp(dp->d_name, "."))
-#endif
 			continue;
-#ifdef HAVE_DP_D_NAMLEN
-		if (dp->d_namlen == 2 && dp->d_name[0] == '.' && dp->d_name[1] == '.')
-#else
 		if (!strcmp(dp->d_name, ".."))
-#endif
 			continue;
-#ifdef HAVE_DP_D_TYPE
-		if (dp->d_type == DT_DIR)
-			strbuf_putc(sb, 'd');
-		else if (dp->d_type == DT_REG)
-			strbuf_putc(sb, 'f');
-		else if (dp->d_type == DT_LNK)
-			strbuf_putc(sb, 'l');
-		else
-			strbuf_putc(sb, ' ');
-		strbuf_puts(sb, dp->d_name);
-#else
 #ifdef HAVE_LSTAT
 		if (lstat(makepath(dir, dp->d_name, NULL), &st) < 0) {
 			fprintf(stderr, "cannot lstat '%s'. (Ignored)\n", dp->d_name);
@@ -389,7 +372,6 @@ STRBUF  *sb;
 		else
 			strbuf_putc(sb, ' ');
 		strbuf_puts(sb, dp->d_name);
-#endif /* HAVE_DP_D_TYPE */
 		strbuf_putc(sb, '\0');
 	}
 	(void)closedir(dirp);
@@ -397,20 +379,25 @@ STRBUF  *sb;
 }
 /*
  * find_open: start iterator without GPATH.
+ *
+ *	i)	start	start directory
+ *			If NULL, assumed '.' directory.
  */
 void
-find_open()
+find_open(start)
+	const char *start;
 {
 	assert(opened == 0);
 	opened = 1;
 
+	if (!start)
+		start = ".";
 	/*
 	 * setup stack.
 	 */
 	curp = &stack[0];
 	topp = curp + STACKSIZE; 
-	strlimcpy(dir, ".", sizeof(dir));
-
+	strlimcpy(dir, start, sizeof(dir));
 	curp->dirp = dir + strlen(dir);
 	curp->sb = strbuf_open(0);
 	if (getdirs(dir, curp->sb) < 0)
@@ -432,18 +419,35 @@ find_open()
 char    *
 find_read(void)
 {
-	static	char val[MAXPATHLEN+1];
+	static char val[MAXPATHLEN+1];
+	extern int qflag;
 
 	for (;;) {
 		while (curp->p < curp->end) {
-			char	type = *(curp->p);
-			char    *unit = curp->p + 1;
+			char type = *(curp->p);
+			const char *unit = curp->p + 1;
 
 			curp->p += strlen(curp->p) + 1;
 			if (type == 'f' || type == 'l') {
-				char	*path = makepath(dir, unit, NULL);
+				char path[MAXPATHLEN];
+
+				/* makepath() returns unsafe module local area. */
+				strlimcpy(path, makepath(dir, unit, NULL), sizeof(path));
 				if (skipthisfile(path))
 					continue;
+				/*
+				 * GLOBAL cannot treat path which includes blanks.
+				 * It will be improved in the future.
+				 */
+				if (locatestring(path, " ", MATCH_FIRST)) {
+					if (!qflag)
+						warning("'%s' ignored, because it includes blank in the path.", &path[2]);
+					continue;
+				}
+				/*
+				 * A blank at the head of path means
+				 * other than source file.
+				 */
 				if (regexec(suff, path, 0, 0, 0) == 0) {
 					/* source file */
 					strlimcpy(val, path, sizeof(val));
@@ -456,8 +460,8 @@ find_read(void)
 				return val;
 			}
 			if (type == 'd') {
-				STRBUF  *sb = strbuf_open(0);
-				char    *dirp = curp->dirp;
+				STRBUF *sb = strbuf_open(0);
+				char *dirp = curp->dirp;
 
 				strcat(dirp, "/");
 				strcat(dirp, unit);
@@ -505,76 +509,3 @@ find_close(void)
 		regfree(skip);
 	opened = 0;
 }
-#else /* !HAVE_FIND */
-/*----------------------------------------------------------------------*/
-/* find command version							*/
-/*----------------------------------------------------------------------*/
-static FILE	*ip;
-
-/*
- * find_open: start iterator without GPATH.
- */
-void
-find_open()
-{
-	char	*findcom = "find . -type f -print";
-
-	assert(opened == 0);
-	opened = 1;
-
-	if (debug)
-		fprintf(stderr, "find com: %s\n", findcom);
-	/*
-	 * prepare regular expressions.
-	 */
-	prepare_source();
-	prepare_skip();
-	if (!(ip = popen(findcom, "r")))
-		die("cannot execute find.");
-}
-/*
- * find_read: read path without GPATH.
- *
- *	r)		path
- */
-char	*
-find_read(void)
-{
-	static char	val[MAXPATHLEN+2];
-	char	*path = &val[1];
-	char	*p;
-
-	assert(opened == 1);
-	while (fgets(path, MAXPATHLEN, ip)) {
-		/*
-		 * chop(path)
-		 */
-		p = path + strlen(path) - 1;
-		if (*p != '\n')
-			die("output of find(1) is wrong (findread).");
-		*p = 0;
-		if (skipthisfile(path))
-			continue;
-		if (regexec(suff, path, 0, 0, 0) != 0) {
-			/* other file like 'Makefile' */
-			val[0] = ' ';
-			path = val;
-		}
-		return path;
-	}
-	return NULL;
-}
-/*
- * find_close: close iterator.
- */
-void
-find_close(void)
-{
-	assert(opened == 1);
-	pclose(ip);
-	opened = 0;
-	regfree(suff);
-	if (skip)
-		regfree(skip);
-}
-#endif /* !HAVE_FIND */

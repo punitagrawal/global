@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2001
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 2001 Tama Communications Corporation
  *
  * Contributed by Jason Hood <jadoxa@yahoo.com.au>, 2001.
  *
@@ -18,15 +17,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#ifdef __DJGPP__
+#if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 #include <stdlib.h>
+#ifdef __DJGPP__
 #include <sys/system.h>
+#endif
 #endif
 
 #include "is_unixy.h"
@@ -39,13 +40,17 @@
 int
 is_unixy(void)
 {
-#ifdef __DJGPP__
+#if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 	static int unix_shell = -1;
 
 	if (unix_shell == -1) {
 		char *s = getenv("SHELL");
+#ifdef __DJGPP__
 		/* Assume if SHELL isn't defined, COMSPEC is DOS. */
 		unix_shell = (s == NULL) ? 0 : _is_unixy_shell(s);
+#else
+		unix_shell = (s != 0);
+#endif
 	}
 	return unix_shell;
 #else

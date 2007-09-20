@@ -1,8 +1,6 @@
 #
-# Copyright (c) 1996, 1997, 1998, 1999
-#             Shigio Yamaguchi. All rights reserved.
-# Copyright (c) 1999, 2000, 2001, 2002
-#             Tama Communications Corporation. All rights reserved.
+# Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+#	Tama Communications Corporation
 #
 # This file is part of GNU GLOBAL.
 #
@@ -18,27 +16,27 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 #
 # This file is converted to the following files:
 #	o command source file(for usage and help).
 #	o man format reference manual.
 #	o texinfo format reference manual.
 #
-@HEADER	GLOBAL,29,March 2002,GNU Project
+@HEADER	GLOBAL,1,Nov 2004,GNU Project
 @NAME	global - print the locations of specified object.
 @SYNOPSIS
-	@name{global} [-ailnqrstTvx] @arg{pattern}
+	@name{global} [-aGilnqrstTvx][-e] @arg{pattern}
 	@name{global} -c[qsv] @arg{prefix}
 	@name{global} -f[anqrstvx] @arg{files}
-	@name{global} -g[ailnoqtvx] @arg{pattern}
-	@name{global} -I[ailnqtvx] @arg{pattern}
+	@name{global} -g[aGilnoqtvx][-e] @arg{pattern}
+	@name{global} -I[ailnqtvx][-e] @arg{pattern}
 	@name{global} -p[qrv]
-	@name{global} -P[ailnqtvx] @arg{pattern}
+	@name{global} -P[aGilnoqtvx][-e] @arg{pattern}
 	@name{global} -u[qv]
 @DESCRIPTION
 	@name{Global} find the locations of specified object
-	in C, C++, Yacc, Java and assembler source files.
+	in C, C++, Yacc, Java, PHP and Assembly source files.
 	@name{Global} can treat a source tree, that is, a directory that
 	has subdirectories and source files.
 	You can get the relative path of objects from anywhere within the tree.
@@ -54,7 +52,8 @@
 	@begin_itemize
 	@item{@arg{pattern}}
 		Print object which match to the @arg{pattern}.
-		It can include POSIX 1003.2 regular expression.
+		Extended regular expressions which are the same as those
+		accepted by @xref{egrep,1} are available.
 	@item{@option{-c}, @option{--completion} [@arg{prefix}]}
 		Print candidate function names which start with specified
 		@arg{prefix}. @arg{Prefix} is not specified,
@@ -62,10 +61,9 @@
 	@item{@option{-f}, @option{--file} @arg{files}}
 		Print all function definitions in the @arg{files}.
 		This option implies -x option.
-	@item{@option{-g}, @option{--grep} @arg{pattern}}
+	@item{@option{-g}, @option{--grep}}
 		Print all lines which match to the @arg{pattern}.
-		This function use @xref{grep,1} as a search engine.
-	@item{@option{-I}, @option{--idutils} @arg{pattern}}
+	@item{@option{-I}, @option{--idutils}}
 		Print all lines which match to the @arg{pattern}.
 		This function use @xref{id-utils,1} as a search engine.
 		To use this command, you need to install @xref{id-utils,1}
@@ -88,6 +86,13 @@
 	@begin_itemize
 	@item{@option{-a}, @option{--absolute}}
 		Print absolute path name. By default, print relative path name.
+	@item{@option{-e}, @option{--regexp} @arg{pattern}}
+		Use @arg{pattern} as the pattern; useful to protect  patterns
+		beginning with -.
+	@item{@option{-G}, @option{--basic-regexp}}
+		Interpret @arg{pattern} as a  basic regular expression.
+		The default is extended regular expression.
+		This option is valid for the @option{-g} and @option{-P} command.
 	@item{@option{-i}, @option{--ignore-case}}
 		ignore case distinctions in pattern.
 	@item{@option{-l}, @option{--local}}
@@ -97,14 +102,14 @@
 	@item{@option{-o}, @option{--other}}
 		Search pattern in not only source files but also other files
 		like @file{README}.
-		This options is valid only with @option{-g} option.
+		This option is valid only with @option{-g} or @option{-P} command.
 	@item{@option{-q}, @option{--quiet}}
 		Quiet mode.
 	@item{@option{-r}, @option{--reference}, @option{--rootdir}}
 		Print the locations of object references.
 		By default, print object definitions.
 		With the @option{-p} option, print the root directory of source tree.
-	@item{@option{-s}, @option{--symbol} @arg{pattern}}
+	@item{@option{-s}, @option{--symbol}}
 		Print the locations of specified symbol other than function names.
 		You need @file{GSYMS} tags file. See @xref{gtags,1}.
 	@item{@option{-t}, @option{--tags}}
@@ -121,33 +126,33 @@
 		the line contents.
 	@end_itemize
 @EXAMPLES
-	% ls -F
+	$ ls -F
 	Makefile      src/    lib/
-	% gtags
-	% global main
+	$ gtags
+	$ global main
 	src/main.c
-	% global -x main
+	$ global -x main
 	main              10 src/main.c  main (argc, argv) {
-	% global -x '^[sg]et'
+	$ global -x '^[sg]et'
 	set_num           20 lib/util.c  set_num(values)
 	get_num           30 lib/util.c  get_num() {
-	% global -rx '^[sg]et'
+	$ global -rx '^[sg]et'
 	set_num          113 src/op.c            set_num(32);
 	set_num          225 src/opop.c               if (set_num(0) > 0) {
 	get_num           90 src/op.c            while (get_num() > 0) {
-	% cd lib
-	% global -rx '^[sg]et'
+	$ cd lib
+	$ global -rx '^[sg]et'
 	set_num          113 ../src/op.c            set_num(32);
 	set_num          225 ../src/opop.c               if (set_num(0) > 0) {
 	get_num           90 ../src/op.c            while (get_num() > 0) {
-	% global strlen
-	% (cd /usr/src/sys; gtags)
-	% setenv GTAGSLIBPATH /usr/src/sys
-	% global strlen
+	$ global strlen
+	$ (cd /usr/src/sys; gtags)
+	$ export GTAGSLIBPATH=/usr/src/sys
+	$ global strlen
 	../../../usr/src/sys/libkern/strlen.c
-	% (cd /usr/src/lib; gtags)
-	% setenv GTAGSLIBPATH /usr/src/lib:/usr/src/sys
-	% global strlen
+	$ (cd /usr/src/lib; gtags)
+	$ GTAGSLIBPATH=/usr/src/lib:/usr/src/sys
+	$ global strlen
 	../../../usr/src/lib/libc/string/strlen.c
 @FILES
 	@begin_itemize
@@ -187,22 +192,18 @@
 	@begin_itemize
 	@item{@code{icase_path}(boolean)}
 		Ignore case distinctions in the @arg{pattern}.
-	@item{@code{sed_command}(string)}
-		Use specified @xref{sed,1} command, which is used internally.
-	@item{@code{sort_command}(string)}
-		Use specified @xref{sort,1} command, which is used internally.
 	@end_itemize
 @DIAGNOSTICS
 	@name{Global} exits with a non 0 value if an error occurred, 0 otherwise.
 @SEE ALSO
-	@xref{btreeop,1},
-	@xref{gctags,1},
+	@xref{gtags-parser,1},
 	@xref{gtags,1},
-	@xref{htags,1}.
+	@xref{htags,1},
+	@xref{less,1}.
 
         GNU GLOBAL source code tag system@br
         (http://www.gnu.org/software/global/).
 @AUTHOR
-	Shigio Yamaguchi
+	Tama Communications Corporation.
 @HISTORY
 	The @name{global} command appeared in FreeBSD 2.2.2.

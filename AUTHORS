@@ -4,31 +4,42 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2001, 2002
+
+Copyright holder of GNU GLOBAL
+==============================
+
+Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
 	Tama Communications Corporation. All rights reserved.
 
- This file is free software; as a special exception the author gives
- unlimited permission to copy and/or distribute it, with or without
- modifications, as long as this notice is preserved.
+Contributers of GNU GLOBAL
+==========================
 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
- implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+The undermentioned people wrote the code, and the right was abandoned
+or transferred to Tama Communications Corporation with legal paper.
 
-		----------------------------------
-
-The GLOBAL was written by Shigio Yamaguchi.
+The original author is Shigio YAMAGUCHI.
 
 Port to Windows 32 (for Borland C++ Compiler) by Dan Fandrich.
-(w32/INSTALL, w32/machine/unistd.h and most of #ifdef _WIN32.)
+(most of #ifdef _WIN32.)
 
 Port to DJGPP by Jason Hood.
 (libutil/is_unixy.[ch] and most of #ifdef __DJGPP__.)
 
+Improvements to htags and gtags-parser by Hideki IWAMOTO.
+* INCLUDED FROM index(htags)
+* CVS REPOSITORY link(htags)
+* Real support of Yacc source code(htags)
+* Rewrite parser for assembly language using Yacc(asm_scan.l,asm_parse.y)
+* Config variable 'langmap'(htags)
+Besides he has contributed many improvements to GLOBAL.
+
 There are also many others who have contributed patches and fixes.
 Please see files ChangeLog and THANKS.
 
-Note: GLOBAL is distributed with the files:
+Separate packages
+=================
+
+GLOBAL is distributed with the files:
 
 (GNU C Library)
 regex.c, regex.h, snprintf.c, getopt.c, getopt1.c and getopt.h
@@ -36,5 +47,9 @@ regex.c, regex.h, snprintf.c, getopt.c, getopt1.c and getopt.h
 bt_close.c, bt_open.c, bt_seq.c, db.c, queue.h, bt_conv.c, bt_overflow.c,
 bt_split.c, db.h bt_debug.c, bt_page.c, bt_utils.c, extern.h bt_delete.c,
 bt_put.c, btree.h, mpool.c bt_get.c, bt_search.c, compat.h, mpool.h
+(GNU sort)
+closeout.c, closeout.h, error.c, error.h, hard-locale.c, hard-locale.h,
+long-options.c, long-options.h, memcoll.c, memcoll.h, sort.c, sys2.h,
+system.h, version-etc.c, version-etc.h, xalloc.h, xmalloc.c
 
 they are considered a separate package, not part of GLOBAL proper.

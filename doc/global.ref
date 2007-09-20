@@ -4,18 +4,18 @@ global - print the locations of specified object.
 @unnumberedsubsec SYNOPSIS
 @noindent
 @quotation
-global [-ailnqrstTvx] pattern@*
+global [-aGilnqrstTvx][-e] pattern@*
 global -c[qsv] prefix@*
 global -f[anqrstvx] files@*
-global -g[ailnoqtvx] pattern@*
-global -I[ailnqtvx] pattern@*
+global -g[aGilnoqtvx][-e] pattern@*
+global -I[ailnqtvx][-e] pattern@*
 global -p[qrv]@*
-global -P[ailnqtvx] pattern@*
+global -P[aGilnoqtvx][-e] pattern@*
 global -u[qv]@*
 @end quotation
 @unnumberedsubsec DESCRIPTION
 Global find the locations of specified object
-in C, C++, Yacc, Java and assembler source files.
+in C, C++, Yacc, Java, PHP and Assembly source files.
 Global can treat a source tree, that is, a directory that
 has subdirectories and source files.
 You can get the relative path of objects from anywhere within the tree.
@@ -31,7 +31,8 @@ The following commands are available:
 @table @asis
 @item pattern
 Print object which match to the pattern.
-It can include POSIX 1003.2 regular expression.
+Extended regular expressions which are the same as those
+accepted by egrep(1) are available.
 @item @samp{-c}, @samp{--completion} [prefix]
 Print candidate function names which start with specified
 prefix. Prefix is not specified,
@@ -39,10 +40,9 @@ print all function names.
 @item @samp{-f}, @samp{--file} files
 Print all function definitions in the files.
 This option implies -x option.
-@item @samp{-g}, @samp{--grep} pattern
+@item @samp{-g}, @samp{--grep}
 Print all lines which match to the pattern.
-This function use grep(1) as a search engine.
-@item @samp{-I}, @samp{--idutils} pattern
+@item @samp{-I}, @samp{--idutils}
 Print all lines which match to the pattern.
 This function use id-utils(1) as a search engine.
 To use this command, you need to install id-utils(1)
@@ -65,6 +65,13 @@ The following options are available:
 @table @asis
 @item @samp{-a}, @samp{--absolute}
 Print absolute path name. By default, print relative path name.
+@item @samp{-e}, @samp{--regexp} pattern
+Use pattern as the pattern; useful to protect  patterns
+beginning with -.
+@item @samp{-G}, @samp{--basic-regexp}
+Interpret pattern as a  basic regular expression.
+The default is extended regular expression.
+This option is valid for the @samp{-g} and @samp{-P} command.
 @item @samp{-i}, @samp{--ignore-case}
 ignore case distinctions in pattern.
 @item @samp{-l}, @samp{--local}
@@ -74,14 +81,14 @@ Suppress sort filter and path conversion filter.
 @item @samp{-o}, @samp{--other}
 Search pattern in not only source files but also other files
 like @file{README}.
-This options is valid only with @samp{-g} option.
+This option is valid only with @samp{-g} or @samp{-P} command.
 @item @samp{-q}, @samp{--quiet}
 Quiet mode.
 @item @samp{-r}, @samp{--reference}, @samp{--rootdir}
 Print the locations of object references.
 By default, print object definitions.
 With the @samp{-p} option, print the root directory of source tree.
-@item @samp{-s}, @samp{--symbol} pattern
+@item @samp{-s}, @samp{--symbol}
 Print the locations of specified symbol other than function names.
 You need @file{GSYMS} tags file. See gtags(1).
 @item @samp{-t}, @samp{--tags}
@@ -99,33 +106,33 @@ the line contents.
 @end table
 @unnumberedsubsec EXAMPLES
 @example
-	% ls -F
+	$ ls -F
 	Makefile      src/    lib/
-	% gtags
-	% global main
+	$ gtags
+	$ global main
 	src/main.c
-	% global -x main
+	$ global -x main
 	main              10 src/main.c  main (argc, argv) @{
-	% global -x '^[sg]et'
+	$ global -x '^[sg]et'
 	set_num           20 lib/util.c  set_num(values)
 	get_num           30 lib/util.c  get_num() @{
-	% global -rx '^[sg]et'
+	$ global -rx '^[sg]et'
 	set_num          113 src/op.c            set_num(32);
 	set_num          225 src/opop.c               if (set_num(0) > 0) @{
 	get_num           90 src/op.c            while (get_num() > 0) @{
-	% cd lib
-	% global -rx '^[sg]et'
+	$ cd lib
+	$ global -rx '^[sg]et'
 	set_num          113 ../src/op.c            set_num(32);
 	set_num          225 ../src/opop.c               if (set_num(0) > 0) @{
 	get_num           90 ../src/op.c            while (get_num() > 0) @{
-	% global strlen
-	% (cd /usr/src/sys; gtags)
-	% setenv GTAGSLIBPATH /usr/src/sys
-	% global strlen
+	$ global strlen
+	$ (cd /usr/src/sys; gtags)
+	$ export GTAGSLIBPATH=/usr/src/sys
+	$ global strlen
 	../../../usr/src/sys/libkern/strlen.c
-	% (cd /usr/src/lib; gtags)
-	% setenv GTAGSLIBPATH /usr/src/lib:/usr/src/sys
-	% global strlen
+	$ (cd /usr/src/lib; gtags)
+	$ GTAGSLIBPATH=/usr/src/lib:/usr/src/sys
+	$ global strlen
 	../../../usr/src/lib/libc/string/strlen.c
 @end example
 @unnumberedsubsec FILES
@@ -166,22 +173,18 @@ The following configuration variables affect the execution of global:
 @table @asis
 @item @code{icase_path}(boolean)
 Ignore case distinctions in the pattern.
-@item @code{sed_command}(string)
-Use specified sed(1) command, which is used internally.
-@item @code{sort_command}(string)
-Use specified sort(1) command, which is used internally.
 @end table
 @unnumberedsubsec DIAGNOSTICS
 Global exits with a non 0 value if an error occurred, 0 otherwise.
 @unnumberedsubsec SEE ALSO
-btreeop(1),
-gctags(1),
+gtags-parser(1),
 gtags(1),
-htags(1).
+htags(1),
+less(1).
 
 GNU GLOBAL source code tag system@*
 (http://www.gnu.org/software/global/).
 @unnumberedsubsec AUTHOR
-Shigio Yamaguchi
+Tama Communications Corporation.
 @unnumberedsubsec HISTORY
 The global command appeared in FreeBSD 2.2.2.

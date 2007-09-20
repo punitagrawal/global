@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -35,38 +33,50 @@
 #include "makepath.h"
 #include "strbuf.h"
 
-static STRBUF	*sb;
 /*
  * makepath: make path from directory and file.
  *
- *	i)	dir	directory
+ *	i)	dir	directory(optional)
  *	i)	file	file
  *	i)	suffix	suffix(optional)
  *	r)		path
+ *
+ * It is necessary to note the usage of makepath(), because it returns
+ * module local area. If makepath() is called again in the function which
+ * is passed the return value of makepath(), then the value is overwritten.
+ * This may cause the bug which is not understood easily.
+ * You must not pass the return value except for the safe functions
+ * described below.
+ * 
+ * Here are safe functions.
+ * o functions in standard C library.
+ * o following libutil functions:
+ *   test(), dbop_open(), strlimcpy(), strbuf_puts(), die()
  */
 char	*
 makepath(dir, file, suffix)
-const char *dir;
-const char *file;
-const char *suffix;
+	const char *dir;
+	const char *file;
+	const char *suffix;
 {
-	int	length;
-	char	sep = '/';
+	STATIC_STRBUF(sb);
+	int length;
+	char sep = '/';
 
-	if (sb == NULL)
-		sb = strbuf_open(0);
-	strbuf_reset(sb);
-	if ((length = strlen(dir)) > MAXPATHLEN)
-		die("path name too long. '%s'\n", dir);
+	strbuf_clear(sb);
+	if (dir != NULL) {
+		if ((length = strlen(dir)) > MAXPATHLEN)
+			die("path name too long. '%s'\n", dir);
 
 #if defined(_WIN32) || defined(__DJGPP__)
-	/* follows native way. */
-	if (dir[0] == '\\' || dir[2] == '\\')
-		sep = '\\';
+		/* follows native way. */
+		if (dir[0] == '\\' || dir[2] == '\\')
+			sep = '\\';
 #endif
-	strbuf_puts(sb, dir);
-	strbuf_unputc(sb, sep);
-	strbuf_putc(sb, sep);
+		strbuf_puts(sb, dir);
+		strbuf_unputc(sb, sep);
+		strbuf_putc(sb, sep);
+	}
 	strbuf_puts(sb, file);
 	if (suffix) {
 		if (*suffix != '.')

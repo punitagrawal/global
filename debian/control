@@ -1,23 +1,23 @@
 Source: global
 Section: devel
 Priority: optional
-Build-Depends: debhelper (>=2.0)
+Build-Depends: debhelper (>=4.0), texinfo
 Maintainer: Ron Lee <ron@debian.org>
-Standards-Version: 3.5.6
+Standards-Version: 3.6.2.1
 
 Package: global
 Architecture: any
 Depends: ${shlibs:Depends}
-Suggests: lynx | www-browser, apache | httpd, id-utils
-Description: Source code search and browse.
+Suggests: lynx | www-browser, doxygen (>=1.4.3), apache | httpd, id-utils
+Description: Source code search and browse tools
  GLOBAL is a source code tag system that works the same way across
  diverse environments. Currently, it supports the following:
  .
-    o Shell command line (see 'Global')
-    o nvi editor (see 'Extended nvi using global')
-    o emacs editor (see 'Emacs using global')
-    o Web browser (see 'Hypertext generator')
-    o Elvis editor (see 'Elvis using global')
+   o command line, and the 'globash' query subshell.
+   o vim plugin, and support for other vi clones.
+   o less
+   o emacs
+   o web browser
  .
  Supported languages are C/C++ Yacc and Java.
  You can locate a specified function in the source files and move
@@ -28,3 +28,7 @@ Description: Source code search and browse.
  This package include the htmake(1) extension which allows GLOBAL's
  hypertext search function to be implemented from a single central
  cgi script.
+ .
+ Doxygen now supports using global as its source browser, with the
+ USE_HTAGS option.
+

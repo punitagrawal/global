@@ -1,7 +1,6 @@
 ## Process this file with automake to create Makefile.in
 #
-# Copyright (c) 2000, 2001, 2002
-#        Tama Communications Corporation. All rights reserved.
+# Copyright (c) 2000, 2001, 2002 Tama Communications Corporation
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -11,14 +10,17 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-SUBDIRS= libdb libglibc libutil btreeop gctags global gozilla gtags htags doc
+SUBDIRS= libdb libglibc libutil gtags-parser global gozilla gtags htags doc
 
 EXTRA_DIST = FAQ LICENSE \
 	gtags.conf gtags.el nvi-1.79-gtags.diff reconf.sh globash.rc \
-	convert.pl gtags.pl \
-	w32/INSTALL w32/libs w32/make.bat w32/makefile.inc \
-	w32/btreeop/makefile w32/gctags/makefile w32/global/makefile \
-	w32/gtags/makefile w32/htags/makefile w32/libdb/makefile \
-	w32/libglibc/makefile w32/libutil/makefile w32/gozilla/makefile \
-	w32/libdb/objs w32/libglibc/objs w32/libutil/objs \
-	w32/htags/htags.bat w32/machine/config.h w32/machine/unistd.h
+	convert.pl gtags.pl gtags.vim
+
+gtagsdir = ${datadir}/gtags
+gtags_DATA = AUTHORS COPYING ChangeLog FAQ INSTALL LICENSE NEWS README THANKS \
+        globash.rc gtags.conf gtags.el gtags.pl gtags.vim nvi-1.79-gtags.diff \
+	htags/bless.sh.tmpl htags/global.cgi.tmpl htags/style.css
+
+# If you would like to install gtags.el to the lisp directory then uncomment
+# the following line.
+# dist_lisp_LISP = gtags.el

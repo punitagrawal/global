@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 2002 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -16,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -28,24 +27,24 @@
 /*
  * strlimcpy: copy string with limit.
  *
- *	o)	dist	distination string
+ *	o)	dest	destination string
  *	i)	source	source string
- *	i)	limit	size of dist
+ *	i)	limit	size of dest
  *
  * NOTE: This function is similar to strlcpy of OpenBSD but is different
  * because strlimcpy abort when it beyond the limit.
  */
 void
-strlimcpy(dist, source, limit)
-char *dist;
-const char *source;
-const int limit;
+strlimcpy(dest, source, limit)
+	char *dest;
+	const char *const source;
+	const int limit;
 {
 	int n = (int)limit;
-	char *d = dist;
+	const char *s = source;
 
 	while (n--)
-		if (!(*d++ = *source++))
+		if (!(*dest++ = *s++))
 			return;
-	die("buffer overflow. strlimcpy(dist, '%s', %d).", source, limit);
+	die("buffer overflow. strlimcpy(dest, '%s', %d).", source, limit);
 }

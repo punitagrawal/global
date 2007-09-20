@@ -4,8 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2001, 2002
-        Tama Communications Corporation. All rights reserved.
+ Copyright (c) 2000, 2001, 2002, 2003, 2004 Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
  unlimited permission to copy and/or distribute it, with or without
@@ -23,8 +22,10 @@ Thanks to:		for his(her):
 ---------------------------------------------------------------------------
 A.E. Brouwer		advice about writing code for generic UNIX.
 Andrew Gallatin		bug report about generating wrong path.
+Andrs Azar		Cygwin trouble report.
 Andy Newman		bug report about treating tab character.
-Andy Zhou		bug report about gctags overlook 'extern' prefixed function.
+Andy Zhou		bug report about gtags-parser overlook 'extern' prefixed function.
+Bakken, Luke		bug fix method about stat() in htags(1).
 Bert Gijsbers		investigation about mandoc macro and a bug report.
 Bob Bentley		bug report about bless.sh and gtags.
 Christoph Conrad	bug report and advice about S.u.S.E Linux 5.1.
@@ -33,25 +34,29 @@ Dan Fandrich		port to Windows 32 environment.
 Darryl Okahata		benchmark report about global(1).
 David Aspinwall		port to Cygwin 32 environment.
 David Brownlee		advice about fine coding style of C.
+Dimitri van Heesch      integration of Doxygen and GLOBAL.
+Don Fisher		bug report about the buffer overflow in htags(1).
 Dunford, Martin		advice about Windows 32 version of GLOBAL.
 Dirk Schultheis		advice about compat.h for Solaris.
 Emile Heyns		advice about writing code for generic UNIX.
-Eric Paire		bug report about gctags's memory violation.
+Eric Paire		bug report about gtags-parser's memory violation.
 Gary Kline		advice about the name of parser.
-Giuseppe Corbelli	Global.py for glimmer code editor.
-Hageseter, Trond E.	bug report about gctags.
+Giuseppe Corbelli	Global.py for glimmer code editor and an advice about vim.
+Hageseter, Trond E.	bug report about gtags-parser.
 Hideaki Okada		idea about -g option of global(1).
-Hideki Iwamoto		bug report about the parser - gctags(1).
+Hideki Iwamoto		many bug reports and improvements about gtags-parser(1), htags(1).
 Hideki Mori		advice about the name of parser.
 Hidetaka KOIE		bug report and advice about configure.in for Solaris7.
 Hiroshi MIURA		idea about printing file name on browser's status bar.
-Jason Hood		port to DJGPP environment and bug report about globash.rc.
+Jason Hood		port to DJGPP and Mingw32, and bug report about globash.rc.
 Jeff Trawick		idea about -l option of htags(1).
 Jordan K. Hubbard	idea about supporting BSD's obj directory.
 Jos Backus		bug report about global.cgi.
 Julien Gilles		idea about -T option of global(1).
+Jun Inoue		idea about generation of lex symbol.
 Jun Obama		improvements on gtags.el.
 Justin Tripp		software evaluation for GNU standard.
+Justin Wojdacki		bug report about htags(1).
 Katsuyuki Okabe		advice about deciding emacs version.
 Klaus Borchers		advice about deciding emacs version.
 Koen Hufkens		advice about HP-UX 10.x.
@@ -66,19 +71,27 @@ Masato Yoshida		bug report and fix method about <NOFRAME> tag.
 Motonori Iwamuro	bug report and fix method about strbuf_fgets function.
 Oleg Checkulaev		advice about writing code for generic UNIX.
 Oliver Paukstadt	idea about -c (gzipped html) option of htags(1).
-Paul Lew		advice about compat.h for Solaris.
+Patrick Strasser	bug report about the --caution and --style-sheet option of htags(1).
+Paul Lew		advice about the build in Solaris environment.
+Pawel Wilk		idea about home_etc facility on PLD Linux/GNU.
 Philippe Defert		building on many plathomes and the problem report.
+Ray Simard		detailed investigation about POSIX dirent(3).
 Richard Stallman	advice about gtags.el and GNU style packaging.
+Rob Fitzgerald		bug fix patch for global(1).
 Ron Lee			Debian package, htmake(1) and many bug reports.
+Rui Lopes		report about build error in *BSD and revision of term.
+Ruppert Koch		bug report about htags(1).
 Sadaichi Hayashida	idea about generating relative path.
+Satoru SATOH		profitable materrial for the support of XHTML.
 Sergio Talens-Oliag	writing online manual for systags(1).
 Shankar Chakkere	useful method to use vim editor with GLOBAL.
 Shigeyuki Yamano	idea about -h option of htags(1).
 Silas S. Brown		proofreading about manuals.
 Sven Verdoolaege	support for gtags.pl(nvi-1.81.5).
 Steve Kirkendall	two commands of Elvis for external tag system.
-Takao Yamashita		advice about assembler parsing.
+Takao Yamashita		advice about assembly parsing.
 Takeshi Hojo		idea about -c option of gtags(1).
+Thomas Gerigk		bug report about skip variable in gtags.conf.
 Thomas Klausner		report about groff's command error of *.1.
 Tim Vanderhoek		GLOBAL tag support on more(1).
 Tomohiko Morioka	advice about deciding emacs version.
@@ -90,7 +103,8 @@ Yann Dirson		many bug reports and many valuable suggestions.
 Yoshiharu Ito		advice about SunOS 4.1.3.
 Yoshinori Tomita	advice about compat.h for Solaris.
 Y. Yoshinaga		advice about makefile for Debian GNU/Linux.
+Yushi Oka		bug report about config path.
 ---------------------------------------------------------------------------
 
 If you cannot find your contributions on this list or you find mistakes,
-please let me <shigio@gnu.org> know. Thanks.
+please send to bug-global@gnu.org. Thanks.

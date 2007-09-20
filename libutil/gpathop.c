@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -41,11 +39,11 @@
 #include "gpathop.h"
 #include "strlimcpy.h"
 
-static DBOP	*dbop;
-static int	_nextkey;
-static int	_mode;
-static int	opened;
-static int	created;
+static DBOP *dbop;
+static int _nextkey;
+static int _mode;
+static int opened;
+static int created;
 
 /*
  * gpath_open: open gpath tag file
@@ -60,12 +58,10 @@ static int	created;
  */
 int
 gpath_open(dbpath, mode, flags)
-const char *dbpath;
-int	mode;
-int	flags;
+	const char *dbpath;
+	int mode;
+	int flags;
 {
-	char	*p;
-
 	assert(opened == 0);
 	/*
 	 * We create GPATH just first time.
@@ -73,17 +69,15 @@ int	flags;
 	_mode = mode;
 	if (mode == 1 && created)
 		mode = 0;
-	p = strdup(makepath(dbpath, dbname(GPATH), NULL));
-	if (p == NULL)
-		die("short of memory.");
-	dbop = dbop_open(p, mode, 0644, flags);
-	free(p);
+	dbop = dbop_open(makepath(dbpath, dbname(GPATH), NULL), mode, 0644, flags);
 	if (dbop == NULL)
 		return -1;
 	if (mode == 1)
 		_nextkey = 1;
 	else {
-		if (!(p = dbop_get(dbop, NEXTKEY)))
+		const char *p = dbop_get(dbop, NEXTKEY);
+
+		if (p == NULL)
 			die("nextkey not found in GPATH.");
 		_nextkey = atoi(p);
 	}
@@ -97,9 +91,9 @@ int	flags;
  */
 void
 gpath_put(path)
-const char *path;
+	const char *path;
 {
-	char	fid[32];
+	char fid[32];
 
 	assert(opened == 1);
 	if (_mode == 1 && created)
@@ -107,16 +101,8 @@ const char *path;
 	if (dbop_get(dbop, path) != NULL)
 		return;
 	snprintf(fid, sizeof(fid), "%d", _nextkey++);
-#ifdef USE_POSTGRES
-	if (dbop->openflags & DBOP_POSTGRES) {
-		dbop_put(dbop, path, fid, fid);
-	} else {
-#endif
-		dbop_put(dbop, path, fid, "0");
-		dbop_put(dbop, fid, path, "0");
-#ifdef USE_POSTGRES
-	}
-#endif
+	dbop_put(dbop, path, fid);
+	dbop_put(dbop, fid, path);
 }
 /*
  * gpath_path2fid: convert path into id
@@ -124,9 +110,9 @@ const char *path;
  *	i)	path	path name
  *	r)		file id
  */
-char *
+const char *
 gpath_path2fid(path)
-const char *path;
+	const char *path;
 {
 	assert(opened == 1);
 	return dbop_get(dbop, path);
@@ -137,14 +123,10 @@ const char *path;
  *	i)	fid	file id
  *	r)		path name
  */
-char *
+const char *
 gpath_fid2path(fid)
-const char *fid;
+	const char *fid;
 {
-#ifdef USE_POSTGRES
-	if (dbop->openflags & DBOP_POSTGRES)
-		return dbop_getkey_by_fid(dbop, fid);
-#endif
 	return dbop_get(dbop, fid);
 }
 /*
@@ -154,9 +136,9 @@ const char *fid;
  */
 void
 gpath_delete(path)
-const char *path;
+	const char *path;
 {
-	char	*fid;
+	const char *fid;
 
 	assert(opened == 1);
 	assert(_mode == 2);
@@ -164,16 +146,8 @@ const char *path;
 	fid = dbop_get(dbop, path);
 	if (fid == NULL)
 		return;
-#ifdef USE_POSTGRES
-	if (dbop->openflags & DBOP_POSTGRES) {
-		dbop_delete_by_fid(dbop, fid);
-	} else {
-#endif
-		dbop_delete(dbop, fid);
-		dbop_delete(dbop, path);
-#ifdef USE_POSTGRES
-	}
-#endif
+	dbop_delete(dbop, fid);
+	dbop_delete(dbop, path);
 }
 /*
  * gpath_nextkey: return next key
@@ -192,7 +166,7 @@ gpath_nextkey(void)
 void
 gpath_close(void)
 {
-	char	fid[32];
+	char fid[32];
 
 	assert(opened == 1);
 	opened = 0;
@@ -202,7 +176,7 @@ gpath_close(void)
 	}
 	snprintf(fid, sizeof(fid), "%d", _nextkey);
 	if (_mode == 1 || _mode == 2)
-		dbop_update(dbop, NEXTKEY, fid, "0");
+		dbop_update(dbop, NEXTKEY, fid);
 	dbop_close(dbop);
 	if (_mode == 1)
 		created = 1;
@@ -215,28 +189,22 @@ gpath_close(void)
  * because gfind_xxx() use GPATH (file index).
  * If GPATH exist then you should use this.
  */
-static DBOP	*gfind_dbop;
-static int      gfind_opened;
-static int      gfind_first;
-static char	gfind_prefix[MAXPATHLEN+1];
+static DBOP *gfind_dbop;
+static int gfind_opened;
+static int gfind_first;
+static char gfind_prefix[MAXPATHLEN+1];
 
 /*
  * gfind_open: start iterator using GPATH.
  */
 void
 gfind_open(dbpath, local)
-char	*dbpath;
-char	*local;
+	const char *dbpath;
+	const char *local;
 {
-	char *path;
-
 	assert(gfind_opened == 0);
 	assert(gfind_first == 0);
-	path = strdup(makepath(dbpath, dbname(GPATH), NULL));
-	if (path == NULL)
-		die("short of memory.");
-	gfind_dbop = dbop_open(path, 0, 0, 0);
-	free(path);
+	gfind_dbop = dbop_open(makepath(dbpath, dbname(GPATH), NULL), 0, 0, 0);
 	if (gfind_dbop == NULL)
 		die("GPATH not found.");
 	strlimcpy(gfind_prefix, (local) ? local : "./", sizeof(gfind_prefix));
@@ -248,8 +216,8 @@ char	*local;
  *
  *	r)		path
  */
-char	*
-gfind_read()
+const char *
+gfind_read(void)
 {
 	assert(gfind_opened == 1);
 	if (gfind_first) {

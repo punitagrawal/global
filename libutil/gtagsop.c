@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -39,6 +37,7 @@
 #include <unistd.h>
 #endif
 
+#include "char.h"
 #include "conf.h"
 #include "gparam.h"
 #include "dbop.h"
@@ -48,33 +47,60 @@
 #include "makepath.h"
 #include "path.h"
 #include "gpathop.h"
+#include "split.h"
 #include "strbuf.h"
 #include "strlimcpy.h"
 #include "strmake.h"
 #include "tab.h"
 
-static char	*genrecord(GTOP *);
-static int	belongto(GTOP *, char *, char *);
+static const char *unpack_pathindex(const char *);
+static const char *genrecord(GTOP *);
+static int belongto(GTOP *, const char *, const char *);
 static regex_t reg;
 
 /*
- * format version:
+ * The concept of format version.
+ *
+ * Since GLOBAL's tag files are machine independent, they can be distributed
+ * apart from GLOBAL itself. For example, if some network file system available,
+ * client may execute global using server's tag files. In this case, both
+ * GLOBAL are not necessarily the same version. So, we should assume that
+ * older version of GLOBAL might access the tag files which generated
+ * by new GLOBAL. To deal in such case, we decided to buried a version number
+ * to both global(1) and tag files. The conclete procedure is like follows:
+ *
+ * 1. Gtags(1) bury the version number in tag files.
+ * 2. Global(1) pick up the version number from a tag file. If the number
+ *    is larger than its acceptable version number then global give up work
+ *    any more and display error message.
+ * 3. If version number is not found then it assumes version 1.
+ *
+ * [History of format version]
+ *
  * GLOBAL-1.0 - 1.8	no idea about format version.
  * GLOBAL-1.9 - 2.24 	understand format version.
  *			support format version 1 (default).
  *			if (format version > 1) then print error message.
- * GLOBAL-3.0 - 4.0	understand format version.
- *			support format version 1 and 2.
+ * GLOBAL-3.0 - 4.5	support format version 1 and 2.
  *			if (format version > 2) then print error message.
- * format version 1:
+ * GLOBAL-4.5.1 -	support format version 1, 2 and 3.
+ *			if (format version > 3) then print error message.
+ * format version 1 (default):
  *	original format.
- * format version 2:
- *	compact format, path index.
+ * format version 2 (gtags -c):
+ *	compact format + pathindex format
+ * format version 3 (gtags -cc):
+ *	only pathindex format (undocumented)
+ *
+ * About GTAGS and GRTAGS, the default format is still version 1.
+ * Since if version number is not found then it assumes version 1, we
+ * don't bury format version in tag files currently.
+ *
+ * Since we know the format version 3 is better than 1 in all aspect,
+ * the default format version will be changed into 3 in the future.
  */
-static int	support_version = 2;	/* acceptable format version   */
+static int support_version = 3;	/* acceptable format version   */
 static const char *tagslist[] = {"GPATH", "GTAGS", "GRTAGS", "GSYMS"};
-static int init;
-static char regexchar[256];
 /*
  * dbname: return db name
  *
@@ -83,7 +109,7 @@ static char regexchar[256];
  */
 const char *
 dbname(db)
-int	db;
+	int db;
 {
 	assert(db >= 0 && db < GTAGLIM);
 	return tagslist[db];
@@ -91,22 +117,22 @@ int	db;
 /*
  * makecommand: make command line to make global tag file
  *
- *	i)	comline	skelton command line
+ *	i)	comline	skeleton command line
  *	i)	path	path name
  *	o)	sb	command line
  *
- * command skelton is like this:
- *	'gctags -r %s'
- * following skelton is allowed too.
- *	'gctags -r'
+ * command skeleton is like this:
+ *	'gtags-parser -r %s'
+ * following skeleton is allowed too.
+ *	'gtags-parser -r'
  */
 void
 makecommand(comline, path, sb)
-char	*comline;
-char	*path;
-STRBUF	*sb;
+	const char *comline;
+	const char *path;
+	STRBUF *sb;
 {
-	char	*p = locatestring(comline, "%s", MATCH_FIRST);
+	const char *p = locatestring(comline, "%s", MATCH_FIRST);
 
 	if (p) {
 		strbuf_nputs(sb, comline, p - comline);
@@ -119,96 +145,71 @@ STRBUF	*sb;
 	}
 }
 /*
- * isregex: test whether or not regular expression
- *
- *	i)	s	string
- *	r)		1: is regex, 0: not regex
- */
-int
-isregex(s)
-char	*s;
-{
-	int	c;
-
-	while ((c = *s++) != '\0')
-		if (isregexchar(c))
-			return 1;
-	return 0;
-}
-/*
  * formatcheck: check format of tag command's output
  *
  *	i)	line	input
- *	i)	flags	flag
- *	r)	0:	normal
- *		-1:	tag name
- *		-2:	line number
- *		-3:	path
+ *	i)	format	format
  *
- * [example of right format]
- *
- * $1                $2 $3             $4
+ * [STANDARD FORMAT]
+ * 0                 1  2              3
  * ----------------------------------------------------
- * main              83 ./ctags.c        main(argc, argv)
- */
-int
-formatcheck(line, flags)
-char	*line;
-int	flags;
-{
-	char	*p, *q;
-	/*
-	 * $1 = tagname: allowed any char except sepalator.
-	 */
-	p = q = line;
-	while (*p && !isspace(*p))
-		p++;
-	while (*p && isspace(*p))
-		p++;
-	if (p == q)
-		return -1;
-	/*
-	 * $2 = line number: must be digit.
-	 */
-	q = p;
-	while (*p && !isspace(*p))
-		if (!isdigit(*p))
-			return -2;
-		else
-			p++;
-	if (p == q)
-		return -2;
-	while (*p && isspace(*p))
-		p++;
-	/*
-	 * $3 = path:
-	 *	standard format: must start with './'.
-	 *	compact format: must be digit.
-	 */
-	if (flags & GTAGS_PATHINDEX) {
-		while (*p && !isspace(*p))
-			if (!isdigit(*p))
-				return -3;
-			else
-				p++;
-	} else {
-		if (!(*p == '.' && *(p + 1) == '/' && *(p + 2)))
-			return -3;
-	}
-	return 0;
-}
-/*
- * gtags_setinfo: set info string.
+ * func              83 ./func.c       func()
  *
- *      i)      info    info string
+ * [PATHINDEX FORMAT]
+ * 0                 1  2              3
+ * ----------------------------------------------------
+ * func              83 38             func()
  *
- * Currently this method is used for postgres.
+ * [COMPACT FORMAT]
+ * 0    1  2
+ * ----------------------------------------------------
+ * func 38 83,95,103,205
  */
 void
-gtags_setinfo(info)
-char *info;
+formatcheck(line, format)
+	const char *line;		/* virtually const */
+	int format;
 {
-	dbop_setinfo(info);
+	int n;
+	const char *p;
+	SPLIT ptable;
+
+	/*
+	 * Extract parts.
+	 */
+	n = split((char *)line, 4, &ptable);
+
+	/*
+	 * line number
+	 */
+	if (n < 4) {
+		recover(&ptable);
+		die("too small number of parts.\n'%s'", line);
+	}
+	for (p = ptable.part[1].start; *p; p++) {
+		if (!isdigit(*p)) {
+			recover(&ptable);
+			die("line number includes other than digit.\n'%s'", line);
+		}
+	}
+	/*
+	 * path name
+	 */
+	if (format == GTAGS_STANDARD) {
+		p = ptable.part[2].start;
+		if (!(*p == '.' && *(p + 1) == '/' && *(p + 2))) {
+			recover(&ptable);
+			die("path name must start with './'.\n'%s'", line);
+		}
+	}
+	if (format & GTAGS_PATHINDEX) {
+		for (p = ptable.part[2].start; *p; p++)
+			if (!isdigit(*p)) {
+				recover(&ptable);
+				die("file number includes other than digit.\n'%s'", line);
+			}
+	}
+	recover(&ptable);
 }
 /*
  * gtags_open: open global tag.
@@ -221,33 +222,23 @@ char *info;
  *			GTAGS_MODIFY: modify tag
  *	i)	flags	GTAGS_COMPACT
  *			GTAGS_PATHINDEX
- *			GTAGS_POSTGRES
  *	r)		GTOP structure
  *
  * when error occurred, gtagopen doesn't return.
  * GTAGS_PATHINDEX needs GTAGS_COMPACT.
  */
-GTOP	*
+GTOP *
 gtags_open(dbpath, root, db, mode, flags)
-char	*dbpath;
-char	*root;
-int	db;
-int	mode;
-int	flags;
+	const char *dbpath;
+	const char *root;
+	int db;
+	int mode;
+	int flags;
 {
-	GTOP	*gtop;
-	char	*path;
-	int	dbmode = 0;
-	int	dbopflags = 0;
+	GTOP *gtop;
+	int dbmode = 0;
+	int dbopflags = 0;
 
-	/* initialize for isregex() */
-	if (!init) {
-		regexchar['^'] = regexchar['$'] = regexchar['{'] =
-		regexchar['}'] = regexchar['('] = regexchar[')'] =
-		regexchar['.'] = regexchar['*'] = regexchar['+'] =
-		regexchar['['] = regexchar[']'] = regexchar['?'] =
-		regexchar['\\'] = init = 1;
-	}
 	if ((gtop = (GTOP *)calloc(sizeof(GTOP), 1)) == NULL)
 		die("short of memory.");
 	gtop->db = db;
@@ -271,20 +262,12 @@ int	flags;
 	 * allow duplicate records.
 	 */
 	dbopflags = DBOP_DUP;
-	if (flags & GTAGS_POSTGRES)
-		dbopflags |= DBOP_POSTGRES;
-	path = strdup(makepath(dbpath, dbname(db), NULL));
-	if (path == NULL)
-		die("short of memory.");
-	gtop->dbop = dbop_open(path, dbmode, 0644, dbopflags);
-	free(path);
+	gtop->dbop = dbop_open(makepath(dbpath, dbname(db), NULL), dbmode, 0644, dbopflags);
 	if (gtop->dbop == NULL) {
 		if (dbmode == 1)
 			die("cannot make %s.", dbname(db));
 		die("%s not found.", dbname(db));
 	}
-	if (gtop->dbop->openflags & DBOP_POSTGRES)
-		gtop->openflags |= GTAGS_POSTGRES;
 	/*
 	 * decide format version.
 	 */
@@ -298,18 +281,23 @@ int	flags;
 		gtop->format |= GTAGS_COMPACT;
 	if (gtop->mode == GTAGS_CREATE) {
 		if (flags & GTAGS_COMPACT) {
-			char	buf[80];
+			gtop->format |= GTAGS_COMPACT;
+			dbop_put(gtop->dbop, COMPACTKEY, COMPACTKEY);
+		}
+		if (flags & GTAGS_PATHINDEX) {
+			gtop->format |= GTAGS_PATHINDEX;
+			dbop_put(gtop->dbop, PATHINDEXKEY, PATHINDEXKEY);
+		}
+		if (gtop->format & (GTAGS_COMPACT|GTAGS_PATHINDEX)) {
+			char buf[80];
 
-			gtop->format_version = 2;
+			if (gtop->format == GTAGS_PATHINDEX)
+				gtop->format_version = 3;
+			else
+				gtop->format_version = 2;
 			snprintf(buf, sizeof(buf),
 				"%s %d", VERSIONKEY, gtop->format_version);
-			dbop_put(gtop->dbop, VERSIONKEY, buf, "0");
-			gtop->format |= GTAGS_COMPACT;
-			dbop_put(gtop->dbop, COMPACTKEY, COMPACTKEY, "0");
-			if (flags & GTAGS_PATHINDEX) {
-				gtop->format |= GTAGS_PATHINDEX;
-				dbop_put(gtop->dbop, PATHINDEXKEY, PATHINDEXKEY, "0");
-			}
+			dbop_put(gtop->dbop, VERSIONKEY, buf);
 		}
 	} else {
 		/*
@@ -318,7 +306,7 @@ int	flags;
 		 * if 'format version record' is not found, it's assumed
 		 * version 1.
 		 */
-		char	*p;
+		const char *p;
 
 		if ((p = dbop_get(gtop->dbop, VERSIONKEY)) != NULL) {
 			for (p += strlen(VERSIONKEY); *p && isspace(*p); p++)
@@ -361,43 +349,41 @@ int	flags;
  *	i)	gtop	descripter of GTOP
  *	i)	tag	tag name
  *	i)	record	ctags -x image
- *	i)	fid	file id.
  *
  * NOTE: If format is GTAGS_COMPACT then this function is destructive.
  */
 void
-gtags_put(gtop, tag, record, fid)
-GTOP	*gtop;
-char	*tag;
-char	*record;
-char	*fid;
+gtags_put(gtop, tag, record)
+	GTOP *gtop;
+	const char *tag;
+	const char *record;		/* virtually const */
 {
-#define PARTS 4
-	char *line, *path;
-	char *parts[PARTS];
+	const char *line, *path;
+	SPLIT ptable;
 
-	if (gtop->format == GTAGS_STANDARD) {
+	if (gtop->format == GTAGS_STANDARD || gtop->format == GTAGS_PATHINDEX) {
 		/* entab(record); */
-		dbop_put(gtop->dbop, tag, record, fid);
+		dbop_put(gtop->dbop, tag, record);
 		return;
 	}
 	/*
 	 * gtop->format & GTAGS_COMPACT
 	 */
-	if (split(record, '\t', PARTS, parts) != PARTS)
-		die("illegal format.");
-	line = parts[1];
-	path = parts[2];
+	if (split((char *)record, 4, &ptable) != 4) {
+		recover(&ptable);
+		die("illegal tag format.\n'%s'", record);
+	}
+	line = ptable.part[1].start;
+	path = ptable.part[2].start;
 	/*
 	 * First time, it occurs, because 'prev_tag' and 'prev_path' are NULL.
 	 */
 	if (strcmp(gtop->prev_tag, tag) || strcmp(gtop->prev_path, path)) {
 		if (gtop->prev_tag[0]) {
-			dbop_put(gtop->dbop, gtop->prev_tag, strbuf_value(gtop->sb), gtop->prev_fid);
+			dbop_put(gtop->dbop, gtop->prev_tag, strbuf_value(gtop->sb));
 		}
 		strlimcpy(gtop->prev_tag, tag, sizeof(gtop->prev_tag));
 		strlimcpy(gtop->prev_path, path, sizeof(gtop->prev_path));
-		strlimcpy(gtop->prev_fid, fid, sizeof(gtop->prev_fid));
 		/*
 		 * Start creating new record.
 		 */
@@ -410,7 +396,10 @@ char	*fid;
 	} else {
 		strbuf_putc(gtop->sb, ',');
 		strbuf_puts(gtop->sb, line);
+		if (strbuf_getlen(gtop->sb) > DBOP_PAGESIZE / 4)
+			gtop->prev_path[0] = '\0';
 	}
+	recover(&ptable);
 }
 /*
  * gtags_add: add tags belonging to the path into tag file.
@@ -422,34 +411,17 @@ char	*fid;
  */
 void
 gtags_add(gtop, comline, path, flags)
-GTOP	*gtop;
-char	*comline;
-char	*path;
-int	flags;
+	GTOP *gtop;
+	const char *comline;
+	const char *path;
+	int flags;
 {
-	char	*ctags_x;
-	FILE	*ip;
-	STRBUF	*sb = strbuf_open(0);
-	STRBUF	*ib = strbuf_open(MAXBUFLEN);
-	STRBUF	*sort_command = strbuf_open(0);
-	STRBUF	*sed_command = strbuf_open(0);
-	char	*fid;
+	const char *ctags_x;
+	FILE *ip;
+	STRBUF *sb = strbuf_open(0);
+	STRBUF *ib = strbuf_open(MAXBUFLEN);
+	const char *fid;
 
-	/*
-	 * get command name of sort and sed.
-	 */
-	if (!getconfs("sort_command", sort_command))
-		die("cannot get sort command name.");
-#if defined(_WIN32) || defined(__DJGPP__)
-	if (!locatestring(strbuf_value(sort_command), ".exe", MATCH_LAST))
-		strbuf_puts(sort_command, ".exe");
-#endif
-	if (!getconfs("sed_command", sed_command))
-		die("cannot get sed command name.");
-#if defined(_WIN32) || defined(__DJGPP__)
-	if (!locatestring(strbuf_value(sed_command), ".exe", MATCH_LAST))
-		strbuf_puts(sed_command, ".exe");
-#endif
 	/*
 	 * add path index if not yet.
 	 */
@@ -461,7 +433,7 @@ int	flags;
 	/*
 	 * get file id.
 	 */
-	if (gtop->format & GTAGS_PATHINDEX || gtop->openflags & GTAGS_POSTGRES) {
+	if (gtop->format & GTAGS_PATHINDEX) {
 		if (!(fid = gpath_path2fid(path)))
 			die("GPATH is corrupted.('%s' not found)", path);
 	} else
@@ -470,34 +442,30 @@ int	flags;
 	 * Compact format.
 	 */
 	if (gtop->format & GTAGS_PATHINDEX) {
-		strbuf_puts(sb, "| ");
-		strbuf_puts(sb, strbuf_value(sed_command));
+		strbuf_puts(sb, "| gtags --sed");
 		strbuf_putc(sb, ' ');
-		strbuf_puts(sb, "\"s@");
-		strbuf_puts(sb, path);
-		strbuf_puts(sb, "@");
 		strbuf_puts(sb, fid);
-		strbuf_puts(sb, "@\"");
 	}
-	if (gtop->format & GTAGS_COMPACT) {
-		strbuf_puts(sb, "| ");
-		strbuf_puts(sb, strbuf_value(sort_command));
-		strbuf_putc(sb, ' ');
-		strbuf_puts(sb, "+0 -1 +1n -2");
-	}
+	if (gtop->format & GTAGS_COMPACT)
+		strbuf_puts(sb, "| sort -k 1,1 -k 2,2n");
 	if (flags & GTAGS_UNIQUE)
 		strbuf_puts(sb, " -u");
+#ifdef DEBUG
 	if (flags & GTAGS_DEBUG)
 		fprintf(stderr, "gtags_add() executing '%s'\n", strbuf_value(sb));
+#endif
 	if (!(ip = popen(strbuf_value(sb), "r")))
 		die("cannot execute '%s'.", strbuf_value(sb));
 	while ((ctags_x = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL) {
-		char	*tag, *p;
+		char tag[MAXTOKEN], *p;
 
 		strbuf_trim(ib);
-		if (formatcheck(ctags_x, gtop->format) < 0)
-			die("invalid parser output.\n'%s'", ctags_x);
-		tag = strmake(ctags_x, " \t");		 /* tag = $1 */
+#ifdef DEBUG
+		if (flags & GTAGS_DEBUG)
+			formatcheck(ctags_x, gtop->format);
+#endif
+		/* tag = $1 */
+		strlimcpy(tag, strmake(ctags_x, " \t"), sizeof(tag));
 		/*
 		 * extract method when class method definition.
 		 *
@@ -506,17 +474,19 @@ int	flags;
 		 * key	= 'method'
 		 * data = 'Class::method  103 ./class.cpp ...'
 		 */
+		p = tag;
 		if (flags & GTAGS_EXTRACTMETHOD) {
 			if ((p = locatestring(tag, ".", MATCH_LAST)) != NULL)
-				tag = p + 1;
+				p++;
 			else if ((p = locatestring(tag, "::", MATCH_LAST)) != NULL)
-				tag = p + 2;
+				p += 2;
+			else
+				p = tag;
 		}
-		gtags_put(gtop, tag, ctags_x, fid);
+		gtags_put(gtop, p, ctags_x);
 	}
-	pclose(ip);
-	strbuf_close(sort_command);
-	strbuf_close(sed_command);
+	if (pclose(ip) != 0)
+		die("terminated abnormally.");
 	strbuf_close(sb);
 	strbuf_close(ib);
 }
@@ -526,35 +496,38 @@ int	flags;
  *	i)	gtop	GTOP structure
  *	i)	path	path name (in standard format)
  *			path number (in compact format)
- *	i)	p	record
+ *	i)	line	record
  *	r)		1: belong, 0: not belong
+ *
  */
 static int
-belongto(gtop, path, p)
-GTOP	*gtop;
-char	*path;
-char	*p;
+belongto(gtop, path, line)
+	GTOP *gtop;
+	const char *path;
+	const char *line;		/* virtually const */
 {
-	char	*q;
-	int	length = strlen(path);
+	const char *p = NULL;
+	int status, n;
+	SPLIT ptable;
 
 	/*
-	 * seek to path part.
+	 * Get path.
 	 */
-	if (gtop->format & GTAGS_PATHINDEX) {
-		for (q = p; *q && !isspace(*q); q++)
-			;
-		if (*q == 0)
-			die("invalid tag format. '%s'", p);
-		for (; *q && isspace(*q); q++)
-			;
-	} else
-		q = locatestring(p, "./", MATCH_FIRST);
-	if (*q == 0)
-		die("invalid tag format. '%s'", p);
-	if (!strncmp(q, path, length) && isspace(*(q + length)))
-		return 1;
-	return 0;
+	n = split((char *)line, 4, &ptable);
+	if (gtop->format == GTAGS_STANDARD || gtop->format == GTAGS_PATHINDEX) {
+		if (n < 4) {
+			recover(&ptable);
+			die("too small number of parts.\n'%s'", line);
+		}
+		p = ptable.part[2].start;
+	} else if (gtop->format & GTAGS_COMPACT) {
+		if (n != 3)
+			die("illegal compact format.\n");
+		p = ptable.part[1].start;
+	}
+	status = !strcmp(p, path) ? 1 : 0;
+	recover(&ptable);
+	return status;
 }
 /*
  * gtags_delete: delete records belong to path.
@@ -564,26 +537,16 @@ char	*p;
  */
 void
 gtags_delete(gtop, path)
-GTOP	*gtop;
-char	*path;
+	GTOP *gtop;
+	const char *path;
 {
-	char *p, *fid;
+	const char *p;
 	/*
 	 * In compact format, a path is saved as a file number.
 	 */
 	if (gtop->format & GTAGS_PATHINDEX)
 		if ((path = gpath_fid2path(path)) == NULL)
 			die("GPATH is corrupted.('%s' not found)", path);
-#ifdef USE_POSTGRES
-	if (gtop->openflags & GTAGS_POSTGRES) {
-		char *fid;
-
-		if ((fid = gpath_path2fid(path)) == NULL)
-			die("GPATH is corrupted.('%s' not found)", path);
-		dbop_delete_by_fid(gtop->dbop, fid);
-		return;
-	}
-#endif
 	/*
 	 * read sequentially, because db(1) has just one index.
 	 */
@@ -606,26 +569,29 @@ char	*path;
  *			GTOP_NOSOURCE	don't read source file(compact format)
  *			GTOP_NOREGEX	don't use regular expression.
  *			GTOP_IGNORECASE	ignore case distinction.
+ *			GTOP_BASICREGEX	use basic regular expression.
  *	r)		record
  */
-char *
+const char *
 gtags_first(gtop, pattern, flags)
-GTOP	*gtop;
-char	*pattern;
-int	flags;
+	GTOP *gtop;
+	const char *pattern;
+	int flags;
 {
-	int	dbflags = 0;
-	char	*line;
-	char    prefix[IDENTLEN+1], *p;
+	int dbflags = 0;
+	char prefix[IDENTLEN+1];
 	regex_t *preg = &reg;
-	char	*key;
-	int	regflags = REG_EXTENDED;
+	const char *key, *p, *line;
+	int regflags = 0;
 
 	gtop->flags = flags;
 	if (flags & GTOP_PREFIX && pattern != NULL)
 		dbflags |= DBOP_PREFIX;
 	if (flags & GTOP_KEY)
 		dbflags |= DBOP_KEY;
+
+	if (!(flags & GTOP_BASICREGEX))
+		regflags |= REG_EXTENDED;
 	if (flags & GTOP_IGNORECASE)
 		regflags |= REG_ICASE;
 
@@ -655,10 +621,12 @@ int	flags;
 		return NULL;
 	if (gtop->format == GTAGS_STANDARD || gtop->flags & GTOP_KEY)
 		return line;
+	if (gtop->format == GTAGS_PATHINDEX)
+		return unpack_pathindex(line);
 	/*
 	 * Compact format.
 	 */
-	gtop->line = line;			/* gtop->line = $0 */
+	gtop->line = (char *)line;		/* gtop->line = $0 */
 	gtop->opened = 0;
 	return genrecord(gtop);
 }
@@ -669,18 +637,26 @@ int	flags;
  *	r)		record
  *			NULL end of tag
  */
-char *
+const char *
 gtags_next(gtop)
-GTOP	*gtop;
+	GTOP *gtop;
 {
-	char	*line;
-
+	const char *line;
 	/*
 	 * If it is standard format or only key.
 	 * Just return it.
 	 */
 	if (gtop->format == GTAGS_STANDARD || gtop->flags & GTOP_KEY)
 		return dbop_next(gtop->dbop);
+	/*
+	 * Pathindex format.
+	 */
+	if (gtop->format == GTAGS_PATHINDEX) {
+		line = dbop_next(gtop->dbop);
+		if (line == NULL)
+			return NULL;
+		return unpack_pathindex(line);
+	}
 	/*
 	 * gtop->format & GTAGS_COMPACT
 	 */
@@ -691,7 +667,7 @@ GTOP	*gtop;
 	 */
 	if ((line = dbop_next(gtop->dbop)) == NULL)
 		return line;
-	gtop->line = line;			/* gtop->line = $0 */
+	gtop->line = (char *)line;		/* gtop->line = $0 */
 	gtop->opened = 0;
 	return genrecord(gtop);
 }
@@ -702,12 +678,12 @@ GTOP	*gtop;
  */
 void
 gtags_close(gtop)
-GTOP	*gtop;
+	GTOP *gtop;
 {
 	if (gtop->format & GTAGS_PATHINDEX || gtop->mode != GTAGS_READ)
 		gpath_close();
 	if (gtop->sb && gtop->prev_tag[0])
-		dbop_put(gtop->dbop, gtop->prev_tag, strbuf_value(gtop->sb), "0");
+		dbop_put(gtop->dbop, gtop->prev_tag, strbuf_value(gtop->sb));
 	if (gtop->sb)
 		strbuf_close(gtop->sb);
 	if (gtop->ib)
@@ -715,47 +691,91 @@ GTOP	*gtop;
 	dbop_close(gtop->dbop);
 	free(gtop);
 }
-static char *
-genrecord(gtop)
-GTOP	*gtop;
+/*
+ * unpack_pathindex: convert pathindex format into standard format.
+ *
+ *	i)	line	tag line
+ */
+static const char *
+unpack_pathindex(line)
+	const char *line;		/* virtually const */
 {
-	static char	output[MAXBUFLEN+1];
-	char	path[MAXPATHLEN+1];
-	static char	buf[1];
-	char	*buffer = buf;
-	char	*lnop;
-	int	tagline;
+	STATIC_STRBUF(output);
+	SPLIT ptable;
+	int n;
+	const char *path;
+
+	n = split((char *)line, 4, &ptable);
+	if (n < 4) {
+		recover(&ptable);
+		die("illegal tag format.'%s'\n", line);
+	}
+	/*
+	 * extract path and convert into file number.
+	 */
+	path = gpath_fid2path(ptable.part[2].start);
+	if (path == NULL)
+		die("GPATH is corrupted.(fid '%s' not found)", ptable.part[2].start);
+	recover(&ptable);
+	/*
+	 * copy line with converting.
+	 */
+	strbuf_clear(output);
+	strbuf_nputs(output, line, ptable.part[2].start - line);
+	strbuf_puts(output, path);
+	strbuf_puts(output, ptable.part[2].end);
+
+	return strbuf_value(output);
+}
+/*
+ * genrecord: generate original tag line from compact format.
+ *
+ *	io)	gtop	GTOP structure
+ *	r)		tag line
+ */
+static const char *
+genrecord(gtop)
+	GTOP *gtop;
+{
+	SPLIT ptable;
+	static char output[MAXBUFLEN+1];
+	char path[MAXPATHLEN+1];
+	static char buf[1];
+	const char *buffer = buf;
+	const char *lnop;
+	int tagline;
 
 	if (!gtop->opened) {
-		char	*p, *q;
+		int n;
+		const char *p;
 
 		gtop->opened = 1;
-		p = gtop->line;
-		q = gtop->tag;				/* gtop->tag = $1 */
-		while (!isspace(*p))
-			*q++ = *p++;
-		*q = 0;
-		for (; isspace(*p) ; p++)
-			;
-		if (gtop->format & GTAGS_PATHINDEX) {	/* gtop->path = $2 */
-			char	*name;
-
-			q = path;
-			while (!isspace(*p))
-				*q++ = *p++;
-			*q = 0;
-			if ((name = gpath_fid2path(path)) == NULL)
-				die("GPATH is corrupted.('%s' not found)", path);
-			strlimcpy(gtop->path, name, sizeof(gtop->path));
-		} else {
-			q = gtop->path;
-			while (!isspace(*p))
-				*q++ = *p++;
-			*q = 0;
+		n = split(gtop->line, 3, &ptable);
+		if (n != 3) {
+			recover(&ptable);
+			die("illegal compact format. '%s'\n", gtop->line);
 		}
-		for (; isspace(*p) ; p++)
-			;
-		gtop->lnop = p;			/* gtop->lnop = $3 */
+		/*
+		 * gtop->tag = part[0]
+		 */
+		strlimcpy(gtop->tag, ptable.part[0].start, sizeof(gtop->tag));
+
+		/*
+		 * gtop->path = part[1]
+		 */
+		p = ptable.part[1].start;
+		if (gtop->format & GTAGS_PATHINDEX) {
+			const char *q;
+			if ((q = gpath_fid2path(p)) == NULL)
+				die("GPATH is corrupted.('%s' not found)", p);
+			p = q;
+		}
+		strlimcpy(gtop->path, p, sizeof(gtop->path));
+
+		/*
+		 * gtop->lnop = part[2]
+		 */
+		gtop->lnop = ptable.part[2].start;
 
 		if (gtop->root)
 			snprintf(path, sizeof(path),
@@ -766,6 +786,7 @@ GTOP	*gtop;
 			if ((gtop->fp = fopen(path, "r")) != NULL)
 				gtop->lno = 0;
 		}
+		recover(&ptable);
 	}
 
 	lnop = gtop->lnop;
@@ -781,7 +802,7 @@ GTOP	*gtop;
 				return output;
 			while (gtop->lno < tagline) {
 				if (!(buffer = strbuf_fgets(gtop->ib, gtop->fp, STRBUF_NOCRLF)))
-					die("unexpected end of file. '%s'", path);
+					die("unexpected end of file. '%s'", gtop->path);
 				strbuf_trim(gtop->ib);
 				gtop->lno++;
 			}

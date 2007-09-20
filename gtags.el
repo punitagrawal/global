@@ -1,10 +1,7 @@
 ;;; gtags.el --- gtags facility for Emacs
 
 ;;
-;; Copyright (c) 1997, 1998, 1999
-;;             Shigio Yamaguchi. All rights reserved.
-;; Copyright (c) 1999, 2000
-;;             Tama Communications Corporation. All rights reserved.
+;; Copyright (c) 1997, 1998, 1999, 2000 Tama Communications Corporation
 ;;
 ;; This file is part of GNU GLOBAL.
 ;;
@@ -20,11 +17,11 @@
 ;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 ;;
 
 ;; GLOBAL home page is at: http://www.gnu.org/software/global/
-;; Author: Shigio Yamaguchi
+;; Author: Tama Communications Corporation
 ;; Version: 2.0
 ;; Keywords: tools
 
@@ -273,7 +270,7 @@
   (gtags-find-with "g"))
 
 (defun gtags-find-with-idutils ()
-  "Input pattern, search with idutils(1) and move to the locations."
+  "Input pattern, search with id-utils(1) and move to the locations."
   (interactive)
   (gtags-find-with "I"))
 
@@ -381,7 +378,7 @@
 ;; common function
 ;;
 
-;; find with grep or idutils.
+;; find with grep or id-utils.
 (defun gtags-find-with (flag)
   (let (tagname prompt input)
     (setq tagname (gtags-current-token))
@@ -486,7 +483,7 @@ Input symbol and move to the locations.
 	\\[gtags-find-symbol]
 Input pattern, search with grep(1) and move to the locations.
 	\\[gtags-find-with-grep]
-Input pattern, search with idutils(1) and move to the locations.
+Input pattern, search with id-utils(1) and move to the locations.
 	\\[gtags-find-with-idutils]
 Input pattern and move to the top of the file.
 	\\[gtags-find-file]

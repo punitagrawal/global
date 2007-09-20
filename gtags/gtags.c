@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -26,12 +24,22 @@
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #include <ctype.h>
 #include <utime.h>
 #include <signal.h>
 #include <stdio.h>
+#if TIME_WITH_SYS_TIME
+#include <sys/time.h>
 #include <time.h>
+#else
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#endif
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif
@@ -48,66 +56,68 @@
 #include "global.h"
 #include "const.h"
 
-static void	usage(void);
-void	signal_setup(void);
-void	onintr(int);
-int	match(char *, char *);
-int	main(int, char **);
-int	incremental(char *, char *);
-void	updatetags(char *, char *, char *, int);
-void	createtags(char *, char *, int);
-char	*now(void);
-int	printconf(char *);
-void	set_base_directory(char *, char *);
-void	put_converting(char *, int);
+static void usage(void);
+static void help(void);
+void signal_setup(void);
+void onintr(int);
+int match(const char *, const char *);
+int main(int, char **);
+int incremental(const char *, const char *);
+void updatetags(const char *, const char *, const char *, int);
+void createtags(const char *, const char *, int);
+int printconf(const char *);
+void set_base_directory(const char *, const char *);
+void put_converting(const char *, int, int);
 
-int	cflag;					/* compact format */
-int	iflag;					/* incremental update */
-int	Iflag;					/* make  idutils index */
-int	oflag;					/* suppress making GSYMS */
-int	Pflag;					/* use postgres */
-int	qflag;					/* quiet mode */
-int	wflag;					/* warning message */
-int	vflag;					/* verbose mode */
-int     show_version;
-int     show_help;
-int	show_config;
-int	do_find;
-int	do_sort;
-int	do_write;
-int	do_relative;
-int	do_absolute;
-int	do_expand;
-int	do_date;
-int	do_pwd;
-int	gtagsconf;
-int	other_files;
-int	info;
-int	debug;
-char	*extra_options;
-char	*info_string;
+int cflag;					/* compact format */
+int iflag;					/* incremental update */
+int Iflag;					/* make  id-utils index */
+int oflag;					/* suppress making GSYMS */
+int qflag;					/* quiet mode */
+int wflag;					/* warning message */
+int vflag;					/* verbose mode */
+int show_version;
+int show_help;
+int show_config;
+int do_convert;
+int do_find;
+int do_sed;
+int do_sort;
+int do_relative;
+int do_absolute;
+int cxref;
+int do_expand;
+int gtagsconf;
+int gtagslabel;
+int other_files;
+int debug;
+int secure_mode;
+const char *extra_options;
+const char *info_string;
+const char *sed_string;
 
-int	extractmethod;
-int	total;
+int extractmethod;
+int total;
 
 static void
-usage()
+usage(void)
 {
 	if (!qflag)
 		fputs(usage_const, stderr);
 	exit(2);
 }
 static void
-help()
+help(void)
 {
 	fputs(usage_const, stdout);
 	fputs(help_const, stdout);
-	exit(2);
+	exit(0);
 }
 
 static struct option const long_options[] = {
 	{"absolute", no_argument, &do_absolute, 1},
 	{"compact", no_argument, NULL, 'c'},
+	{"cxref", no_argument, &cxref, 1},
 	{"incremental", no_argument, NULL, 'i'},
 	{"omit-gsyms", no_argument, NULL, 'o'},
 	{"quiet", no_argument, NULL, 'q'},
@@ -116,19 +126,18 @@ static struct option const long_options[] = {
 
 	/* long name only */
 	{"config", optional_argument, &show_config, 1},
-	{"date", no_argument, &do_date, 1},
+	{"convert", no_argument, &do_convert, 1},
 	{"debug", no_argument, &debug, 1},
 	{"expand", required_argument, &do_expand, 1},
 	{"find", no_argument, &do_find, 1},
 	{"gtagsconf", required_argument, &gtagsconf, 1},
+	{"gtagslabel", required_argument, &gtagslabel, 1},
 	{"idutils", no_argument, NULL, 'I'},
-	{"info", required_argument, &info, 1},
 	{"other", no_argument, &other_files, 1},
-	{"postgres", optional_argument, NULL, 'P'},
-	{"pwd", no_argument, &do_pwd, 1},
 	{"relative", no_argument, &do_relative, 1},
+	{"secure", no_argument, &secure_mode, 1},
+	{"sed", required_argument, &do_sed, 1},
 	{"sort", no_argument, &do_sort, 1},
-	{"write", no_argument, &do_write, 1},
 	{"version", no_argument, &show_version, 1},
 	{"help", no_argument, &show_help, 1},
 	{ 0 }
@@ -137,18 +146,20 @@ static struct option const long_options[] = {
 /*
  * Gtags catch signal even if the parent ignore it.
  */
-int	exitflag = 0;
+int exitflag = 0;
+
+static const char *langmap = DEFAULTLANGMAP;
 
 void
 onintr(signo)
-int     signo;
+	int signo;
 {
 	signo = 0;      /* to satisfy compiler */
 	exitflag = 1;
 }
 
 void
-signal_setup()
+signal_setup(void)
 {
 	signal(SIGINT, onintr);
 	signal(SIGTERM, onintr);
@@ -162,10 +173,10 @@ signal_setup()
 
 int
 match(curtag, line)
-char *curtag;
-char *line;
+	const char *curtag;
+	const char *line;
 {
-	char *p, *q = line;
+	const char *p, *q = line;
 
 	for (p = curtag; *p; p++)
 		if (*p != *q++)
@@ -177,17 +188,17 @@ char *line;
 
 int
 main(argc, argv)
-int	argc;
-char	*argv[];
+	int argc;
+	char *argv[];
 {
-	char    root[MAXPATHLEN+1];
-	char	dbpath[MAXPATHLEN+1];
-	char	cwd[MAXPATHLEN+1];
-	STRBUF	*sb = strbuf_open(0);
+	char root[MAXPATHLEN+1];
+	char dbpath[MAXPATHLEN+1];
+	char cwd[MAXPATHLEN+1];
+	STRBUF *sb = strbuf_open(0);
 	const char *p;
-	int	db;
-	int	optchar;
-	int	option_index = 0;
+	int db;
+	int optchar;
+	int option_index = 0;
 
 	while ((optchar = getopt_long(argc, argv, "cGiIoPqvw", long_options, &option_index)) != EOF) {
 		switch (optchar) {
@@ -195,28 +206,24 @@ char	*argv[];
 			p = long_options[option_index].name;
 			if (!strcmp(p, "expand")) {
 				settabs(atoi(optarg + 1));
-			} else if (!strcmp(p, "info")) {
-				info_string = optarg;
 			} else if (!strcmp(p, "config")) {
 				if (optarg)
 					info_string = optarg;
-			} else if (gtagsconf) {
-				char    conf[MAXPATHLEN+1];
-				char	*env;
+			} else if (!strcmp(p, "sed")) {
+				if (optarg)
+					sed_string = optarg;
+			} else if (gtagsconf || gtagslabel) {
+				char value[MAXPATHLEN+1];
+				const char *name = (gtagsconf) ? "GTAGSCONF" : "GTAGSLABEL";
 
-				gtagsconf = 0;
-				if (realpath(optarg, conf) == NULL)
-					die("%s not found.", optarg);
-#ifdef HAVE_PUTENV
-				env = (char *)malloc(strlen("GTAGSCONF=")+strlen(conf)+1);
-				if (!env)	
-					die("short of memory.");
-				strcpy(env, "GTAGSCONF=");
-				strcat(env, conf);
-				putenv(env);
-#else
-				setenv("GTAGSCONF", conf, 1);
-#endif /* HAVE_PUTENV */
+				if (gtagsconf) {
+					if (realpath(optarg, value) == NULL)
+						die("%s not found.", optarg);
+				} else {
+					strlimcpy(value, optarg, sizeof(value));
+				}
+				set_env(name, value);
+				gtagsconf = gtagslabel = 0;
 			}
 			break;
 		case 'c':
@@ -230,12 +237,6 @@ char	*argv[];
 			break;
 		case 'o':
 			oflag++;
-			break;
-		case 'P':
-			Pflag++;
-			/* pass info string to PQconnectdb(3) */
-			if (optarg)
-				gtags_setinfo(optarg);
 			break;
 		case 'q':
 			qflag++;
@@ -258,15 +259,6 @@ char	*argv[];
 	}
 	if (qflag)
 		vflag = 0;
-#ifndef USE_POSTGRES
-	if (Pflag)
-		die_with_code(2, "The -P option not available. Please configure GLOBAL with --with-postgres and rebuild it.");
-#endif
-	if (Pflag) {
-		/* for backward compatibility */
-		if (info_string)
-			gtags_setinfo(info_string);
-	}
 	if (show_version)
 		version(NULL, vflag);
 	if (show_help)
@@ -284,125 +276,232 @@ char	*argv[];
 			fprintf(stdout, "%s\n", getconfline());
 		}
 		exit(0);
+	} else if (do_convert) {
+		STRBUF *ib = strbuf_open(MAXBUFLEN);
+		const char *fid;
+		char *p, *q;
+		int c;
+
+		/*
+		 * [Job]
+		 *
+		 * Read line from stdin and replace " ./<file name> "
+		 * with the file number like this.
+		 *
+		 * <a href='http://xxx/global/S/ ./main.c .html#110'>main</a>\n
+		 *				|
+		 *				v
+		 * <a href='http://xxx/global/S/39.html#110'>main</a>\n
+		 *
+		 * If the file name is not found in GPATH, change into the path to CGI script.
+		 * <a href='http://xxx/global/S/ ./README .html#9'>main</a>\n
+		 *				|
+		 *				v
+		 * <a href='http://xxx/global/cgi-bin/global.cgi?pattern=README&amp;type=source#9'>main</a>\n
+		 */
+		if (gpath_open(".", 0, 0) < 0)
+			die("GPATH not found.");
+		while (strbuf_fgets(ib, stdin, 0) != NULL) {
+			p = strbuf_value(ib);
+			if (strncmp("<a ", p, 3))
+				continue;
+			q = locatestring(p, "/S/ ", MATCH_FIRST);
+			if (q == NULL) {
+				printf("%s: ERROR(1): %s", progname, strbuf_value(ib));
+				continue;
+			}
+			/* Print just before "/S/ " and skip "/S/ ". */
+			for (; p < q; p++)
+				putc(*p, stdout);
+			for (; *p && *p != ' '; p++)
+				;
+			/* Extract path name. */
+			for (q = ++p; *q && *q != ' '; q++)
+				;
+			if (*q == '\0') {
+				printf("%s: ERROR(2): %s", progname, strbuf_value(ib));
+				continue;
+			}
+			*q++ = '\0';
+			/*
+			 * Convert path name into URL.
+			 * The output of 'global -xgo' may include lines about
+			 * files other than source code. In this case, file id
+			 * doesn't exist in GPATH.
+			 */
+			fid = gpath_path2fid(p);
+			if (fid) {
+				fputs("/S/", stdout);
+				fputs(fid, stdout);
+				fputs(q, stdout);
+			} else {
+				fputs("/cgi-bin/global.cgi?pattern=", stdout);
+				p += 2;
+				while ((c = (unsigned char)*p++) != '\0') {
+					if (isalnum(c))
+						putc(c, stdout);
+					else
+						printf("%%%02x", c);
+				}
+				fputs("&amp;type=source", stdout);
+				for (; *q && *q != '#'; q++)
+					;
+				if (*q == '\0') {
+					printf("%s: ERROR(2): %s", progname, strbuf_value(ib));
+					continue;
+				}
+				fputs(q, stdout);
+			}
+		}
+		gpath_close();
+		strbuf_close(ib);
+		exit(0);
 	} else if (do_expand) {
+		/*
+		 * The 'gtags --expand' is nearly equivalent with 'expand'.
+		 * We made this command to decrease dependency to external
+		 * command. But now, the --secure option use this command
+		 * positively.
+		 */
 		FILE *ip;
 		STRBUF *ib = strbuf_open(MAXBUFLEN);
 
-		ip = (argc) ? fopen(argv[0], "r") : stdin;
-		if (ip == NULL)
-			exit(1);
+		if (argc) {
+			if (secure_mode) {
+				char	buf[MAXPATHLEN+1], *path;
+				getdbpath(cwd, root, dbpath, 0);
+				path = realpath(argv[0], buf);
+				if (path == NULL)
+					die("realpath(%s, buf) failed. (errno=%d).", argv[0], errno);
+				if (!isabspath(path))
+					die("realpath(3) is not compatible with BSD version.");
+				if (strncmp(path, root, strlen(root)))
+					die("'%s' is out of source tree.", path);
+			}
+			ip = fopen(argv[0], "r");
+			if (ip == NULL)
+				exit(1);
+		} else
+			ip = stdin;
 		while (strbuf_fgets(ib, ip, STRBUF_NOCRLF) != NULL)
 			detab(stdout, strbuf_value(ib));
 		strbuf_close(ib);
 		exit(0);
-	} else if (do_date) {
-		fprintf(stdout, "%s\n", now());
-		exit(0);
-	} else if (do_pwd) {
-		if (!getcwd(cwd, MAXPATHLEN))
-			die("cannot get current directory.");
-		canonpath(cwd);
-		fprintf(stdout, "%s\n", cwd);
-		exit(0);
 	} else if (do_find) {
-		char	*path;
+		/*
+		 * This code is used by htags(1) to traverse file system.
+		 *
+		 * If the --other option is not specified, 'gtags --find'
+		 * read GPATH instead of traversing file. But if the option
+		 * is specified, it traverse file system every time.
+		 * It is because gtags doesn't record the paths other than
+		 * source file in GPATH.
+		 * Since it is slow, gtags should record not only source
+		 * files but also other files in GPATH in the future.
+		 * But it needs adding a new format version.
+		 */
+		const char *path;
+		const char *local = (argc) ? argv[0] : NULL;
 
-		if (other_files) {
-			for (find_open(); (path = find_read()) != NULL; )
-				fprintf(stdout, "%s\n", path);
-			find_close();
-		} else {
-			char *local = (argc) ? argv[0] : "./";
-			getdbpath(cwd, root, dbpath, 0);
-			for (gfind_open(dbpath, local); (path = gfind_read()) != NULL; )
-				fprintf(stdout, "%s\n", path);
-			gfind_close();
+		for (vfind_open(local, other_files); (path = vfind_read()) != NULL; ) {
+			fputs(path, stdout);
+			fputc('\n', stdout);
+		}
+		vfind_close();
+		exit(0);
+	} else if (do_sed) {
+		/*
+		 * This code is used by gtags(1) to convert from path to
+		 * file id. The 'gtags --sed fid' is equivalent with
+		 * 'sed "s@<path>@fid@"'.
+		 */
+		STRBUF *ib = strbuf_open(MAXBUFLEN);
+		const char *ctags_x;
+
+		while ((ctags_x = strbuf_fgets(ib, stdin, 0)) != NULL) {
+			char *p = locatestring(ctags_x, "./", MATCH_FIRST);
+			if (p == NULL)
+				die("gtags --sed: path name not found.");
+			*p++ = '\0';
+			fputs(ctags_x, stdout);
+			while (*p && !isspace(*p))
+				p++;
+			fputs(sed_string, stdout);
+			fputs(p, stdout);
 		}
 		exit(0);
 	} else if (do_sort) {
 		/*
-		 * This is GLOBAL version of sort.
-		 * We replace sort with this procedure for performance.
+		 * This code and the makedupindex() in htags(1) compose
+		 * a pipeline 'global -x ".*" | gtags --sort'.
+		 * The 'gtags --sort' is equivalent with 'sort -k 1,1 -k 3,3 -k 2,2n -u'
+		 * but the latter is ineffective and needs a lot of temporary
+		 * files when applied to a huge file. (According to circumstances,
+		 * hundreds of files are generated.)
+		 *
+		 * Utilizing the feature that the output of 'global -x ".*"'
+		 * is already sorted in alphabetical order by tag name,
+		 * we splited the output into relatively small unit and
+		 * execute sort for each unit.
+		 *
+		 * It is not certain whether the present unit value is the best.
 		 */
 		int unit = 1500;
 		STRBUF *ib = strbuf_open(MAXBUFLEN);
-		char *line = strbuf_fgets(ib, stdin, 0);
+		const char *ctags_x = strbuf_fgets(ib, stdin, 0);
 
-		while (line != NULL) {
+		while (ctags_x != NULL) {
 			int count = 0;
-			FILE *op = popen("sort +0 -1 +2 -3 +1n -2 -u", "w");
+			FILE *op = popen("sort -k 1,1 -k 3,3 -k 2,2n -u", "w");
 			do {
-				fputs(line, op);
-			} while ((line = strbuf_fgets(ib, stdin, 0)) != NULL && ++count < unit);
-			if (line) {
+				fputs(ctags_x, op);
+			} while ((ctags_x = strbuf_fgets(ib, stdin, 0)) != NULL && ++count < unit);
+			if (ctags_x) {
 				/* curtag = current tag name */
 				STRBUF *curtag = strbuf_open(0);
-				char *p = line;
+				const char *p = ctags_x;
 				while (!isspace(*p))
 					strbuf_putc(curtag, *p++);
 				/* read until next tag name */
 				do {
-					fputs(line, op);
-				} while ((line = strbuf_fgets(ib, stdin, 0)) != NULL
-					&& match(strbuf_value(curtag), line));
+					fputs(ctags_x, op);
+				} while ((ctags_x = strbuf_fgets(ib, stdin, 0)) != NULL
+					&& match(strbuf_value(curtag), ctags_x));
 			}
-			pclose(op);
+			if (pclose(op) != 0)
+				die("terminated abnormally.");
 		}
-		exit(0);
-	} else if (do_write) {
-		FILE *op;
-		STRBUF *ib = strbuf_open(MAXBUFLEN);
-		int writing = 0;
-		int pipe = 0;
-
-		while (strbuf_fgets(ib, stdin, STRBUF_NOCRLF) != NULL) {
-			char *p = strbuf_value(ib);
-			if (*p == '<') {
-				strbuf_putc(ib, '\n');
-				fputs(p, op);
-			} else {
-				if (writing) {
-					if (pipe)
-						(void)pclose(op);
-					else
-						(void)fclose(op);
-				}
-				pipe = 0;
-				if (*p == 'N') {
-					p++;
-					if ((op = fopen(p, "w")) == NULL)
-						die("cannot create file '%s'.", p);
-				} else if (*p == 'C') {
-					char command[MAXPATHLEN];
-					p++;
-					snprintf(command, sizeof(command), "gzip -c > %s", p);
-					if ((op = popen(command, "w")) == NULL)
-						die("cannot create file '%s'.", p);
-					pipe = 1;
-				} else {
-					die("illegal internal file format (--write).");
-				}
-				writing = 1;
-			}
-		}
-		if (writing) {
-			if (pipe)
-				(void)pclose(op);
-			else
-				(void)fclose(op);
-		}
-		strbuf_close(ib);
 		exit(0);
 	} else if (do_relative || do_absolute) {
+		/*
+		 * This is the main body of path filter.
+		 * This code extract path name from tag line and
+		 * replace it with the relative or the absolute path name.
+		 *
+		 * By default, if we are in src/ directory, the output
+		 * should be converted like follws:
+		 *
+		 * main      10 ./src/main.c  main(argc, argv)\n
+		 * main      22 ./libc/func.c   main(argc, argv)\n
+		 *		v
+		 * main      10 main.c  main(argc, argv)\n
+		 * main      22 ../libc/func.c   main(argc, argv)\n
+		 *
+		 * Similarly, the --absolute option specified, then
+		 *		v
+		 * main      10 /prj/xxx/src/main.c  main(argc, argv)\n
+		 * main      22 /prj/xxx/libc/func.c   main(argc, argv)\n
+		 */
 		STRBUF *ib = strbuf_open(MAXBUFLEN);
-		char	*root = argv[0];
-		char	*cwd = argv[1];
+		const char *root = argv[0];
+		const char *cwd = argv[1];
+		const char *ctags_x;
 
 		if (argc < 2)
 			die("do_relative: 2 arguments needed.");
 		set_base_directory(root, cwd);
-		while (strbuf_fgets(ib, stdin, 0) != NULL)
-			put_converting(strbuf_value(ib), do_absolute ? 1 : 0);
+		while ((ctags_x = strbuf_fgets(ib, stdin, 0)) != NULL)
+			put_converting(ctags_x, do_absolute ? 1 : 0, cxref);
 		strbuf_close(ib);
 		exit(0);
 	} else if (Iflag) {
@@ -410,22 +509,6 @@ char	*argv[];
 			die("mkid not found.");
 	}
 
-	/*
-	 * Check whether or not your system has GLOBAL's gctags.
-	 * Some GNU/Linux distributions rename emacs's ctags to gctags!
-	 */
-	{
-		FILE *ip = popen("gctags --check", "r");
-		STRBUF *ib = strbuf_open(MAXBUFLEN);
-		if (strbuf_fgets(ib, ip, STRBUF_NOCRLF) == NULL || strcmp(strbuf_value(ib), "Part of GLOBAL")) {
-			if (!qflag) {
-				fprintf(stderr, "Warning: gctags in your system is not GLOBAL's one.\n");
-				fprintf(stderr, "Please type 'gctags --version'\n");
-			}
-		}
-		strbuf_close(ib);
-		pclose(ip);
-	}
 	if (!getcwd(cwd, MAXPATHLEN))
 		die("cannot get current directory.");
 	canonpath(cwd);
@@ -452,51 +535,41 @@ char	*argv[];
 	if (iflag && (!test("f", makepath(dbpath, dbname(GTAGS), NULL)) ||
 		!test("f", makepath(dbpath, dbname(GPATH), NULL)))) {
 		if (wflag)
-			fprintf(stderr, "Warning: GTAGS or GPATH not found. -i option ignored.\n");
+			warning("GTAGS or GPATH not found. -i option ignored.");
 		iflag = 0;
-	}
-	if (Pflag && iflag) {
-		if (wflag)
-			fprintf(stderr, "Warning: existing tag files are used. -P option ignored.\n");
-		Pflag = 0;
 	}
 	if (!test("d", dbpath))
 		die("directory '%s' not found.", dbpath);
 	if (vflag)
 		fprintf(stderr, "[%s] Gtags started.\n", now());
 	/*
-	 * load .gtagsrc or /etc/gtags.conf
+	 * load .globalrc or /etc/gtags.conf
 	 */
 	openconf();
 	if (getconfb("extractmethod"))
 		extractmethod = 1;
 	strbuf_reset(sb);
-	if (getconfs("format", sb) && !strcmp(strbuf_value(sb), "compact"))
+	if (cflag == 0 && getconfs("format", sb) && !strcmp(strbuf_value(sb), "compact"))
 		cflag++;
 	/*
-	 * teach gctags(1) where is dbpath by environment variable.
+	 * Pass the following information to gtags-parser(1)
+	 * using environment variable.
+	 *
+	 * o langmap
+	 * o DBPATH
 	 */
-#ifdef HAVE_PUTENV
-	{
-		char *env = (char *)malloc(strlen("GTAGSDBPATH=")+strlen(dbpath)+1);
-
-		if (!env)	
+	strbuf_reset(sb);
+	if (getconfs("langmap", sb)) {
+		const char *p = strdup(strbuf_value(sb));
+		if (p == NULL)
 			die("short of memory.");
-		strcpy(env, "GTAGSDBPATH=");
-		strcat(env, dbpath);
-		putenv(env);
+		langmap = p;
 	}
-#else
-	setenv("GTAGSDBPATH", dbpath, 1);
-#endif /* HAVE_PUTENV */
+	set_env("GTAGSLANGMAP", langmap);
+	set_env("GTAGSDBPATH", dbpath);
 
-	if (wflag) {
-#ifdef HAVE_PUTENV
-		putenv("GTAGSWARNING=1");
-#else
-		setenv("GTAGSWARNING", "1", 1);
-#endif /* HAVE_PUTENV */
-	}
+	if (wflag)
+		set_env("GTAGSWARNING", "1");
 	/*
 	 * incremental update.
 	 */
@@ -528,7 +601,7 @@ char	*argv[];
 			continue;
 		strbuf_reset(sb);
 		/*
-		 * get parser for db. (gctags by default)
+		 * get parser for db. (gtags-parser by default)
 		 */
 		if (!getconfs(dbname(db), sb))
 			continue;
@@ -555,30 +628,15 @@ char	*argv[];
 			exit(1);
 	}
 	/*
-	 * create idutils index.
+	 * create id-utils index.
 	 */
 	if (Iflag) {
-		char *path;
-
 		if (vflag)
-			fprintf(stderr, "[%s] Creating indexes for idutils.\n", now());
+			fprintf(stderr, "[%s] Creating indexes for id-utils.\n", now());
 		strbuf_reset(sb);
-		strbuf_puts(sb, "mkid --file=");
-		strbuf_puts(sb, makepath(dbpath, "ID", NULL));
+		strbuf_puts(sb, "mkid");
 		if (vflag)
 			strbuf_puts(sb, " -v");
-		if (extra_options) {
-			strbuf_putc(sb, ' ');
-			strbuf_puts(sb, extra_options);
-		}
-		/* append file list */
-		for (find_open(); (path = find_read()) != NULL; ) {
-			/* a blank at the head of path means 'NOT SOURCE'. */
-			if (*path == ' ')
-				continue;
-			strbuf_putc(sb, ' ');
-			strbuf_puts(sb, path);
-		}
 		if (vflag) {
 #ifdef __DJGPP__
 			if (is_unixy())	/* test for 4DOS as well? */
@@ -613,16 +671,16 @@ char	*argv[];
  */
 int
 incremental(dbpath, root)
-char	*dbpath;
-char	*root;
+	const char *dbpath;
+	const char *root;
 {
 	struct stat statp;
-	time_t	gtags_mtime;
-	STRBUF	*addlist = strbuf_open(0);
-	STRBUF	*updatelist = strbuf_open(0);
-	STRBUF	*deletelist = strbuf_open(0);
-	int	updated = 0;
-	char	*path;
+	time_t gtags_mtime;
+	STRBUF *addlist = strbuf_open(0);
+	STRBUF *updatelist = strbuf_open(0);
+	STRBUF *deletelist = strbuf_open(0);
+	int updated = 0;
+	const char *path;
 
 	if (vflag) {
 		fprintf(stderr, " Tag found in '%s'.\n", dbpath);
@@ -641,15 +699,10 @@ char	*root;
 	/*
 	 * make add list and update list.
 	 */
-	for (find_open(); (path = find_read()) != NULL; ) {
+	for (find_open(NULL); (path = find_read()) != NULL; ) {
 		/* a blank at the head of path means 'NOT SOURCE'. */
 		if (*path == ' ')
 			continue;
-		if (locatestring(path, " ", MATCH_FIRST)) {
-			if (!qflag)
-				fprintf(stderr, "Warning: '%s' ignored, because it includes blank in the path.\n", path);
-			continue;
-		}
 		if (stat(path, &statp) < 0)
 			die("stat failed '%s'.", path);
 		if (!gpath_path2fid(path))
@@ -662,7 +715,7 @@ char	*root;
 	 * make delete list.
 	 */
 	{
-		char    fid[32];
+		char fid[32];
 		int i, limit = gpath_nextkey();
 
 		for (i = 1; i < limit; i++) {
@@ -681,9 +734,9 @@ char	*root;
 	 */
 	signal_setup();
 	if (strbuf_getlen(updatelist) > 0) {
-		char	*start = strbuf_value(updatelist);
-		char	*end = start + strbuf_getlen(updatelist);
-		char	*p;
+		const char *start = strbuf_value(updatelist);
+		const char *end = start + strbuf_getlen(updatelist);
+		const char *p;
 
 		for (p = start; p < end; p += strlen(p) + 1) {
 			updatetags(dbpath, root, p, 0);
@@ -693,9 +746,9 @@ char	*root;
 		updated = 1;
 	}
 	if (strbuf_getlen(addlist) > 0) {
-		char	*start = strbuf_value(addlist);
-		char	*end = start + strbuf_getlen(addlist);
-		char	*p;
+		const char *start = strbuf_value(addlist);
+		const char *end = start + strbuf_getlen(addlist);
+		const char *p;
 
 		for (p = start; p < end; p += strlen(p) + 1) {
 			updatetags(dbpath, root, p, 1);
@@ -705,9 +758,9 @@ char	*root;
 		updated = 1;
 	}
 	if (strbuf_getlen(deletelist) > 0) {
-		char	*start = strbuf_value(deletelist);
-		char	*end = start + strbuf_getlen(deletelist);
-		char	*p;
+		const char *start = strbuf_value(deletelist);
+		const char *end = start + strbuf_getlen(deletelist);
+		const char *p;
 
 		for (p = start; p < end; p += strlen(p) + 1) {
 			updatetags(dbpath, root, p, 2);
@@ -727,7 +780,7 @@ char	*root;
 	if (exitflag)
 		exit(1);
 	if (updated) {
-		int	db;
+		int db;
 		/*
 		 * Update modification time of tag files
 		 * because they may have no definitions.
@@ -761,14 +814,14 @@ char	*root;
  */
 void
 updatetags(dbpath, root, path, type)
-char	*dbpath;
-char	*root;
-char	*path;
-int	type;
+	const char *dbpath;
+	const char *root;
+	const char *path;
+	int type;
 {
-	GTOP	*gtop;
-	STRBUF	*sb = strbuf_open(0);
-	int	db;
+	GTOP *gtop;
+	STRBUF *sb = strbuf_open(0);
+	int db;
 	const char *msg = NULL;
 
 	switch (type) {
@@ -777,9 +830,9 @@ int	type;
 	case 2:	msg = "Deleting"; break;
 	}
 	if (vflag)
-		fprintf(stderr, " %s tags of '%s' ...", msg, path + 2);
+		fprintf(stderr, " %s tags of %s ...", msg, path + 2);
 	for (db = GTAGS; db < GTAGLIM; db++) {
-		int	gflags = 0;
+		int gflags = 0;
 
 		if (exitflag)
 			break;
@@ -811,8 +864,6 @@ int	type;
 				gflags |= GTAGS_EXTRACTMETHOD;
 			if (debug)
 				gflags |= GTAGS_DEBUG;
-			if (Pflag)
-				gflags |= GTAGS_POSTGRES;
 			gtags_add(gtop, strbuf_value(sb), path, gflags);
 		}
 		gtags_close(gtop);
@@ -832,16 +883,16 @@ int	type;
  */
 void
 createtags(dbpath, root, db)
-char	*dbpath;
-char	*root;
-int	db;
+	const char *dbpath;
+	const char *root;
+	int db;
 {
-	char	*path;
-	GTOP	*gtop;
-	int	flags;
-	char	*comline;
-	STRBUF	*sb = strbuf_open(0);
-	int	count = 0;
+	const char *path;
+	GTOP *gtop;
+	int flags;
+	const char *comline;
+	STRBUF *sb = strbuf_open(0);
+	int count = 0;
 
 	/*
 	 * get tag command.
@@ -857,18 +908,24 @@ int	db;
 	if (db == GRTAGS && !test("f", makepath(dbpath, dbname(GTAGS), NULL)))
 		die("GTAGS needed to create GRTAGS.");
 	flags = 0;
+	/*
+	 * Compact format:
+	 *
+	 * -c: COMPACT format.
+	 * -cc: PATHINDEX format.
+	 * Ths -cc is undocumented.
+	 * In the future, it may become the standard format of GLOBAL.
+	 */
 	if (cflag) {
-		flags |= GTAGS_COMPACT;
 		flags |= GTAGS_PATHINDEX;
-	}
-	if (Pflag) {
-		flags |= GTAGS_POSTGRES;
+		if (cflag == 1)
+			flags |= GTAGS_COMPACT;
 	}
 	strbuf_reset(sb);
 	if (vflag > 1 && getconfs(dbname(db), sb))
 		fprintf(stderr, " using tag command '%s <path>'.\n", strbuf_value(sb));
 	gtop = gtags_open(dbpath, root, db, GTAGS_CREATE, flags);
-	for (find_open(); (path = find_read()) != NULL; ) {
+	for (find_open(NULL); (path = find_read()) != NULL; ) {
 		int	gflags = 0;
 		int	skip = 0;
 
@@ -877,11 +934,6 @@ int	db;
 			continue;
 		if (exitflag)
 			break;
-		if (locatestring(path, " ", MATCH_FIRST)) {
-			if (!qflag)
-				fprintf(stderr, "Warning: '%s' ignored, because it includes blank in the path.\n", path + 2);
-			continue;
-		}
 		count++;
 		/*
 		 * GSYMS doesn't treat asembler.
@@ -907,43 +959,13 @@ int	db;
 			gflags |= GTAGS_EXTRACTMETHOD;
 		if (debug)
 			gflags |= GTAGS_DEBUG;
-		if (Pflag)
-			gflags |= GTAGS_POSTGRES;
 		gtags_add(gtop, comline, path, gflags);
 	}
 	total = count;				/* save total count */
 	find_close();
 	gtags_close(gtop);
-	free(comline);
+	free((void *)comline);
 	strbuf_close(sb);
-}
-/*
- * now: current date and time
- *
- *	r)		date and time
- */
-char *
-now(void)
-{
-	static	char	buf[128];
-
-#ifdef HAVE_STRFTIME
-	time_t	tval;
-
-	if (time(&tval) == -1)
-		die("cannot get current time.");
-	(void)strftime(buf, sizeof(buf), "%a %b %d %H:%M:%S %Z %Y", localtime(&tval));
-#else
-	FILE	*ip;
-
-	strlimcpy(buf, "unkown time", sizeof(buf));
-	if (ip = popen("date", "r")) {
-		if (fgets(buf, sizeof(buf), ip))
-			buf[strlen(buf) - 1] = 0;
-		fclose(ip);
-	}
-#endif
-	return buf;
 }
 /*
  * printconf: print configuration data.
@@ -953,17 +975,17 @@ now(void)
  */
 int
 printconf(name)
-char	*name;
+	const char *name;
 {
-	int	num;
-	int	exist = 1;
+	int num;
+	int exist = 1;
 
 	if (getconfn(name, &num))
 		fprintf(stdout, "%d\n", num);
 	else if (getconfb(name))
 		fprintf(stdout, "1\n");
 	else {
-		STRBUF  *sb = strbuf_open(0);
+		STRBUF *sb = strbuf_open(0);
 		if (getconfs(name, sb))
 			fprintf(stdout, "%s\n", strbuf_value(sb));
 		else
@@ -977,14 +999,15 @@ char	*name;
  *
  *	i)	line	raw output from global(1)
  *	i)	absolute 1: absolute, 0: relative
+ *	i)	cxref 1: -x format, 0: file name only
  */
 static STRBUF *abspath;
 static char basedir[MAXPATHLEN+1];
 static int start_point;
 void
 set_base_directory(root, cwd)
-char	*root;
-char	*cwd;
+	const char *root;
+	const char *cwd;
 {
 	abspath = strbuf_open(MAXPATHLEN);
 	strbuf_puts(abspath, root);
@@ -997,19 +1020,25 @@ char	*cwd;
 	/* leave abspath unclosed. */
 }
 void
-put_converting(line, absolute)
-char	*line;
-int	absolute;
+put_converting(line, absolute, cxref)
+	const char *line;
+	int absolute;
+	int cxref;
 {
 	char buf[MAXPATHLEN+1];
-	char *p, *q;
-	int i = 0;
+	const char *p = line;
 
 	/*
 	 * print until path name.
 	 */
-	for (p = line; *p && *p != '.'; p++)
-		(void)putc(*p, stdout);
+	if (cxref) {
+		/* print tag name */
+		for (; *p && !isspace(*p); p++)
+			(void)putc(*p, stdout);
+		/* print blanks and line number */
+		for (; *p && *p != '.'; p++)
+			(void)putc(*p, stdout);
+	}
 	if (*p++ == '\0')
 		return;
 	/*
@@ -1024,8 +1053,8 @@ int	absolute;
 	if (absolute) {
 		(void)fputs(strbuf_value(abspath), stdout);
 	} else {
-		char *a = strbuf_value(abspath);
-		char *b = basedir;
+		const char *a = strbuf_value(abspath);
+		const char *b = basedir;
 #if defined(_WIN32) || defined(__DJGPP__)
 		/* skip drive char in 'c:/usr/bin' */
 		while (*a != '/')

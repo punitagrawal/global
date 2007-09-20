@@ -1,8 +1,5 @@
 /*
- * Copyright (c) 1997
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1999 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -76,8 +73,8 @@ abs2rel(path, base, result, size)
 	for (pp = path, bp = base; *pp && *bp && *pp == *bp; pp++, bp++)
 		if (*pp == '/')
 			branch = pp;
-	if ((*pp == 0 || *pp == '/' && *(pp + 1) == 0) &&
-	    (*bp == 0 || *bp == '/' && *(bp + 1) == 0)) {
+	if ((*pp == 0 || (*pp == '/' && *(pp + 1) == 0)) &&
+	    (*bp == 0 || (*bp == '/' && *(bp + 1) == 0))) {
 		rp = result;
 		*rp++ = '.';
 		if (*pp == '/' || *(pp - 1) == '/')
@@ -87,7 +84,7 @@ abs2rel(path, base, result, size)
 		*rp = 0;
 		goto finish;
 	}
-	if (*pp == 0 && *bp == '/' || *pp == '/' && *bp == 0)
+	if ((*pp == 0 && *bp == '/') || (*pp == '/' && *bp == 0))
 		branch = pp;
 	/*
 	 * up to root.

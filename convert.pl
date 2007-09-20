@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright (c) 2001
-#             Tama Communications Corporation. All rights reserved.
+# Copyright (c) 2001 Tama Communications Corporation
 #
 # This file is part of GNU GLOBAL.
 #
@@ -17,7 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 #
 # Main procedure.
 #
@@ -65,7 +64,9 @@ sub getline {
 		$_ = $lastline;
 		$lastline = '';
 	} else {
-		$_ = <INFILE>;
+		while (<INFILE>) {
+			last unless (/^#/);
+		}
 	}
 	($_) ? 1 : 0;
 }
@@ -227,13 +228,14 @@ sub convert {
 	while (s/\@xref\{($arg),($arg)\}/\\fB$1\\fP($2)/) {
 		;
 	}
+	s/\@{/{/g;
+	s/\@}/}/g;
 	s/\@br$/\n.br/;
 }
 sub gen {
 	local($arg) = '[^,]+';
 	print ".\\\" This file is generated automatically by $'com from $'infile.\n";
 	while (&'getline()) {
-		next if (/^#/);		# comment
 		if (/^\@HEADER\s+($arg),($arg),($arg),($arg)\n$/) {
 			print ".TH $1 $2 \"$3\" \"$4\"\n";
 		} elsif (/^\@NAME\s+(.*)$/) {
@@ -311,7 +313,6 @@ sub convert {
 sub gen {
 	print "\@c This file is generated automatically by $'com from $'infile.\n";
 	while (&'getline()) {
-		next if (/^#/);		# comment
 		if (/^\@HEADER/) {
 			;
 		} elsif (/^\@(NAME)\s+(.*)$/) {
@@ -384,7 +385,7 @@ sub gen {
 		$infile = "$dir/manual.in";
 		open(INFILE, $infile) || die("cannot open '$infile'\n");
 		while (<INFILE>) {
-			if (/^\@NAME\s+((\w+)\s+\-\s+.*)$/) {
+			if (/^\@NAME\s+((\S+)\s+\-\s+.*)$/) {
 				$line = $1;
 				$name = $2;
 				last;

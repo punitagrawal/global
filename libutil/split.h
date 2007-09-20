@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 2002 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -16,12 +15,37 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifndef _SPLIT_H_
 #define _SPLIT_H_
 
-int	split(char *, int, int, char **);
+#define NPART 10
+
+/*
+ * Element id for ctags -x format.
+ *
+ * PART_TAG     PART_LNO PART_PATH      PART_LINE
+ * +----------------------------------------------
+ * |main             227 src/main       main()
+ */
+#define PART_TAG  0
+#define PART_LNO  1
+#define PART_PATH 2
+#define PART_LINE 3
+
+typedef struct {
+        int npart;
+	struct part {
+		char *start;
+		char *end;
+		int savec;
+	} part[NPART];
+} SPLIT;
+
+int split(char *, int, SPLIT *);
+void recover(SPLIT *);
+void split_dump(SPLIT *);
 
 #endif /* ! _SPLIT_H_ */

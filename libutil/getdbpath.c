@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1997, 1998, 1999, 2000, 2002
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -18,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -55,9 +53,9 @@ static const char *makeobjdir;		/* obj directory		*/
  */
 static void
 setupvariables(verbose)
-int verbose;
+	int verbose;
 {
-	char *p;
+	const char *p;
 
 	if ((p = getenv("MAKEOBJDIRPREFIX")) != NULL) {
 		makeobjdirprefix = p;
@@ -89,12 +87,12 @@ int verbose;
  */
 int
 gtagsexist(candidate, dbpath, size, verbose)
-char	*candidate;
-char	*dbpath;
-int	size;
-int	verbose;
+	const char *candidate;
+	char *dbpath;
+	int size;
+	int verbose;
 {
-	char	path[MAXPATHLEN+1];
+	char path[MAXPATHLEN+1];
 
 	/*
 	 * setup makeobjdir and makeobjdirprefix (only first time).
@@ -156,13 +154,13 @@ int	verbose;
  */
 void
 getdbpath(cwd, root, dbpath, verbose)
-char	*cwd;
-char	*root;
-char	*dbpath;
-int	verbose;
+	char *cwd;
+	char *root;
+	char *dbpath;
+	int verbose;
 {
 	struct stat sb;
-	char	*p;
+	char *p;
 
 	if (!getcwd(cwd, MAXPATHLEN))
 		die("cannot get current directory.");
@@ -216,7 +214,7 @@ int	verbose;
 		do {
 			FILE *fp;
 			STRBUF *sb;
-			char *s, *path;
+			const char *s, *path;
 
 			path = makepath(root, "GTAGSROOT", NULL);
 			if (!test("fr", path)) {

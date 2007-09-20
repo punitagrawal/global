@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1996, 1997, 1998, 1999, 2000
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -21,11 +19,11 @@
  * the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _TAB
+#ifndef _TAB_H_
 #define _TAB_H_
 
-void	settabs(int);
-void	detab(FILE *, char *);
-void	entab(char *);
+void settabs(int);
+void detab(FILE *, const char *);
+void entab(char *);
 
 #endif /* ! _TAB_H_ */

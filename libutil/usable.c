@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2002
- *             Tama Communications Corporation. All rights reserved.
+ * Copyright (c) 1998, 1999, 2000, 2002
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -51,19 +49,20 @@ static const char *suffix[] = {".exe", ".com", ".bat",};
  * usable: check if command is executable or not.
  *
  *	i)	command
- *	r)		1: executable
- *			0: non executable
+ *	r)		==NULL: not found.
+ *			!=NULL: absolute path of command.
  */
 char *
 usable(command)
-char	*command;
+	const char *command;
 {
-	STRBUF	*sb;
-	char *p, *dir;
+	STRBUF *sb;
+	char *p;
+	const char *dir;
 	static char path[MAXPATHLEN+1];
 
 #if defined(_WIN32) || defined(__DJGPP__)
-	int	i, lim = sizeof(suffix)/sizeof(char *);
+	int i, lim = sizeof(suffix)/sizeof(char *);
 #endif
 
 	if (isabspath(command) || locatestring(command, "./", MATCH_AT_FIRST)

@@ -4,8 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2001, 2002
-        Tama Communications Corporation. All rights reserved.
+ Copyright (c) 2000, 2001, 2002, 2003, 2004 Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
  unlimited permission to copy and/or distribute it, with or without
@@ -18,36 +17,29 @@ ___________________________________
 		----------------------------------
 
 GNU GLOBAL is a source code tag system that works the same way across diverse
-environments. It supports C, C++, Yacc and Java source code.
+environments. It supports C, C++, Yacc, Java, PHP4 and assembler source code.
 
 * Installation
 
-	If you use a UNIX or DJGPP on Windows9X then please see 'INSTALL'.
-	If you want to use Borland C++ compiler on Windows32 environment
-	then please see 'w32/INSTALL'.
-
-	Note: I strongly recommend you to use UNIX(GNU/Linux,*BSD) environment.
-	I cannot say GLOBAL works well in Windows32 environment because
-	I don't use it and in fact I don't have it.
+	Please see 'INSTALL'.
 
 * Documentation
 
-	Please see 'doc/global.texi'(texinfo format) to know how to use GLOBAL.
-	The real GLOBAL documentation is incomplete, and will be revised.
+	Please see 'doc/global.txi'(texinfo format) to know how to use GLOBAL.
 	The descriptions about new facilities are added to 'NEWS'.  At least,
-	you had better read '[INCOMPATIBLE CHANGES]' for each version.
+	you should read '[INCOMPATIBLE CHANGES]' for each version.
 
 * License
 
 	You may redistribute copies of GNU GLOBAL under the terms of
-	the GNU General Public License.
-	For more information about these matters, see the files named COPYING.
+	the GNU General Public License.  For more information about
+	these matters, see the files named 'LICENSE' and 'COPYING'.
 
 * Latest information
 
-	You can see the latest information on GLOBAL's WWW.
+	You can see the latest information on GLOBAL's web site.
 
-	http://www.gnu.org/software/global/
+	http://www.gnu.org/software/global/whatsnew.html
 
 * Mailing list
 
@@ -55,8 +47,6 @@ environments. It supports C, C++, Yacc and Java source code.
 	in GLOBAL or you need help about GLOBAL, then some mailing lists are
 	available. Please see GLOBAL's WWW.
 
-	http://www.gnu.org/software/global/
+	http://www.gnu.org/software/global/maillist.html
 
 Enjoy!
-
-Shigio Yamaguchi

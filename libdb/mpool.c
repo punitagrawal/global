@@ -54,6 +54,10 @@ static char sccsid[] = "@(#)mpool.c	8.5 (Berkeley) 7/26/94";
 #include <unistd.h>
 #endif
 
+#if (defined(_WIN32) && !defined(__CYGWIN__))
+#define fsync _commit
+#endif
+
 #include "queue.h"
 #include "db.h"
 
@@ -436,10 +440,10 @@ mpool_stat(mp)
 	int cnt;
 	char *sep;
 
-	(void)fprintf(stderr, "%lu pages in the file\n", mp->npages);
+	(void)fprintf(stderr, "%lu pages in the file\n", (long unsigned int)mp->npages);
 	(void)fprintf(stderr,
 	    "page size %lu, cacheing %lu pages of %lu page max cache\n",
-	    mp->pagesize, mp->curcache, mp->maxcache);
+	    mp->pagesize, (long unsigned int)mp->curcache, (long unsigned int)mp->maxcache);
 	(void)fprintf(stderr, "%lu page puts, %lu page gets, %lu page new\n",
 	    mp->pageput, mp->pageget, mp->pagenew);
 	(void)fprintf(stderr, "%lu page allocs, %lu page flushes\n",

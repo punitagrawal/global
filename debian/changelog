@@ -1,3 +1,35 @@
+global (4.8.6-1) unstable; urgency=low
+
+  * New upstream release.  Closes: #262250, #318848
+  * Update to policy 2.6.2.1 and DH_COMPAT 4.
+  * global.info is now monolithic, drop the * again.
+  * gctags is dead, replaced by gtags-parser, and htags has been
+    reimplemented in C.  Performance gains are alleged.
+    Tentatively Closes: #159901, get back to me if pain persists.
+  * Suggest doxygen (>=1.4.3) as it can now use global as its
+    source browser.
+  * Include vim plugin and other goodies with examples.
+  * Don't build 'gnusort', use the system one.
+  * Add zero space breaks '\:' to long lines in the man pages.
+  * Fixes problem with --style-sheet option.  The original
+    reporter's example will not actually work as he might have
+    anticipated, but this clearly still Closes: #182187
+    which I could reproduce in 4.5-1.
+  * Install globash.rc in /etc with a couple of minor tweaks,
+    and a wrapper to call it in /usr/bin, with simple man page.
+    Noted in info docs.
+
+ -- Ron Lee <ron@debian.org>  Thu,  4 Aug 2005 18:08:14 +0930
+
+global (4.5-1.1) unstable; urgency=high
+
+  * NMU
+  * Bump debhelper build-dep to >=3, change DH_COMPAT to 3, change
+    debian/global.info to 'doc/global.info*', and build-dep on texinfo.
+    really closes: #136357.
+
+ -- Clint Adams <schizo@debian.org>  Sat, 26 Oct 2002 14:19:35 -0400
+
 global (4.5-1) unstable; urgency=low
 
   * New upstream release.

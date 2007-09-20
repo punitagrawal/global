@@ -9,6 +9,9 @@ const char *help_const = "Options:\n\
        If name is not specified then show whole of config entry.\n\
 --gtagsconf file\n\
        Load user's configuration from file.\n\
+--gtagslabel label\n\
+       label is used as the label of configuration file.\n\
+       The default is default.\n\
 -i, --incremental\n\
        Update tag files incrementally. You had better use\n\
        global(1) with the -u option.\n\
@@ -20,14 +23,15 @@ const char *help_const = "Options:\n\
 -o, --omit-gsyms\n\
        Suppress making GSYMS file.\n\
        Use this option if you don't use -s option of global(1).\n\
--P, --postgres\n\
-       Use postgres database system instead of db(3).\n\
-       you can pass info string to PQconnectdb(3)\n\
-       using --info option.\n\
 -q, --quiet\n\
        Quiet mode.\n\
 -v, --verbose\n\
        Verbose mode.\n\
 -w, --warning\n\
        Print warning messages.\n\
+dbpath\n\
+       The directory in which tag files are generated.\n\
+       The default is the current directory.\n\
+       It is useful when your source directory is on a read only\n\
+       device like CDROM.\n\
 ";

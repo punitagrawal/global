@@ -118,8 +118,16 @@ $htagsflags .= 'v' if $verbose;
 push @htagsopt,('-t',"$title") if $title;
 push @htagsopt,('-d',"$tags") if $tags;
 print "Executing: htags @htagsopt --action=$action --id=$id --nocgi $destdir\n" if $verbose;
-system('htags',@htagsopt,"--action=$action","--id=$id","--nocgi","$destdir") == 0 or
-	&error("Failed to execute htags.");
+
+# htags is a C program now, so the number of arguments is important.
+#
+if ($destdir eq '') {
+	system('htags',@htagsopt,"--action=$action","--id=$id","--nocgi") == 0 or
+		&error("Failed to execute htags.");
+} else {
+	system('htags',@htagsopt,"--action=$action","--id=$id","--nocgi","$destdir") == 0 or
+		&error("Failed to execute htags.");
+}
 
 # call htconfig
 #
