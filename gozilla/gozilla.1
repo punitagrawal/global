@@ -1,9 +1,11 @@
 .\" This file is generated automatically by convert.pl from gozilla/manual.in.
-.TH GOZILLA 1 "February 2002" "GNU Project"
+.TH GOZILLA 1 "May 2002" "GNU Project"
 .SH NAME
 gozilla \- force mozilla to display specified source file.
 .SH SYNOPSIS
-\fBgozilla\fP [+no][-b browser][-p] file
+\fBgozilla\fP [-b browser][-p][+no] file
+.br
+\fBgozilla\fP [-b browser][-p] -d name
 .br
 .SH DESCRIPTION
 \fBGozilla\fP force mozilla to display specified source
@@ -13,7 +15,15 @@ In advance of using this command, [1] you must execute \fBgtags\fP(1)
 and \fBhtags\fP(1) at the root directory of the source tree
 to make tag files, and [2] execute mozilla in you computer.
 Then you can execute gozilla at anywhere in the source tree.
+.PP
+First form:
+.br
 You can specify source file and the line number optionally.
+.PP
+Second form:
+.br
+You can specify definition name directly. Definition name must exist 
+in \'GTAGS\' tag file.
 .SH OPTIONS
 The following options are available:
 .TP
@@ -32,6 +42,9 @@ just print generated target URL.
 .TP
 \fIfile\fP
 path of source file or alias name.
+.TP
+\fB-d\fP \fIname\fP
+print function.
 .TP
 \fB-q\fP, \fB--quiet\fP
 Quiet mode.

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001
+ * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -43,10 +43,12 @@
 #include "defined.h"
 #include "die.h"
 #include "strbuf.h"
+#include "strlimcpy.h"
 #include "token.h"
 
 static	int	function_definition(int);
 static	void	condition_macro(int);
+static	int	seems_datatype(const char *);
 static	int	reserved(char *);
 
 /*
@@ -111,7 +113,7 @@ C(yacc)
 					char	savetok[MAXTOKEN], *saveline;
 					int	savelineno = lineno;
 
-					strcpy(savetok, token);
+					strlimcpy(savetok, token, sizeof(savetok));
 					strbuf_reset(sb);
 					strbuf_puts(sb, sp);
 					saveline = strbuf_value(sb);
@@ -119,16 +121,19 @@ C(yacc)
 						if (target == DEF)
 							PUT(savetok, savelineno, saveline);
 					} else {
-						if (target == SYM)
+						if (target == REF && defined(savetok))
 							PUT(savetok, savelineno, saveline);
 					}
 				}
 			} else {
 				if (dflag) {
-					if (target == REF && defined(token))
-						PUT(token, lineno, sp);
-					else if (target == SYM && !defined(token))
-						PUT(token, lineno, sp);
+					if (target == REF) {
+						if (defined(token))
+							PUT(token, lineno, sp);
+					} else if (target == SYM) {
+						if (!defined(token))
+							PUT(token, lineno, sp);
+					}
 				} else {
 					if (target == SYM)
 						PUT(token, lineno, sp);
@@ -294,60 +299,134 @@ C(yacc)
 		case C_TYPEDEF:
 			if (tflag) {
 				char	savetok[MAXTOKEN];
-				int	savelineno;
-				char	savefunc[MAXTOKEN];
-				int	savefunclineno;
-				int	typelevel = 0;
-				int	funclevel = 0;
+				int	savelineno = 0;
+				int	typedef_savelevel = level;
 
-				savetok[0] = savefunc[0] = 0;
-				while ((c = nexttoken("{}();", reserved)) != EOF) {
-					if (c == ';' && typelevel == 0)
-						break;
-					if (c == '(' || c == ')') {
-						if (c == '(') {
-							if (funclevel++ == 0) {
-								strcpy(savefunc, savetok);
-								savefunclineno = savelineno;
-								savetok[0] = 0;
-							}
-						}
-						if (c == ')') {
-							if (--funclevel == 0) {
-								strcpy(savetok, savefunc);
-								savelineno = savefunclineno;
-								savefunc[0] = 0;
-							}
-						}
-						continue;
-					} else if (c == '{' || c == '}') {
-						if (c == '{')
-							typelevel++;
-						if (c == '}')
-							typelevel--;
-						continue;
-					}
-					if (savetok[0]) {
-						if (target == SYM)
-							PUT(savetok, lineno, sp);
-						if (target == REF && defined(savetok))
-							PUT(savetok, lineno, sp);
-						savetok[0] = 0;
-					}
-					if (c == SYMBOL) {
-						/* save lastest token */
-						strcpy(savetok, token);
-						savelineno = lineno;
-					}
-				}
+				savetok[0] = 0;
+				c = nexttoken("{}(),;", reserved);
 				if (wflag && c == EOF) {
-					if (typelevel > 0)
-						fprintf(stderr, "Warning: typedef block unmatched. (last at level %d.)[+%d %s]\n", typelevel, lineno, curfile);
-					if (funclevel > 0)
-						fprintf(stderr, "Warning: () block unmatched. (last at level %d.)[+%d %s]\n", funclevel, lineno, curfile);
+					fprintf(stderr, "Warning: unexpected eof. [+%d %s]\n", lineno, curfile);
+					break;
+				} else if (c == C_ENUM || c == C_STRUCT || c == C_UNION) {
+					char *interest_enum = "{},;";
+					int c_ = c;
+
+					c = nexttoken(interest_enum, reserved);
+					/* read enum name if exist */
+					if (c == SYMBOL) {
+						if (target == SYM)
+							PUT(token, lineno, sp);
+						c = nexttoken(interest_enum, reserved);
+					}
+					for (; c != EOF; c = nexttoken(interest_enum, reserved)) {
+						switch (c) {
+						case CP_IFDEF:
+						case CP_IFNDEF:
+						case CP_IF:
+						case CP_ELIF:
+						case CP_ELSE:
+						case CP_ENDIF:
+						case CP_UNDEF:
+							condition_macro(c);
+							continue;
+						default:
+							break;
+						}
+						if (c == ';' && level == typedef_savelevel) {
+							if (savetok[0] && target == DEF)
+								PUT(savetok, savelineno, sp);
+							break;
+						} else if (c == '{')
+							level++;
+						else if (c == '}') {
+							if (--level == typedef_savelevel)
+								break;
+						} else if (c == SYMBOL) {
+							if (c_ == C_ENUM) {
+								if (target == DEF && level > typedef_savelevel)
+									PUT(token, lineno, sp);
+								if (target == SYM && level == typedef_savelevel)
+									PUT(token, lineno, sp);
+							} else {
+								if (target == REF) {
+									if (level > typedef_savelevel && defined(token))
+										PUT(token, lineno, sp);
+								} else if (target == SYM) {
+									if (!defined(token))
+										PUT(token, lineno, sp);
+								} else if (target == DEF) {
+									/* save lastest token */
+									strlimcpy(savetok, token, sizeof(savetok));
+									savelineno = lineno;
+								}
+							}
+						}
+					}
+					if (c == ';')
+						break;
+					if (wflag && c == EOF) {
+						fprintf(stderr, "Warning: unexpected eof. [+%d %s]\n", lineno, curfile);
+						break;
+					}
+					if (wflag && level != typedef_savelevel || c != '}') {
+						fprintf(stderr, "Warning: uneven {}. [+%d %s]\n", lineno, curfile);
+						break;
+					}
+				} else if (c == SYMBOL) {
+					if (target == REF && defined(token))
+						PUT(token, lineno, sp);
+					if (target == SYM && !defined(token))
+						PUT(token, lineno, sp);
 				}
-				if (target == DEF && savetok[0])
-					PUT(savetok, lineno, sp);
+				savetok[0] = 0;
+				while ((c = nexttoken("(),;", reserved)) != EOF) {
+					switch (c) {
+					case CP_IFDEF:
+					case CP_IFNDEF:
+					case CP_IF:
+					case CP_ELIF:
+					case CP_ELSE:
+					case CP_ENDIF:
+					case CP_UNDEF:
+						condition_macro(c);
+						continue;
+					default:
+						break;
+					}
+					if (c == '(')
+						level++;
+					else if (c == ')')
+						level--;
+					else if (c == SYMBOL) {
+						if (level > 0) {
+							if (target == SYM)
+								PUT(token, lineno, sp);
+						} else {
+							/* put latest token if any */
+							if (savetok[0]) {
+								if (target == SYM)
+									PUT(savetok, savelineno, sp);
+							}
+							/* save lastest token */
+							strlimcpy(savetok, token, sizeof(savetok));
+							savelineno = lineno;
+						}
+					} else if (c == ',' || c == ';') {
+						if (savetok[0]) {
+							if (target == DEF)
+								PUT(savetok, lineno, sp);
+							savetok[0] = 0;
+						}
+					}
+					if (level == 0 && c == ';')
+						break;
+				}
+				if (wflag) {
+					if (c == EOF)
+						fprintf(stderr, "Warning: unexpected eof. [+%d %s]\n", lineno, curfile);
+					else if (level > 0)
+						fprintf(stderr, "Warning: () block unmatched. (last at level %d.)[+%d %s]\n", level, lineno, curfile);
+				}
 			}
 			break;
 		default:
@@ -396,8 +475,13 @@ int	target;
 				break;
 		}
 		/* pick up symbol */
-		if (c == SYMBOL && target == SYM)
-			PUT(token, lineno, sp);
+		if (c == SYMBOL) {
+			if (target == REF) {
+				if (seems_datatype(token))
+					PUT(token, lineno, sp);
+			} else if (target == SYM)
+				PUT(token, lineno, sp);
+		}
 	}
 	if (c == EOF)
 		return 0;
@@ -434,8 +518,13 @@ int	target;
 			break;
 
 		/* pick up symbol */
-		if (c == SYMBOL && target == SYM)
-			PUT(token, lineno, sp);
+		if (c == SYMBOL) {
+			if (target == REF) {
+				if (seems_datatype(token))
+					PUT(token, lineno, sp);
+			} else if (target == SYM)
+				PUT(token, lineno, sp);
+		}
 	}
 	return 0;
 }
@@ -494,6 +583,28 @@ condition_macro(cc)
 		}
 	}
 }
+/*
+ * seems_datatype: decide whether or not it is a data type.
+ *
+ *	i)	token	token
+ *	r)		0: not data type, 1: data type
+ */
+static int
+seems_datatype(token)
+const char *token;
+{
+	int length = strlen(token);
+	const char *p = token + length;
+
+	if (length < 3)
+		return 0;
+	if (strcmp(p - 2, "_t"))
+		return 1;
+	for (p = token; *p; p++)
+		if (islower(*p))
+			return 0;
+	return 1;
+}
 		/* sorted by alphabet */
 static struct words words[] = {
 	{"##",		CP_SHARP},
@@ -524,11 +635,13 @@ static struct words words[] = {
 	{"%{",		YACC_BEGIN},
 	{"%}",		YACC_END},
 	{"__P",		C___P},
+	{"__attribute__",C___ATTRIBUTE__},
 	{"asm",		C_ASM},
 	{"auto",	C_AUTO},
 	{"break",	C_BREAK},
 	{"case",	C_CASE},
 	{"char",	C_CHAR},
+	{"const",	C_CONST},
 	{"continue",	C_CONTINUE},
 	{"default",	C_DEFAULT},
 	{"do",		C_DO},
@@ -554,6 +667,8 @@ static struct words words[] = {
 	{"union",	C_UNION},
 	{"unsigned",	C_UNSIGNED},
 	{"void",	C_VOID},
+	{"volatile",	C_VOLATILE},
+	{"wchar_t",	C_WCHAR_T},
 	{"while",	C_WHILE},
 };
 

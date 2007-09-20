@@ -1,7 +1,6 @@
-# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
-# Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -10,8 +9,6 @@
 # but WITHOUT ANY WARRANTY, to the extent permitted by law; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
-
-@SET_MAKE@
 
 #
 # Copyright (c) 2000, 2001
@@ -25,6 +22,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
+
 
 SHELL = @SHELL@
 
@@ -46,9 +44,13 @@ infodir = @infodir@
 mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
+
+DESTDIR =
+
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
+
 top_builddir = ..
 
 ACLOCAL = @ACLOCAL@
@@ -57,27 +59,22 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
-INSTALL_HEADER = $(INSTALL_DATA)
 transform = @program_transform_name@
+
 NORMAL_INSTALL = :
 PRE_INSTALL = :
 POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-AMTAR = @AMTAR@
-AWK = @AWK@
 CC = @CC@
-DEPDIR = @DEPDIR@
-EXEEXT = @EXEEXT@
 FIND = @FIND@
 GREP = @GREP@
-INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDADD = @LDADD@
-OBJEXT = @OBJEXT@
+MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 RANLIB = @RANLIB@
@@ -85,277 +82,247 @@ SED = @SED@
 SORT = @SORT@
 VERSION = @VERSION@
 XARGS = @XARGS@
-am__include = @am__include@
-am__quote = @am__quote@
-install_sh = @install_sh@
-
-INCLUDES = @INCLUDES@
 
 noinst_LIBRARIES = libgloutil.a
 
-noinst_HEADERS = \
-conf.h dbop.h defined.h die.h find.h getdbpath.h global.h gparam.h \
-gtagsop.h locatestring.h makepath.h path.h gpathop.h strbuf.h \
-strmake.h tab.h test.h token.h usable.h version.h is_unixy.h abs2rel.h
+noinst_HEADERS =  conf.h dbop.h defined.h die.h find.h getdbpath.h global.h gparam.h gtagsop.h locatestring.h makepath.h path.h gpathop.h strbuf.h strmake.h tab.h test.h token.h usable.h version.h is_unixy.h abs2rel.h split.h strlimcpy.h
 
 
-libgloutil_a_SOURCES = \
-conf.c dbop.c defined.c die.c find.c getdbpath.c gtagsop.c locatestring.c \
-makepath.c path.c gpathop.c strbuf.c strmake.c tab.c test.c \
-token.c usable.c version.c is_unixy.c abs2rel.c
+libgloutil_a_SOURCES =  conf.c dbop.c defined.c die.c find.c getdbpath.c gtagsop.c locatestring.c makepath.c path.c gpathop.c strbuf.c strmake.c tab.c test.c token.c usable.c version.c is_unixy.c abs2rel.c split.c strlimcpy.c
 
 
 AM_CFLAGS = -DBINDIR='"$(bindir)"'
 
+INCLUDES = @INCLUDES@
+
 libgloutil_a_DEPENDENCIES = $(libgloutil_a_LIBADD)
-subdir = libutil
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+CONFIG_HEADER = ../config.h
+CONFIG_CLEAN_FILES = 
+LIBRARIES =  $(noinst_LIBRARIES)
 
-libgloutil_a_AR = $(AR) cru
-libgloutil_a_LIBADD =
-am_libgloutil_a_OBJECTS = conf.$(OBJEXT) dbop.$(OBJEXT) \
-	defined.$(OBJEXT) die.$(OBJEXT) find.$(OBJEXT) \
-	getdbpath.$(OBJEXT) gtagsop.$(OBJEXT) locatestring.$(OBJEXT) \
-	makepath.$(OBJEXT) path.$(OBJEXT) gpathop.$(OBJEXT) \
-	strbuf.$(OBJEXT) strmake.$(OBJEXT) tab.$(OBJEXT) test.$(OBJEXT) \
-	token.$(OBJEXT) usable.$(OBJEXT) version.$(OBJEXT) \
-	is_unixy.$(OBJEXT) abs2rel.$(OBJEXT)
-libgloutil_a_OBJECTS = $(am_libgloutil_a_OBJECTS)
 
-DEFS = @DEFS@
-DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-depcomp = $(SHELL) $(top_srcdir)/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/abs2rel.Po $(DEPDIR)/conf.Po \
-@AMDEP_TRUE@	$(DEPDIR)/dbop.Po $(DEPDIR)/defined.Po \
-@AMDEP_TRUE@	$(DEPDIR)/die.Po $(DEPDIR)/find.Po \
-@AMDEP_TRUE@	$(DEPDIR)/getdbpath.Po $(DEPDIR)/gpathop.Po \
-@AMDEP_TRUE@	$(DEPDIR)/gtagsop.Po $(DEPDIR)/is_unixy.Po \
-@AMDEP_TRUE@	$(DEPDIR)/locatestring.Po $(DEPDIR)/makepath.Po \
-@AMDEP_TRUE@	$(DEPDIR)/path.Po $(DEPDIR)/strbuf.Po \
-@AMDEP_TRUE@	$(DEPDIR)/strmake.Po $(DEPDIR)/tab.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test.Po $(DEPDIR)/token.Po \
-@AMDEP_TRUE@	$(DEPDIR)/usable.Po $(DEPDIR)/version.Po
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-CFLAGS = @CFLAGS@
-DIST_SOURCES = $(libgloutil_a_SOURCES)
-HEADERS = $(noinst_HEADERS)
-
-DIST_COMMON = $(noinst_HEADERS) Makefile.am Makefile.in
-SOURCES = $(libgloutil_a_SOURCES)
-
-all: all-am
-
-.SUFFIXES:
-.SUFFIXES: .c .o .obj
-$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
-	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  libutil/Makefile
-Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
-	cd $(top_builddir) && \
-	  CONFIG_HEADERS= CONFIG_LINKS= \
-	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
-
+libgloutil_a_LIBADD = 
+libgloutil_a_OBJECTS =  conf.o dbop.o defined.o die.o find.o getdbpath.o \
+gtagsop.o locatestring.o makepath.o path.o gpathop.o strbuf.o strmake.o \
+tab.o test.o token.o usable.o version.o is_unixy.o abs2rel.o split.o \
+strlimcpy.o
 AR = ar
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+HEADERS =  $(noinst_HEADERS)
+
+DIST_COMMON =  Makefile.am Makefile.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = tar
+GZIP_ENV = --best
+SOURCES = $(libgloutil_a_SOURCES)
+OBJECTS = $(libgloutil_a_OBJECTS)
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .o .s
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps libutil/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+
+mostlyclean-noinstLIBRARIES:
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libgloutil.a: $(libgloutil_a_OBJECTS) $(libgloutil_a_DEPENDENCIES) 
-	-rm -f libgloutil.a
-	$(libgloutil_a_AR) libgloutil.a $(libgloutil_a_OBJECTS) $(libgloutil_a_LIBADD)
-	$(RANLIB) libgloutil.a
+
+distclean-noinstLIBRARIES:
+
+maintainer-clean-noinstLIBRARIES:
+
+.c.o:
+	$(COMPILE) -c $<
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
 
 mostlyclean-compile:
-	-rm -f *.$(OBJEXT) core *.core
+	-rm -f *.o core *.core
+
+clean-compile:
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/abs2rel.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/conf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dbop.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/defined.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/die.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/find.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/getdbpath.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/gpathop.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/gtagsop.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/is_unixy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/locatestring.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/makepath.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/path.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/strbuf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/strmake.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/tab.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/token.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/usable.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/version.Po@am__quote@
+maintainer-clean-compile:
 
-distclean-depend:
-	-rm -rf $(DEPDIR)
-
-.c.o:
-@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
-
-.c.obj:
-@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c `cygpath -w $<`
-CCDEPMODE = @CCDEPMODE@
-uninstall-info-am:
+libgloutil.a: $(libgloutil_a_OBJECTS) $(libgloutil_a_DEPENDENCIES)
+	-rm -f libgloutil.a
+	$(AR) cru libgloutil.a $(libgloutil_a_OBJECTS) $(libgloutil_a_LIBADD)
+	$(RANLIB) libgloutil.a
 
 tags: TAGS
 
-ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
-	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
-	mkid -fID $$unique $(LISP)
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
 	tags=; \
 	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
 	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
-	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
 
-GTAGS:
-	here=`CDPATH=: && cd $(top_builddir) && pwd` \
-	  && cd $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) $$here \
-	  && case `pwd` in \
-	     $$here);; \
-	     *)	echo $(top_srcdir) >$$here/GTAGSROOT;; \
-	     esac
+mostlyclean-tags:
 
-HTML:
-	here=`CDPATH=: && cd $(top_builddir) && pwd` \
-	  && cd $(top_srcdir) \
-	  && htags $(HTAGS_ARGS) -d $$here $$here
+clean-tags:
 
 distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH GTAGSROOT
-	-rm -rf HTML
+	-rm -f TAGS ID
 
-DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+maintainer-clean-tags:
 
-top_distdir = ..
-distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = libutil
 
 distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
-	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
-	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
-	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
-	    $(mkinstalldirs) "$(distdir)/$$dir"; \
-	  fi; \
+	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pR $$d/$$file $(distdir) \
-	    || exit 1; \
+	    cp -pr $$/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
-	    || cp -p $$d/$$file $(distdir)/$$file \
-	    || exit 1; \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
+abs2rel.o: abs2rel.c ../config.h abs2rel.h
+conf.o: conf.c ../config.h gparam.h conf.h strbuf.h die.h locatestring.h \
+	makepath.h strlimcpy.h strmake.h test.h usable.h
+dbop.o: dbop.c ../config.h dbop.h gparam.h ../libdb/db.h \
+	../libdb/compat.h ../libglibc/regex.h strbuf.h die.h \
+	locatestring.h strlimcpy.h strmake.h test.h
+defined.o: defined.c ../config.h die.h dbop.h gparam.h ../libdb/db.h \
+	../libdb/compat.h ../libglibc/regex.h strbuf.h defined.h \
+	makepath.h
+die.o: die.c ../config.h die.h
+find.o: find.c ../config.h gparam.h ../libglibc/regex.h conf.h strbuf.h \
+	die.h find.h is_unixy.h locatestring.h makepath.h strlimcpy.h
+getdbpath.o: getdbpath.c ../config.h gparam.h die.h getdbpath.h \
+	gtagsop.h dbop.h ../libdb/db.h ../libdb/compat.h \
+	../libglibc/regex.h strbuf.h makepath.h path.h strlimcpy.h \
+	test.h
+gpathop.o: gpathop.c ../config.h die.h dbop.h gparam.h ../libdb/db.h \
+	../libdb/compat.h ../libglibc/regex.h strbuf.h gtagsop.h \
+	makepath.h gpathop.h strlimcpy.h
+gtagsop.o: gtagsop.c ../config.h conf.h strbuf.h gparam.h dbop.h \
+	../libdb/db.h ../libdb/compat.h ../libglibc/regex.h die.h \
+	gtagsop.h locatestring.h makepath.h path.h gpathop.h \
+	strlimcpy.h strmake.h tab.h
+is_unixy.o: is_unixy.c ../config.h is_unixy.h
+locatestring.o: locatestring.c ../config.h locatestring.h
+makepath.o: makepath.c ../config.h gparam.h die.h makepath.h strbuf.h
+path.o: path.c ../config.h gparam.h path.h strlimcpy.h
+split.o: split.c ../config.h
+strbuf.o: strbuf.c ../config.h die.h strbuf.h
+strlimcpy.o: strlimcpy.c ../config.h die.h strlimcpy.h
+strmake.o: strmake.c ../config.h strbuf.h strmake.h
+tab.o: tab.c ../config.h tab.h
+test.o: test.c ../config.h locatestring.h test.h
+token.o: token.c ../config.h gparam.h strlimcpy.h token.h strbuf.h
+usable.o: usable.c ../config.h gparam.h locatestring.h makepath.h path.h \
+	test.h strbuf.h strlimcpy.h usable.h
+version.o: version.c ../config.h version.h
+
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES) $(HEADERS)
-
-installdirs:
-
-install: install-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am:
 install-exec: install-exec-am
+
+install-data-am:
 install-data: install-data-am
-uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
-
-installcheck: installcheck-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile $(LIBRARIES) $(HEADERS)
+all-redirect: all-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
-	  `test -z '$(STRIP)' || \
-	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+
+
 mostlyclean-generic:
 
 clean-generic:
 
 distclean-generic:
-	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-	@echo "This command is intended for maintainers to use"
-	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-am
-
-clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
-
-distclean: distclean-am
-
-distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
-
-dvi: dvi-am
-
-dvi-am:
-
-info: info-am
-
-info-am:
-
-install-data-am:
-
-install-exec-am:
-
-install-info: install-info-am
-
-install-man:
-
-installcheck-am:
-
-maintainer-clean: maintainer-clean-am
-
-maintainer-clean-am: distclean-am maintainer-clean-generic
+mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
+		mostlyclean-tags mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+clean-am:  clean-noinstLIBRARIES clean-compile clean-tags clean-generic \
+		mostlyclean-am
 
-uninstall-am: uninstall-info-am
+clean: clean-am
 
-.PHONY: GTAGS HTML all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-info-am
+distclean-am:  distclean-noinstLIBRARIES distclean-compile \
+		distclean-tags distclean-generic clean-am
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
+		maintainer-clean-compile maintainer-clean-tags \
+		maintainer-clean-generic distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir info-am info dvi-am dvi check \
+check-am installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
+
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

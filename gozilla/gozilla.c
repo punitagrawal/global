@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
  * Copyright (c) 1999, 2000, 2002
  *             Tama Communications Corporation. All rights reserved.
@@ -41,6 +41,8 @@ const char *gozillarc = ".gozillarc";
 
 static char *alias(char *);
 int	main(int, char **);
+void	getdefinitionURL(char *, STRBUF *);
+void	getURL(char *, STRBUF *);
 int	isprotocol(char *);
 int	issource(char *);
 int	convertpath(char *, char *, char *, STRBUF *);
@@ -92,7 +94,6 @@ static char *
 alias(alias_name)
 char	*alias_name;
 {
-	char rc[MAXPATHLEN+1];
 	FILE *ip;
 	STRBUF *sb = strbuf_open(0);
 	char *p, *alias = NULL;
@@ -100,12 +101,11 @@ char	*alias_name;
 
 	if (!(p = getenv("HOME")))
 		goto end;
-	strcpy(rc, makepath(p, gozillarc, NULL));
-	if (!test("r", rc))
+	if (!test("r", makepath(p, gozillarc, NULL)))
 		goto end;
-	if (!(ip = fopen(rc, "r")))
+	if (!(ip = fopen(makepath(p, gozillarc, NULL), "r")))
 		goto end;
-	while (p = strbuf_fgets(sb, ip, flag)) {
+	while ((p = strbuf_fgets(sb, ip, flag)) != NULL) {
 		char *name, *value;
 
 		flag &= ~STRBUF_APPEND;
@@ -148,15 +148,13 @@ main(argc, argv)
 int	argc;
 char	*argv[];
 {
-	char	c, *p, *q;
+	char	c, *p;
 	char	*browser = NULL;
-	char	*command = NULL;
-	char	arg[MAXPATHLEN+1];
-	char	URL[MAXPATHLEN+1];
-	char	com[MAXFILLEN+1];
-	int	status;
+	char	*definition = NULL;
+	STRBUF	*arg = strbuf_open(0);
+	STRBUF	*URL = strbuf_open(0);
 
-	while (--argc > 0 && (c = (++argv)[0][0]) == '-' || c == '+') {
+	while (--argc > 0 && ((c = (++argv)[0][0]) == '-' || c == '+')) {
 		if (argv[0][1] == '-') {
 			if (!strcmp("--help", argv[0]))
 				help();
@@ -182,12 +180,16 @@ char	*argv[];
 			browser = argv[1];
 			--argc; ++argv;
 			break;
+		case 'd':
+			definition = argv[1];
+			--argc; ++argv;
+			break;
 		case 'p':
 			pflag++;
-			setquiet();
 			break;
 		case 'q':
 			qflag++;
+			setquiet();
 			break;
 		case 'v':
 			vflag++;
@@ -202,59 +204,29 @@ char	*argv[];
 		browser = getenv("BROWSER");
 	if (!browser)
 		browser = "mozilla";
-	if (argc == 0)
-		usage();
-	strcpy(arg, argv[0]);
-	if (p = alias(arg))		/* get alias value */
-		strcpy(arg, p);
-	if (isprotocol(arg)) {
-		strcpy(URL, arg);
-	} else {
-		char	*abspath;
-		char	buf[MAXPATHLEN+1];
-
-		if (!test("f", arg) && !test("d", NULL))
-			die("path '%s' not found.", arg);
-		if (!(abspath = realpath(arg, buf)))
-			die("cannot make absolute path name. realpath(%s) failed.", arg);
-		if (!isabspath(abspath))
-			die("realpath(3) is not compatible with BSD version.");
-		if (issource(abspath)) {
-			char	cwd[MAXPATHLEN+1];
-			char	root[MAXPATHLEN+1];
-			char	dbpath[MAXPATHLEN+1];
-			char	htmldir[MAXPATHLEN+1];
-			STRBUF *sb = strbuf_open(0);
-			/*
-			 * get current, root and dbpath directory.
-			 * if GTAGS not found, getdbpath doesn't return.
-			 */
-			getdbpath(cwd, root, dbpath, 0);
-			if (test("d", makepath(dbpath, "HTML", NULL)))
-				strcpy(htmldir, makepath(dbpath, "HTML", NULL));
-			else if (test("d", makepath(root, "HTML", NULL)))
-				strcpy(htmldir, makepath(root, "HTML", NULL));
-			else
-				die("hypertext not found. See htags(1).");
-			/*
-			 * convert path into hypertext.
-			 */
-			p = abspath + strlen(root);
-			if (convertpath(dbpath, htmldir, p, sb) == -1)
-				die("cannot find the hypertext.");
-			if (linenumber)
-				sprintf(URL, "file:%s#%d", strbuf_value(sb), linenumber);
-			else {
-				strcpy(URL, "file:");
-				strcat(URL, strbuf_value(sb));
-			}
-		} else {
-			strcpy(URL, "file:");
-			strcat(URL, abspath);
+	if (definition == NULL) {
+		if (argc == 0)
+			usage();
+		strbuf_puts(arg, argv[0]);
+		/*
+		 * Replace with alias value.
+		 */
+		if ((p = alias(strbuf_value(arg))) != NULL) {
+			strbuf_reset(arg);
+			strbuf_puts(arg, p);
 		}
 	}
+	/*
+	 * Get URL.
+	 */
+	if (definition)
+		getdefinitionURL(definition, URL);
+	else if (isprotocol(strbuf_value(arg)))
+		strbuf_puts(URL, strbuf_value(arg));
+	else
+		getURL(strbuf_value(arg), URL);
 	if (pflag) {
-		fprintf(stdout, "%s\n", URL);
+		fprintf(stdout, "%s\n", strbuf_value(URL));
 		if (vflag)
 			fprintf(stdout, "using browser '%s'.\n", browser);
 		exit(0);
@@ -266,16 +238,149 @@ char	*argv[];
 		|| locatestring(browser, "netscape", MATCH_AT_LAST)
 		|| locatestring(browser, "netscape-remote", MATCH_AT_LAST))
 	{
-		sendbrowser(browser, URL);
+		sendbrowser(browser, strbuf_value(URL));
 	}
 	/*
 	 * execute generic browser.
 	 */
 	else {
-		sprintf(com, "%s \"%s\"", browser, URL);
+		char	com[MAXFILLEN+1];
+
+		snprintf(com, sizeof(com), "%s \"%s\"", browser, strbuf_value(URL));
 		system(com);
 	}
 	exit(0);
+}
+
+/*
+ * getdefinitionURL: get URL includes specified definition.
+ *
+ *	i)	arg	definition name
+ *	o)	URL	URL begin with 'file:'
+ */
+void
+getdefinitionURL(arg, URL)
+char *arg;
+STRBUF *URL;
+{
+	char	cwd[MAXPATHLEN+1];
+	char	root[MAXPATHLEN+1];
+	char	dbpath[MAXPATHLEN+1];
+	char	htmldir[MAXPATHLEN+1];
+	char	*path, *p;
+	DBOP	*dbop = NULL;
+	char	*args[2];
+	int	status = -1;
+
+	/*
+	 * get current, root and dbpath directory.
+	 * if GTAGS not found, getdbpath doesn't return.
+	 */
+	getdbpath(cwd, root, dbpath, 0);
+	if (test("d", makepath(dbpath, "HTML", NULL)))
+		strlimcpy(htmldir, makepath(dbpath, "HTML", NULL), sizeof(htmldir));
+	else if (test("d", makepath(root, "HTML", NULL)))
+		strlimcpy(htmldir, makepath(root, "HTML", NULL), sizeof(htmldir));
+	else
+		die("hypertext not found. See htags(1).");
+	path = makepath(htmldir, "MAP.db", NULL);
+	if (test("f", path))
+		dbop = dbop_open(path, 0, 0, 0);
+	if (!dbop) {
+		path = makepath(htmldir, "MAP", NULL);
+		if (!test("f", path))
+			die("'%s' not found. Please reconstruct hypertext using the latest htags(1).", path);
+		dbop = dbop_open(path, 0, 0, 0);
+	}
+	if (dbop) {
+		if ((p = dbop_get(dbop, arg)) != NULL) {
+			if (split(p, '\t', 2, args) != 2)
+				die("illegal format.");
+			status = 0;
+		}
+		dbop_close(dbop);
+	} else {
+		STRBUF *sb = strbuf_open(0);
+		FILE *fp;
+
+		fp = fopen(path, "r");
+		if (fp) {
+			while ((p = strbuf_fgets(sb, fp, STRBUF_NOCRLF)) != NULL) {
+				if (split(p, '\t', 2, args) != 2)
+					die("illegal format.");
+				if (!strcmp(arg, args[0])) {
+					status = 0;
+					break;
+				}
+			}
+			fclose(fp);
+		}
+		strbuf_close(sb);
+	}
+	if (status == -1)
+		die("definition %s not found.", arg);
+	strbuf_reset(URL);
+	strbuf_puts(URL, "file:");
+	strbuf_puts(URL, htmldir);
+	strbuf_putc(URL, '/');
+	strbuf_puts(URL, args[1]);
+}
+/*
+ * getURL: get specified URL.
+ *
+ *	i)	arg	definition name
+ *	o)	URL	URL begin with 'file:'
+ */
+void
+getURL(arg, URL)
+char *arg;
+STRBUF *URL;
+{
+	char	cwd[MAXPATHLEN+1];
+	char	root[MAXPATHLEN+1];
+	char	dbpath[MAXPATHLEN+1];
+	char	htmldir[MAXPATHLEN+1];
+	char	*abspath, *p;
+	char	buf[MAXPATHLEN+1];
+
+	if (!test("f", arg) && !test("d", NULL))
+		die("path '%s' not found.", arg);
+	if (!(abspath = realpath(arg, buf)))
+		die("cannot make absolute path name. realpath(%s) failed.", arg);
+	if (!isabspath(abspath))
+		die("realpath(3) is not compatible with BSD version.");
+	if (issource(abspath)) {
+		STRBUF *sb = strbuf_open(0);
+		/*
+		 * get current, root and dbpath directory.
+		 * if GTAGS not found, getdbpath doesn't return.
+		 */
+		getdbpath(cwd, root, dbpath, 0);
+		if (test("d", makepath(dbpath, "HTML", NULL)))
+			strlimcpy(htmldir, makepath(dbpath, "HTML", NULL), sizeof(htmldir));
+		else if (test("d", makepath(root, "HTML", NULL)))
+			strlimcpy(htmldir, makepath(root, "HTML", NULL), sizeof(htmldir));
+		else
+			die("hypertext not found. See htags(1).");
+		/*
+		 * convert path into hypertext.
+		 */
+		p = abspath + strlen(root);
+		if (convertpath(dbpath, htmldir, p, sb) == -1)
+			die("cannot find the hypertext.");
+		if (linenumber) {
+			strbuf_puts(URL, "file:");
+			strbuf_puts(URL, strbuf_value(sb));
+			strbuf_putc(URL, '#');
+			strbuf_putn(URL, linenumber);
+		} else {
+			strbuf_puts(URL, "file:");
+			strbuf_puts(URL, strbuf_value(sb));
+		}
+	} else {
+		strbuf_puts(URL, "file:");
+		strbuf_puts(URL, abspath);
+	}
 }
 /*
  * isprotocol: return 1 if url has a procotol.
@@ -327,7 +432,7 @@ char	*path;
 		char    *unit = p;
 		if ((p = locatestring(p, ",", MATCH_FIRST)) != NULL)
 			*p++ = 0;
-		strcpy(&suff[1], unit);
+		strlimcpy(&suff[1], unit, sizeof(suff) - 1);
 		if (locatestring(path, suff, MATCH_AT_LAST)) {
 			retval = 1;
 			break;
@@ -368,14 +473,14 @@ STRBUF	*sb;
 		char key[MAXPATHLEN+1];
 		int tag1 = strbuf_getlen(sb);
 
-		strcpy(key, "./");
+		strlimcpy(key, "./", sizeof(key));
 		strcat(key, path + 1);
 		p = gpath_path2fid(key);
 		if (p == NULL) {
 			gpath_close();
 			return -1;
 		}
-		strcpy(key, p);
+		strlimcpy(key, p, sizeof(key));
 		gpath_close();
 		strbuf_puts(sb, key);
 		for (i = 0; i < lim; i++) {
@@ -442,7 +547,7 @@ char	*browser;
 char	*url;
 {
 	int	pid;
-	char	com[1024], *name, *path;
+	char	com[1024], *path;
 
 	if (!(path = usable(browser)))
 		die("%s not found in your path.", browser);

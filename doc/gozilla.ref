@@ -4,7 +4,8 @@ gozilla - force mozilla to display specified source file.
 @unnumberedsubsec SYNOPSIS
 @noindent
 @quotation
-gozilla [+no][-b browser][-p] file@*
+gozilla [-b browser][-p][+no] file@*
+gozilla [-b browser][-p] -d name@*
 @end quotation
 @unnumberedsubsec DESCRIPTION
 Gozilla force mozilla to display specified source
@@ -14,7 +15,14 @@ In advance of using this command, [1] you must execute gtags(1)
 and htags(1) at the root directory of the source tree
 to make tag files, and [2] execute mozilla in you computer.
 Then you can execute gozilla at anywhere in the source tree.
+
+First form:@*
 You can specify source file and the line number optionally.
+
+Second form:@*
+You can specify definition name directly. Definition name must exist 
+in @file{GTAGS} tag file.
+
 @unnumberedsubsec OPTIONS
 The following options are available:
 @table @asis
@@ -30,6 +38,8 @@ exiting of the browser.
 just print generated target URL.
 @item file
 path of source file or alias name.
+@item @samp{-d} name
+print function.
 @item @samp{-q}, @samp{--quiet}
 Quiet mode.
 @item @samp{-v}, @samp{--verbose}

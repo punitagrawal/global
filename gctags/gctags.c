@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001
+ * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -50,9 +50,19 @@ char	*notfunction;
 int	main(int, char **);
 static	void usage(void);
 static	void help(void);
+static	int match_suffix_list(const char *, const char *);
 
 struct words *words;
 static int tablesize;
+
+/*
+ * language map.
+ *
+ * By default, default_map is used.
+ */
+static const char *default_map = "c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.cpp.cxx.hxx.C.H";
+static char *langmap;
+static STRBUF *active_map;
 
 int	bflag;			/* -b: force level 1 block start */
 int	dflag;			/* -d: treat #define with no argument */
@@ -63,6 +73,7 @@ int	sflag;			/* -s: collect symbols */
 int	tflag;			/* -t: treat typedefs, structs, unions, and enums. */
 int	wflag;			/* -w: warning message */
 int	vflag;			/* -v: verbose mode */
+int	do_check;
 int	show_version;
 int	show_help;
 int	debug;
@@ -84,16 +95,19 @@ help()
 }
 static struct option const long_options[] = {
 	{"begin-block", no_argument, NULL, 'b'},
+	{"check", no_argument, &do_check, 1},
 	{"define", no_argument, NULL, 'd'},
 	{"end-block", no_argument, NULL, 'e'},
 	{"no-tags", no_argument, NULL, 'n'},
 	{"reference", no_argument, NULL, 'r'},
 	{"symbol", no_argument, NULL, 's'},
 	{"typedef", no_argument, NULL, 't'},
+	{"verbose", no_argument, NULL, 'v'},
 	{"warning", no_argument, NULL, 'w'},
 
 	/* long name only */
 	{"debug", no_argument, &debug, 1},
+	{"langmap", required_argument, NULL, 0},
 	{"version", no_argument, &show_version, 1},
 	{"help", no_argument, &show_help, 1},
 	{ 0 }
@@ -104,12 +118,17 @@ main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-	int	optchar;
 	char	*p;
+	int	flag;
+	int	optchar;
+	int     option_index = 0;
 
-	while ((optchar = getopt_long(argc, argv, "bdenrstw", long_options, NULL)) != EOF) {
+	while ((optchar = getopt_long(argc, argv, "bdenrstvw", long_options, &option_index)) != EOF) {
 		switch(optchar) {
 		case 0:
+			p = (char *)long_options[option_index].name;
+			if (!strcmp(p, "langmap"))
+				langmap = optarg;	
 			break;
 		case 'b':
 			bflag++;
@@ -134,6 +153,9 @@ main(argc, argv)
 		case 't':
 			tflag++;
 			break;
+		case 'v':
+			vflag++;
+			break;
 		case 'w':
 			wflag++;
 			break;
@@ -146,6 +168,29 @@ main(argc, argv)
 		version(NULL, 0);
 	else if (show_help)
 		help();
+	else if (do_check) {
+		fprintf(stdout, "Part of GLOBAL\n");
+		exit(0);
+	}
+	/*
+	 * construct language map.
+	 */
+	active_map = strbuf_open(0);
+	strbuf_puts(active_map, (langmap) ? langmap : default_map);
+	flag = 0;
+	for (p = strbuf_value(active_map); *p; p++) {
+		/*
+		 * "c:.c.h,java:.java,cpp:.C.H"
+		 */
+		if (flag == 0 && *p == ',' || flag == 1 && *p == ':')
+			die_with_code(2, "syntax error in --langmap option.");
+		if (*p == ':' || *p == ',') {
+			flag ^= 1;
+			*p = 0;
+		}
+	}
+	if (flag == 0)
+		die_with_code(2, "syntax error in --langmap option.");
 
         argc -= optind;
         argv += optind;
@@ -154,6 +199,10 @@ main(argc, argv)
 		usage();
 	if (getenv("GTAGSWARNING"))
 		wflag++;	
+	/*
+	 * This is a hack for FreeBSD.
+	 * In the near future, it will be removed.
+	 */
 	if (test("r", NOTFUNCTION)) {
 		FILE	*ip;
 		STRBUF	*sb = strbuf_open(0);
@@ -181,55 +230,75 @@ main(argc, argv)
 		strbuf_close(sb);
 		strbuf_close(ib);
 	}
+
+	/*
+	 * pick up files and parse them.
+	 */
 	for (; argc > 0; argv++, argc--) {
+		char *lang, *suffix, *list, *tail;
+
+		/* initialize token parser. */
 		if (!opentoken(argv[0]))
 			die("'%s' cannot open.", argv[0]);
 #if defined(_WIN32) || defined(__DJGPP__)
 		/* Lower case the file name since names are case insensitive */
 		strlwr(argv[0]);
 #endif
+		/* get suffix of the path. */
+		suffix = locatestring(argv[0], ".", MATCH_LAST);
+		if (!suffix)
+			continue;
+		list = strbuf_value(active_map);
+		tail = list + strbuf_getlen(active_map);
+
+		/* check whether or not list includes suffix. */
+		while (list < tail) {
+			lang = list;
+			list = lang + strlen(lang) + 1;
+			if (match_suffix_list(suffix, list))
+				break;
+			lang = NULL;
+			list += strlen(list) + 1;
+		}
+		if (lang == NULL)
+			continue;
+		if (vflag)
+			fprintf(stderr, "suffix '%s' assumed language '%s'.\n", suffix, lang);
 		/*
-		 * yacc
+		 * call language specific parser.
 		 */
-		if (locatestring(argv[0], ".y", MATCH_AT_LAST))
-			C(YACC);
-		/*
-		 * assembler
-		 */
-		else if (locatestring(argv[0], ".s", MATCH_AT_LAST)	||
-			locatestring(argv[0], ".S", MATCH_AT_LAST))
-			assembler();
-		/*
-		 * java
-		 */
-		else if (locatestring(argv[0], ".java", MATCH_AT_LAST))
-			java();
-		/*
-		 * C++
-		 */
-		else if (locatestring(argv[0], ".c++", MATCH_AT_LAST)	||
-			locatestring(argv[0], ".cc", MATCH_AT_LAST)	||
-			locatestring(argv[0], ".cpp", MATCH_AT_LAST)	||
-			locatestring(argv[0], ".cxx", MATCH_AT_LAST)	||
-			locatestring(argv[0], ".hxx", MATCH_AT_LAST)	||
-			locatestring(argv[0], ".C", MATCH_AT_LAST)	||
-			locatestring(argv[0], ".H", MATCH_AT_LAST))
-			Cpp();
-		/*
-		 * C
-		 */
-		else if (locatestring(argv[0], ".c", MATCH_AT_LAST))
-			C(0);
-		/*
-		 * C or C++
-		 */
-		else if (locatestring(argv[0], ".h", MATCH_AT_LAST)) {
-			if (isCpp())
+		if (!strcmp(lang, "c")) {
+			if (!locatestring(suffix, ".h", MATCH_COMPLETE) && isCpp())
 				Cpp();
 			else
 				C(0);
+		} else if (!strcmp(lang, "yacc")) {
+			C(YACC);
+		} else if (!strcmp(lang, "asm")) {
+			assembler();
+		} else if (!strcmp(lang, "java")) {
+			java();
+		} else if (!strcmp(lang, "cpp")) {
+			Cpp();
 		}
 		closetoken();
+	}
+	return 0;
+}
+
+/*
+ * return true if suffix matches with one in suffix list.
+ */
+int
+match_suffix_list(suffix, list)
+	const char *suffix;
+	const char *list;
+{
+	while (*list) {
+		if (locatestring(list, suffix, MATCH_AT_FIRST))
+			return 1;
+		for (list++; *list && *list != '.'; list++)
+			;
 	}
 	return 0;
 }

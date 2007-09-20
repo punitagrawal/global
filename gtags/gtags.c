@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
  * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
@@ -51,6 +51,7 @@
 static void	usage(void);
 void	signal_setup(void);
 void	onintr(int);
+int	match(char *, char *);
 int	main(int, char **);
 int	incremental(char *, char *);
 void	updatetags(char *, char *, char *, int);
@@ -72,6 +73,8 @@ int     show_version;
 int     show_help;
 int	show_config;
 int	do_find;
+int	do_sort;
+int	do_write;
 int	do_relative;
 int	do_absolute;
 int	do_expand;
@@ -124,6 +127,8 @@ static struct option const long_options[] = {
 	{"postgres", optional_argument, NULL, 'P'},
 	{"pwd", no_argument, &do_pwd, 1},
 	{"relative", no_argument, &do_relative, 1},
+	{"sort", no_argument, &do_sort, 1},
+	{"write", no_argument, &do_write, 1},
 	{"version", no_argument, &show_version, 1},
 	{"help", no_argument, &show_help, 1},
 	{ 0 }
@@ -153,6 +158,21 @@ signal_setup()
 #ifdef SIGQUIT
 	signal(SIGQUIT, onintr);
 #endif
+}
+
+int
+match(curtag, line)
+char *curtag;
+char *line;
+{
+	char *p, *q = line;
+
+	for (p = curtag; *p; p++)
+		if (*p != *q++)
+			return 0;
+	if (!isspace(*q))
+		return 0;
+	return 1;
 }
 
 int
@@ -259,8 +279,7 @@ char	*argv[];
 		if (!info_string && argc)
 			info_string = argv[0];
 		if (info_string) {
-			if (!printconf(info_string))
-				exit(1);
+			printconf(info_string);
 		} else {
 			fprintf(stdout, "%s\n", getconfline());
 		}
@@ -300,6 +319,80 @@ char	*argv[];
 			gfind_close();
 		}
 		exit(0);
+	} else if (do_sort) {
+		/*
+		 * This is GLOBAL version of sort.
+		 * We replace sort with this procedure for performance.
+		 */
+		int unit = 1500;
+		STRBUF *ib = strbuf_open(MAXBUFLEN);
+		char *line = strbuf_fgets(ib, stdin, 0);
+
+		while (line != NULL) {
+			int count = 0;
+			FILE *op = popen("sort +0 -1 +2 -3 +1n -2 -u", "w");
+			do {
+				fputs(line, op);
+			} while ((line = strbuf_fgets(ib, stdin, 0)) != NULL && ++count < unit);
+			if (line) {
+				/* curtag = current tag name */
+				STRBUF *curtag = strbuf_open(0);
+				char *p = line;
+				while (!isspace(*p))
+					strbuf_putc(curtag, *p++);
+				/* read until next tag name */
+				do {
+					fputs(line, op);
+				} while ((line = strbuf_fgets(ib, stdin, 0)) != NULL
+					&& match(strbuf_value(curtag), line));
+			}
+			pclose(op);
+		}
+		exit(0);
+	} else if (do_write) {
+		FILE *op;
+		STRBUF *ib = strbuf_open(MAXBUFLEN);
+		int writing = 0;
+		int pipe = 0;
+
+		while (strbuf_fgets(ib, stdin, STRBUF_NOCRLF) != NULL) {
+			char *p = strbuf_value(ib);
+			if (*p == '<') {
+				strbuf_putc(ib, '\n');
+				fputs(p, op);
+			} else {
+				if (writing) {
+					if (pipe)
+						(void)pclose(op);
+					else
+						(void)fclose(op);
+				}
+				pipe = 0;
+				if (*p == 'N') {
+					p++;
+					if ((op = fopen(p, "w")) == NULL)
+						die("cannot create file '%s'.", p);
+				} else if (*p == 'C') {
+					char command[MAXPATHLEN];
+					p++;
+					snprintf(command, sizeof(command), "gzip -c > %s", p);
+					if ((op = popen(command, "w")) == NULL)
+						die("cannot create file '%s'.", p);
+					pipe = 1;
+				} else {
+					die("illegal internal file format (--write).");
+				}
+				writing = 1;
+			}
+		}
+		if (writing) {
+			if (pipe)
+				(void)pclose(op);
+			else
+				(void)fclose(op);
+		}
+		strbuf_close(ib);
+		exit(0);
 	} else if (do_relative || do_absolute) {
 		STRBUF *ib = strbuf_open(MAXBUFLEN);
 		char	*root = argv[0];
@@ -317,6 +410,22 @@ char	*argv[];
 			die("mkid not found.");
 	}
 
+	/*
+	 * Check whether or not your system has GLOBAL's gctags.
+	 * Some GNU/Linux distributions rename emacs's ctags to gctags!
+	 */
+	{
+		FILE *ip = popen("gctags --check", "r");
+		STRBUF *ib = strbuf_open(MAXBUFLEN);
+		if (strbuf_fgets(ib, ip, STRBUF_NOCRLF) == NULL || strcmp(strbuf_value(ib), "Part of GLOBAL")) {
+			if (!qflag) {
+				fprintf(stderr, "Warning: gctags in your system is not GLOBAL's one.\n");
+				fprintf(stderr, "Please type 'gctags --version'\n");
+			}
+		}
+		strbuf_close(ib);
+		pclose(ip);
+	}
 	if (!getcwd(cwd, MAXPATHLEN))
 		die("cannot get current directory.");
 	canonpath(cwd);
@@ -333,12 +442,12 @@ char	*argv[];
 		if (argc > 0)
 			realpath(*argv, dbpath);
 		else if (!gtagsexist(cwd, dbpath, MAXPATHLEN, vflag))
-			strcpy(dbpath, cwd);
+			strlimcpy(dbpath, cwd, sizeof(dbpath));
 	} else {
 		if (argc > 0)
 			realpath(*argv, dbpath);
 		else
-			strcpy(dbpath, cwd);
+			strlimcpy(dbpath, cwd, sizeof(dbpath));
 	}
 	if (iflag && (!test("f", makepath(dbpath, dbname(GTAGS), NULL)) ||
 		!test("f", makepath(dbpath, dbname(GPATH), NULL)))) {
@@ -698,8 +807,6 @@ int	type;
 		if (vflag)
 			fprintf(stderr, "..");
 		if (type != 2) {
-			if (db == GSYMS)
-				gflags |= GTAGS_UNIQUE;
 			if (extractmethod)
 				gflags |= GTAGS_EXTRACTMETHOD;
 			if (debug)
@@ -772,7 +879,7 @@ int	db;
 			break;
 		if (locatestring(path, " ", MATCH_FIRST)) {
 			if (!qflag)
-				fprintf(stderr, "Warning: '%s' ignored, because it includes blank in the path.\n", path);
+				fprintf(stderr, "Warning: '%s' ignored, because it includes blank in the path.\n", path + 2);
 			continue;
 		}
 		count++;
@@ -789,15 +896,13 @@ int	db;
 				fprintf(stderr, " [%d/%d]", count, total);
 			else
 				fprintf(stderr, " [%d]", count);
-			fprintf(stderr, " extracting tags of %s", path);
+			fprintf(stderr, " extracting tags of %s", path + 2);
 			if (skip)
 				fprintf(stderr, " (skipped)");
 			fputc('\n', stderr);
 		}
 		if (skip)
 			continue;
-		if (db == GSYMS)
-			gflags |= GTAGS_UNIQUE;
 		if (extractmethod)
 			gflags |= GTAGS_EXTRACTMETHOD;
 		if (debug)
@@ -831,7 +936,7 @@ now(void)
 #else
 	FILE	*ip;
 
-	strcpy(buf, "unkown time");
+	strlimcpy(buf, "unkown time", sizeof(buf));
 	if (ip = popen("date", "r")) {
 		if (fgets(buf, sizeof(buf), ip))
 			buf[strlen(buf) - 1] = 0;
@@ -888,7 +993,7 @@ char	*cwd;
 
 	if (strlen(cwd) > MAXPATHLEN)
 		die("current directory name too long.");
-	strcpy(basedir, cwd);
+	strlimcpy(basedir, cwd, sizeof(basedir));
 	/* leave abspath unclosed. */
 }
 void

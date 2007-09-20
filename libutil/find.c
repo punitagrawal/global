@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
+ * Copyright (c) 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
  * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
@@ -59,6 +59,7 @@
 #include "locatestring.h"
 #include "makepath.h"
 #include "strbuf.h"
+#include "strlimcpy.h"
 
 /*
  * usage of ?findxxx()
@@ -408,7 +409,7 @@ find_open()
 	 */
 	curp = &stack[0];
 	topp = curp + STACKSIZE; 
-	strcpy(dir, ".");
+	strlimcpy(dir, ".", sizeof(dir));
 
 	curp->dirp = dir + strlen(dir);
 	curp->sb = strbuf_open(0);
@@ -445,12 +446,13 @@ find_read(void)
 					continue;
 				if (regexec(suff, path, 0, 0, 0) == 0) {
 					/* source file */
-					strcpy(val, path);
+					strlimcpy(val, path, sizeof(val));
 				} else {
 					/* other file like 'Makefile' */
 					val[0] = ' ';
-					strcpy(&val[1], path);
+					strlimcpy(&val[1], path, sizeof(val) - 1);
 				}
+				val[sizeof(val) - 1] = '\0';
 				return val;
 			}
 			if (type == 'd') {

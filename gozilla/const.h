@@ -1,6 +1,7 @@
 /* This file is generated automatically by convert.pl from gozilla/manual.in. */
 const char *progname = "gozilla";
-const char *usage_const = "Usage: gozilla [+no][-b browser][-p] file\n";
+const char *usage_const = "Usage: gozilla [-b browser][-p][+no] file\n\
+       gozilla [-b browser][-p] -d name\n";
 const char *help_const = "Options:\n\
 +no\n\
        line number. It must be a line on which function definition or\n\
@@ -14,6 +15,8 @@ const char *help_const = "Options:\n\
        just print generated target URL.\n\
 file\n\
        path of source file or alias name.\n\
+-d name\n\
+       print function.\n\
 -q, --quiet\n\
        Quiet mode.\n\
 -v, --verbose\n\
