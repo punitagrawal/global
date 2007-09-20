@@ -1,6 +1,6 @@
 ## Process this file with automake to create Makefile.in
 #
-# Copyright (c) 2000
+# Copyright (c) 2000, 2001
 #        Tama Communications Corporation. All rights reserved.
 #
 # This file is free software; as a special exception the author gives
@@ -12,5 +12,8 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 info_TEXINFOS = global.texi
+
+global_TEXINFOS = fdl.texi reference.texi \
+	global.ref gtags.ref htags.ref gctags.ref gozilla.ref btreeop.ref
 
 EXTRA_DIST = texinfo.tex

@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename global.info
-@settitle GLOBAL source code tag system
+@settitle GNU GLOBAL source code tag system
 @comment %**end of header
 
 @include version.texi
@@ -13,14 +13,14 @@
 @ifinfo
 @dircategory Miscellaneous
 @direntry
-* GLOBAL: (global).             The GNU GLOBAL source code tag system.
+* GLOBAL: (global).             GNU GLOBAL source code tag system.
 @end direntry
 @end ifinfo
 
 @ifinfo
-This file documents the @file{GLOBAL} source code tag system.
+This file documents the GNU GLOBAL source code tag system.
 
-Copyright (c) 2000, 2001 Tama Communications Corporation. All rights reserved.
+Copyright (c) 2000, 2001, 2002 Tama Communications Corporation. All rights reserved.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -32,14 +32,14 @@ Free Documentation License".
 @end ifinfo
 
 @titlepage
-@title GLOBAL source code tag system
-@subtitle Edition @value{EDITION}, for GLOBAL version @value{VERSION}
+@title GNU GLOBAL source code tag system
+@subtitle Edition @value{EDITION}, for GNU GLOBAL version @value{VERSION}
 @subtitle @value{UPDATED}
 @author by Shigio Yamaguchi
 @c copyright page
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2000, 2001 Tama Communications Corporation.
+Copyright @copyright{} 2000, 2001, 2002 Tama Communications Corporation.
 @sp 2
 This is the first edition of the GNU GLOBAL documentation,@*
 and is consistent with @value{VERSION}.@*
@@ -59,20 +59,16 @@ Free Documentation License".
 
 @ifinfo
 @node Top
-@top GLOBAL source code tag system
+@top GNU GLOBAL source code tag system
 
-This manual documents version @value{VERSION} of the GLOBAL source code tag system.
+This manual documents version @value{VERSION} of the GNU GLOBAL source code tag system.
 
 @menu
 * Introduction::                        Overview of the tools.
 * Global::                              Command line GLOBAL.
-* GloBash::                             Global facility for Bash.
-* Nvi editor::                          Extended nvi using GLOBAL.
-* Elvis editor::                        Elvis using GLOBAL.
-* Vim editor::                          Vim using GLOBAL.
-* Emacs editor::                        Extended emacs using GLOBAL.
-* Web browser::                         Hypertext generator.
+* Applications::			Various applications.
 * Other topics::                        Other topics.
+* Reference::				Reference manual.
 * GNU Free Documentation License::	GNU Free Documentation License.
 * Index::                               Option index.
 @end menu
@@ -84,13 +80,31 @@ This manual documents version @value{VERSION} of the GLOBAL source code tag syst
 @node Introduction
 @chapter Overview of the tools
 
+@section What is this?
+
 GNU GLOBAL is a source code tag system that works the same way
 across diverse environments.
 You can locate a specified function in the source files and move there easily.
 It is useful for hacking a large project containing many subdirectories,
 many @code{#ifdef} and many @code{main()} functions.
 
-@sp 1
+It is similar to ctags or etags but is different from them at the point of
+independence of any editor.
+
+@section Concept of project.
+
+GNU GLOBAL can treat a source tree containing subdirectories as a project.
+It is similar to CVS.
+You can get the relative path of your object from anywhere in the source tree.
+
+You need not specify where the tag file is.
+Instead, global(1) will locate the tag file by itself.
+If tag file isn't found in the current directory, global(1) search parent
+directories for tag file. 
+
+User's position (current directory) is the first argument for GLOBAL's command.
+
+@section Features.
 
 GNU GLOBAL has following features:
 
@@ -109,9 +123,6 @@ GNU GLOBAL has following features:
 @item locate not only object definitions but also object references.
 @item allows duplicate objects.
 @item locate also path which includes specified pattern.
-@item can treat a source tree containing subdirectories as a logical
-     scope.  You can get the relative path of objects from anywhere within
-     that scope.
 @item search not only in a source tree but also in library paths.
 @item understand POSIX 1003.2 regular expressions.
 @item support external search engine (grep and idutils).
@@ -122,6 +133,7 @@ GNU GLOBAL has following features:
 @item support incremental updating of tag files.
 @item support customizing with gtags.conf.
 @item generate completion list for completing input method.
+@item Postgres database system is available as a tag store.
 @end itemize
 
 @c ***************************************************************************
@@ -143,7 +155,7 @@ It is a big merit of GLOBAL compared with any other tag system.
 @node   Preparation
 @section Preparation.
 
-First of all, you must execute gtags(1) at the root of source tree.
+First of all, you must execute gtags(1)(See @xref{gtags}.) at the root of source tree.
 For example, if you want to browse vi's source code:
 
 @example
@@ -508,10 +520,27 @@ one command, for example:
 @end itemize
 
 @c ***************************************************************************
+@c Applications
+@c ***************************************************************************
+@node Applications
+@chapter Various applications
+
+@menu
+* GloBash::                             Global facility for Bash.
+* Less viewer::                         Less using GLOBAL.
+* Nvi-1.79 editor::                     Extended nvi-1.79 using GLOBAL.
+* Nvi-1.81.5 editor::                   nvi-1.81.5 using GLOBAL.
+* Elvis editor::                        Elvis using GLOBAL.
+* Vim editor::                          Vim using GLOBAL.
+* Emacs editor::                        Extended emacs using GLOBAL.
+* Web browser::                         Hypertext generator.
+@end menu
+
+@c ***************************************************************************
 @c GloBash
 @c ***************************************************************************
 @node GloBash
-@chapter Global facility for Bash
+@section Global facility for Bash
 
 Special support for bash is available.
 
@@ -524,15 +553,15 @@ Special support for bash is available.
 
 @c ***************************************************************************
 @node   Features(globash)
-@section Features.
+@subsection Features.
 
 @itemize @bullet
 @item
 Vi-like tag stack is available.
 @item
-Editor or viewer is automatically invoked.
+Emacs-like tag name completion is available.
 @item
-Tag name completion is available.
+Editor or viewer is automatically invoked.
 @item
 Tag mark facility is available.
 @item
@@ -541,7 +570,7 @@ Yor can manage directory list by cookie facility.
 
 @c ***************************************************************************
 @node   Preparation(globash)
-@section Preparation.
+@subsection Preparation.
 
 First, do the preparation of global. (Please see @xref{Preparation}.).
 And you can invoke bash(1) with ---rcfile option.
@@ -578,10 +607,10 @@ If you need help then please type 'ghelp'.
 
 @c ***************************************************************************
 @node   Basic usage(globash)
-@section Basic usage.
+@subsection Basic usage.
 
 @itemize @bullet
-@item Almost global(1)'s command character is available as a command.
+@item Almost global(1)(See @xref{global}.)'s command character is available as a command.
 @example
 
     [/usr/src/sys] x fork               <- @r{(global -x fork)}
@@ -633,11 +662,13 @@ environment variable or temporarily by option.
     (Load emacs and show boot/alpha/boot1/boot1.c at line 227.)
     [/usr/src/sys] show -l 3
     (Load less and show boot/alpha/boot1/boot1.c at line 227.)
+    [/usr/src/sys] show -g 3
+    (Preloaded mozilla show boot/alpha/boot1/boot1.c at line 227.)
 
 @end example
 
 @item You can use vi-like tag stack. You can return previous tag list by
-pop command.
+pop or @kbd{CTL-T} command.
 @example
 
     [/usr/src/sys] x main
@@ -658,7 +689,7 @@ pop command.
 @end itemize
 @c ***************************************************************************
 @node   Applied usage(globash)
-@section Applied usage.
+@subsection Applied usage.
 
 @itemize @bullet
 @item You can memory tags using 'mark' command.
@@ -704,24 +735,180 @@ current bash session.
 Cookie directories are valid until you delete them.
 
 @end itemize
+
+@c ***************************************************************************
+@c Less viewer
+@c ***************************************************************************
+@node Less viewer
+@section Less using GLOBAL.
+
+You can use GLOBAL as a tag system of less instead of ctags.
+
+@menu
+* Features(less)::                       Features.
+* Preparation(less)::                    Preparation.
+* Basic usage(less)::                    Basic usage.
+* Applied usage(less)::                  Applied usage.
+@end menu
+
+@c ***************************************************************************
+@node   Features(less)
+@subsection Features.
+
+@itemize @bullet
+@item
+You can use most of GLOBAL's facilities from less-370 or the later.
+@item
+Less viewer support duplicated tag.
+@end itemize
+
+@c ***************************************************************************
+@node   Preparation(less)
+@subsection Preparation.
+
+First, do the preparation of global. (Please see @xref{Preparation}.).
+
+Second, to use global from less, you need to set environment variable
+@code{LESSGLOBALTAGS} to "global".
+
+@example
+
+    % setenv LESSGLOBALTAGS global
+
+@end example
+
+@c ***************************************************************************
+@node   Basic usage(less)
+@subsection Basic usage.
+
+@itemize @bullet
+@item To go to func1, you can say
+@example
+
+    % less -t func1
+
+@end example
+
+Please note that if @file{tags} exist then less use it.
+If you want to use @file{GTAGS} even if @file{tags} exist
+then please specify tag file explicitly like this.
+
+@example
+
+    % less -TGTAGS -t func1
+
+@end example
+
+@item To go to the referenced point of func1, please specify @file{GRTAGS}.
+@example
+
+    % less -TGRTAGS -t func1
+
+@end example
+
+In the same way, you can use @file{GTAGS}, @file{GRTAGS}, @file{GSYMS},
+@file{GPATH} as tag file.
+
+@item If a number of functions are located, less goes to the first tag.
+You can go to next tag by typing @kbd{t} and back by typing @kbd{T}.
+
+@table @code
+@item @kbd{t}
+go to next tag.
+@item @kbd{T}
+go to previous tag.
+@end table
+
+@item
+From less session, you can use @kbd{:t} command to locate new symbol.
+But in this case, you cannot change tag file from one specified by
+@kbd{-T} option.
+
+@end itemize
+
+@c ***************************************************************************
+@node   Applied usage(less)
+@subsection Applied usage.
+
+@itemize @bullet
+@item With @kbd{-T-} option, less read standard input as tag file.
+It is very valuable. You can connect global and less with pipe line.
+@example
+
+    % global -x func | less -T-
+
+@end example
+
+In the same way, you can use following command lines.
+
+@example
+    # pattern match with grep(1).
+    % global -xg 'lseek(.*)' | less -T-
+
+    # pattern match with idutils(1).
+    % global -xI func | less -T-
+
+    # all function definitions in *.c.
+    % global -f *.c | less -T-
+
+    # all files includes 'init' in its path.
+    % global -Px init | less -T-
+@end example
+
+@item If your editor doesn't support GLOBAL directly then you can use less
+as a footstool.
+
+@example
+    # invoke less
+    % less -t main
+    main(int argc, char **argv)
+    @{
+    int i;
+    .....
+    [xxx/main.c (tag 1 of 55)]
+
+    # type 'v'(vi) command in less session.
+    v
+
+    # load vi and show the same position.
+    .....
+    main((int argc, char **argv)
+    @{
+    int i;
+    .....
+    [xxx/main.c 313 lines, 7783 char]
+
+    # type 'ZZ' command in vi session.
+    ZZ
+
+    # exit vi and back to less session.
+    main(int argc, char **argv)
+    @{
+    int i;
+    .....
+    [xxx/main.c (tag 1 of 55)]
+@end example
+
+@end itemize
+
 @c ***************************************************************************
 @c Nvi editor
 @c ***************************************************************************
-@node Nvi editor
-@chapter Extended nvi using global
+@node Nvi-1.79 editor
+@section Extended nvi-1.79 using GLOBAL.
 
 You can use GLOBAL as a tag system of Nvi editor instead of ctags.
 
 @menu
-* Features(nvi)::			Features.
-* Preparation(nvi)::                    Preparation.
-* Basic usage(nvi)::                    Basic usage.
-* Applied usage(nvi)::                  Applied usage.
+* Features(nvi-1.79)::			Features.
+* Preparation(nvi-1.79)::               Preparation.
+* Basic usage(nvi-1.79)::               Basic usage.
+* Applied usage(nvi-1.79)::             Applied usage.
 @end menu
 
 @c ***************************************************************************
-@node   Features(nvi)
-@section Features.
+@node   Features(nvi-1.79)
+@subsection Features.
 
 @itemize @bullet
 @item
@@ -734,30 +921,30 @@ You can use GLOBAL's facilities only in 'gtags mode'.
 @end itemize
 
 @c ***************************************************************************
-@node   Preparation(nvi)
-@section Preparation.
+@node   Preparation(nvi-1.79)
+@subsection Preparation.
 
 First, do the preparation of global. (Please see @xref{Preparation}.).
 
-Second, to use global from vi, you need to get into @dfn{gtagsmode}.
+Second, to use global from nvi, you need to get into @dfn{gtagsmode}.
 There are several ways to do this:
 
 @enumerate
 @item
-Start vi with @samp{-G} option
+Start nvi with @samp{-G} option
 
 @example
 
-    % vi -G file.c
+    % nvi -G file.c
 
 @end example
 
 @item
-Start vi and execute @code{set gtagsmode}.
+Start nvi and execute @code{set gtagsmode}.
 
 @example
 
-    % vi file.c
+    % nvi file.c
     ~
     ~
     ~
@@ -766,7 +953,7 @@ Start vi and execute @code{set gtagsmode}.
 @end example
 
 @item
-Write the above set command to the @file{.exrc} or @file{.nexrc} and start vi
+Write the above set command to the @file{.exrc} or @file{.nexrc} and start nvi
 
 @example
 
@@ -776,12 +963,12 @@ Write the above set command to the @file{.exrc} or @file{.nexrc} and start vi
 
 @end example
 
-You must start vi under the source tree described in @xref{Preparation}.
+You must start nvi under the source tree described in @xref{Preparation}.
 @end enumerate
 
 @c ***************************************************************************
-@node   Basic usage(nvi)
-@section Basic usage.
+@node   Basic usage(nvi-1.79)
+@subsection Basic usage.
 
 @itemize @bullet
 @item To go to func1, you can say
@@ -791,7 +978,7 @@ You must start vi under the source tree described in @xref{Preparation}.
 
 @end example
 
-It seemes the same as original vi, but extended vi use @file{GTAGS}
+It seemes the same as original nvi, but extended nvi use @file{GTAGS}
 instead of @file{tags}.
 
 @item To go to the referenced point of func1, add the option @kbd{-r}
@@ -803,7 +990,7 @@ instead of @file{tags}.
 
 Extended nvi use @file{GRTAGS}.
 
-@item If a number of functions are located, extended vi goes to the first tag.
+@item If a number of functions are located, extended nvi goes to the first tag.
 You can go to next tag by typing @kbd{:tagnext} and back by typing @kbd{:tagprev}.
 
 @example
@@ -853,14 +1040,14 @@ Display the tags stack.
 
 
 @c ***************************************************************************
-@node   Applied usage(nvi)
-@section Applied usage.
+@node   Applied usage(nvi-1.79)
+@subsection Applied usage.
 
 @itemize @bullet
-@item In large projects that include many main() function like MH, you can start vi like this:
+@item In large projects that include many main() function like MH, you can start nvi like this:
 @example
 
-    % vi -G -t main
+    % nvi -G -t main
 
 @end example
 You can browse all commands sequentially.
@@ -868,7 +1055,7 @@ You can browse all commands sequentially.
 @item When you want to check functions the name of which start with "set" or "get", use:
 @example
 
-    % vi -G -t '^[sg]et'
+    % nvi -G -t '^[sg]et'
 
 @end example
 
@@ -888,7 +1075,7 @@ the following:
     % gtags /var/dbpath             # @r{make tag files in /var/dbpath}
     % setenv GTAGSROOT `pwd`
     % setenv GTAGSDBPATH /var/dbpath
-    % vi -G -t main
+    % nvi -G -t main
 
 @end example
 
@@ -909,19 +1096,159 @@ the following:
 
     % cd /usr/src/usr.bin/vi
     % gtags
-    % vi -G -t main
+    % nvi -G -t main
 
 @end example
 
-You can start from vi and browse the whole unix world as if you were
+You can start from nvi and browse the whole unix world as if you were
 using hypertext.
+@end itemize
+
+@c ***************************************************************************
+@c Nvi-1.81.5 editor
+@c ***************************************************************************
+@node Nvi-1.81.5 editor
+@section nvi-1.81.5 using GLOBAL.
+
+You can use GLOBAL as a tag system of Nvi editor instead of ctags.
+
+@menu
+* Features(nvi-1.81.5)::		Features.
+* Preparation(nvi-1.81.5)::             Preparation.
+* Basic usage(nvi-1.81.5)::             Basic usage.
+@end menu
+
+@c ***************************************************************************
+@node   Features(nvi-1.81.5)
+@subsection Features.
+
+@itemize @bullet
+@item
+You can use most of GLOBAL's facilities from the editor.
+@item
+Recognition of the current token and its type.
+@end itemize
+
+@c ***************************************************************************
+@node   Preparation(nvi-1.81.5)
+@subsection Preparation.
+
+First, do the preparation of global. (Please see @xref{Preparation}.).
+
+Second, to use global from nvi, you need write to @file{.nexrc} like this:
+It assumed that gtags.pl is put on @file{$HOME/perl}.
+
+@example
+
+    $HOME/.nexrc
+    +----------------------------
+    |perl use lib "$ENV@{'HOME'@}/perl"
+    |perl require 'gtags.pl'
+    |map ^P :tagprev^M
+    |map ^N :tagnext^M
+    |map ^] :perl tag^M
+    |ab gtag perl tag qw(
+    |ab gta perl tag qw(
+    |ab gt perl tag qw(
+
+@end example
+
+You must start nvi under the source tree described in @xref{Preparation}.
+
+@c ***************************************************************************
+@node   Basic usage(nvi-1.81.5)
+@subsection Basic usage.
+
+@itemize @bullet
+@item To go to func1, you can say
+@example
+
+    :perl tag qw(func1)
+
+@end example
+@example
+
+    Suggested .nexrc:
+    ab gtag perl tag qw(
+    ab gta perl tag qw(
+    ab gt perl tag qw(
+
+@end example
+
+@item To go to the referenced point of func1, add the option @kbd{-r}
+@example
+
+    :perl tag qw(-r func1)
+
+@end example
+
+@item If a number of functions are located, nvi goes to the first tag.
+You can go to next tag by typing @kbd{:tagnext} and back by typing @kbd{:tagprev}.
+
+@example
+
+    Suggested .nexrc:
+    map ^N :tagnext^M
+    map ^P :tagprev^M
+
+@end example
+
+@item If you don't specify any argument. ':perl tag' command do the followins:
+If current token is not a function then it is equivalent to
+@kbd{:perl tag qw(-s @var{current token})}.
+Otherwise, if you are in the first column of a line,
+it is equivalent to @kbd{:perl tag qw(-r @var{current token})} else it is equivalent
+to @kbd{:perl tag qw(@var{current token})}.
+
+@example
+
+    Suggested .nexrc:
+    map ^] :perl tag^M
+
+@end example
+
+It is similar to @kbd{CTL-]} command.
+
+@item You can use the @kbd{-s} option. It locates any symbols other than
+functions.
+@example
+
+    :perl tag qw(-s pat)
+
+@end example
+
+@item The @kbd{-g}, @kbd{-f} and @kbd{-P} option are also available.
+It works like command line.
+@example
+
+    :perl tag qw(-g pat)
+
+@end example
+
+@item When you want to check functions the name of which start with "set" or "get", use:
+@example
+
+    :perl tag qw(^[sg]et)
+
+@end example
+@item Other tag commands are also available:
+@table @code
+@item @kbd{CTL-T}
+Return to the most recent tag context.
+@item @kbd{:tagpop}
+Go to the specified tag in the tags stack.
+@item @kbd{:tagtop}
+Go to the top tag in the tags stack.
+@item @kbd{:display tags}
+Display the tags stack.
+@end table
 @end itemize
 
 @c ***************************************************************************
 @c Elvis editor
 @c ***************************************************************************
 @node Elvis editor
-@chapter Elvis using global
+@section Elvis using global
 
 Elvis 2.1 has new @code{tagprg} and @code{tagprgonce} variables for
 running an external tag search program. You can use them with GLOBAL.
@@ -935,7 +1262,7 @@ running an external tag search program. You can use them with GLOBAL.
 
 @c ***************************************************************************
 @node   Features(elvis)
-@section Features.
+@subsection Features.
 
 @itemize @bullet
 @item
@@ -948,7 +1275,7 @@ Mouse events are supported.
 
 @c ***************************************************************************
 @node   Preparation(elvis)
-@section Preparation.
+@subsection Preparation.
 
 First, do the preparation of global. (Please see @xref{Preparation}.).
 
@@ -970,7 +1297,7 @@ Second, start elvis and execute @code{set tagprg="global -t $1"} like this.
 
 @c ***************************************************************************
 @node   Basic usage(elvis)
-@section Basic usage.
+@subsection Basic usage.
 
 @itemize @bullet
 @item To go to func1, you can say
@@ -1061,7 +1388,7 @@ the point.
 
 @c ***************************************************************************
 @node   Applied usage(elvis)
-@section Applied usage.
+@subsection Applied usage.
 
 @itemize @bullet
 @item You can use POSIX regular expressions.
@@ -1115,7 +1442,7 @@ To come back, double click on the right button.
 @c Vim editor
 @c ***************************************************************************
 @node Vim editor
-@chapter Vim using global
+@section Vim using global
 
 Vim 5.2 or later has @code{grepprg} and @code{grepformat} variables for
 running an external grep like search program. You can use them with GLOBAL.
@@ -1129,7 +1456,7 @@ running an external grep like search program. You can use them with GLOBAL.
 
 @c ***************************************************************************
 @node   Features(vim)
-@section Features.
+@subsection Features.
 
 @itemize @bullet
 @item
@@ -1142,7 +1469,7 @@ No source level patch is needed.
 
 @c ***************************************************************************
 @node   Preparation(vim)
-@section Preparation.
+@subsection Preparation.
 
 First, do the preparation of global. (Please see @xref{Preparation}.).
 
@@ -1162,7 +1489,7 @@ Second, write the following set command to the @file{.vimrc} and start vim.
 
 @c ***************************************************************************
 @node   Basic usage(vim)
-@section Basic usage.
+@subsection Basic usage.
 
 @itemize @bullet
 @item To go to func1, you can say
@@ -1240,7 +1567,7 @@ You can go to any entry with @kbd{cc}n command.
 
 @c ***************************************************************************
 @node   Applied usage(vim)
-@section Applied usage.
+@subsection Applied usage.
 
 @itemize @bullet
 @item You can use POSIX regular expressions.
@@ -1277,7 +1604,7 @@ You can go to any entry with @kbd{cc}n command.
 @c Emacs editor
 @c ***************************************************************************
 @node Emacs editor
-@chapter Extended emacs using global
+@section Extended emacs using global
 
 You can use GLOBAL as a tag system of Emacs editor instead of etags.
 
@@ -1290,7 +1617,7 @@ You can use GLOBAL as a tag system of Emacs editor instead of etags.
 
 @c ***************************************************************************
 @node   Features(emacs)
-@section Features.
+@subsection Features.
 
 @itemize @bullet
 @item
@@ -1305,7 +1632,7 @@ Mouse events are supported.
 
 @c ***************************************************************************
 @node   Preparation(emacs)
-@section Preparation.
+@subsection Preparation.
 
 First, do the preparation of global. (Please see @xref{Preparation}.).
 
@@ -1314,12 +1641,15 @@ and execute gtags-mode function in it.
 
 @enumerate
 @item Write the autoload function to the @file{$HOME/.emacs}, start emacs
-       and execute the gtags-mode function.
+       and execute the gtags-mode function. If you don't put @file{gtags.el}
+       in standard macro directory, you need to add the directory to
+       @code{load-path}.
 
 @example
 
     $HOME/.emacs
     +------------------------------------------------------
+    |(setq load-path (cons "/home/owner/global" load-path))
     |(autoload 'gtags-mode "gtags" "" t)
     
     % emacs
@@ -1355,7 +1685,7 @@ If you have tag files in /usr/src/sys then please do like this:
 
 @c ***************************************************************************
 @node   Basic usage(emacs)
-@section Basic usage.
+@subsection Basic usage.
 
 @itemize @bullet
 @item To go to func1, invoke @code{gtags-find-tag}
@@ -1431,7 +1761,7 @@ otherwise it is equivalent to @kbd{Find tag: @var{current token}RET}.
 
 @c ***************************************************************************
 @node   Applied usage(emacs)
-@section Applied usage.
+@subsection Applied usage.
 
 @itemize @bullet
 @item You can use POSIX regular expressions.
@@ -1485,7 +1815,7 @@ To return to the previous position, click the right button.
 @c Web browser
 @c ***************************************************************************
 @node Web browser
-@chapter Hypertext generator
+@section Hypertext generator
 
 You can use GLOBAL's facilities from WWW browser.
 
@@ -1497,7 +1827,7 @@ You can use GLOBAL's facilities from WWW browser.
 
 @c ***************************************************************************
 @node   Features(browser)
-@section Features.
+@subsection Features.
 
 @itemize @bullet
 @item Htags makes hypertext from C, C++, Yacc and Java source files.
@@ -1509,7 +1839,7 @@ You can use GLOBAL's facilities from WWW browser.
 
 @c ***************************************************************************
 @node   Preparation(browser)
-@section Preparation.
+@subsection Preparation.
 
 At first, you must ensure that you have a lot of disk space. Hypertext
 needs a great amount of disk space. For example, the source code
@@ -1528,7 +1858,8 @@ of FreeBSD kernel needs:
 
 @end example
 
-Please do the following:
+Please invoke gtags(1)(See @xref{gtags}.) and htags(1)(See @xref{htags}.)
+in order like this:
 
 @example
 
@@ -1543,7 +1874,7 @@ Then you will find an @file{HTML} subdirectory in the current directory.
 
 @c ***************************************************************************
 @node   Usage(browser)
-@section Usage.
+@subsection Usage.
 
 Please start a web browser like this:
 
@@ -1558,6 +1889,18 @@ You will understand the usage by looking at the examples.
 You can move the HTML directory to anywhere. It is independent of the
 source code.
 
+Using mozilla, you can also utilize hypertext from your command line like this:
+@example
+
+    % mozilla				# @r{load mozilla}
+    % global -x main
+    main        10 main.c main(int argc, char *argv[]) @{
+    % gozilla +10 main.c		# @r{usage is similar to vi editor.}
+    (show main.c at 10 on mozilla's screen.)
+    
+@end example
+But in this case, you must not move HTML directory from the source directory.
+
 @c ***************************************************************************
 @c Other topics
 @c ***************************************************************************
@@ -1565,10 +1908,34 @@ source code.
 @chapter Other topics
 
 @menu
+* Configuration::                       How to config GLOBAL.
 * Plugin::                              How to plug in a parser.
 * Compact format::                      Compact format.
 * Incremental updating::                Incremental updating.
+* Postgres::                            Using Postgres.
 @end menu
+
+@c ***************************************************************************
+@node   Configuration
+@section How to config GLOBAL.
+
+You can customize GLOBAL using configuration file.
+
+@example
+
+    # cp gtags.conf /etc/gtags.conf         # system wide configuration file.
+    # vi /etc/gtags.conf
+
+    % cp gtags.conf $HOME/.globalrc         # personal configuration file.
+    % vi $HOME/.globalrc
+
+@end example
+
+If @file{$HOME/.globalrc} exists then GLOBAL use it. Else if @file{/etc/gtags.conf}
+exists then GLOBAL use it. Otherwise default value will be used.
+The format of @file{gtags.conf} is resemble to termcap(5). By default, 'default'
+target is used.
+About the capabilities, please see each command manual. (See @xref{Reference}.)
 
 @c ***************************************************************************
 @node   Plugin
@@ -1669,7 +2036,7 @@ needs source files.
 
 With the @samp{-c} option, htags makes gzipped hypertext.
 You need to set up an HTTP server so that gzipped files can be read
-(see @file{HTML/.htaccess.skel}).
+(see @file{HTML/.htaccess}).
 
 @example
 
@@ -1720,391 +2087,43 @@ Instead, you can use incremental updating facility (@samp{-u} option).
 @end example
 
 @c ***************************************************************************
-@c GNU Free Documentation License
+@node   Postgres
+@section Using Postgres.
+
+You can make tag files in postgres database instead of normal files.
+To do this, you must setup postgres database system, configure GLOBAL
+with @option{--with-postgres}, build it and make a database so that you can
+access to it. You need a database for a project.
+At the first time of creating tag files, you need specify info string with
+@option{--info}. The info string is passed to PQconnectdb(3) as is.
+@opindex -P
+@example
+
+    # setup postgres database system
+    % set DBNAME=gtagsdb
+    % createdb $DBNAME
+    % gtags -P --info="dbname=$DBNAME user=`whoami`"
+
+@end example
+
+Once tag files are created, you need not use @option{--info}.
+If info string is not specified then gtags load it from tag files.
+
+Please be careful of the value of info string.
+It is passed to Postgres system as is.
+If you mistake the value then program may abort with core dump.
+
 @c ***************************************************************************
-
-@node GNU Free Documentation License
-@unnumbered GNU Free Documentation License
-
-@c This file is intended to be included in another file.
-
-@center Version 1.1, March 2000
-
-@display
-Copyright (C) 2000  Free Software Foundation, Inc.
-    59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-Everyone is permitted to copy and distribute verbatim copies
-of this license document, but changing it is not allowed.
-@end display
-
-@unnumberedsec Preamble
-
-The purpose of this License is to make a manual, textbook, or other
-written document ``free'' in the sense of freedom: to assure everyone
-the effective freedom to copy and redistribute it, with or without
-modifying it, either commercially or noncommercially.  Secondarily,
-this License preserves for the author and publisher a way to get
-credit for their work, while not being considered responsible for
-modifications made by others.
-
-This License is a kind of ``copyleft'', which means that derivative
-works of the document must themselves be free in the same sense.  It
-complements the GNU General Public License, which is a copyleft
-license designed for free software.
-
-We have designed this License in order to use it for manuals for free
-software, because free software needs free documentation: a free
-program should come with manuals providing the same freedoms that the
-software does.  But this License is not limited to software manuals;
-it can be used for any textual work, regardless of subject matter or
-whether it is published as a printed book.  We recommend this License
-principally for works whose purpose is instruction or reference.
-
-@unnumberedsec APPLICABILITY AND DEFINITIONS
-
-This License applies to any manual or other work that contains a
-notice placed by the copyright holder saying it can be distributed
-under the terms of this License.  The ``Document'', below, refers to any
-such manual or work.  Any member of the public is a licensee, and is
-addressed as ``you''.
-
-A ``Modified Version'' of the Document means any work containing the
-Document or a portion of it, either copied verbatim, or with
-modifications and/or translated into another language.
-
-A ``Secondary Section'' is a named appendix or a front-matter section of
-the Document that deals exclusively with the relationship of the
-publishers or authors of the Document to the Document's overall subject
-(or to related matters) and contains nothing that could fall directly
-within that overall subject.  (For example, if the Document is in part a
-textbook of mathematics, a Secondary Section may not explain any
-mathematics.)  The relationship could be a matter of historical
-connection with the subject or with related matters, or of legal,
-commercial, philosophical, ethical or political position regarding
-them.
-
-The ``Invariant Sections'' are certain Secondary Sections whose titles
-are designated, as being those of Invariant Sections, in the notice
-that says that the Document is released under this License.
-
-The ``Cover Texts'' are certain short passages of text that are listed,
-as Front-Cover Texts or Back-Cover Texts, in the notice that says that
-the Document is released under this License.
-
-A ``Transparent'' copy of the Document means a machine-readable copy,
-represented in a format whose specification is available to the
-general public, whose contents can be viewed and edited directly and
-straightforwardly with generic text editors or (for images composed of
-pixels) generic paint programs or (for drawings) some widely available
-drawing editor, and that is suitable for input to text formatters or
-for automatic translation to a variety of formats suitable for input
-to text formatters.  A copy made in an otherwise Transparent file
-format whose markup has been designed to thwart or discourage
-subsequent modification by readers is not Transparent.  A copy that is
-not ``Transparent" is called "Opaque''.
-
-Examples of suitable formats for Transparent copies include plain
-ASCII without markup, Texinfo input format, LaTeX input format, SGML
-or XML using a publicly available DTD, and standard-conforming simple
-HTML designed for human modification.  Opaque formats include
-PostScript, PDF, proprietary formats that can be read and edited only
-by proprietary word processors, SGML or XML for which the DTD and/or
-processing tools are not generally available, and the
-machine-generated HTML produced by some word processors for output
-purposes only.
-
-The ``Title Page'' means, for a printed book, the title page itself,
-plus such following pages as are needed to hold, legibly, the material
-this License requires to appear in the title page.  For works in
-formats which do not have any title page as such, ``Title Page'' means
-the text near the most prominent appearance of the work's title,
-preceding the beginning of the body of the text.
-
-@unnumberedsec VERBATIM COPYING
-
-You may copy and distribute the Document in any medium, either
-commercially or noncommercially, provided that this License, the
-copyright notices, and the license notice saying this License applies
-to the Document are reproduced in all copies, and that you add no other
-conditions whatsoever to those of this License.  You may not use
-technical measures to obstruct or control the reading or further
-copying of the copies you make or distribute.  However, you may accept
-compensation in exchange for copies.  If you distribute a large enough
-number of copies you must also follow the conditions in section 3.
-
-You may also lend copies, under the same conditions stated above, and
-you may publicly display copies.
-
-@unnumberedsec COPYING IN QUANTITY
-
-If you publish printed copies of the Document numbering more than 100,
-and the Document's license notice requires Cover Texts, you must enclose
-the copies in covers that carry, clearly and legibly, all these Cover
-Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
-the back cover.  Both covers must also clearly and legibly identify
-you as the publisher of these copies.  The front cover must present
-the full title with all words of the title equally prominent and
-visible.  You may add other material on the covers in addition.
-Copying with changes limited to the covers, as long as they preserve
-the title of the Document and satisfy these conditions, can be treated
-as verbatim copying in other respects.
-
-If the required texts for either cover are too voluminous to fit
-legibly, you should put the first ones listed (as many as fit
-reasonably) on the actual cover, and continue the rest onto adjacent
-pages.
-
-If you publish or distribute Opaque copies of the Document numbering
-more than 100, you must either include a machine-readable Transparent
-copy along with each Opaque copy, or state in or with each Opaque copy
-a publicly-accessible computer-network location containing a complete
-Transparent copy of the Document, free of added material, which the
-general network-using public has access to download anonymously at no
-charge using public-standard network protocols.  If you use the latter
-option, you must take reasonably prudent steps, when you begin
-distribution of Opaque copies in quantity, to ensure that this
-Transparent copy will remain thus accessible at the stated location
-until at least one year after the last time you distribute an Opaque
-copy (directly or through your agents or retailers) of that edition to
-the public.
-
-It is requested, but not required, that you contact the authors of the
-Document well before redistributing any large number of copies, to give
-them a chance to provide you with an updated version of the Document.
-
-@unnumberedsec MODIFICATIONS
-
-You may copy and distribute a Modified Version of the Document under
-the conditions of sections 2 and 3 above, provided that you release
-the Modified Version under precisely this License, with the Modified
-Version filling the role of the Document, thus licensing distribution
-and modification of the Modified Version to whoever possesses a copy
-of it.  In addition, you must do these things in the Modified Version:
-
-@enumerate A
-@item
-Use in the Title Page (and on the covers, if any) a title distinct
-from that of the Document, and from those of previous versions
-(which should, if there were any, be listed in the History section
-of the Document).  You may use the same title as a previous version
-if the original publisher of that version gives permission.
-
-@item 
- List on the Title Page, as authors, one or more persons or entities
-responsible for authorship of the modifications in the Modified
-Version, together with at least five of the principal authors of the
-Document (all of its principal authors, if it has less than five).
-
-@item 
-State on the Title page the name of the publisher of the
-Modified Version, as the publisher.
-
-@item 
- Preserve all the copyright notices of the Document.
-
-@item 
-Add an appropriate copyright notice for your modifications
-adjacent to the other copyright notices.
-
-@item 
-Include, immediately after the copyright notices, a license notice
-giving the public permission to use the Modified Version under the
-terms of this License, in the form shown in the Addendum below.
-
-@item 
-Preserve in that license notice the full lists of Invariant Sections
-and required Cover Texts given in the Document's license notice.
-
-@item 
-Include an unaltered copy of this License.
-
-@item 
-Preserve the section entitled ``History'', and its title, and add to
-it an item stating at least the title, year, new authors, and
-publisher of the Modified Version as given on the Title Page.  If
-there is no section entitled ``History'' in the Document, create one
-stating the title, year, authors, and publisher of the Document as
-given on its Title Page, then add an item describing the Modified
-Version as stated in the previous sentence.
-
-@item 
-Preserve the network location, if any, given in the Document for
-public access to a Transparent copy of the Document, and likewise
-the network locations given in the Document for previous versions
-it was based on.  These may be placed in the ``History'' section.
-You may omit a network location for a work that was published at
-least four years before the Document itself, or if the original
-publisher of the version it refers to gives permission.
-
-@item 
-In any section entitled ``Acknowledgements" or "Dedications'',
-preserve the section's title, and preserve in the section all the
-substance and tone of each of the contributor acknowledgements
-and/or dedications given therein.
-
-@item 
-Preserve all the Invariant Sections of the Document,
-unaltered in their text and in their titles.  Section numbers
-or the equivalent are not considered part of the section titles.
-
-@item 
-Delete any section entitled ``Endorsements''.  Such a section
-may not be included in the Modified Version.
-
-@item 
-Do not retitle any existing section as ``Endorsements''
-or to conflict in title with any Invariant Section.
-@end enumerate
-
-If the Modified Version includes new front-matter sections or
-appendices that qualify as Secondary Sections and contain no material
-copied from the Document, you may at your option designate some or all
-of these sections as invariant.  To do this, add their titles to the
-list of Invariant Sections in the Modified Version's license notice.
-These titles must be distinct from any other section titles.
-
-You may add a section entitled ``Endorsements'', provided it contains
-nothing but endorsements of your Modified Version by various
-parties--for example, statements of peer review or that the text has
-been approved by an organization as the authoritative definition of a
-standard.
-
-You may add a passage of up to five words as a Front-Cover Text, and a
-passage of up to 25 words as a Back-Cover Text, to the end of the list
-of Cover Texts in the Modified Version.  Only one passage of
-Front-Cover Text and one of Back-Cover Text may be added by (or
-through arrangements made by) any one entity.  If the Document already
-includes a cover text for the same cover, previously added by you or
-by arrangement made by the same entity you are acting on behalf of,
-you may not add another; but you may replace the old one, on explicit
-permission from the previous publisher that added the old one.
-
-The author(s) and publisher(s) of the Document do not by this License
-give permission to use their names for publicity for or to assert or
-imply endorsement of any Modified Version.
-
-@unnumberedsec COMBINING DOCUMENTS
-
-You may combine the Document with other documents released under this
-License, under the terms defined in section 4 above for modified
-versions, provided that you include in the combination all of the
-Invariant Sections of all of the original documents, unmodified, and
-list them all as Invariant Sections of your combined work in its
-license notice.
-
-The combined work need only contain one copy of this License, and
-multiple identical Invariant Sections may be replaced with a single
-copy.  If there are multiple Invariant Sections with the same name but
-different contents, make the title of each such section unique by
-adding at the end of it, in parentheses, the name of the original
-author or publisher of that section if known, or else a unique number.
-Make the same adjustment to the section titles in the list of
-Invariant Sections in the license notice of the combined work.
-
-In the combination, you must combine any sections entitled ``History''
-in the various original documents, forming one section entitled
-``History"; likewise combine any sections entitled "Acknowledgements'',
-and any sections entitled ``Dedications''.  You must delete all sections
-entitled ``Endorsements.''
-
-@unnumberedsec COLLECTIONS OF DOCUMENTS
-
-You may make a collection consisting of the Document and other documents
-released under this License, and replace the individual copies of this
-License in the various documents with a single copy that is included in
-the collection, provided that you follow the rules of this License for
-verbatim copying of each of the documents in all other respects.
-
-You may extract a single document from such a collection, and distribute
-it individually under this License, provided you insert a copy of this
-License into the extracted document, and follow this License in all
-other respects regarding verbatim copying of that document.
-
-@unnumberedsec AGGREGATION WITH INDEPENDENT WORKS
-
-A compilation of the Document or its derivatives with other separate
-and independent documents or works, in or on a volume of a storage or
-distribution medium, does not as a whole count as a Modified Version
-of the Document, provided no compilation copyright is claimed for the
-compilation.  Such a compilation is called an ``aggregate'', and this
-License does not apply to the other self-contained works thus compiled
-with the Document, on account of their being thus compiled, if they
-are not themselves derivative works of the Document.
-
-If the Cover Text requirement of section 3 is applicable to these
-copies of the Document, then if the Document is less than one quarter
-of the entire aggregate, the Document's Cover Texts may be placed on
-covers that surround only the Document within the aggregate.
-Otherwise they must appear on covers around the whole aggregate.
-
-@unnumberedsec TRANSLATION
-
-Translation is considered a kind of modification, so you may
-distribute translations of the Document under the terms of section 4.
-Replacing Invariant Sections with translations requires special
-permission from their copyright holders, but you may include
-translations of some or all Invariant Sections in addition to the
-original versions of these Invariant Sections.  You may include a
-translation of this License provided that you also include the
-original English version of this License.  In case of a disagreement
-between the translation and the original English version of this
-License, the original English version will prevail.
-
-@unnumberedsec TERMINATION
-
-You may not copy, modify, sublicense, or distribute the Document except
-as expressly provided for under this License.  Any other attempt to
-copy, modify, sublicense or distribute the Document is void, and will
-automatically terminate your rights under this License.  However,
-parties who have received copies, or rights, from you under this
-License will not have their licenses terminated so long as such
-parties remain in full compliance.
-
-@unnumberedsec FUTURE REVISIONS OF THIS LICENSE
-
-The Free Software Foundation may publish new, revised versions
-of the GNU Free Documentation License from time to time.  Such new
-versions will be similar in spirit to the present version, but may
-differ in detail to address new problems or concerns.  See
-http://www.gnu.org/copyleft/.
-
-Each version of the License is given a distinguishing version number.
-If the Document specifies that a particular numbered version of this
-License ``or any later version'' applies to it, you have the option of
-following the terms and conditions either of that specified version or
-of any later version that has been published (not as a draft) by the
-Free Software Foundation.  If the Document does not specify a version
-number of this License, you may choose any version ever published (not
-as a draft) by the Free Software Foundation.
-
-
-
-@unnumberedsec ADDENDUM: How to use this License for your documents
-
-To use this License in a document you have written, include a copy of
-the License in the document and put the following copyright and
-license notices just after the title page:
-
-@display
-Copyright (c)  YEAR  YOUR NAME.
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1
-or any later version published by the Free Software Foundation;
-with the Invariant Sections being LIST THEIR TITLES, with the
-Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.
-A copy of the license is included in the section entitled "GNU
-Free Documentation License".
-@end display
-
-If you have no Invariant Sections, write ``with no Invariant Sections''
-instead of saying which ones are invariant.  If you have no
-Front-Cover Texts, write ``no Front-Cover Texts'' instead of
-``Front-Cover Texts being LIST''; likewise for Back-Cover Texts.
-
-If your document contains nontrivial examples of program code, we
-recommend releasing these examples in parallel under your choice of
-free software license, such as the GNU General Public License,
-to permit their use in free software.
+@c Reference manual.
+@c ***************************************************************************
+@node Reference
+@chapter Reference manual
+@include reference.texi
+
+@c ***************************************************************************
+@c FDL
+@c ***************************************************************************
+@include fdl.texi
 
 @node Index
 @unnumbered Option Index

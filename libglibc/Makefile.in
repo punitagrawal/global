@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4i from Makefile.am.
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
 
 # Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
 # Free Software Foundation, Inc.
@@ -14,7 +14,7 @@
 @SET_MAKE@
 
 #
-# Copyright (c) 2000
+# Copyright (c) 2000, 2001
 #        Tama Communications Corporation. All rights reserved.
 #
 # This file is free software; as a special exception the author gives
@@ -72,11 +72,13 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 CC = @CC@
 DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
 FIND = @FIND@
 GREP = @GREP@
 INCLUDES = @INCLUDES@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDADD = @LDADD@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 RANLIB = @RANLIB@
@@ -84,19 +86,17 @@ SED = @SED@
 SORT = @SORT@
 VERSION = @VERSION@
 XARGS = @XARGS@
-_am_include = @_am_include@
-_am_quote = @_am_quote@
+am__include = @am__include@
+am__quote = @am__quote@
 install_sh = @install_sh@
 
 noinst_LIBRARIES = libgloglibc.a
 
 noinst_HEADERS = regex.h getopt.h
 
-libgloglibc_a_SOURCES = regex.c getopt.c getopt1.c
+libgloglibc_a_SOURCES = regex.c getopt.c getopt1.c snprintf.c
 
 libgloglibc_a_DEPENDENCIES = $(libgloglibc_a_LIBADD)
-EXEEXT =
-OBJEXT = o
 subdir = libglibc
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -106,7 +106,7 @@ LIBRARIES = $(noinst_LIBRARIES)
 libgloglibc_a_AR = $(AR) cru
 libgloglibc_a_LIBADD =
 am_libgloglibc_a_OBJECTS = regex.$(OBJEXT) getopt.$(OBJEXT) \
-	getopt1.$(OBJEXT)
+	getopt1.$(OBJEXT) snprintf.$(OBJEXT)
 libgloglibc_a_OBJECTS = $(am_libgloglibc_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -116,7 +116,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/getopt.Po $(DEPDIR)/getopt1.Po \
-@AMDEP_TRUE@	$(DEPDIR)/regex.Po
+@AMDEP_TRUE@	$(DEPDIR)/regex.Po $(DEPDIR)/snprintf.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -144,7 +144,7 @@ AR = ar
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libgloglibc.a: $(libgloglibc_a_OBJECTS) $(libgloglibc_a_DEPENDENCIES)
+libgloglibc.a: $(libgloglibc_a_OBJECTS) $(libgloglibc_a_DEPENDENCIES) 
 	-rm -f libgloglibc.a
 	$(libgloglibc_a_AR) libgloglibc.a $(libgloglibc_a_OBJECTS) $(libgloglibc_a_LIBADD)
 	$(RANLIB) libgloglibc.a
@@ -155,9 +155,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/getopt.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/getopt1.Po@_am_quote@
-@AMDEP_TRUE@@_am_include@ @_am_quote@$(DEPDIR)/regex.Po@_am_quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/getopt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/getopt1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/regex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/snprintf.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -203,14 +204,20 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 GTAGS:
 	here=`CDPATH=: && cd $(top_builddir) && pwd` \
 	  && cd $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) $$here
-HTAGS: GTAGS
+	  && gtags -i $(GTAGS_ARGS) $$here \
+	  && case `pwd` in \
+	     $$here);; \
+	     *)	echo $(top_srcdir) >$$here/GTAGSROOT;; \
+	     esac
+
+HTML:
 	here=`CDPATH=: && cd $(top_builddir) && pwd` \
 	  && cd $(top_srcdir) \
 	  && htags $(HTAGS_ARGS) -d $$here $$here
 
 distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH GTAGSROOT
+	-rm -rf HTML
 
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
@@ -299,7 +306,7 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
 uninstall-am: uninstall-info-am
 
-.PHONY: GTAGS HTAGS all all-am check check-am clean clean-generic \
+.PHONY: GTAGS HTML all all-am check check-am clean clean-generic \
 	clean-noinstLIBRARIES distclean distclean-compile \
 	distclean-depend distclean-generic distclean-tags distdir dvi \
 	dvi-am info info-am install install-am install-data \

@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2001
+ Copyright (c) 2000, 2001, 2002
         Tama Communications Corporation. All rights reserved.
 
  This file is free software; as a special exception the author gives
@@ -18,6 +18,50 @@ ___________________________________
 		----------------------------------
 
 ChangeLog about GNU GLOBAL
+
+March 30 2002, Shigio Yamaguchi  <shigio@gnu.org>
+
+	* conf.c: added GPATH,GTAGS,GRTAGS,GSYMS,tags,TAGS,ID to DEFAULTSKIP.
+	* find.c: decreased dependency on find(1).
+	  removed length argument from find_read().
+	* global.texi: documentation reconstucted.
+	* globash.rc: --no-wait option added to emacsclient.
+	* gozilla: gozilla directory added.
+	* abs2rel.c: added for path conversion. pathfilter with sed(1)
+	  is replaced gtags(1) --relative or --absolute.
+	* global: use lid(1) rather than gid(1).
+	* usable.c: locate command for BINDIR before PATH.
+	* htags: bless.sh remove cgi-bin/global.cgi because it is not needed.
+	* htags: changed open into 'open + exec' to avoid command substitutions
+	  in pattern.
+
+January 22 2002, Shigio Yamaguchi  <shigio@gnu.org>
+
+	* htags: build trouble fixed.
+	  global.cgi wasn't generated correctly.
+
+January 10 2002, Shigio Yamaguchi  <shigio@gnu.org>
+
+	* DJGPP support code added.
+	  Jason Hood ported Global-4.0.1 into DJGPP environment.
+	  I have merged his code into this version.
+	* gtags.pl added.
+	* Convert.pl added. From now on, usage, help, man, info are
+	  generated automatically by this script from */manual.in files.
+	* gtags, global: make exit code rule:
+	  0:normal, 1:exception, 2:usage, 3:GTAGS not found.
+
+November 23 2001, Shigio Yamaguchi  <shigio@tamacom.com>
+
+	* gtags: format char for strftime() changed (%e -> %d).
+	* gtags: the path of gctags changed from 'gctags' to '$bindir/gctags'.
+	* htags: use gtags --date and gtags --pwd instead of date and pwd.
+	  Above changes are for Windows 32 environment.
+	* rename file: pathop.[ch] -> gpathop.[ch].
+	* rename functions: pathxxx -> gpath_xxx, gtagsxxx -> gtags_xxx.
+	* rename functions: ffindxxx -> find_xxx, gfindxxx -> gfind_xxx.
+	* libglibc/snprintf.c added.
+	* move gfind_xxx from libutil/find.c to libutil/gpathop.c.
 
 July 31 2001, Shigio Yamaguchi  <shigio@tamacom.com>
 

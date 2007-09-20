@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4i from Makefile.am.
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
 
 # Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
 # Free Software Foundation, Inc.
@@ -14,7 +14,7 @@
 @SET_MAKE@
 
 #
-# Copyright (c) 2000
+# Copyright (c) 2000, 2001
 #        Tama Communications Corporation. All rights reserved.
 #
 # This file is free software; as a special exception the author gives
@@ -72,34 +72,33 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 CC = @CC@
 DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
 FIND = @FIND@
 GREP = @GREP@
 INCLUDES = @INCLUDES@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDADD = @LDADD@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SED = @SED@
 SORT = @SORT@
+VERSION = @VERSION@
 XARGS = @XARGS@
-_am_include = @_am_include@
-_am_quote = @_am_quote@
+am__include = @am__include@
+am__quote = @am__quote@
 install_sh = @install_sh@
 
 PERL = @PERL@
-VERSION = @VERSION@
 
-bin_SCRIPTS = htags
-
-SUFFIXES = .pl
+@DJGPP_TRUE@bin_SCRIPTS = htags htags.bat
+@DJGPP_FALSE@bin_SCRIPTS = htags
 
 man_MANS = htags.1
 
-EXTRA_DIST = ${man_MANS} ${bin_SCRIPTS}${SUFFIXES}
+EXTRA_DIST = $(man_MANS) htags.in manual.in const.pl htags.bat
 
-CLEANFILES = ${bin_SCRIPTS}
-EXEEXT =
-OBJEXT = o
+CLEANFILES = htags
 subdir = htags
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -114,7 +113,6 @@ DIST_COMMON = Makefile.am Makefile.in
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .pl
 $(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  htags/Makefile
@@ -288,9 +286,10 @@ uninstall-man: uninstall-man1
 	uninstall-man uninstall-man1
 
 
-.pl:
-	sed -e 's,@''PERL''@,$(PERL),g' $< >$@.tmp && \
-	chmod +x $@.tmp && mv $@.tmp $@
+htags: $(srcdir)/htags.in $(srcdir)/const.pl
+	echo "#! @PERL@" | cat - $(srcdir)/const.pl $(srcdir)/htags.in | \
+	sed -e 's,@''PERL''@,$(PERL),g' >htags.tmp && \
+	chmod +x htags.tmp && mv htags.tmp htags
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

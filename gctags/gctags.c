@@ -43,12 +43,13 @@
 
 #include "global.h"
 #include "gctags.h"
+#include "const.h"
 
-const char *progname = "gctags";	/* program name */
 char	*notfunction;
 
 int	main(int, char **);
 static	void usage(void);
+static	void help(void);
 
 struct words *words;
 static int tablesize;
@@ -61,6 +62,7 @@ int	rflag;			/* -r: function reference */
 int	sflag;			/* -s: collect symbols */
 int	tflag;			/* -t: treat typedefs, structs, unions, and enums. */
 int	wflag;			/* -w: warning message */
+int	vflag;			/* -v: verbose mode */
 int	show_version;
 int	show_help;
 int	debug;
@@ -70,10 +72,16 @@ int	yaccfile;		/* yacc file */
 static void
 usage()
 {
-	(void)fprintf(stderr, "usage: gctags [-bdenrstw] file ...\n");
+	fputs(usage_const, stderr);
 	exit(2);
 }
-
+static void
+help()
+{
+	fputs(usage_const, stdout);
+	fputs(help_const, stdout);
+	exit(0);
+}
 static struct option const long_options[] = {
 	{"begin-block", no_argument, NULL, 'b'},
 	{"define", no_argument, NULL, 'd'},
@@ -137,7 +145,7 @@ main(argc, argv)
 	if (show_version)
 		version(NULL, 0);
 	else if (show_help)
-		usage();
+		help();
 
         argc -= optind;
         argv += optind;
@@ -176,7 +184,7 @@ main(argc, argv)
 	for (; argc > 0; argv++, argc--) {
 		if (!opentoken(argv[0]))
 			die("'%s' cannot open.", argv[0]);
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DJGPP__)
 		/* Lower case the file name since names are case insensitive */
 		strlwr(argv[0]);
 #endif

@@ -1,7 +1,7 @@
 #
 # GloBash --- Global facility for Bash
 #
-# Copyright (c) 2001
+# Copyright (c) 2001, 2002
 #             Tama Communications Corporation. All rights reserved.
 #
 # This file is part of GNU GLOBAL.
@@ -20,17 +20,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-# GLOBAL home page is at: http://www.tamacom.com/global/
+# GLOBAL home page is at: http://www.gnu.org/software/global/
 # Author: Shigio Yamaguchi
   version=0.1
 # Usage:
 # $ bash --rcfile <this file>
 # [/usr/src/sys] ghelp<RET>
 #
-if !(( BASH_VERSINFO[0] >= 2 && BASH_VERSINFO[1] >= 4 )); then
+bash_minorversion=$(echo ${BASH_VERSINFO[1]} | sed 's/[^0-9]//')
+if !(( BASH_VERSINFO[0] > 2 || BASH_VERSINFO[0] == 2 && 10#${bash_minorversion} >= 4 )); then
 	echo "GloBash needs Bash version 2.04 or later."
 	exit 1
 fi
+unset bash_minorversion
 ###########################################################################
 # Global variables and utilities.
 ###########################################################################
@@ -656,7 +658,7 @@ show()	{
 		case $1 in
 		-v|-vi)		local EDITOR=vi; shift;;
 		-l|-less)	local EDITOR=less; shift;;
-		-e|-emacs)	local EDITOR=emacsclient; shift;;
+		-e|-emacs)	local EDITOR='emacsclient --no-wait'; shift;;
 		-g|-gozilla)	local EDITOR=gozilla; shift;;
 		-n|-noedit)	local EDITOR=noedit; shift;;
 		*)		echo "invalid option $1."
@@ -678,9 +680,9 @@ ghelp() {
 	echo
 	echo "GloBash --- Global facility for Bash"
 	echo
-	echo "Copyright (c) 2001"
+	echo "Copyright (c) 2001, 2002"
 	echo "Tama Communications Corporation. All rights reserved."
-	echo "GLOBAL WWW: http://tamacom.com/global/"
+	echo "GLOBAL WWW: http://www.gnu.org/software/global/"
 	echo
 	echo "Prompt:"
 	echo
@@ -713,7 +715,7 @@ ghelp() {
 	echo "	You can specify a editor statically by EDITOR environment"
 	echo "	variable or temporarily by option."
 	echo "	(-l: less, -v: vi, -e: emacs, -g:gozilla, -n: no editor)"
-	echo "	show [-l|-v|-e|-g-n]][<no>|first|last]"
+	echo "	show [-l|-v|-e|-g|-n][<no>|first|last]"
 	echo "			- view specified (default=current) tag."
 	echo "	first [-l|-v|-e|-g|-n]"
 	echo "			- view the first tag."

@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4i from Makefile.am.
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
 
 # Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
 # Free Software Foundation, Inc.
@@ -14,7 +14,7 @@
 @SET_MAKE@
 
 #
-# Copyright (c) 2000
+# Copyright (c) 2000, 2001
 #        Tama Communications Corporation. All rights reserved.
 #
 # This file is free software; as a special exception the author gives
@@ -72,11 +72,13 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 CC = @CC@
 DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
 FIND = @FIND@
 GREP = @GREP@
 INCLUDES = @INCLUDES@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDADD = @LDADD@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 RANLIB = @RANLIB@
@@ -84,15 +86,17 @@ SED = @SED@
 SORT = @SORT@
 VERSION = @VERSION@
 XARGS = @XARGS@
-_am_include = @_am_include@
-_am_quote = @_am_quote@
+am__include = @am__include@
+am__quote = @am__quote@
 install_sh = @install_sh@
 
 info_TEXINFOS = global.texi
 
+global_TEXINFOS = fdl.texi reference.texi \
+	global.ref gtags.ref htags.ref gctags.ref gozilla.ref btreeop.ref
+
+
 EXTRA_DIST = texinfo.tex
-EXEEXT =
-OBJEXT = o
 subdir = doc
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -101,8 +105,8 @@ DIST_SOURCES =
 INFO_DEPS = global.info
 DVIS = global.dvi
 TEXINFOS = global.texi
-DIST_COMMON = Makefile.am Makefile.in mdate-sh stamp-vti texinfo.tex \
-	version.texi
+DIST_COMMON = $(global_TEXINFOS) Makefile.am Makefile.in mdate-sh \
+	stamp-vti texinfo.tex version.texi
 all: all-am
 
 .SUFFIXES:
@@ -135,8 +139,8 @@ mostlyclean-vti:
 maintainer-clean-vti:
 	-rm -f $(srcdir)/stamp-vti $(srcdir)/version.texi
 
-global.info: global.texi $(srcdir)/version.texi
-global.dvi: global.texi $(srcdir)/version.texi
+global.info: global.texi $(srcdir)/version.texi $(global_TEXINFOS)
+global.dvi: global.texi $(srcdir)/version.texi $(global_TEXINFOS)
 
 .texi.info:
 	@cd $(srcdir) && rm -f $@ $@-[0-9] $@-[0-9][0-9]

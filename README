@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2001
+ Copyright (c) 2000, 2001, 2002
         Tama Communications Corporation. All rights reserved.
 
  This file is free software; as a special exception the author gives
@@ -22,9 +22,13 @@ environments. It supports C, C++, Yacc and Java source code.
 
 * Installation
 
-	If your system is a UNIX then please see 'INSTALL',
-	else if your system is a Windows32 (Windows95/98, Windows-NT) then
-	please see 'w32/INSTALL'.
+	If you use a UNIX or DJGPP on Windows9X then please see 'INSTALL'.
+	If you want to use Borland C++ compiler on Windows32 environment
+	then please see 'w32/INSTALL'.
+
+	Note: I strongly recommend you to use UNIX(GNU/Linux,*BSD) environment.
+	I cannot say GLOBAL works well in Windows32 environment because
+	I don't use it and in fact I don't have it.
 
 * Documentation
 
@@ -43,7 +47,7 @@ environments. It supports C, C++, Yacc and Java source code.
 
 	You can see the latest information on GLOBAL's WWW.
 
-	http://www.tamacom.com/global/
+	http://www.gnu.org/software/global/
 
 * Mailing list
 
@@ -51,7 +55,7 @@ environments. It supports C, C++, Yacc and Java source code.
 	in GLOBAL or you need help about GLOBAL, then some mailing lists are
 	available. Please see GLOBAL's WWW.
 
-	http://www.tamacom.com/global/
+	http://www.gnu.org/software/global/
 
 Enjoy!
 

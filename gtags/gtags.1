@@ -1,173 +1,173 @@
-.\"
-.\" Copyright (c) 1996, 1997, 1998, 1999
-.\"             Shigio Yamaguchi. All rights reserved.
-.\" Copyright (c) 1999, 2000, 2001
-.\"             Tama Communications Corporation. All rights reserved.
-.\"
-.\" This file is part of GNU GLOBAL.
-.\"
-.\" GNU GLOBAL is free software; you can redistribute it and/or modify
-.\" it under the terms of the GNU General Public License as published by
-.\" the Free Software Foundation; either version 2, or (at your option)
-.\" any later version.
-.\"
-.\" GNU GLOBAL is distributed in the hope that it will be useful,
-.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
-.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-.\" GNU General Public License for more details.
-.\"
-.\" You should have received a copy of the GNU General Public License
-.\" along with this program; if not, write to the Free Software
-.\" Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-.\"
-.Dd July 20, 2001
-.Dt GTAGS 1
-.Os FreeBSD
-.Sh NAME
-.Nm gtags
-.Nd create tag files for global.
-.Sh SYNOPSIS
-.Nm gtags
-.Op Fl c
-.Op Fl i
-.Op Fl I
-.Op Fl o
-.Op Fl w
-.Op Fl v
-.Op Ar dbpath
-.Sh DESCRIPTION
-.Nm Gtags
-makes GTAGS, GRTAGS, GSYMS and GPATH file for
-.Xr global 1 .
-.Nm Gtags
-trace subdirectories, read source files,
-locate symbols and save the information into tag files in current directory.
+.\" This file is generated automatically by convert.pl from gtags/manual.in.
+.TH GTAGS 29 "March 2002" "GNU Project"
+.SH NAME
+gtags \- create tag files for global.
+.SH SYNOPSIS
+\fBgtags\fP [-c][-i][-I][-o][-P][-q][-v][-w][\fIdbpath\fP]
+.br
+.SH DESCRIPTION
+\fBGtags\fP makes \'GTAGS\', \'GRTAGS\', \'GSYMS\' and \'GPATH\'
+file for \fBglobal\fP(1).
+\fBGtags\fP trace subdirectories, read source files,
+locate symbols and save the information into tag files
+in current directory.
 You should execute this command at the root of the source tree.
-If your source directory is on a read only device like CDROM, specify
-.Ar dbpath
-of the directory on which make tag files.
-.Pp
+If your source directory is on a read only device like CDROM,
+specify \fIdbpath\fP of the directory on which make tag files.
+.PP
 C, C++, yacc, java and assembler source files are supported.
-.Pp
-.Bl -tag -width Ds -compact
-.It Fl c
-.It Fl -compact
-Make tag files with compact format.
-.It Fl -config Ar name
-Show the value of config variable
-.Ar name .
-If
-.Ar name
-is not specified then show whole of config entry.
-.It Fl -gtagsconf Ar file
-Load user's configuration from
-.Ar file .
-.It Fl i
-.It Fl -incremental
-Update tag files incrementally. You had better use
-.Xr global 1
-with the -u option.
-.It Fl I
-.It Fl -idutils
-Make index files for id-utils(1).
-.It Fl o
-.It Fl -omit-gsyms
-Suppress making GSYMS file.
-Use this option if you don't use -s option of
-.Xr global 1 .
-.It Fl v
-.It Fl -verbose
-Verbose mode.
-.It Fl w
-.It Fl -warning
-Print warning messages.
-.El
-.Pp
-Files whose names end in
-.Nm \&.c
-or
-.Nm \&.h
-are assumed to be C
-source files and are searched for C style routine and macro definitions.
-Files whose names end in
-.Nm \&.c++
-.Nm \&.cc
-.Nm \&.cpp
-.Nm \&.cxx
-.Nm \&.hxx
-.Nm \&.C
-.Nm \&.H
-are assumed to be C++
-source files.
-Files whose names end in
-.Nm \&.y
-are assumed to be
-.Tn YACC
-source files.
-Files whose names end in
-.Nm \&.java
-are assumed to be Java source files.
-Files whose names end in
-.Nm \&.s
-or
-.Nm \&.S
-are assumed to be Assembler
-source files.
+Files whose names end in \'.c\' or \'.h\' are assumed to be
+C source files and are searched for C style routine and macro
+definitions.
+Files whose names end in \'.c++\' \'.cc\' \'.cpp\' \'.cxx\'
+\'.hxx\' \'.C\' \'.H\' are assumed to be C++ source files.
+Files whose names end in \'.y\' are assumed to be YACC source files.
+Files whose names end in \'.java\' are assumed to be Java source files.
+Files whose names end in \'.s\' or \'.S\'
+are assumed to be Assembler source files.
 Other files are searched for C style definitions.
-.Sh FILES
-.Bl -tag -width tags -compact
-.It Pa GTAGS
+.SH OPTIONS
+The following options are available:
+.TP
+\fB-c\fP, \fB--compact\fP
+Make tag files with compact format.
+.TP
+\fB--config\fP \fIname\fP
+Show the value of config variable \fIname\fP.
+If \fIname\fP is not specified then show whole of config entry.
+.TP
+\fB--gtagsconf\fP \fIfile\fP
+Load user's configuration from \fIfile\fP.
+.TP
+\fB-i\fP, \fB--incremental\fP
+Update tag files incrementally. You had better use
+\fBglobal\fP(1) with the -u option.
+.TP
+\fB-I\fP, \fB--idutils\fP
+Make index files for \fBid-utils\fP(1).
+.TP
+\fB--info\fP \fIinfo\fP
+Pass info string to external system.
+Currently you can use it with -P option.
+.TP
+\fB-o\fP, \fB--omit-gsyms\fP
+Suppress making \'GSYMS\' file.
+Use this option if you don't use -s option of \fBglobal\fP(1).
+.TP
+\fB-P\fP, \fB--postgres\fP
+Use postgres database system instead of \fBdb\fP(3).
+you can pass info string to \fBPQconnectdb\fP(3)
+using \fB--info\fP option.
+.TP
+\fB-q\fP, \fB--quiet\fP
+Quiet mode.
+.TP
+\fB-v\fP, \fB--verbose\fP
+Verbose mode.
+.TP
+\fB-w\fP, \fB--warning\fP
+Print warning messages.
+.SH EXAMPLES
+.nf
+	% ls -F
+	Makefile      src/    lib/
+	% gtags -v
+	% global -x main
+	main              10 src/main.c  main (argc, argv) {
+.fi
+.SH FILES
+.TP
+\'GTAGS\'
 Tag file for function definitions.
-.It Pa GRTAGS
+.TP
+\'GRTAGS\'
 Tag file for function references.
-.It Pa GSYMS
+.TP
+\'GSYMS\'
 Tag file for other symbols.
-.It Pa GPATH
+.TP
+\'GPATH\'
 Tag file for path of source files.
-.It Pa /etc/gtags.conf $HOME/.globalrc
+.TP
+\'/etc/gtags.conf\', \'$HOME/.globalrc\'
 Configuration file.
-.El
-.Sh ENVIRONMENT
-The following environment variables affect the execution of htags.
-.Pp
-.Bl -tag -width indent
-.It Ev GTAGSCONF
-If this variable is set, its value is used as the configuration file.
-The default is $HOME/.globalrc.
-.It Ev GTAGSLABEL
-If this variable is set, its value is used as the label of configuration file.
-The default is 'default'.
-.El
-.Sh EXAMPLES
-  % ls -F
-  Makefile      src/    lib/
-  % gtags -v
-  % global -x main
-  main              10 src/main.c  main (argc, argv) {
-.Sh DIAGNOSTICS
-.Nm Gtags
-exits with a non 0 value if an error occurred, 0 otherwise.
-.Sh SEE ALSO
-.Xr btreeop 1 ,
-.Xr gctags 1 ,
-.Xr global 1 ,
-.Xr gozilla 1 ,
-.Xr htags 1 ,
-.Xr vi 1 .
-.Sh BUG
-GTAGS, GRTAGS and GSYMS are very large.
+.SH ENVIRONMENT
+The following environment variables affect the execution of \fBgtags\fP:
+.TP
+\fBGTAGSCONF\fP
+If this variable is set, its value is used as the
+configuration file. The default is \'$HOME/.globalrc\'.
+.TP
+\fBGTAGSLABEL\fP
+If this variable is set, its value is used as the label
+of configuration file. The default is default.
+.SH CONFIGURATION
+The following configuration variables affect the execution of \fBgtags\fP:
+.TP
+GTAGS(string)
+If this variable is set, its value is used as the
+command line of parser for GTAGS. The default is \'gctags %s\'.
+.TP
+GRTAGS(string)
+If this variable is set, its value is used as the
+command line of parser for GRTAGS. The default is \'gctags -r %s\'.
+.TP
+GSYMS(string)
+If this variable is set, its value is used as the
+command line of parser for GSYMS. The default is \'gctags -s %s\'.
+.TP
+skip(comma separated list)
+\fBGtags\fP skips files which listed in this list.
+As a special exception, \fBgtags\fP collect values from multiple skip variables.
+If the value ends with '/', it assumed as a directory and \fBgtags\fP skips all files under it.
+If the value start with '/', it assumed relative path from the root of source directory.
+By default, it assumes GPATH, GTAGS, GRTAGS, GSYMS, HTML/, tags, TAGS, ID, y.tab.c, y.tab.h, SCCS/, RCS/, CVS/, CVSROOT/, .deps/.
+.TP
+suffixes(comma separated list)
+Suffixes of target source file.
+As a special exception, \fBgtags\fP collect values from multiple suffixes variables.
+By default, it assumes c, h, y, c++, cc, cpp, cxx, hxx, C, H, s, S, java.
+.TP
+format(standard|compact)
+Format of tag files. The default is standard.
+Compact format is same to \fB-c\fP(\fB--compact\fP).
+.TP
+icase_path(boolean)
+Ignore case distinctions in the path.
+Suffixes check are affected by this capability.
+.TP
+sed_command(string)
+Use specified \fBsed\fP(1) command, which is used internally.
+.TP
+sort_command(string)
+Use specified \fBsort\fP(1) command, which is used internally.
+.SH DIAGNOSTICS
+\fBGtags\fP exits with a non 0 value if an error occurred, 0 otherwise.
+.SH "SEE ALSO"
+\fBbtreeop\fP(1),
+\fBgctags\fP(1),
+\fBglobal\fP(1),
+\fBhtags\fP(1).
+.PP
+GNU GLOBAL source code tag system
+.br
+(http://www.gnu.org/software/global/).
+.SH BUG
+\'GTAGS\', \'GRTAGS\' and \'GSYMS\' are very large.
 In advance of using this command, check the space of your disk.
-.Pp
-Assembler support is far from complete.  It extracts only ENTRY()
-and ALTENTRY() from source file. Probably valid only for FreeBSD and Linux
-kernel source.
-.Pp
+.PP
+Assembler support is far from complete.
+It extracts only ENTRY() and ALTENTRY() from source file.
+Probably valid only for FreeBSD and Linux kernel source.
+.PP
 There is no concurrency control about tag files.
-.Pp
-Symbols in assembler source files are not extracted for GSYMS.
-.Sh AUTHORS
+.PP
+Symbols in assembler source files are not extracted for \'GSYMS\'.
+.PP
+Please be careful of info string using \fB--info\fP option.
+Info string is passed to external system as is.
+If you mistake the value then program may abort with core dump.
+.SH AUTHOR
 Shigio Yamaguchi
-.Sh HISTORY
-The
-.Nm
-command appeared in FreeBSD 2.2.2.
+.SH HISTORY
+The \fBgtags\fP command appeared in FreeBSD 2.2.2.

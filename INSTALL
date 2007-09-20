@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000
+ Copyright (c) 2000, 2002
         Tama Communications Corporation. All rights reserved.
 
  This file is free software; as a special exception the author gives
@@ -27,6 +27,17 @@ o PERL version 4 or later is needed for htags.
 
 	http://www.perl.com/CPAN/
 
+
+o If your environment is Windows32(Windows95,98,NT...), you need to
+  install DJGPP tools to your environment. See following site:
+
+	http://www.delorie.com/djgpp/
+
+  You should install the following tools:
+
+	gcc, perl, bash, sed, grep, id-utils
+	find, xargs(Find-utils)
+	sort, cat, tr(Text-utils)
 
 o Groff is needed for formatting online manuals.
 
@@ -53,14 +64,20 @@ o If you want to use the -I option of global(1) then id-utils(1) is needed.
 
    You need GNU make. It may be named 'gmake' on your system.
 
+   UNIX:
+
 	% ./configure
-	% make				<- GNU make
+	% make
 	# make install
 
+   DJGPP:
+	c:\> bash configure
+	c:\> make
+	c:\> make install
 
 3. Using GLOBAL with editors.
 
-o Nvi
+o Nvi-1.79
 
    Please get nvi-1.79 at:
 
@@ -77,6 +94,31 @@ o Nvi
 	# make install
 
    ('nvi-1.79-gtags.diff' is included in GLOBAL package.)
+
+o Nvi-1.81.5
+
+   Please get nvi-1.81.5 at:
+
+
+	   http://www.kotnet.org/~skimo/nvi/
+
+   build it with '--enable-perlinterp' option and do the followings.
+   ($HOME/perl is an example. Please replace it with any directory you like.)
+
+	% mkdir $HOME/perl
+	% cp gtags.pl $HOME/perl
+	% vi $HOME/.nexrc
+	+-----------------------------------------
+	|perl use lib qw($ENV{HOME}/perl)
+	|perl require 'gtags.pl'
+	|map ^P :tagprev^M
+	|map ^N :tagnext^M
+	|map ^] :perl tag^M
+	|ab gtag perl tag qw(
+	|ab gta perl tag qw(
+	|ab gt perl tag qw(
+
+   ('gtags.pl' is included in GLOBAL package.)
 
 o Emacs
 

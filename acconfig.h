@@ -78,9 +78,3 @@
 
 /* Define if your system have grep(1). */
 #undef HAVE_GREP
-
-/* Define for current machine architecture. */
-#undef WORDS_BIGENDIAN
-
-/* Define if your system have snprintf(3).  */
-#undef HAVE_SNPRINTF

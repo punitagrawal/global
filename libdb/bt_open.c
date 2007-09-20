@@ -224,7 +224,7 @@ __bt_open(fname, flags, mode, openinfo, dflags)
 		F_SET(t, B_INMEM);
 	}
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__DJGPP__)
 	if (fcntl(t->bt_fd, F_SETFD, 1) == -1)
 		goto err;
 #endif
@@ -412,11 +412,8 @@ tmp()
 	envtmp = getenv("TMPDIR");
 	if (envtmp && strlen(envtmp) + strlen("/bt.XXXXXX") >= sizeof(path))
 		return -1;
-#ifdef HAVE_SNPRINTF
-	(void)snprintf(path, sizeof(path), "%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
-#else
-	(void)sprintf(path, "%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
-#endif /* HAVE_SNPRINTF */
+	(void)snprintf(path, sizeof(path),
+				"%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
 
 #ifndef _WIN32
 	(void)sigfillset(&set);

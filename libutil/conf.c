@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
+ * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -43,10 +43,14 @@
 #include "strbuf.h"
 #include "strmake.h"
 #include "test.h"
+#include "usable.h"
 
 static FILE	*fp;
 static STRBUF	*ib;
 static char	*line;
+/*
+ * 8 level nested tc= or include= is allowed.
+ */
 static int	allowed_nest_level = 8;
 static int	opened;
 
@@ -58,6 +62,14 @@ static void	includelabel(STRBUF *, const char *, int);
 #define isblank(c)	((c) == ' ' || (c) == '\t')
 #endif
 
+/*
+ * trim: trim string.
+ *
+ * : var1=a b :
+ *	|
+ *	v
+ * :var1=a b :
+ */
 static void
 trim(l)
 char	*l;
@@ -65,6 +77,9 @@ char	*l;
 	char	*f, *b;
 	int	colon = 0;
 
+	/*
+	 * delete blanks.
+	 */
 	for (f = b = l; *f; f++) {
 		if (colon && isblank(*f))
 			continue;
@@ -73,36 +88,57 @@ char	*l;
 			colon = 1;
 	}
 	*b = 0;
+	/*
+	 * delete duplicate semi colons.
+	 */
+	for (f = b = l; *f;) {
+		if ((*b++ = *f++) == ':') {
+			while (*f == ':')
+				f++;
+		}
+	}
+	*b = 0;
 }
+/*
+ * readrecord: read recoed indexed by label.
+ *
+ *	i)	label	label in config file
+ *	r)		record
+ *
+ * Jobs:
+ * o skip comment.
+ * o append following line.
+ * o format check.
+ */
 static char	*
 readrecord(label)
 const char *label;
 {
-	char	*p, *q;
+	char	*line, *p, *q;
 	int	flag = STRBUF_NOCRLF;
-	int	line = 0;
+	int	count = 0;
 
 	rewind(fp);
-	while ((p = strbuf_fgets(ib, fp, flag)) != NULL) {
-		line++;
+	while ((line = strbuf_fgets(ib, fp, flag)) != NULL) {
+		count++;
 		flag &= ~STRBUF_APPEND;
-		if (*p == '#' || *p == '\0')
+		if (*line == '#' || *line == '\0')
 			continue;
 		if (strbuf_unputc(ib, '\\')) {
 			flag |= STRBUF_APPEND;
 			continue;
 		}
-		trim(p);
-		for (;;) {
+		trim(line);
+		for (p = line;;) {
 			if ((q = strmake(p, "|:")) == NULL)
-				die("invalid config file format (line %d).", line);
+				die("invalid config file format (line %d).", count);
 			if (!strcmp(label, q)) {
-				if (!(p = locatestring(p, ":", MATCH_FIRST)))
+				if (!(p = locatestring(line, ":", MATCH_FIRST)))
 					die("invalid config file format (line %d).", line);
-				p = strdup(p);
-				if (!p)
+				line = strdup(p);
+				if (!line)
 					die("short of memory.");
-				return p;
+				return line;
 			}
 			p += strlen(q);
 			if (*p == ':')
@@ -110,11 +146,18 @@ const char *label;
 			else if (*p == '|')
 				p++;
 			else
-				die("invalid config file format (line %d).", line);
+				die("invalid config file format (line %d).", count);
 		}
 	}
 	return NULL;
 }
+/*
+ * includelabel: procedure for tc= (or include=)
+ *
+ *	o)	sb	string buffer
+ *	i)	label	record label
+ *	i)	level	nest level for check
+ */
 static	void
 includelabel(sb, label, level)
 STRBUF	*sb;
@@ -150,17 +193,18 @@ configpath() {
 	char *p;
 
 	if ((p = getenv("HOME")) && test("r", makepath(p, GTAGSRC, NULL)))
-		strcpy(config, makepath(p, GTAGSRC, NULL));
+		strncpy(config, makepath(p, GTAGSRC, NULL), sizeof(config));
 	else if (test("r", GTAGSCONF))
-		strcpy(config, GTAGSCONF);
+		strncpy(config, GTAGSCONF, sizeof(config));
 	else if (test("r", OLD_GTAGSCONF))
-		strcpy(config, OLD_GTAGSCONF);
+		strncpy(config, OLD_GTAGSCONF, sizeof(config));
 	else if (test("r", DEBIANCONF))
-		strcpy(config, DEBIANCONF);
+		strncpy(config, DEBIANCONF, sizeof(config));
 	else if (test("r", OLD_DEBIANCONF))
-		strcpy(config, OLD_DEBIANCONF);
+		strncpy(config, OLD_DEBIANCONF, sizeof(config));
 	else
 		return NULL;
+	config[sizeof(config) - 1] = '\0';
 	return config;
 }
 /*
@@ -176,6 +220,7 @@ openconf()
 	extern int vflag;
 
 	assert(opened == 0);
+	opened = 1;
 
 	/*
 	 * if GTAGSCONF not set then check standard config files.
@@ -188,29 +233,15 @@ openconf()
 	if (!config) {
 		if (vflag)
 			fprintf(stderr, " Using default configuration.\n");
-		sb = strbuf_open(0);
-		strbuf_putc(sb, ':');
-		strbuf_puts(sb, "suffixes=");
-		strbuf_puts(sb, DEFAULTSUFFIXES);
-		strbuf_putc(sb, ':');
-		strbuf_puts(sb, "skip=");
-		strbuf_puts(sb, DEFAULTSKIP);
-		strbuf_putc(sb, ':');
-		strbuf_puts(sb, "format=standard:");
-		strbuf_puts(sb, "extractmethod:");
-		strbuf_puts(sb, "GTAGS=gctags %s:");
-		strbuf_puts(sb, "GRTAGS=gctags -r %s:");
-		strbuf_puts(sb, "GSYMS=gctags -s %s:");
-		strbuf_puts(sb, "sort_command=sort:");
-		strbuf_puts(sb, "sed_command=sed:");
-		line = strdup(strbuf_value(sb));
-		strbuf_close(sb);
+		line = "";
 	}
 	/*
 	 * if it doesn't start with '/' then assumed config value itself.
 	 */
 	else if (*config != '/') {
 		line = strdup(config);
+		if (!locatestring(line, ":", MATCH_FIRST))
+			die("GTAGSCONF must be absolute path name.");
 	}
 	/*
 	 * else load value from config file.
@@ -239,9 +270,61 @@ openconf()
 		strbuf_close(sb);
 		fclose(fp);
 	}
+	/*
+	 * make up lacked variables.
+	 */
+	sb = strbuf_open(0);
+	strbuf_puts(sb, line);
+	strbuf_unputc(sb, ':');
+	if (!getconfs("suffixes", NULL)) {
+		strbuf_puts(sb, ":suffixes=");
+		strbuf_puts(sb, DEFAULTSUFFIXES);
+	}
+	if (!getconfs("skip", NULL)) {
+		strbuf_puts(sb, ":skip=");
+		strbuf_puts(sb, DEFAULTSKIP);
+	}
+	/*
+	 * GTAGS, GRTAGS and GSYMS have no default values but non of them
+	 * specified then use default values.
+	 * (Otherwise, nothing to do for gtags.)
+	 */
+	if (!getconfs("GTAGS", NULL) && !getconfs("GRTAGS", NULL) && !getconfs("GSYMS", NULL)) {
+		char *path;
+
+		/*
+		 * Some GNU/Linux has gctags as '/usr/bin/gctags', that is
+		 * different from GLOBAL's one.
+		 * usable search in BINDIR at first.
+		 */
+#if defined(_WIN32) || defined(__DJGPP__)
+		path = "gctags.exe";
+#else
+		path = usable("gctags");
+		if (!path)
+			path = "gctags";
+#endif /* _WIN32 */
+		strbuf_puts(sb, ":GTAGS=");
+		strbuf_puts(sb, path);
+		strbuf_puts(sb, " %s");
+		strbuf_puts(sb, ":GRTAGS=");
+		strbuf_puts(sb, path);
+		strbuf_puts(sb, " -r %s");
+		strbuf_puts(sb, ":GSYMS=");
+		strbuf_puts(sb, path);
+		strbuf_puts(sb, " -s %s");
+	}
+	if (!getconfs("sort_command", NULL))
+		strbuf_puts(sb, ":sort_command=sort");
+	if (!getconfs("sed_command", NULL))
+		strbuf_puts(sb, ":sed_command=sed");
+	strbuf_unputc(sb, ':');
+	strbuf_putc(sb, ':');
+	line = strdup(strbuf_value(sb));
+	strbuf_close(sb);
 	if (!line)
 		die("short of memory.");
-	opened = 1;
+	trim(line);
 	return;
 }
 /*
@@ -261,11 +344,7 @@ int	*num;
 
 	if (!opened)
 		openconf();
-#ifdef HAVE_SNPRINTF
 	snprintf(buf, sizeof(buf), ":%s#", name);
-#else
-	sprintf(buf, ":%s#", name);
-#endif /* HAVE_SNPRINTF */
 	if ((p = locatestring(line, buf, MATCH_FIRST)) != NULL) {
 		p += strlen(buf);
 		if (num != NULL)
@@ -295,11 +374,7 @@ STRBUF	*sb;
 		openconf();
 	if (!strcmp(name, "suffixes") || !strcmp(name, "skip"))
 		all = 1;
-#ifdef HAVE_SNPRINTF
 	snprintf(buf, sizeof(buf), ":%s=", name);
-#else
-	sprintf(buf, ":%s=", name);
-#endif /* HAVE_SNPRINTF */
 	p = line;
 	while ((p = locatestring(p, buf, MATCH_FIRST)) != NULL) {
 		if (exist && sb)
@@ -313,27 +388,6 @@ STRBUF	*sb;
 		}
 		if (!all)
 			break;
-	}
-	/*
-	 * It may be that these code should be moved to applications.
-	 * But nothing cannot start without them.
-	 */
-	if (!exist) {
-		exist = 1;
-		if (!strcmp(name, "suffixes")) {
-			if (sb)
-				strbuf_puts(sb, DEFAULTSUFFIXES);
-		} else if (!strcmp(name, "skip")) {
-			if (sb)
-				strbuf_puts(sb, DEFAULTSKIP);
-		} else if (!strcmp(name, "sort_command")) {
-			if (sb)
-				strbuf_puts(sb, "sort");
-		} else if (!strcmp(name, "sed_command")) {
-			if (sb)
-				strbuf_puts(sb, "sed");
-		} else
-			exist = 0;
 	}
 	return exist;
 }
@@ -351,11 +405,7 @@ const char *name;
 
 	if (!opened)
 		openconf();
-#ifdef HAVE_SNPRINTF
 	snprintf(buf, sizeof(buf), ":%s:", name);
-#else
-	sprintf(buf, ":%s:", name);
-#endif /* HAVE_SNPRINTF */
 	if (locatestring(line, buf, MATCH_FIRST) != NULL)
 		return 1;
 	return 0;

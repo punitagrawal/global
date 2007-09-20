@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4i from Makefile.am.
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
 
 # Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
 # Free Software Foundation, Inc.
@@ -14,7 +14,7 @@
 @SET_MAKE@
 
 #
-# Copyright (c) 2000, 2001
+# Copyright (c) 2000, 2001, 2002
 #        Tama Communications Corporation. All rights reserved.
 #
 # This file is free software; as a special exception the author gives
@@ -72,11 +72,13 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 CC = @CC@
 DEPDIR = @DEPDIR@
+EXEEXT = @EXEEXT@
 FIND = @FIND@
 GREP = @GREP@
 INCLUDES = @INCLUDES@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDADD = @LDADD@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 RANLIB = @RANLIB@
@@ -84,23 +86,22 @@ SED = @SED@
 SORT = @SORT@
 VERSION = @VERSION@
 XARGS = @XARGS@
-_am_include = @_am_include@
-_am_quote = @_am_quote@
+am__include = @am__include@
+am__quote = @am__quote@
 install_sh = @install_sh@
 
-SUBDIRS = libdb libglibc libutil btreeop gctags global gtags htags doc
+SUBDIRS = libdb libglibc libutil btreeop gctags global gozilla gtags htags doc
 
 EXTRA_DIST = FAQ LICENSE \
 	gtags.conf gtags.el nvi-1.79-gtags.diff reconf.sh globash.rc \
+	convert.pl gtags.pl \
 	w32/INSTALL w32/libs w32/make.bat w32/makefile.inc \
 	w32/btreeop/makefile w32/gctags/makefile w32/global/makefile \
 	w32/gtags/makefile w32/htags/makefile w32/libdb/makefile \
-	w32/libglibc/makefile w32/libutil/makefile \
+	w32/libglibc/makefile w32/libutil/makefile w32/gozilla/makefile \
 	w32/libdb/objs w32/libglibc/objs w32/libutil/objs \
 	w32/htags/htags.bat w32/machine/config.h w32/machine/unistd.h
 
-EXEEXT =
-OBJEXT = o
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -250,14 +251,20 @@ TAGS: tags-recursive $(HEADERS) $(SOURCES) config.h.in $(TAGS_DEPENDENCIES) \
 GTAGS:
 	here=`CDPATH=: && cd $(top_builddir) && pwd` \
 	  && cd $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) $$here
-HTAGS: GTAGS
+	  && gtags -i $(GTAGS_ARGS) $$here \
+	  && case `pwd` in \
+	     $$here);; \
+	     *)	echo $(top_srcdir) >$$here/GTAGSROOT;; \
+	     esac
+
+HTML:
 	here=`CDPATH=: && cd $(top_builddir) && pwd` \
 	  && cd $(top_srcdir) \
 	  && htags $(HTAGS_ARGS) -d $$here $$here
 
 distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH GTAGSROOT
+	-rm -rf HTML
 
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
@@ -270,7 +277,7 @@ GZIP_ENV = --best
 distdir: $(DISTFILES)
 	-chmod -R a+w $(distdir) >/dev/null 2>&1; rm -rf $(distdir)
 	mkdir $(distdir)
-	$(mkinstalldirs) $(distdir)/w32 $(distdir)/w32/btreeop $(distdir)/w32/gctags $(distdir)/w32/global $(distdir)/w32/gtags $(distdir)/w32/htags $(distdir)/w32/libdb $(distdir)/w32/libglibc $(distdir)/w32/libutil $(distdir)/w32/machine
+	$(mkinstalldirs) $(distdir)/w32 $(distdir)/w32/btreeop $(distdir)/w32/gctags $(distdir)/w32/global $(distdir)/w32/gozilla $(distdir)/w32/gtags $(distdir)/w32/htags $(distdir)/w32/libdb $(distdir)/w32/libglibc $(distdir)/w32/libutil $(distdir)/w32/machine
 	@for file in $(DISTFILES); do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
@@ -327,7 +334,9 @@ distcheck: dist
 	  && $(MAKE) $(AM_MAKEFLAGS) install \
 	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
 	  && $(MAKE) $(AM_MAKEFLAGS) uninstall \
-	  && test `find $$dc_install_base -type f -print | wc -l` -le 1 \
+	  && (test `find $$dc_install_base -type f -print | wc -l` -le 1 \
+	     || (echo "Error: files left after uninstall" 1>&2; \
+	         exit 1) ) \
 	  && $(MAKE) $(AM_MAKEFLAGS) dist \
 	  && $(MAKE) $(AM_MAKEFLAGS) distclean \
 	  && rm -f $(distdir).tar.gz \
@@ -407,7 +416,7 @@ uninstall-am: uninstall-info-am
 
 uninstall-info: uninstall-info-recursive
 
-.PHONY: $(RECURSIVE_TARGETS) GTAGS HTAGS all all-am check check-am clean \
+.PHONY: $(RECURSIVE_TARGETS) GTAGS HTML all all-am check check-am clean \
 	clean-generic clean-recursive dist dist-all distcheck distclean \
 	distclean-generic distclean-hdr distclean-recursive \
 	distclean-tags distdir dvi dvi-am dvi-recursive info info-am \

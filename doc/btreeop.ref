@@ -1,0 +1,134 @@
+@c This file is generated automatically by convert.pl from btreeop/manual.in.
+@unnumberedsubsec NAME
+btreeop - btree database maintenance tool.
+@unnumberedsubsec SYNOPSIS
+@noindent
+@quotation
+btreeop [-A][-C][-D[n] key][-K[n] key][-L[2]][-k prefix][dbname]@*
+@end quotation
+@unnumberedsubsec DESCRIPTION
+Btreeop execute simple operations for btree(3) database.
+Btreeop can create database, write record, read record
+(sequential or indexed) and delete record from it.
+Duplicate entries are allowed.
+Multi-key is available but only primary key can use index of
+btree(3).
+@unnumberedsubsec COMMANDS
+A capital letter means a command. If no command specified
+then it assume sequential read operation.
+The following commands are available:
+@table @asis
+@item none
+Read records sequentially.
+@item @samp{-A}
+Append records. If database doesn't exist, btreeop creates it.
+@item @samp{-C}
+Create database and write records to it.
+@item @samp{-D}[n] key
+Delete records by the key. By default, n is 0 (primary key).
+@item @samp{-K}[n] key
+Search records by the key. By default, n is 0 (primary key).
+@item @samp{-L}[2]
+List all primary keys.
+If 2 is specified, list all the key and data pairs.
+@item dbname
+Database name. By default, it assume @file{btree}.
+@end table
+@unnumberedsubsec OPTIONS
+@table @asis
+@item @samp{-k} prefix
+Scan records which have the prefix as a primary key.
+This option is valid only with sequential read operation
+@samp{-L} command or no command.
+@end table
+@unnumberedsubsec FORMAT
+@example
+To creat (or append) database, btreeop read data from stdin.
+The format of the data is the following.
+
+  Primary-key  Secondary-key-1  Secondary-key-2  Data
+  (keyno = 0)  (keyno = 1)      (keyno = 2)
+  --------------------------------------------------------------
+  main         246              main.c           main () @{
+  func         120              library.c        func(a1, a2)
+  .
+  .
+  .
+
+o All key and data are separated by blank('\\t' or ' '). 
+o Key cannot include blank.
+o Data can include blank.
+o Null data not allowed.
+
+Additionally, META record is available. META record has a key that
+start with a blank. You can read this record only by indexed read
+operation (-K option). Usage is unlimited by btreeop.
+@end example
+@unnumberedsubsec EXAMPLES
+@example
+Create database.
+
+  % btreeop -C
+  key1  data1
+  key2  data2
+  key3  data3
+  ^D
+  %
+
+Append records.
+
+  % btreeop -A
+   __.VERSION 2
+  key2  data2-2
+  ^D
+  %
+
+Sequential read.
+
+  % btreeop
+  key1  data1
+  key2  data2-2
+  key2  data2
+  key3  data3
+  %
+
+Indexed read.
+
+  % btreeop -K key2
+  key2  data2-2
+  key2  data2
+  % btreeop -K ' __.VERSION'
+   __.VERSION 2
+  %
+
+List primary keys.
+
+  % btreeop -L
+  key1
+  key2
+  key3
+  %
+
+Delete record.
+
+  % btreeop -D ' __.VERSION'
+  % btreeop -K ' __.VERSION'
+  %
+
+@end example
+@unnumberedsubsec FILES
+@table @asis
+@item @file{btree}
+default database name.
+@end table
+@unnumberedsubsec DIAGNOSTICS
+Btreeop exits with a non 0 value if an error occurred, 0 otherwise.
+@unnumberedsubsec SEE ALSO
+btree(3).
+
+GNU GLOBAL source code tag system@*
+(http://www.gnu.org/software/global/).
+@unnumberedsubsec AUTHOR
+Shigio Yamaguchi
+@unnumberedsubsec HISTORY
+The btreeop command appeared in FreeBSD 2.2.2.

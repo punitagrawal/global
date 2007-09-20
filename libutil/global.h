@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
  *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000, 2001
+ * Copyright (c) 1999, 2000, 2001, 2002
  *             Tama Communications Corporation. All rights reserved.
  *
  * This file is part of GNU GLOBAL.
@@ -25,6 +25,7 @@
 #define _GLOBAL_H_
 
 #include "gparam.h"
+#include "abs2rel.h"
 #include "conf.h"
 #include "dbop.h"
 #include "defined.h"
@@ -32,10 +33,11 @@
 #include "find.h"
 #include "getdbpath.h"
 #include "gtagsop.h"
+#include "is_unixy.h"
 #include "locatestring.h"
 #include "makepath.h"
 #include "path.h"
-#include "pathop.h"
+#include "gpathop.h"
 #include "strbuf.h"
 #include "strmake.h"
 #include "tab.h"

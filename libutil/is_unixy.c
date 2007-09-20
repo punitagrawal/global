@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999
- *             Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999, 2000
+ * Copyright (c) 2001
  *             Tama Communications Corporation. All rights reserved.
+ *
+ * Contributed by Jason Hood <jadoxa@yahoo.com.au>, 2001.
  *
  * This file is part of GNU GLOBAL.
  *
@@ -21,21 +21,34 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _PATHOP_H_
-#define _PATHOP_H_
-#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#ifdef __DJGPP__
+#include <stdlib.h>
+#include <sys/system.h>
+#endif
 
-#include "gparam.h"
-#include "dbop.h"
+#include "is_unixy.h"
 
-#define NEXTKEY		" __.NEXTKEY"
+/*
+ * is_unixy: whether running in a unix-like shell or not
+ *
+ *	r)		1: unixy shell, 0: DOS shell (COMMAND.COM)
+ */
+int
+is_unixy(void)
+{
+#ifdef __DJGPP__
+	static int unix_shell = -1;
 
-int	pathopen(const char *, int);
-char	*pathget(const char *);
-char	*pathiget(int);
-void	pathput(const char *);
-void	pathdel(const char *);
-void	pathclose(void);
-int	nextkey(void);
-
-#endif /* ! _PATHOP_H_ */
+	if (unix_shell == -1) {
+		char *s = getenv("SHELL");
+		/* Assume if SHELL isn't defined, COMSPEC is DOS. */
+		unix_shell = (s == NULL) ? 0 : _is_unixy_shell(s);
+	}
+	return unix_shell;
+#else
+	return 1;
+#endif
+}
