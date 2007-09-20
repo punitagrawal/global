@@ -32,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	btreeop.c				5-Aug-99
+ *      btreeop.c                               12-Dec-99
  *
  */
 #include <sys/types.h>
@@ -270,7 +270,7 @@ int	secondkey;
 	char	*p;
 
 	if (!secondkey) {
-		for (p = dbop_first(dbop, skey, 0); p; p = dbop_next(dbop))
+		for (p = dbop_first(dbop, skey, NULL, 0); p; p = dbop_next(dbop))
 			detab(stdout, p);
 		return;
 	}
@@ -298,7 +298,7 @@ int	keylist;
 	if (keylist)
 		flags |= DBOP_KEY;
 
-	for (p = dbop_first(dbop, prefix, flags); p; p = dbop_next(dbop)) {
+	for (p = dbop_first(dbop, prefix, NULL, flags); p; p = dbop_next(dbop)) {
 		if (keylist == 2)
 			fprintf(stdout, "%s %s\n", p, dbop->lastdat);
 		else
@@ -351,7 +351,7 @@ int	secondkey;
 	for (c = skey+strlen(skey)-1; *c && isspace(*c); c--)
 		*c = 0;
 
-	for (p = dbop_first(dbop, NULL, 0); p; p = dbop_next(dbop)) {
+	for (p = dbop_first(dbop, NULL, NULL, 0); p; p = dbop_next(dbop)) {
 		if (exitflag)
 			break;
 		c = p;

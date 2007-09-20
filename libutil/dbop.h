@@ -32,14 +32,16 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	dbop.h					12-Jul-99
+ *      dbop.h                                  12-Dec-99
  *
  */
+
 #ifndef _DBOP_H_
 #define _DBOP_H_
 
 #include "gparam.h"
 #include "db.h"
+#include "regex.h"
 
 #ifndef LITTLE_ENDIAN
 #define LITTLE_ENDIAN   1234
@@ -53,6 +55,7 @@ typedef	struct {
 	char	dbname[MAXPATHLEN+1];	/* dbname */
 	char	key[MAXKEYLEN+1];	/* key */
 	int	keylen;			/* key length */
+	regex_t	*preg;			/* compiled regular expression */
 	char	prev[MAXKEYLEN+1];	/* previous key value */
 	char	*lastkey;		/* the key of last located record */
 	char	*lastdat;		/* the data of last located record */
@@ -76,7 +79,7 @@ DBOP	*dbop_open(const char *, int, int, int);
 char	*dbop_get(DBOP *, const char *);
 void	dbop_put(DBOP *, const char *, const char *);
 void	dbop_del(DBOP *, const char *);
-char	*dbop_first(DBOP *, const char *, int);
+char	*dbop_first(DBOP *, const char *, regex_t *, int);
 char	*dbop_next(DBOP *);
 void	dbop_close(DBOP *);
 #endif /* _DBOP_H_ */

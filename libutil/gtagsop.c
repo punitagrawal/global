@@ -32,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	gtagsop.c				19-Aug-99
+ *      gtagsop.c                               12-Dec-99
  *
  */
 #include <assert.h>
@@ -60,11 +60,11 @@ static char	*genrecord(GTOP *);
 static int	belongto(GTOP *, char *, char *);
 
 static int	support_version = 2;	/* acceptable format version   */
-static const char *tagslist[] = {"GTAGS", "GRTAGS", "GSYMS"};
+static const char *tagslist[] = {"GPATH", "GTAGS", "GRTAGS", "GSYMS"};
 /*
  * dbname: return db name
  *
- *	i)	db	0: GTAGS, 1: GRTAGS, 2: GSYMS
+ *	i)	db	0: GPATH, 1: GTAGS, 2: GRTAGS, 3: GSYMS
  *	r)		dbname
  */
 const char *
@@ -80,6 +80,11 @@ int	db;
  *	i)	comline	skelton command line
  *	i)	path	path name
  *	o)	sb	command line
+ *
+ * command skelton is like this:
+ *	'gctags -r %s'
+ * following skelton is allowed too.
+ *	'gctags -r'
  */
 void
 makecommand(comline, path, sb)
@@ -89,13 +94,37 @@ STRBUF	*sb;
 {
 	char	*p;
 
-	if (!(p = strmake(comline, "%")))
-		die1("'%%s' is needed in tag command line. (%s)\n", comline);
-	strputs(sb, p);
-	strputs(sb, path);
-	if (!(p = locatestring(comline, "%s", MATCH_FIRST)))
-		die1("'%%s' is needed in tag command line. (%s)\n", comline);
-	strputs(sb, p+2);
+	if (p = locatestring(comline, "%s", MATCH_FIRST)) {
+		strnputs(sb, comline, p - comline);
+		strputs(sb, path);
+		strputs(sb, p + 2);
+	} else {
+		strputs(sb, comline);
+		strputc(sb, ' ');
+		strputs(sb, path);
+	}
+}
+/*
+ * notnamechar: test whether or not no name char included.
+ *
+ *	i)	s	string
+ *	r)		0: not included, 1: included
+ */
+int
+notnamechar(s)
+char	*s;
+{
+	int	c;
+
+	while ((c = *s++) != '\0')
+		if (	(c >= 'a' && c <= 'z')	||
+			(c >= 'A' && c <= 'Z')	||
+			(c >= '0' && c <= '9')	||
+			(c == '-') || (c == '_'))
+			;
+		else
+			return 1;
+	return 0;
 }
 /*
  * formatcheck: check format of tag command's output
@@ -368,10 +397,18 @@ int	flags;
 	 */
 	if (!getconfs("sort_command", sb))
 		die("cannot get sort command name.");
+#ifdef _WIN32
+	if (!locatestring(strvalue(sb), ".exe", MATCH_LAST))
+		strputs(sb, ".exe");
+#endif
 	strcpy(sort_command, strvalue(sb));
 	strstart(sb);
 	if (!getconfs("sed_command", sb))
 		die("cannot get sed command name.");
+#ifdef _WIN32
+	if (!locatestring(strvalue(sb), ".exe", MATCH_LAST))
+		strputs(sb, ".exe");
+#endif
 	strcpy(sed_command, strvalue(sb));
 	/*
 	 * add path index if not yet.
@@ -497,7 +534,7 @@ char	*path;
 	/*
 	 * read sequentially, because db(1) has just one index.
 	 */
-	for (p = dbop_first(gtop->dbop, NULL, 0); p; p = dbop_next(gtop->dbop))
+	for (p = dbop_first(gtop->dbop, NULL, NULL, 0); p; p = dbop_next(gtop->dbop))
 		if (belongto(gtop, key, p))
 			dbop_del(gtop->dbop, NULL);
 	/*
@@ -508,26 +545,51 @@ char	*path;
  * gtagsfirst: return first record
  *
  *	i)	gtop	GTOP structure
- *	i)	tag	tag name
+ *	i)	pattern	tag name
+ *		o may be regular expression
+ *		o may be NULL
  *	i)	flags	GTOP_PREFIX	prefix read
  *			GTOP_KEY	read key only
  *	r)		record
  */
 char *
-gtagsfirst(gtop, tag, flags)
+gtagsfirst(gtop, pattern, flags)
 GTOP	*gtop;
-char	*tag;
+char	*pattern;
 int	flags;
 {
 	int	dbflags = 0;
 	char	*line;
+	char    buf[IDENTLEN+1], *p;
+	regex_t reg, *preg = &reg;
+	char	*key;
 
 	gtop->flags = flags;
-	if (flags & GTOP_PREFIX && tag != NULL)
+	if (flags & GTOP_PREFIX && pattern != NULL)
 		dbflags |= DBOP_PREFIX;
 	if (flags & GTOP_KEY)
 		dbflags |= DBOP_KEY;
-	if ((line = dbop_first(gtop->dbop, tag, dbflags)) == NULL)
+	if (pattern == NULL || !strcmp(pattern, ".*")) {
+		key = NULL;
+		preg = NULL;
+	} else if (notnamechar(pattern) && regcomp(preg, pattern, REG_EXTENDED) == 0) {
+		if (*pattern == '^' && *(p = pattern + 1) && (isalpha(*p) || *p == '_')) {
+			char    *prefix = buf;
+
+			*prefix++ = *p++;
+			while (*p && (isalpha(*p) || isdigit(*p) || *p == '_'))
+				*prefix++ = *p++;
+			*prefix = 0;
+			key = buf;
+			dbflags |= DBOP_PREFIX;
+		} else {
+			key = NULL;
+		}
+	} else {
+		key = pattern;
+		preg = NULL;
+	}
+	if ((line = dbop_first(gtop->dbop, key, preg, dbflags)) == NULL)
 		return NULL;
 	if (gtop->format == GTAGS_STANDARD || gtop->flags & GTOP_KEY)
 		return line;

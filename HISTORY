@@ -771,3 +771,13 @@ version 3.54	a couple of bugs fixed [3-Nov-99]
 	gctags	- gctags  - couldn't treat comment (/* ... */) that
 		  include multi-byte character.
 	htags	- index wasn't generated for large project.
+
+version 3.55	optimize the -s and the -g option [23-Dec-99]
+
+	[fixed]
+	htags	- removed all files in current directory in some error case.
+		  (Only 3.54 have this bug.)
+	[changed]
+	global	- optimize the -s and the -g option.
+
+		Thanks to Darryl Okahata for his benchmark report.

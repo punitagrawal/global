@@ -32,7 +32,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	dbop.c					12-Nov-98
+ *      dbop.c                                  12-Dec-98
  *
  */
 #include <sys/types.h>
@@ -160,8 +160,11 @@ const char *data;
 {
 	DB	*db = dbop->db;
 	int	status;
+	int	len = strlen(name);
 
-	if (strlen(name) > MAXKEYLEN)
+	if (len == 0)
+		die("primary key size == 0.");
+	if (len > MAXKEYLEN)
 		die("primary key too long.");
 	key.data = (char *)name;
 	key.size = strlen(name)+1;
@@ -204,9 +207,10 @@ const char *name;
  * dbop_first: get first record. 
  * 
  *	i)	dbop	dbop descripter
- *	i)	name	key
+ *	i)	name	key value or prefix
  *			!=NULL: indexed read by key
  *			==NULL: sequential read
+ *	i)	preg	compiled regular expression if any.
  *	i)	flags	following dbop_next call take over this.
  *			DBOP_KEY	read key part
  *			DBOP_PREFIX	prefix read
@@ -214,13 +218,16 @@ const char *name;
  *	r)		data
  */
 char	*
-dbop_first(dbop, name, flags)
+dbop_first(dbop, name, preg, flags)
 DBOP	*dbop;
 const char *name;
+regex_t *preg;
 int	flags;
 {
 	DB	*db = dbop->db;
 	int	status;
+
+	dbop->preg = preg;
 
 	if (flags & DBOP_PREFIX && !name)
 		flags &= ~DBOP_PREFIX;
@@ -236,15 +243,30 @@ int	flags;
 		if (!(flags & DBOP_PREFIX))
 			key.size++;
 		dbop->keylen = key.size;
-		status = (*db->seq)(db, &key, &dat, R_CURSOR);
+		for (status = (*db->seq)(db, &key, &dat, R_CURSOR);
+			status == RET_SUCCESS;
+			status = (*db->seq)(db, &key, &dat, R_NEXT)) {
+			if (flags & DBOP_PREFIX) {
+				if (strncmp((char *)key.data, dbop->key, dbop->keylen))
+					return NULL;
+			} else {
+				if (strcmp((char *)key.data, dbop->key))
+					return NULL;
+			}
+			if (preg && regexec(preg, (char *)key.data, 0, 0, 0) != 0)
+				continue;
+			break;
+		}
 	} else {
 		dbop->keylen = dbop->key[0] = 0;
-		/* skip META records */
 		for (status = (*db->seq)(db, &key, &dat, R_FIRST);
 			status == RET_SUCCESS;
 			status = (*db->seq)(db, &key, &dat, R_NEXT)) {
-			if (*((char *)key.data) != ' ')
-				break;
+			if (*((char *)key.data) == ' ')	/* meta record */
+				continue;
+			if (preg && regexec(preg, (char *)key.data, 0, 0, 0) != 0)
+				continue;
+			break;
 		}
 	}
 	dbop->lastkey	= (char *)key.data;
@@ -258,13 +280,6 @@ int	flags;
 		return (NULL);
 	}
 	dbop->ioflags = flags;
-	if (flags & DBOP_PREFIX) {
-		if (strncmp((char *)key.data, dbop->key, dbop->keylen))
-			return NULL;
-	} else if (dbop->keylen) {
-		if (strcmp((char *)key.data, dbop->key))
-			return NULL;
-	}
 	if (flags & DBOP_KEY) {
 		strcpy(dbop->prev, (char *)key.data);
 		return (char *)key.data;
@@ -309,6 +324,8 @@ DBOP	*dbop;
 			if (strcmp((char *)key.data, dbop->key))
 				return NULL;
 		}
+		if (dbop->preg && regexec(dbop->preg, (char *)key.data, 0, 0, 0) != 0)
+			continue;
 		return (flags & DBOP_KEY) ? (char *)key.data : (char *)dat.data;
 	}
 	if (status == RET_ERROR)

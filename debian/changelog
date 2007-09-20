@@ -1,3 +1,11 @@
+global (3.55-1) unstable; urgency=medium
+
+  * New upstream version.
+  * fixes bug in htags which could inadvertantly remove user files
+      if an error occurs.
+
+ -- Ron C. Lee <ron@microtronics.com.au>  Thu, 23 Dec 1999 23:27:55 +1030
+
 global (3.54-1) unstable; urgency=low
 
   * New upstream version.
