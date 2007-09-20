@@ -3,14 +3,14 @@ Section: devel
 Priority: optional
 Build-Depends: debhelper (>=4.0), texinfo
 Maintainer: Ron Lee <ron@debian.org>
-Standards-Version: 3.6.2.1
+Standards-Version: 3.7.2.2
 
 Package: global
 Architecture: any
 Depends: ${shlibs:Depends}
 Suggests: lynx | www-browser, doxygen (>=1.4.3), apache | httpd, id-utils
 Description: Source code search and browse tools
- GLOBAL is a source code tag system that works the same way across
+ GNU GLOBAL is a source code tag system that works the same way across
  diverse environments. Currently, it supports the following:
  .
    o command line, and the 'globash' query subshell.

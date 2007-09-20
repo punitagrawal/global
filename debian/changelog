@@ -1,3 +1,12 @@
+global (5.6.1-1) unstable; urgency=low
+
+  * New upstream release.  Closes: #378514, #387592, #430604
+  * Add the prefix GNU in the package description.  It was actually BSD global
+    when that description was first written, but if it makes it just a little
+    less ambiguous to search for, then why not.  Closes: #385303
+
+ -- Ron Lee <ron@debian.org>  Fri, 21 Sep 2007 08:58:45 +0930
+
 global (4.8.6-2) unstable; urgency=low
 
   * Don't touch config.status unconditionally, some of the buildd's

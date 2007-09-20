@@ -3,8 +3,6 @@
 # originally set up by debmake, later converted to use Joey Hess'
 # debhelper scripts
 
-export DH_COMPAT=4
-
 package=global
 
 
