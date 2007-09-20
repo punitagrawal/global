@@ -46,16 +46,29 @@ static char sccsid[] = "@(#)bt_open.c	8.10 (Berkeley) 8/17/94";
  * is wholly independent of the Postgres code.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <sys/stat.h>
 
 #include <errno.h>
 #include <fcntl.h>
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <signal.h>
 #include <stdio.h>
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "db.h"
 #include "btree.h"
@@ -260,7 +273,7 @@ __bt_open(fname, flags, mode, openinfo, dflags)
 		 * Don't overflow the page offset type.
 		 */
 		if (b.psize == 0) {
-#ifndef _WIN32
+#ifdef HAVE_ST_BLKSIZE
 			b.psize = sb.st_blksize;
 			if (b.psize < MINPSIZE)
 				b.psize = MINPSIZE;
@@ -394,13 +407,12 @@ tmp()
 	sigset_t set, oset;
 	int fd;
 	char *envtmp;
-#define MAXTEMPLEN	128
-	char path[MAXTEMPLEN];
+	char path[1024];
 
 	envtmp = getenv("TMPDIR");
-	if (envtmp && strlen(envtmp) + strlen("/bt.XXXXXX") >= MAXTEMPLEN)
+	if (envtmp && strlen(envtmp) + strlen("/bt.XXXXXX") >= sizeof(path))
 		return -1;
-	(void)sprintf(path, "%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
+	(void)snprintf(path, sizeof(path), "%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
 
 #ifndef _WIN32
 	(void)sigfillset(&set);

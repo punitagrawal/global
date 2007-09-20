@@ -1,45 +1,64 @@
-#!/usr/bin/env perl
+#! @PERL@
 #
 # Copyright (c) 1996, 1997, 1998, 1999
-#            Shigio Yamaguchi. All rights reserved.
-# Copyright (c) 1999
-#            Tama Communications Corporation. All rights reserved.
+#             Shigio Yamaguchi. All rights reserved.
+# Copyright (c) 1999, 2000
+#             Tama Communications Corporation. All rights reserved.
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-# 3. All advertising materials mentioning features or use of this software
-#    must display the following acknowledgement:
-#      This product includes software developed by Tama Communications
-#      Corporation and its contributors.
-# 4. Neither the name of the author nor the names of any co-contributors
-#    may be used to endorse or promote products derived from this software
-#    without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
+# This file is part of GNU GLOBAL.
 #
-#	htags.pl				23-Dec-99
+# GNU GLOBAL is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# GNU GLOBAL is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 $com = $0;
 $com =~ s/.*\///;
-$usage = "usage: $com [-a][-c][-f][-h][-l][-n][-v][-w][-t title][-d tagdir][dir]\n";
-$'win32 = ($^O =~ /^ms(dos|win(32|nt))/i) ? 1 : 0;
-$'pathsep = ($'win32) ? ';' : ':';
+$usage = "Usage: $com [-a][-c][-f][-F][-l][-n][-v][-w][-d tagdir][-S cgidir][-t title][dir]";
+$help = <<END_OF_HELP;
+$usage
+Options:
+     -a, --alphabet
+             make an alphabetical definition index.
+     -c, --compact
+             compress html files by gzip(1).
+     -f, --form
+             support an input form and a dynamic index with a CGI program.
+     -F, --frame
+             use frame for index and main view.
+     -l, --each-line-tag
+             make a name tag(<A NAME=line number>) for each line.
+     -n, --line-number
+             print the line numbers.
+     -v, --verbose
+             verbose mode.
+     -w, --warning
+             print warning messages.
+     -d, --dbpath tagdir
+             specifies the directory in which GTAGS and GRTAGS exist.
+     -S, --secure-cgi cgidir
+             write cgi script into cgidir to realize a centralised cgi script.
+     -t, --title title
+             the title of this hypertext.
+     --version
+             print version.
+     --help
+             print help message.
+     dir     the directory in which hypertext is generated.
+END_OF_HELP
+$version = `global --version`;
+chop($version);
+
+$'w32 = ($^O =~ /^ms(dos|win(32|nt))/i) ? 1 : 0;
 #-------------------------------------------------------------------------
 # COMMAND EXISTENCE CHECK
 #-------------------------------------------------------------------------
@@ -61,17 +80,24 @@ if (! -d $tmp || ! -w $tmp) {
 }
 $'ncol = 4;					# columns of line number
 $'tabs = 8;					# tab skip
-$'fullpath = 0;					# file index format
+$'full_path = 0;				# file index format
+$'icon_list = '';				# use icon for file index
+$'table_list = 0;				# tag list using table tag
+$'script_alias = '/cgi-bin';			# script alias of WWW server
 $'gzipped_suffix = 'ghtml';			# suffix of gzipped html file
 $'normal_suffix = 'html';			# suffix of normal html file
 $'action = 'cgi-bin/global.cgi';		# default action
 $'id = '';					# id (default non)
 $'cgi = 1;					# 1: make cgi-bin/
 #
-# font
+# tag
 #
-$'title_begin	= '<FONT COLOR=#cc0000>';
-$'title_end	= '</FONT>';
+$'body_begin     = '<BODY>';
+$'body_end       = '</BODY>';
+$'table_begin    = '<TABLE>';
+$'table_end      = '</TABLE>';
+$'title_begin	 = '<FONT COLOR=#cc0000>';
+$'title_end	 = '</FONT>';
 $'comment_begin  = '<I><FONT COLOR=green>';	# /* ... */
 $'comment_end    = '</FONT></I>';
 $'sharp_begin    = '<FONT COLOR=darkred>';	# #define, #include or so on
@@ -81,32 +107,24 @@ $'brace_end      = '</FONT>';
 $'reserved_begin = '<B>';			# if, while, for or so on
 $'reserved_end   = '</B>';
 #
-# color
-#
-$'body_bgcolor	= '';
-$'body_text	= '';
-$'body_link	= '';
-$'body_vlink	= '';
-$'body_alink	= '';
-#
 # Reserved words for C and Java are hard coded.
 # (configuration parameter 'reserved_words' was deleted.)
 #
 $'c_reserved_words =	"auto,break,case,char,continue,default,do,double,else," .
-			"extern,float,for,goto,if,int,long,register,return," .
-			"short,sizeof,static,struct,switch,typedef,union," .
-			"unsigned,void,while";
+		"extern,float,for,goto,if,int,long,register,return," .
+		"short,sizeof,static,struct,switch,typedef,union," .
+		"unsigned,void,while";
 $'cpp_reserved_words =	"catch,class,delete,enum,friend,inline,new,operator," .
-			"private,protected,public,template,this,throw,try," .
-			"virtual,volatile" .
-			$'c_reserved_words;
+		"private,protected,public,template,this,throw,try," .
+		"virtual,volatile" .
+		$'c_reserved_words;
 $'java_reserved_words  = "abstract,boolean,break,byte,case,catch,char,class," .
-			"const,continue,default,do,double,else,extends,false," .
-			"final,finally,float,for,goto,if,implements,import," .
-			"instanceof,int,interface,long,native,new,null," .
-			"package,private,protected,public,return,short," .
-			"static,super,switch,synchronized,this,throw,throws," .
-			"union,transient,true,try,void,volatile,while";
+		"const,continue,default,do,double,else,extends,false," .
+		"final,finally,float,for,goto,if,implements,import," .
+		"instanceof,int,interface,long,native,new,null," .
+		"package,private,protected,public,return,short," .
+		"static,super,switch,synchronized,this,throw,throws," .
+		"union,transient,true,try,void,volatile,while";
 $'c_reserved_words    =~ s/,/|/g;
 $'cpp_reserved_words  =~ s/,/|/g;
 $'java_reserved_words =~ s/,/|/g;
@@ -115,80 +133,92 @@ $'java_reserved_words =~ s/,/|/g;
 #
 chop($config = `gtags --config`);
 if ($config) {
-	if ($var1 = &'getconf('ncol')) {
-		if ($var1 < 1 || $var1 > 10) {
-			print STDERR "Warning: parameter 'ncol' ignored becase the value is too large or too small.\n";
-		} else {
-			$'ncol = $var1;
-		}
+if ($var1 = &'getconf('ncol')) {
+	if ($var1 < 1 || $var1 > 10) {
+		print STDERR "Warning: parameter 'ncol' ignored becase the value is too large or too small.\n";
+	} else {
+		$'ncol = $var1;
 	}
-	if ($var1 = &'getconf('tabs')) {
-		if ($var1 < 1 || $var1 > 32) {
-			print STDERR "Warning: parameter 'tabs' ignored becase the value is too large or too small.\n";
-		} else {
-			$'tabs = $var1;
-		}
+}
+if ($var1 = &'getconf('tabs')) {
+	if ($var1 < 1 || $var1 > 32) {
+		print STDERR "Warning: parameter 'tabs' ignored becase the value is too large or too small.\n";
+	} else {
+		$'tabs = $var1;
 	}
-	if ($var1 = &'getconf('gzipped_suffix')) {
-		$'gzipped_suffix = $var1;
-	}
-	if ($var1 = &'getconf('normal_suffix')) {
-		$'normal_suffix = $var1;
-	}
-	if ($var1 = &'getconf('fullpath')) {
-		$'fullpath = $var1;
-	}
-	if (($var1 = &'getconf('title_begin')) && ($var2 = &'getconf('title_end'))) {
-		$'title_begin  = $var1;
-		$'title_end    = $var2;
-	}
-	if (($var1 = &'getconf('comment_begin')) && ($var2 = &'getconf('comment_end'))) {
-		$'comment_begin  = $var1;
-		$'comment_end    = $var2;
-	}
-	if (($var1 = &'getconf('sharp_begin')) && ($var2 = &'getconf('sharp_end'))) {
-		$'sharp_begin  = $var1;
-		$'sharp_end    = $var2;
-	}
-	if (($var1 = &'getconf('brace_begin')) && ($var2 = &'getconf('brace_end'))) {
-		$'brace_begin  = $var1;
-		$'brace_end    = $var2;
-	}
-	if (($var1 = &'getconf('reserved_begin')) && ($var2 = &'getconf('reserved_end'))) {
-		$'reserved_begin  = $var1;
-		$'reserved_end    = $var2;
-	}
-	$'body_bgcolor	= $var1 if ($var1 = &'getconf('bgcolor'));
-	$'body_text	= $var1 if ($var1 = &'getconf('text'));
-	$'body_link	= $var1 if ($var1 = &'getconf('link'));
-	$'body_vlink	= $var1 if ($var1 = &'getconf('vlink'));
-	$'body_alink	= $var1 if ($var1 = &'getconf('alink'));
+}
+if ($var1 = &'getconf('gzipped_suffix')) {
+	$'gzipped_suffix = $var1;
+}
+if ($var1 = &'getconf('normal_suffix')) {
+	$'normal_suffix = $var1;
+}
+if ($var1 = &'getconf('full_path')) {
+	$'full_path = $var1;
+}
+if ($var1 = &'getconf('table_list')) {
+	$'table_list = $var1;
+}
+if ($var1 = &'getconf('icon_list')) {
+	$'icon_list = $var1;
+}
+if ($var1 = &'getconf('script_alias')) {
+	$'script_alias = $var1;
+}
+if (($var1 = &'getconf('body_begin')) && ($var2 = &'getconf('body_end'))) {
+	$'body_begin  = $var1;
+	$'body_end    = $var2;
+}
+if (($var1 = &'getconf('table_begin')) && ($var2 = &'getconf('table_end'))) {
+	$'table_begin  = $var1;
+	$'table_end    = $var2;
+}
+if (($var1 = &'getconf('title_begin')) && ($var2 = &'getconf('title_end'))) {
+	$'title_begin  = $var1;
+	$'title_end    = $var2;
+}
+if (($var1 = &'getconf('comment_begin')) && ($var2 = &'getconf('comment_end'))) {
+	$'comment_begin  = $var1;
+	$'comment_end    = $var2;
+}
+if (($var1 = &'getconf('sharp_begin')) && ($var2 = &'getconf('sharp_end'))) {
+	$'sharp_begin  = $var1;
+	$'sharp_end    = $var2;
+}
+if (($var1 = &'getconf('brace_begin')) && ($var2 = &'getconf('brace_end'))) {
+	$'brace_begin  = $var1;
+	$'brace_end    = $var2;
+}
+if (($var1 = &'getconf('reserved_begin')) && ($var2 = &'getconf('reserved_end'))) {
+	$'reserved_begin  = $var1;
+	$'reserved_end    = $var2;
+}
 }
 # HTML tag
-$'begin_html  = "<HTML>";
-$'end_html    = "</HTML>";
+$'html_begin  = '<HTML>';
+$'html_end    = '</HTML>';
 $'meta_robots = "<META NAME='ROBOTS' CONTENT='NOINDEX,NOFOLLOW'>";
-$'meta_generator = "<META NAME='GENERATOR' CONTENT='GLOBAL'>";
-$'begin_body  = '<BODY';
-$'begin_body .= " BGCOLOR=$body_bgcolor" if ($body_bgcolor);
-$'begin_body .= " TEXT=$body_text" if ($body_text);
-$'begin_body .= " LINK=$body_link" if ($body_link);
-$'begin_body .= " VLINK=$body_vlink" if ($body_vlink);
-$'begin_body .= " ALINK=$body_alink" if ($body_alink);
-$'begin_body .= '>';
-$'end_body    = "</BODY>";
-
+$'meta_generator = "<META NAME='GENERATOR' CONTENT='GLOBAL-$version'>";
 # Titles
-$'title_func_index = "FUNCTION INDEX";
-$'title_file_index = "FILE INDEX";
-#-------------------------------------------------------------------------
-# DEFINITION
-#-------------------------------------------------------------------------
-# unit for a path
-$'SRCS   = 'S';
-$'DEFS   = 'D';
-$'REFS   = 'R';
-$'INCS   = 'I';
+$'title_define_index = 'DEFINITIONS';
+$'title_file_index = 'FILES';
+
+# Anchor image
+@anchor_label = ('&lt;', '&gt;', '^', 'v', 'top', 'bottom', 'index', 'help');
+@anchor_icons = ('left.jpg', 'right.jpg', 'first.jpg', 'last.jpg', 'top.jpg', 'bottom.jpg', 'index.jpg', 'help.jpg');
+@anchor_comment = ('previous', 'next', 'first', 'last', 'top', 'bottom', 'index', 'help');
+$back_icon = 'back.jpg';
+$dir_icon  = 'dir.jpg';
+$file_icon = 'c.jpg';
+@anchor_msg   = ('Previous definition.',
+		'Next definition.',
+		'First definition in this file.',
+		'Last definition in this file.',
+		'Top of this file.',
+		'Bottom of this file.',
+		'Return to index page.',
+		'You are seeing now.',
+);
 #-------------------------------------------------------------------------
 # JAVASCRIPT PARTS
 #-------------------------------------------------------------------------
@@ -197,39 +227,23 @@ $'langle  = sprintf("unescape('%s')", &'escape('<'));
 $'rangle  = sprintf("unescape('%s')", &'escape('>'));
 $'begin_script="<SCRIPT LANGUAGE=javascript>\n<!--\n";
 $'end_script="<!-- end of script -->\n</SCRIPT>\n";
-$'default_view=
-	"// if your browser doesn't support javascript, write a BASE tag statically.\n" .
-	"if (parent.frames.length)\n" .
-	"	document.write($langle+'BASE TARGET=mains'+$rangle)\n";
-$'rewrite_href_funcs =
-	"if (parent.frames.length && parent.funcs == self) {\n" .
-	"	document.links[0].href = '../funcs.$'normal_suffix';\n" .
-	"	document.links[document.links.length - 1].href = '../funcs.$'normal_suffix';\n" .
-	"}\n";
-$'rewrite_href_files =
-	"if (parent.frames.length && parent.files == self) {\n" .
-	"	document.links[0].href = '../files.$'normal_suffix';\n" .
-	"	document.links[document.links.length - 1].href = '../files.$'normal_suffix';\n" .
-	"}\n";
+#-------------------------------------------------------------------------
+# DEFINITION
+#-------------------------------------------------------------------------
+# unit for a path
+$'SRCS   = 'S';
+$'DEFS   = 'D';
+$'REFS   = 'R';
+$'INCS   = 'I';
 sub set_header {
-	local($display, $title, $script) = @_;
-	local($head) = "<HEAD><TITLE>$title</TITLE>\n$'meta_robots\n$'meta_generator";
-	if ($script || ($'hflag && $display)) {
-		$head .= "\n";
-		$head .= $'begin_script;
-		$head .= $script if ($script);
-		if ($'hflag && $display) {
-			$title = '[' . $title . ']' if ($title);
-			$head .= "if (parent.frames.length && parent.mains == self) {\n";
-			$head .= "	parent.title.document.open();\n";
-			$head .= "	parent.title.document.write('$'begin_html$'begin_body');\n";
-			$head .= "	parent.title.document.write('<H3>$title</H3>');\n";
-			$head .= "	parent.title.document.write('$'end_body$'end_html');\n";
-			$head .= "	parent.title.document.close();\n";
-			$head .= "}\n";
-		}
-		$head .= $'end_script;
-	}
+	local($title) = @_;
+	local($head) = '';
+	$head .= "<HEAD>\n";
+	$head .= "<TITLE>$title</TITLE>\n";
+	$head .= "$'meta_robots\n$'meta_generator\n";
+	$head .= $'begin_script;
+	$head .= "self.defaultStatus = '$title'\n";
+	$head .= $'end_script;	
 	$head .= "</HEAD>\n";
 	$head;
 }
@@ -238,6 +252,7 @@ sub set_header {
 #-------------------------------------------------------------------------
 sub getcwd {
         local($dir) = `pwd`;
+	if ($w32) { $dir =~ s!\\!/!g; }
         chop($dir);
         $dir;
 }
@@ -269,15 +284,27 @@ sub escape {
 }
 sub usable {
 	local($command) = @_;
-	foreach (split(/$'pathsep/, $ENV{'PATH'})) {
-		if ($win32) {
-			return 1 if (-f "$_/$command.com");
-			return 1 if (-f "$_/$command.exe");
+	local($pathsep) = ($'w32) ? ';' : ':';
+	foreach (split(/$pathsep/, $ENV{'PATH'})) {
+		if ($w32) {
+			return "$_/$command.com" if (-f "$_/$command.com");
+			return "$_/$command.exe" if (-f "$_/$command.exe");
 		} else {
-			return 1 if (-x "$_/$command");
+			return "$_/$command" if (-x "$_/$command");
 		}
 	}
-	return 0;
+	return '';
+}
+sub duplicatefile {
+	local($file, $from, $to) = @_;
+	if ($'w32) {
+		&'copy("$from/$file", "$to/$file")
+			|| &'error("cannot copy $file.");
+	} else {
+		link("$from/$file", "$to/$file")
+			|| &'copy("$from/$file", "$to/$file")
+			|| &'error("cannot copy $file.");
+	}
 }
 sub copy {
 	local($from, $to) = @_;
@@ -304,31 +331,94 @@ sub path2url {
 	$'GPATH{$path} . '.' . $'HTML;
 }
 #-------------------------------------------------------------------------
+# LIST PROCEDURE
+#-------------------------------------------------------------------------
+sub list_begin {
+	$'table_list ? "$'table_begin\n<TR ALIGN=center><TH NOWRAP>tag</TH><TH NOWRAP>line</TH><TH NOWRAP>file</TH><TH NOWRAP>source code</TH></TR>\n" :  "<PRE>\n";
+}
+sub list_body {
+	local($srcdir, $s) = @_;	# $s must be choped.
+	local($name, $lno, $filename, $line) = ($s =~ /^(\S+)\s+(\d+)\s+\.\/(\S+) (.*)$/);
+	local($html) = &'path2url($filename);
+
+	$s =~ s/\.\///;
+	$s =~ s/&/&amp;/g;
+	$s =~ s/</&lt;/g;
+	$s =~ s/>/&gt;/g;
+	if ($'table_list) {
+		$line =~ s/ /&nbsp;&nbsp;/g;
+		$s = "<TR><TD NOWRAP><A HREF=$srcdir\/$html#$lno>$name</A></TD><TD NOWRAP>$lno</TD><TD NOWRAP>$filename</TD><TD NOWRAP>$line</TD></TR>";
+	} else {
+		$s =~ s/^($name)/<A HREF=$srcdir\/$html#$lno>$1<\/A>/;
+	}
+	$s . "\n";
+}
+sub list_end {
+	local($s) = $'table_list ? $'table_end : "</PRE>";
+	$s . "\n";
+}
+#-------------------------------------------------------------------------
 # PROCESS START
 #-------------------------------------------------------------------------
 #
 # options check.
 #
-$'aflag = $'cflag = $'fflag = $'hflag = $'lflag = $'nflag = $'vflag = $'wflag = '';
+$'aflag = $'cflag = $'fflag = $'Fflag = $'lflag = $'nflag = $'Sflag = $'vflag = $'wflag = '';
+$show_version = 0;
+$show_help = 0;
+$action_value = '';
+$id_value = '';
+$cgidir = '';
 while ($ARGV[0] =~ /^-/) {
 	$opt = shift;
 	if ($opt =~ /^--action=(.*)$/) {
-		$'action = $1;
+		$action_value = $1;
 	} elsif ($opt =~ /^--id=(.*)$/) {
-		$'id = $1;
+		$id_value = $1;
 	} elsif ($opt =~ /^--nocgi$/) {
 		$'cgi = 0;
 	} elsif ($opt =~ /^--version$/) {
-		system("gtags --version");
-		exit 0;
-	} elsif ($opt =~ /[^-acfhlnvwtd]/) {
-		print STDERR $usage;
+		$show_version = 1;
+	} elsif ($opt =~ /^--help$/) {
+		$show_help = 1;
+	} elsif ($opt =~ /^--alphabet$/) {
+		$'aflag = 'a';
+	} elsif ($opt =~ /^--compact$/) {
+		$'cflag = 'c';
+	} elsif ($opt =~ /^--form$/) {
+		$'fflag = 'f';
+	} elsif ($opt =~ /^--frame$/) {
+		$'Fflag = 'F';
+	} elsif ($opt =~ /^--each-line-tag$/) {
+		$'lflag = 'l';
+	} elsif ($opt =~ /^--line-number$/) {
+		$'nflag = 'n';
+	} elsif ($opt =~ /^--verbose$/) {
+		$'vflag = 'v';
+	} elsif ($opt =~ /^--warning$/) {
+		$'wflag = 'w';
+	} elsif ($opt =~ /^--title$/) {
+		$opt = shift;
+		last if ($opt eq '');
+		$title = $opt;
+	} elsif ($opt =~ /^--dbpath$/) {
+		$opt = shift;
+		last if ($opt eq '');
+		$dbpath = $opt;
+	} elsif ($opt =~ /^--secure-cgi$/) {
+		$'Sflag = 'S';
+		$'cgidir = shift;
+	} elsif ($opt =~ /^--/) {
+		print STDERR $usage, "\n";
+		exit 1;
+	} elsif ($opt =~ /[^-acdfFlnsStvwtd]/) {
+		print STDERR $usage, "\n";
 		exit 1;
 	} else {
 		if ($opt =~ /a/) { $'aflag = 'a'; }
 		if ($opt =~ /c/) { $'cflag = 'c'; }
 		if ($opt =~ /f/) { $'fflag = 'f'; }
-		if ($opt =~ /h/) { $'hflag = 'h'; }
+		if ($opt =~ /F/) { $'Fflag = 'F'; }
 		if ($opt =~ /l/) { $'lflag = 'l'; }
 		if ($opt =~ /n/) { $'nflag = 'n'; }
 		if ($opt =~ /v/) { $'vflag = 'v'; }
@@ -341,8 +431,22 @@ while ($ARGV[0] =~ /^-/) {
 			$opt = shift;
 			last if ($opt eq '');
 			$dbpath = $opt;
+		} elsif ($opt =~ /S/) {
+			$'Sflag = 'S';
+			$'cgidir = shift;
 		}
 	}
+}
+if ($show_version) {
+	$com = 'global --version';
+	$com .= ' --verbose' if ($vflag);
+	$com .= ' htags';
+	system($com);
+	exit 0;
+}
+if ($show_help) {
+	print STDOUT $help;
+	exit 1;
 }
 if ($'cflag && !&'usable('gzip')) {
 	print STDERR "Warning: 'gzip' command not found. -c option ignored.\n";
@@ -352,9 +456,21 @@ if (!$title) {
 	@cwd = split('/', &'getcwd);
 	$title = $cwd[$#cwd];
 }
+if ($'Sflag) {
+	$script_alias =~ s!/$!!;
+	$'action = "$script_alias/global.cgi";
+	chop($'id = `pwd`);
+}
+# --action, --id overwrite Sflag's value.
+if ($action_value) {
+	$'action = $action_value;
+}
+if ($id_value) {
+	$'id = $id_value;
+}
 $dbpath = '.' if (!$dbpath);
 unless (-r "$dbpath/GTAGS" && -r "$dbpath/GRTAGS") {
-	&'error("GTAGS and GRTAGS not found. Please make them.");
+	&'error("GTAGS and/or GRTAGS not found. Htags needs both of them.");
 }
 if ($'fflag && ! -r "$dbpath/GSYMS") {
 	&'error("-f option needs GSYMS. Please make it.");
@@ -379,6 +495,16 @@ if ($ARGV[0]) {
 	$dist = &'getcwd() . '/HTML';
 	chdir($cwd) || &'error("cannot return to original directory.");
 }
+if ($'fflag || $'cflag) {
+	if ($'cgidir && ! -d $'cgidir) {
+		&'error("'$'cgidir' not found.");
+	}
+	if (!$'Sflag) {
+		$'cgidir = "$dist/cgi-bin";
+	}
+} else {
+	$'Sflag = $'cgidir = '';
+}
 #
 # find filter
 #
@@ -401,19 +527,20 @@ if ($?) { &'error("cannot traverse directory."); }
 #-------------------------------------------------------------------------
 #	HTML/cgi-bin/global.cgi	... CGI program (1)
 #	HTML/cgi-bin/ghtml.cgi	... unzip script (1)
-#	HTML/.htaccess.skel	... skelton of .htaccess (1)
+#	HTML/.htaccess		... skelton of .htaccess (1)
 #	HTML/help.html		... help file (2)
 #	HTML/$REFS/*		... references (3)
 #	HTML/$DEFS/*		... definitions (3)
-#	HTML/funcs.html		... function index (4)
-#	HTML/funcs/*		... function index (4)
+#	HTML/defines.html	... definitions index (4)
+#	HTML/defines/*		... definitions index (4)
 #	HTML/files.html		... file index (5)
 #	HTML/files/*		... file index (5)
 #	HTML/index.html		... index file (6)
 #	HTML/mains.html		... main index (7)
 #	HTML/null.html		... main null html (7)
 #	HTML/$SRCS/		... source files (8)
-#	HTML/$INCS/		... include file index (9)
+#	HTML/$INCS/		... include file index (8)
+#	HTML/search.html	... search index (9)
 #-------------------------------------------------------------------------
 $'HTML = ($'cflag) ? $'gzipped_suffix : $'normal_suffix;
 print STDERR "[", &'date, "] ", "Htags started\n" if ($'vflag);
@@ -422,7 +549,7 @@ print STDERR "[", &'date, "] ", "Htags started\n" if ($'vflag);
 #
 print STDERR "[", &'date, "] ", "(0) making directories ...\n" if ($'vflag);
 mkdir($dist, 0777) || &'error("cannot make directory '$dist'.") if (! -d $dist);
-foreach $d ($SRCS, $INCS, $DEFS, $REFS, 'files', 'funcs') {
+foreach $d ($SRCS, $INCS, $DEFS, $REFS, 'files', 'defines') {
 	mkdir("$dist/$d", 0775) || &'error("cannot make HTML directory") if (! -d "$dist/$d");
 }
 if ($'cgi && ($'fflag || $'cflag)) {
@@ -432,20 +559,23 @@ if ($'cgi && ($'fflag || $'cflag)) {
 # (1) make CGI program
 #
 if ($'cgi && $'fflag) {
-	print STDERR "[", &'date, "] ", "(1) making CGI program ...\n" if ($'vflag);
-	&makeprogram("$dist/cgi-bin/global.cgi") || &'error("cannot make CGI program.");
-	chmod(0755, "$dist/cgi-bin/global.cgi") || &'error("cannot chmod CGI program.");
-	unlink("$dist/cgi-bin/GTAGS", "$dist/cgi-bin/GRTAGS", "$dist/cgi-bin/GSYMS", "$dist/cgi-bin/GPATH");
-	link("$dbpath/GTAGS", "$dist/cgi-bin/GTAGS") || &'copy("$dbpath/GTAGS", "$dist/cgi-bin/GTAGS") || &'error("cannot copy GTAGS.");
-	link("$dbpath/GRTAGS", "$dist/cgi-bin/GRTAGS") || &'copy("$dbpath/GRTAGS", "$dist/cgi-bin/GRTAGS") || &'error("cannot copy GRTAGS.");
-	link("$dbpath/GSYMS", "$dist/cgi-bin/GSYMS") || &'copy("$dbpath/GSYMS", "$dist/cgi-bin/GSYMS") || &'error("cannot copy GSYMS.");
-	link("$dbpath/GPATH", "$dist/cgi-bin/GPATH") || &'copy("$dbpath/GPATH", "$dist/cgi-bin/GPATH") || &'error("cannot copy GPATH.");
+	if ($'cgidir) {
+		print STDERR "[", &'date, "] ", "(1) making CGI program ...\n" if ($'vflag);
+		&makeprogram("$cgidir/global.cgi") || &'error("cannot make CGI program.");
+		chmod(0755, "$cgidir/global.cgi") || &'error("cannot chmod CGI program.");
+	}
+	foreach $f ('GTAGS', 'GRTAGS', 'GSYMS', 'GPATH') {
+		unlink("$dist/cgi-bin/$f");
+		&duplicatefile($f, $dbpath, "$dist/cgi-bin");
+	}
 }
 if ($'cgi && $'cflag) {
-	&makehtaccess("$dist/.htaccess.skel") || &'error("cannot make .htaccess skelton.");
-	chmod(0644, "$dist/.htaccess.skel") || &'error("cannot chmod .htaccess skelton.");
-	&makeghtml("$dist/cgi-bin/ghtml.cgi") || &'error("cannot make unzip script.");
-	chmod(0755, "$dist/cgi-bin/ghtml.cgi") || &'error("cannot chmod unzip script.");
+	&makehtaccess("$dist/.htaccess") || &'error("cannot make .htaccess skelton.");
+	chmod(0644, "$dist/.htaccess") || &'error("cannot chmod .htaccess skelton.");
+	if ($'cgidir) {
+		&makeghtml("$cgidir/ghtml.cgi") || &'error("cannot make unzip script.");
+		chmod(0755, "$cgidir/ghtml.cgi") || &'error("cannot chmod unzip script.");
+	}
 }
 #
 # (2) make help file
@@ -455,11 +585,10 @@ print STDERR "[", &'date, "] ", "(2) making help.html ...\n" if ($'vflag);
 #
 # (#) load GPATH
 #
-local($command) = "btreeop -L2 $dbpath/GPATH";
+local($command) = "btreeop -L2 -k './' $dbpath/GPATH";
 open(GPATH, "$command |") || &'error("cannot fork.");
 $nextkey = 0;
 while (<GPATH>) {
-	next if ($_ !~ /^\./);
 	chop;
 	local($path, $no) = split;
 	$'GPATH{$path} = $no;
@@ -482,11 +611,11 @@ $SIG{'TERM'} = 'suddenly';
 $func_total = &makedupindex($dist);
 print STDERR "Total $func_total functions.\n" if ($'vflag);
 #
-# (4) make function index (funcs.html and funcs/*)
-#     PRODUCE @funcs
+# (4) make function index (defines.html and defines/*)
+#     PRODUCE @defines
 #
 print STDERR "[", &'date, "] ", "(4) making function index ...\n" if ($'vflag);
-$func_total = &makefuncindex($dist, "$dist/funcs.$'normal_suffix", $func_total);
+$func_total = &makedefineindex($dist, "$dist/defines.$'normal_suffix", $func_total);
 print STDERR "Total $func_total functions.\n" if ($'vflag);
 #
 # (5) make file index (files.html and files/*)
@@ -497,7 +626,7 @@ $file_total = &makefileindex($dist, "$dist/files.$'normal_suffix", "$dist/$INCS"
 print STDERR "Total $file_total files.\n" if ($'vflag);
 #
 # [#] make a common part for mains.html and index.html
-#     USING @funcs @files
+#     USING @defines @files
 #
 print STDERR "[", &'date, "] ", "(#) making a common part ...\n" if ($'vflag);
 $index = &makecommonpart($title);
@@ -511,7 +640,6 @@ print STDERR "[", &'date, "] ", "(6) making index file ...\n" if ($'vflag);
 #
 print STDERR "[", &'date, "] ", "(7) making main index ...\n" if ($'vflag);
 &makemainindex("$dist/mains.$'normal_suffix", $index);
-&makenullhtml("$dist/null.$'normal_suffix") if ($'hflag);
 #
 # (#) make anchor database
 #
@@ -523,6 +651,13 @@ print STDERR "[", &'date, "] ", "(#) making temporary database ...\n" if ($'vfla
 #
 print STDERR "[", &'date, "] ", "(8) making hypertext from source code ...\n" if ($'vflag);
 &makehtml($dist, $file_total);
+#
+# (9) search index. (search.html)
+#
+if ($'Fflag && $'fflag) {
+	print STDERR "[", &'date, "] ", "(9) making search index ...\n" if ($'vflag);
+	&makesearchindex("$dist/search.$'normal_suffix");
+}
 &'clean();
 print STDERR "[", &'date, "] ", "Done.\n" if ($'vflag);
 if ($'vflag && $'cgi && ($'cflag || $'fflag)) {
@@ -533,17 +668,21 @@ if ($'vflag && $'cgi && ($'cflag || $'fflag)) {
 		print STDERR " Your system may need to be setup to decompress *.$'gzipped_suffix files.\n";
 		print STDERR " This can be done by having your browser compiled with the relevant\n";
 		print STDERR " options, or by configuring your http server to treat these as\n";
-		print STDERR " gzipped files. (Please see 'HTML/.htaccess.skel')\n";
+		print STDERR " gzipped files. (Please see 'HTML/.htaccess')\n";
 		print STDERR "\n";
 	}
 	if ($'fflag) {
 		local($path) = ($'action =~ /^\//) ? "DOCUMENT_ROOT$'action" : "HTML/$'action";
 		print STDERR " You need to setup http server so that $path\n";
-		print STDERR " is executed as a CGI script.\n";
+		print STDERR " is executed as a CGI script. (DOCUMENT_ROOT means WWW server's data root.)\n";
 		print STDERR "\n";
 	}
 	print STDERR " Good luck!\n";
 	print STDERR "\n";
+}
+# This is not supported.
+if ($'icon_list && -f $'icon_list) {
+	system("tar xzf $'icon_list -C $dist");
 }
 exit 0;
 #-------------------------------------------------------------------------
@@ -554,64 +693,95 @@ exit 0;
 #
 sub makeprogram {
 	local($file) = @_;
+	local($globalpath) = &'usable('global');
+	local($btreeoppath) = &'usable('btreeop');
 
 	open(PROGRAM, ">$file") || &'error("cannot make CGI program.");
-	$program = <<END_OF_SCRIPT;
-#!/usr/bin/perl
+	$program = <<'END_OF_SCRIPT';
+#! @PERL@
 #------------------------------------------------------------------
 # SORRY TO HAVE SURPRISED YOU!
 # IF YOU SEE THIS UNREASONABLE FILE WHILE BROUSING, FORGET PLEASE.
 # IF YOU ARE A ADMINISTRATOR OF THIS SITE, PLEASE SETUP HTTP SERVER
 # SO THAT THIS SCRIPT CAN BE EXECUTED AS A CGI COMMAND. THANK YOU.
 #------------------------------------------------------------------
-print "Content-type: text/html\\n\\n";
-print "$'begin_html$'begin_body";
-\@pairs = split (/&/, \$ENV{'QUERY_STRING'});
-foreach \$p (\@pairs) {
-	(\$name, \$value) = split(/=/, \$p);
-	\$value =~ tr/+/ /;
-	\$value =~ s/%([\\dA-Fa-f][\\dA-Fa-f])/pack("C", hex(\$1))/eg;
-	\$form{\$name} = \$value;
+$htmlbase = $ENV{'HTTP_REFERER'};
+if ($htmlbase) {
+	$htmlbase =~ s/\/[^\/]*$//;
+} else {
+	$htmlbase = '..';
 }
-if (\$form{'pattern'} eq '') {
-	print "<H3>Pattern not specified. <A HREF=../mains.$'normal_suffix>[return]</A></H3>\\n";
-	print "$'end_body$'end_html\n";
+print "Content-type: text/html\n\n";
+print "@html_begin@\n";
+print "@body_begin@\n";
+if (! -x '@globalpath@' || ! -x '@btreeoppath@') {
+	print "<H1><FONT COLOR=#cc0000>Error</FONT></H1>\n";
+	print "<H3>Server side command not found. <A HREF=$htmlbase/mains.@normal_suffix@>[return]</A></H3>\n";
+	print "@body_end@\n";
+	print "@html_end@\n";
 	exit 0;
 }
-\$pattern = \$form{'pattern'};
-\$flag = '';
-\$words = 'definitions';
-if (\$form{'type'} eq 'reference') {
-	\$flag = 'r';
-	\$words = 'references';
-} elsif (\$form{'type'} eq 'symbol') {
-	\$flag = 's';
-	\$words = 'symbols';
+@pairs = split (/&/, $ENV{'QUERY_STRING'});
+foreach $p (@pairs) {
+	($name, $value) = split(/=/, $p);
+	$value =~ tr/+/ /;
+	$value =~ s/%([\dA-Fa-f][\dA-Fa-f])/pack("C", hex($1))/eg;
+	$form{$name} = $value;
 }
-print "<H1><FONT COLOR=#cc0000>\" . \$pattern . \"</FONT></H1>\\n";
-print "Following \$words are matched to above pattern.<HR>\\n";
-\$pattern =~ s/'//g;			# to shut security hole
-unless (open(PIPE, "/usr/bin/global -x\$flag \\"\$pattern\\" |")) {
-	print "<H3>Cannot execute global. <A HREF=../mains.$'normal_suffix>[return]</A></H3>\\n";
-	print "$'end_body$'end_html\n";
+if ($form{'pattern'} eq '') {
+	print "<H1><FONT COLOR=#cc0000>Error</FONT></H1>\n";
+	print "<H3>Pattern not specified. <A HREF=$htmlbase/mains.@normal_suffix@>[return]</A></H3>\n";
+	print "@body_end@\n";
+	print "@html_end@\n";
 	exit 0;
 }
-\$cnt = 0;
-local(\$tag, \$lno, \$filename, \$fileno);
-print "<PRE>\\n";
+$pattern = $form{'pattern'};
+$flag = '';
+$words = 'definitions';
+if ($form{'type'} eq 'reference') {
+	$flag = 'r';
+	$words = 'references';
+} elsif ($form{'type'} eq 'symbol') {
+	$flag = 's';
+	$words = 'symbols';
+}
+if ($form{'id'}) {
+	chdir("$form{'id'}/HTML/cgi-bin");
+	if ($?) {	
+		print "<H1><FONT COLOR=#cc0000>Error</FONT></H1>\n";
+		print "<H3>Couldn't find tag directory in secure mode. <A HREF=$htmlbase/mains.@normal_suffix@>[return]</A></H3>\n";
+		print "@body_end@\n";
+		print "@html_end@\n";
+		exit 0;
+	}
+}
+$pattern =~ s/"//g;			# to shut security hole
+unless (open(PIPE, "@globalpath@ -x$flag \"$pattern\" |")) {
+	print "<H1><FONT COLOR=#cc0000>Error</FONT></H1>\n";
+	print "<H3>Cannot execute global. <A HREF=$htmlbase/mains.@normal_suffix@>[return]</A></H3>\n";
+	print "@body_end@\n";
+	print "@html_end@\n";
+	exit 0;
+}
+print "<H1><FONT COLOR=#cc0000>" . $pattern . "</FONT></H1>\n";
+print "Following $words are matched to above pattern.<HR>\n";
+$cnt = 0;
+local($tag, $lno, $filename, $fileno);
+print "<PRE>\n";
 while (<PIPE>) {
-	\$cnt++;
-	(\$tag, \$lno, \$filename) = split;
-	chop(\$fileno = `/usr/bin/btreeop -K "./\$filename" GPATH`);
-	s!(\$tag)!<A HREF=../$'SRCS/\$fileno.$'HTML#\$lno>\$1<\\/A>!;
+	$cnt++;
+	($tag, $lno, $filename) = split;
+	chop($fileno = `@btreeoppath@ -K "./$filename" GPATH`);
+	s!($tag)!<A HREF=$htmlbase/@SRCS@/$fileno.@HTML@#$lno>$1<\/A>!;
 	print;
 }
 close(PIPE);
-print "</PRE>\\n";
-if (\$cnt == 0) {
-	print "<H3>Pattern not found. <A HREF=../mains.$'normal_suffix>[return]</A></H3>\\n";
+print "</PRE>\n";
+if ($cnt == 0) {
+	print "<H3>Pattern not found. <A HREF=$htmlbase/mains.@normal_suffix@>[return]</A></H3>\n";
 }
-print "$'end_body$'end_html\n";
+print "@body_end@\n";
+print "@html_end@\n";
 exit 0;
 #------------------------------------------------------------------
 # SORRY TO HAVE SURPRISED YOU!
@@ -621,6 +791,19 @@ exit 0;
 #------------------------------------------------------------------
 END_OF_SCRIPT
 
+	$quoted_body_begin = $'body_begin;
+	$quoted_body_begin =~ s/"/\\"/g;
+	$quoted_body_end = $'body_end;
+	$quoted_body_end =~ s/"/\\"/g;
+	$program =~ s/\@html_begin\@/$'html_begin/g;
+	$program =~ s/\@html_end\@/$'html_end/g;
+	$program =~ s/\@body_begin\@/$quoted_body_begin/g;
+	$program =~ s/\@body_end\@/$quoted_body_end/g;
+	$program =~ s/\@normal_suffix\@/$'normal_suffix/g;
+	$program =~ s/\@SRCS\@/$'SRCS/g;
+	$program =~ s/\@HTML\@/$'HTML/g;
+	$program =~ s/\@globalpath\@/$globalpath/g;
+	$program =~ s/\@btreeoppath\@/$btreeoppath/g;
 	print PROGRAM $program;
 	close(PROGRAM);
 }
@@ -656,11 +839,10 @@ sub makehtaccess {
 # There are many way to do it, but one of the method is to put .htaccess
 # file in 'HTML' directory.
 #
-# Please rewrite XXX to the true value in your web site and rename this
-# file to '.htaccess' and http server read this.
+# Please rewrite '/cgi-bin/ghtml.cgi' to the true value in your web site.
 #
 AddHandler htags-gzipped-html $'gzipped_suffix
-Action htags-gzipped-html /XXX/cgi-bin/ghtml.cgi
+Action htags-gzipped-html /cgi-bin/ghtml.cgi
 END_OF_SCRIPT
 	print SKELTON $skelton;
 	close(SKELTON);
@@ -670,26 +852,41 @@ END_OF_SCRIPT
 #
 sub makehelp {
 	local($file) = @_;
+	local(@label) = ($'icon_list) ? @'anchor_comment : @'anchor_label;
+	local(@icons) = @'anchor_icons;
+	local(@msg)   = @'anchor_msg;
 
 	open(HELP, ">$file") || &'error("cannot make help file.");
-	print HELP $'begin_html;
-	print HELP &'set_header(0, 'HELP');
-	print HELP $'begin_body;
+	print HELP $'html_begin, "\n";
+	print HELP &'set_header('HELP');
+	print HELP $'body_begin, "\n";
 	print HELP "<H2>Usage of Links</H2>\n";
-	print HELP "<PRE>/* [&lt;][&gt;][^][v] [top][bottom][index][help] */</PRE>\n";
+
+	print HELP "<PRE>/* ";
+	foreach $n (0 .. $#label) {
+		if ($'icon_list) {
+			print HELP "<IMG SRC=icons/$icons[$n] ALT=\[$label[$n]\] HSPACE=3 BORDER=0>";
+			if ($n < $#label) {
+				print HELP " ";
+			}
+		} else {
+			print HELP "\[$label[$n]\]";
+		}
+	}
+	print HELP " */</PRE>\n";
 	print HELP "<DL>\n";
-	print HELP "<DT>[&lt;]<DD>Previous function.\n";
-	print HELP "<DT>[&gt;]<DD>Next function.\n";
-	print HELP "<DT>[^]<DD>First function in this file.\n";
-	print HELP "<DT>[v]<DD>Last function in this file.\n";
-	print HELP "<DT>[top]<DD>Top of this file.\n";
-	print HELP "<DT>[bottom]<DD>Bottom of this file.\n";
-	print HELP "<DT>[index]<DD>Return to index page (mains.$'normal_suffix).\n";
-	print HELP "<DT>[help]<DD>You are seeing now.\n";
+	foreach $n (0 .. $#label) {
+		print HELP "<DT>";
+		if ($'icon_list) {
+			print HELP "<IMG SRC=icons/$icons[$n] ALT=\[$label[$n]\] HSPACE=3 BORDER=0>";
+		} else {
+			print HELP "[$label[$n]]";
+		}
+		print HELP "<DD>$msg[$n]\n";
+	}
 	print HELP "</DL>\n";
-	print HELP $'end_body;
-	print HELP $'end_html;
-	print HELP "\n";
+	print HELP $'body_end, "\n";
+	print HELP $'html_end, "\n";
 	close(HELP);
 }
 #
@@ -698,18 +895,10 @@ sub makehelp {
 #	go)	tag cache
 #	r)	$count
 #
-sub makeline {
-	$_[0] =~ s/\.\///;
-	$_[0] =~ s/&/&amp;/g;
-	$_[0] =~ s/</&lt;/g;
-	$_[0] =~ s/>/&gt;/g;
-	local($tag, $lno, $filename) = split(/[ \t\n]+/, $_[0]);;
-	$filename = &'path2url($filename);
-	$_[0] =~ s/^$tag/<A HREF=..\/$'SRCS\/$filename#$lno>$tag<\/A>/;
-}
 sub makedupindex {
 	local($dist) = @_;
 	local($count) = 0;
+	local($srcdir) = "../$'SRCS";
 
 	foreach $db ('GRTAGS', 'GTAGS') {
 		local($kind) = $db eq 'GTAGS' ? "definitions" : "references";
@@ -723,14 +912,14 @@ sub makedupindex {
 		open(LIST, "$command |") || &'error("cannot fork.");
 		while (<LIST>) {
 			chop;
-			local($tag, $lno, $filename) = split;
+			local($tag) = split;
 			if ($prev ne $tag) {
 				$count++;
-				print STDERR " [$count] adding $tag $kind.\n" if ($'vflag);
+				print STDERR " [$count] adding $tag $kind\n" if ($'vflag);
 				if ($writing) {
-					print FILE "</PRE>\n";
-					print FILE $'end_body;
-					print FILE $'end_html;
+					print FILE &'list_end;
+					print FILE $'body_end, "\n";
+					print FILE $'html_end;
 					print FILE "\n";
 					close(FILE);
 					$writing = 0;
@@ -752,24 +941,22 @@ sub makedupindex {
 						open(FILE, ">$dist/$type/$count.$'HTML") || &'error("cannot make file '$dist/$type/$count.$'HTML'.");
 					}
 					$writing = 1;
-					print FILE $'begin_html;
-					print FILE &'set_header(0, $tag);
-					print FILE $'begin_body;
-					print FILE "<PRE>\n";
-					&makeline($first_line);
-					print FILE $first_line, "\n";
+					print FILE $'html_begin, "\n";
+					print FILE &'set_header($tag);
+					print FILE $'body_begin, "\n";
+					print FILE &'list_begin;
+					print FILE &'list_body($srcdir, $first_line);
 					$first_line = '';
 				}
-				&makeline($_);
-				print FILE $_, "\n";
+				print FILE &'list_body($srcdir, $_);
 			}
 		}
 		close(LIST);
 		if ($?) { &'error("'$command' failed."); }
 		if ($writing) {
-			print FILE "</PRE>\n";
-			print FILE $'end_body;
-			print FILE $'end_html;
+			print FILE &'list_end;
+			print FILE $'body_end;
+			print FILE $'html_end;
 			print FILE "\n";
 			close(FILE);
 		}
@@ -780,30 +967,38 @@ sub makedupindex {
 	$count;
 }
 #
-# makefuncindex: make function index (including alphabetic index)
+# makedefineindex: make definition index (including alphabetic index)
 #
 #	i)	dist		distribution directory
-#	i)	file		function index file
-#	i)	total		functions total
+#	i)	file		definition index file
+#	i)	total		definitions total
 #	gi)	tag cache
-#	go)	@funcs
+#	go)	@defines
 #
-sub makefuncindex {
+sub makedefineindex {
 	local($dist, $file, $total) = @_;
 	local($count) = 0;
-	local($indexlink) = "../mains.$'normal_suffix";
-
-	open(FUNCTIONS, ">$file") || &'error("cannot make function index '$file'.");
-	print FUNCTIONS $'begin_html;
-	print FUNCTIONS &'set_header(0, $'title_func_index, $'default_view);
-	print FUNCTIONS $'begin_body;
-	print FUNCTIONS "<H2>$'title_func_index</H2>\n";
-	print FUNCTIONS "<OL>\n" if (!$'aflag);
-	local($old) = select(FUNCTIONS);
+	local($indexlink) = ($'Fflag) ? "../defines.$'normal_suffix" : "../mains.$'normal_suffix";
+	local($target) = ($'Fflag) ? 'mains' : '_top';
+	open(DEFINES, ">$file") || &'error("cannot make function index '$file'.");
+	print DEFINES $'html_begin, "\n";
+	print DEFINES &'set_header($'title_define_index);
+	print DEFINES $'body_begin, "\n";
+	if ($'Fflag) {
+		print DEFINES "<A HREF=defines.$'normal_suffix><H2>$'title_define_index</H2></A>\n";
+	} else {
+		print DEFINES "<H2>$'title_define_index</H2>\n";
+	}
+	if (!$'aflag && !$'Fflag) {
+		$indexlink = "mains.$'normal_suffix";
+		print DEFINES "<A HREF=$indexlink>[index]</A>\n";
+	}
+	print DEFINES "<OL>\n" if (!$'aflag);
+	local($old) = select(DEFINES);
 	local($command) = "global -c";
 	open(TAGS, "$command |") || &'error("cannot fork.");
 	local($alpha, $alpha_f);
-	@funcs = ();	# [A][B][C]...
+	@defines = ();	# [A][B][C]...
 	while (<TAGS>) {
 		$count++;
 		chop;
@@ -812,10 +1007,11 @@ sub makefuncindex {
 		if ($'aflag && ($alpha eq '' || $tag !~ /^$alpha/)) {
 			if ($alpha) {
 				print ALPHA "</OL>\n";
-				print ALPHA "<A HREF=$indexlink TARGET=_self>[index]</A>\n";
-				print ALPHA "$'begin_script$'rewrite_href_funcs$'end_script";
-				print ALPHA $'end_body;
-				print ALPHA $'end_html;
+				print ALPHA "<A HREF=$indexlink>";
+				print ALPHA $'icon_list ? "<IMG SRC=../icons/$'back_icon ALT='[index]' HSPACE=3 BORDER=0>" : "[index]";
+				print ALPHA "</A>\n";
+				print ALPHA $'body_end;
+				print ALPHA $'html_end;
 				print ALPHA "\n";
 				close(ALPHA);
 			}
@@ -834,27 +1030,29 @@ sub makefuncindex {
 					$alpha_f = "l$c0";
 				}
 			}
-			push(@funcs, "<A HREF=funcs/$alpha_f.$'HTML TARGET=_self>[$alpha]</A>\n");
+			push(@defines, "<A HREF=defines/$alpha_f.$'HTML>[$alpha]</A>\n");
 			if ($'cflag) {
-				open(ALPHA, "| gzip -c >$dist/funcs/$alpha_f.$'HTML") || &'error("cannot make alphabetical function index.");
+				open(ALPHA, "| gzip -c >$dist/defines/$alpha_f.$'HTML") || &'error("cannot make alphabetical function index.");
 			} else {
-				open(ALPHA, ">$dist/funcs/$alpha_f.$'HTML") || &'error("cannot make alphabetical function index.");
+				open(ALPHA, ">$dist/defines/$alpha_f.$'HTML") || &'error("cannot make alphabetical function index.");
 			}
-			print ALPHA $'begin_html;
-			print ALPHA &'set_header(0, $alpha, $'default_view);
-			print ALPHA $'begin_body;
+			print ALPHA $'html_begin, "\n";
+			print ALPHA &'set_header("[$alpha]");
+			print ALPHA $'body_begin, "\n";
 			print ALPHA "<H2>[$alpha]</H2>\n";
-			print ALPHA "<A HREF=$indexlink TARGET=_self>[index]</A>\n";
+			print ALPHA "<A HREF=$indexlink>";
+			print ALPHA $'icon_list ? "<IMG SRC=../icons/$'back_icon ALT='[index]' HSPACE=3 BORDER=0>" : "[index]";
+			print ALPHA "</A>\n";
 			print ALPHA "<OL>\n";
 			select(ALPHA);
 		}
 		local($line) = &cache'get('GTAGS', $tag);
 		if ($line =~ /^ (.*)/) {
-			print "<LI><A HREF=", ($'aflag) ? "../" : "", "$'DEFS/$1.$'HTML>$tag</A>\n";
+			print "<LI><A HREF=", ($'aflag) ? "../" : "", "$'DEFS/$1.$'HTML TARGET=$target>$tag</A>\n";
 		} else {
 			local($tag, $lno, $filename) = split(/[ \t]+/, $line);
 			$filename = &'path2url($filename);
-			print "<LI><A HREF=", ($'aflag) ? "../" : "", "$'SRCS/$filename#$lno>$tag</A>\n";
+			print "<LI><A HREF=", ($'aflag) ? "../" : "", "$'SRCS/$filename#$lno TARGET=$target>$tag</A>\n";
 		}
 	}
 	close(TAGS);
@@ -862,20 +1060,22 @@ sub makefuncindex {
 	select($old);
 	if ($'aflag) {
 		print ALPHA "</OL>\n";
-		print ALPHA "<A HREF=$indexlink TARGET=_self>[index]</A>\n";
-		print ALPHA "$'begin_script$'rewrite_href_funcs$'end_script";
-		print ALPHA $'end_body;
-		print ALPHA $'end_html;
-		print ALPHA "\n";
+		print ALPHA "<A HREF=$indexlink>";
+		print ALPHA $'icon_list ? "<IMG SRC=../icons/$'back_icon ALT='[index]' HSPACE=3 BORDER=0>" : "[index]";
+		print ALPHA "</A>\n";
+		print ALPHA $'body_end, "\n";
+		print ALPHA $'html_end, "\n";
 		close(ALPHA);
 
-		print FUNCTIONS @funcs;
+		print DEFINES @defines;
 	}
-	print FUNCTIONS "</OL>\n" if (!$'aflag);
-	print FUNCTIONS $'end_body;
-	print FUNCTIONS $'end_html;
-	print FUNCTIONS "\n";
-	close(FUNCTIONS);
+	print DEFINES "</OL>\n" if (!$'aflag);
+	if (!$'aflag && !$'Fflag) {
+		print DEFINES "<A HREF=$indexlink>[index]</A>\n";
+	}
+	print DEFINES $'body_end, "\n";
+	print DEFINES $'html_end, "\n";
+	close(DEFINES);
 	$count;
 }
 #
@@ -890,15 +1090,16 @@ sub makefuncindex {
 sub makefileindex {
 	local($dist, $file, $incdir) = @_;
 	local($count) = 0;
-	local($indexlink) = "../mains.$'normal_suffix";
+	local($indexlink) = ($'Fflag) ? "../files.$'normal_suffix" : "../mains.$'normal_suffix";
+	local($target) = ($'Fflag) ? 'mains' : '_top';
 	local(@dirstack, @fdstack);
 	local($command) = "$'findcom | sort";
 	open(FIND, "$command |") || &'error("cannot fork.");
 	open(FILES, ">$file") || &'error("cannot make file '$file'.");
-	print FILES $'begin_html;
-	print FILES &'set_header(0, $'title_file_index, $'default_view);
-	print FILES $'begin_body;
-	print FILES "<H2>$'title_file_index</H2>\n";
+	print FILES $'html_begin, "\n";
+	print FILES &'set_header($'title_file_index);
+	print FILES $'body_begin, "\n";
+	print FILES "<A HREF=files.$'normal_suffix><H2>$'title_file_index</H2></A>\n";
 	print FILES "<OL>\n";
 
 	local($org) = select(FILES);
@@ -921,10 +1122,11 @@ sub makefileindex {
 				pop(@dirstack);
 				local($parent) = (@dirstack) ? &'path2url(join('/', @dirstack)) : $indexlink;
 				print "</OL>\n";
-				print "<A HREF=$parent TARGET=_self>[..]</A>\n";
-				print "$'begin_script$'rewrite_href_files$'end_script" if (@dirstack == 0);
-				print $'end_body;
-				print $'end_html;
+				print "<A HREF=$parent>" .
+					($'icon_list ? "<IMG SRC=../icons/$'back_icon ALT='[..]' HSPACE=3 BORDER=0>" : "[..]") .
+					"</A>\n";
+				print $'body_end;
+				print $'html_end;
 				print "\n";
 				$path = pop(@fdstack);
 				close($path);
@@ -937,10 +1139,13 @@ sub makefileindex {
 				$path = join('/', @dirstack);
 				$cur = "$dist/files/" . &'path2url($path);
 				local($last) = $path;
-				if (!$'fullpath) {
+				if (!$'full_path) {
 					$last =~ s!.*/!!;
 				}
-				local($li) = "<LI><A HREF=" . (@dirstack == 1 ? 'files/' : '') . &path2url($path) . " TARGET=_self>$last/</A>\n";
+				local($li) = "<LI>" .
+					"<A HREF=" . (@dirstack == 1 ? 'files/' : '') . &path2url($path) . ">" .
+					($'icon_list ? "<IMG SRC=" . (@dirstack == 1 ? '' : '../') . "icons/$'dir_icon ALT=[$path/] HSPACE=3 BORDER=0>" : '') .
+					"$last/</A>\n";
 				if (@dirstack == 1) {
 					push(@files, $li);
 				} else {
@@ -953,11 +1158,23 @@ sub makefileindex {
 				}
 				select($cur);
 				push(@fdstack, $cur);
-				print $'begin_html;
-				print &'set_header(0, "$path", $'default_view);
-				print $'begin_body;
-				print "<H2>$path/</H2>\n";
-				print "<A HREF=$parent  TARGET=_self>[..]</A>\n";
+				print $'html_begin, "\n";
+				print &'set_header("$path/");
+				print $'body_begin, "\n";
+				print "<H2>";
+				local(@p);
+				foreach $n (0 .. $#dirstack) {
+					push(@p, $dirstack[$n]);
+					local($url) = &'path2url(join('/', @p));
+					print "<A HREF=$url>" if ($n < $#dirstack);
+					print "$dirstack[$n]";
+					print "</A>" if ($n < $#dirstack);
+					print "/";
+				}
+				print "</H2>\n";
+				print "<A HREF=$parent>" .
+					($'icon_list ? "<IMG SRC=../icons/$'back_icon ALT='[..]' HSPACE=3 BORDER=0>" : "[..]") .
+					"</A>\n";
 				print "<OL>\n";
 			}
 		}
@@ -973,10 +1190,13 @@ sub makefileindex {
 		}
 		local($url) = &'path2url($_);
 		local($last) = $_;
-		if (!$'fullpath) {
+		if (!$'full_path) {
 			$last =~ s!.*/!!;
 		}
-		local($li) = "<LI><A HREF=" . (@dirstack == 0 ? '' : '../') . "S/$url>$last</A>\n";
+		local($li) = "<LI>" .
+			"<A HREF=" . (@dirstack == 0 ? '' : '../') . "S/$url TARGET=$target>" .
+			($'icon_list ? "<IMG SRC=" . (@dirstack == 0 ? '' : '../') . "icons/$'file_icon ALT=[$_] HSPACE=3 BORDER=0>" : '') .
+			"$last</A>\n";
 		if (@dirstack == 0) {
 			push(@files, $li);
 		} else {
@@ -988,10 +1208,11 @@ sub makefileindex {
 		pop(@dirstack);
 		local($parent) = (@dirstack) ? &'path2url(join('/', @dirstack)) : $indexlink;
 		print "</OL>\n";
-		print "<A HREF=$parent TARGET=_self>[..]</A>\n";
-		print "$'begin_script$'rewrite_href_files$'end_script" if (@dirstack == 0);
-		print $'end_body;
-		print $'end_html;
+		print "<A HREF=$parent>" .
+			($'icon_list ? "<IMG SRC=../icons/$'back_icon ALT='[..]' HSPACE=3 BORDER=0>" : "[..]") .
+			"</A>\n";
+		print $'body_end;
+		print $'html_end;
 		print "\n";
 		$path = pop(@fdstack);
 		close($path);
@@ -999,9 +1220,8 @@ sub makefileindex {
 	}
 	print FILES @files;
 	print FILES "</OL>\n";
-	print FILES $'end_body;
-	print FILES $'end_html;
-	print FILES "\n";
+	print FILES $'body_end, "\n";
+	print FILES $'html_end, "\n";
         close(FILES);
 
 	select($org);
@@ -1014,18 +1234,17 @@ sub makefileindex {
 			} else {
 				open(INCLUDE, ">$path") || &'error("cannot open file '$path'.");
 			}
-			print INCLUDE $'begin_html;
-			print INCLUDE &'set_header(0, $last);
-			print INCLUDE $'begin_body;
+			print INCLUDE $'html_begin, "\n";
+			print INCLUDE &'set_header($last);
+			print INCLUDE $'body_begin, "\n";
 			print INCLUDE "<PRE>\n";
 			foreach $filename (@incs) {
 				$path = &'path2url($filename);
-				print INCLUDE "<A HREF=../$'SRCS/$path>$filename</A>\n";
+				print INCLUDE "<A HREF=../$'SRCS/$path TARGET=$target>$filename</A>\n";
 			}
 			print INCLUDE "</PRE>\n";
-			print INCLUDE $'end_body;
-			print INCLUDE $'end_html;
-			print INCLUDE "\n";
+			print INCLUDE $'body_end, "\n";
+			print INCLUDE $'html_end, "\n";
 			close(INCLUDE);
 			# '' means that information already written to file.
 			$includes{$last} = $no;
@@ -1034,65 +1253,91 @@ sub makefileindex {
 	$count;
 }
 #
+# makesearchpart: make search part
+#
+#	i)	$action	action url
+#	i)	$id	hidden variable
+#	i)	$target	target
+#	r)		html
+#
+sub makesearchpart {
+	local($action, $id, $target) = @_;
+	local($index) = '';
+
+	if ($'Fflag) {
+		$index .= "<A HREF=search.$'normal_suffix><H2>SEARCH</H2></A>\n";
+	} else {
+		$index .= "<H2>SEARCH</H2>\n";
+	}
+	if (!$target) {
+		$index .= "Please input object name and select [Search]. POSIX's regular expression is allowed.<P>\n"; 
+	}
+	$index .= "<FORM METHOD=GET ACTION=$action";
+	$index .= " TARGET=$target" if ($target);
+	$index .= ">\n";
+	$index .= "<INPUT NAME=pattern>\n";
+	$index .= "<INPUT TYPE=hidden NAME=id VALUE=$id>\n" if ($id);
+	$index .= "<INPUT TYPE=submit VALUE=Search>\n";
+	$index .= "<INPUT TYPE=reset VALUE=Reset><BR>\n";
+	$index .= "<INPUT TYPE=radio NAME=type VALUE=definition CHECKED>";
+	$index .= ($target) ? "Def" : "Definition";
+	$index .= "\n<INPUT TYPE=radio NAME=type VALUE=reference>";
+	$index .= ($target) ? "Ref" : "Reference";
+	$index .= "\n<INPUT TYPE=radio NAME=type VALUE=symbol>";
+	$index .= ($target) ? "Sym" : "Other symbol";
+	$index .= "\n</FORM>\n";
+	$index;
+}
+#
 # makecommonpart: make a common part for mains.html and index.html
 #
 #	gi)	@files
-#	gi)	@funcs
+#	gi)	@defines
 #
 sub makecommonpart {
 	local($title) = @_;
 	local($index) = '';
 
 	$index .= "<H1>$'title_begin$'title$'title_end</H1>\n";
-	$index .= "<P ALIGN=right>";
+	$index .= "<P ALIGN=right>\n";
 	$index .= "Last updated " . &'date . "<BR>\n";
-	$index .= "This hypertext was generated by <A HREF=http://www.tamacom.com/global/ TARGET=_top>GLOBAL</A>.<BR>\n";
-	$index .= $'begin_script;
-	$index .= "if (parent.frames.length && parent.mains == self)\n";
-	$index .= "	document.write($'langle+'A HREF=mains.$'normal_suffix TARGET=_top'+$'rangle+'[No frame version is here.]'+$'langle+'/A'+$'rangle)\n";
-	$index .= $'end_script;
+	$index .= "This hypertext was generated by <A HREF=http://www.tamacom.com/global/ TARGET=_top>GLOBAL-$'version</A>.<BR>\n";
 	$index .= "</P>\n<HR>\n";
 	if ($'fflag) {
-		$index .= "<H2>OBJECT SEARCH</H2>\n";
-		$index .= "Please input function name and select [Search]. POSIX's regular expression is allowed.<P>\n"; 
-		$index .= "<FORM METHOD=GET ACTION=$'action>\n";
-		$index .= "<INPUT NAME=pattern>\n";
-		$index .= "<INPUT TYPE=hidden NAME=id VALUE=$'id>\n" if ($'id);
-		$index .= "<INPUT TYPE=submit VALUE=Search>\n";
-		$index .= "<INPUT TYPE=reset VALUE=Reset><BR>\n";
-		$index .= "<INPUT TYPE=radio NAME=type VALUE=definition CHECKED>Definition\n";
-		$index .= "<INPUT TYPE=radio NAME=type VALUE=reference>Reference\n";
-		$index .= "<INPUT TYPE=radio NAME=type VALUE=symbol>Other symbol\n";
-		$index .= "</FORM>\n<HR>\n";
+		$index .= &makesearchpart($'action, $'id);
+		$index .= "<HR>\n";
 	}
 	$index .= "<H2>MAINS</H2>\n";
-	$index .= "<PRE>\n";
 	local($command) = "global -nx main | sort +0 -1 +2 -3 +1n -2";
 	open(PIPE, "$command |") || &'error("cannot fork.");
+	$index .= &'list_begin();
 	while (<PIPE>) {
-		local($nouse, $lno, $filename) = split;
-		$nouse = '';	# to make perl quiet
-		$filename = &'path2url($filename);
-		s/(main)/<A HREF=$'SRCS\/$filename#$lno>$1<\/A>/;
-		$index .= $_;
+		chop;
+		$index .= &'list_body($'SRCS, $_);
 	}
+	$index .= &'list_end();
 	close(PIPE);
 	if ($?) { &'error("'$command' failed."); }
-	$index .= "</PRE>\n<HR>\n";
-	if ($'aflag) {
-		$index .= "<H2>FUNCTIONS</H2>\n";
-		foreach $f (@funcs) {
+	$index .= "<HR>\n";
+	if ($'aflag && !$'Fflag) {
+		$index .= "<H2>$'title_define_index</H2>\n";
+		foreach $f (@defines) {
 			$index .= $f;
 		}
 	} else {
-		$index .= "<H2><A HREF=funcs.$'normal_suffix>FUNCTIONS</A></H2>\n";
+		$index .= "<H2><A HREF=defines.$'normal_suffix>$'title_define_index</A></H2>\n";
 	}
-	$index .= "<HR>\n<H2>FILES</H2>\n";
-	$index .= "<OL>\n";
-	foreach $f (@files) {
-		$index .= $f;
+	$index .= "<HR>\n";
+	if ($'Fflag) {
+		$index .= "<H2><A HREF=files.$'normal_suffix>$'title_file_index</A></H2>\n";
+	} else {
+		$index .= "<H2>$'title_file_index</H2>\n";
+		$index .= "<OL>\n";
+		foreach $f (@files) {
+			$index .= $f;
+		}
+		$index .= "</OL>\n<HR>\n";
 	}
-	$index .= "</OL>\n<HR>\n";
 	$index;
 }
 #
@@ -1105,27 +1350,39 @@ sub makecommonpart {
 sub makeindex {
 	local($file, $title, $index) = @_;
 
-	open(FRAME, ">$file") || &'error("cannot open file '$file'.");
-	print FRAME $'begin_html;
-	print FRAME "<HEAD><TITLE>$title</TITLE>$'meta_robots\n$'meta_generator</HEAD>\n";
-	print FRAME "<FRAMESET COLS='200,*'>\n";
-	print FRAME "<FRAMESET ROWS='50%,50%'>\n";
-	print FRAME "<FRAME NAME=funcs SRC=funcs.$'normal_suffix>\n";
-	print FRAME "<FRAME NAME=files SRC=files.$'normal_suffix>\n";
-	print FRAME "</FRAMESET>\n";
-	if ($'hflag) {
-		print FRAME "<FRAMESET ROWS='50,*'>\n";
-		print FRAME "<FRAME NAME=title SRC=null.$'normal_suffix BORDER=0 SCROLLING=no>\n";
-		print FRAME "<FRAME NAME=mains SRC=mains.$'normal_suffix BORDER=0>\n";
+	if ($'Fflag) {
+		open(FRAME, ">$file") || &'error("cannot open file '$file'.");
+		print FRAME $'html_begin, "\n";
+		print FRAME "<HEAD>\n<TITLE>$title</TITLE>\n$'meta_robots\n$'meta_generator\n</HEAD>\n";
+		print FRAME "<FRAMESET COLS='200,*'>\n";
+		if ($'fflag) {
+			print FRAME "<FRAMESET ROWS='33%,33%,*'>\n";
+			print FRAME "<FRAME NAME=search SRC=search.$'normal_suffix>\n";
+		} else {
+			print FRAME "<FRAMESET ROWS='50%,*'>\n";
+		}
+		print FRAME "<FRAME NAME=defines SRC=defines.$'normal_suffix>\n";
+		print FRAME "<FRAME NAME=files SRC=files.$'normal_suffix>\n";
 		print FRAME "</FRAMESET>\n";
-	} else {
 		print FRAME "<FRAME NAME=mains SRC=mains.$'normal_suffix>\n";
+		print FRAME "<NOFRAMES>\n";
+		print FRAME $'body_begin, "\n";
+		print FRAME $index;
+		print FRAME $'body_end, "\n";
+		print FRAME "</NOFRAMES>\n";
+		print FRAME "</FRAMESET>\n";
+		print FRAME $'html_end, "\n";
+		close(FRAME);
+	} else {
+		open(FILE, ">$file") || &'error("cannot open file '$file'.");
+		print FILE $'html_begin, "\n";
+		print FILE &'set_header($title);
+		print FILE $'body_begin, "\n";
+		print FILE $index;
+		print FILE $'body_end, "\n";
+		print FILE $'html_end, "\n";
+		close(FILE);
 	}
-	print FRAME "<NOFRAMES>\n$index</NOFRAMES>\n";
-	print FRAME "</FRAMESET>\n";
-	print FRAME $'end_html;
-	print FRAME "\n";
-	close(FRAME);
 }
 #
 # makemainindex: make main index
@@ -1137,26 +1394,30 @@ sub makemainindex {
 	local($file, $index) = @_;
 
 	open(INDEX, ">$file") || &'error("cannot create file '$file'.");
-	print INDEX $'begin_html;
-	print INDEX &'set_header(1, $title);
-	print INDEX $'begin_body;
+	print INDEX $'html_begin, "\n";
+	print INDEX &'set_header($title);
+	print INDEX $'body_begin, "\n";
 	print INDEX $index;
-	print INDEX $'end_body;
-	print INDEX $'end_html;
-	print INDEX "\n";
+	print INDEX $'body_end, "\n";
+	print INDEX $'html_end, "\n";
 	close(INDEX);
 }
 #
-# makenullhtml: make null html
+# makesearchindex: make search html
 #
 #	i)	$file	file name
 #
-sub makenullhtml {
+sub makesearchindex {
 	local($file) = @_;
 
-	open(NULL, ">$file") || &'error("cannot create file '$file'.");
-	print NULL "$'begin_html$'begin_body$'end_body$'end_html\n";
-	close(NULL);
+	open(SEARCH, ">$file") || &'error("cannot create file '$file'.");
+	print SEARCH $'html_begin, "\n";
+	print SEARCH &'set_header('SEARCH');
+	print SEARCH $'body_begin, "\n";
+	print SEARCH &makesearchpart($'action, $'id, 'mains');
+	print SEARCH $'body_end, "\n";
+	print SEARCH $'html_end, "\n";
+	close(SEARCH);
 }
 #
 # makehtml: make html files
@@ -1199,9 +1460,12 @@ sub src2html {
 	local(%ctab) = ('&', '&amp;', '<', '&lt;', '>', '&gt;');
 	local($isjava) = ($file =~ /\.java$/) ? 1 : 0;
 	local($iscpp) = ($file =~ /\.(h|c\+\+|cc|cpp|cxx|hxx|C|H)$/) ? 1 : 0;
+	local($command);
 
 	if ($'cflag) {
-		open(HTML, "| gzip -c >\"$hfile\"") || &'error("cannot create file '$hfile'.");
+		$command = "gzip -c >";
+		$command .= ($'w32) ? "\"$hfile\"" : "'$hfile'";
+		open(HTML, "| $command") || &'error("cannot create file '$hfile'.");
 	} else {
 		open(HTML, ">$hfile") || &'error("cannot create file '$hfile'.");
 	}
@@ -1210,18 +1474,20 @@ sub src2html {
 	# load tags belonging to this file.
 	#
 	&anchor'load($file);
-	open(SRC, "gtags --expand -$tabs \"$file\" |") || &'error("cannot fork.");
+	$command = "gtags --expand -$tabs ";
+	$command .= ($'w32) ? "\"$file\"" : "'$file'";
+	open(SRC, "$command |") || &'error("cannot fork.");
 	#
 	# print the header
 	#
 	$file =~ s/^\.\///;
-	print $'begin_html;
-	print &'set_header(1, $file);
-	print $'begin_body;
+	print $'html_begin, "\n";
+	print &'set_header($file);
+	print $'body_begin, "\n";
 	print "<A NAME=TOP><H2>$file</H2>\n";
 	print &link_format(&anchor'getlinks(0));
 	print "\n<HR>\n";
-	print "<H2>FUNCTIONS</H2>\n";
+	print "<H2>$'title_define_index</H2>\n";
 	print "This source file includes following functions.\n";
 	print "<OL>\n";
 	local($lno, $tag, $type);
@@ -1250,6 +1516,8 @@ sub src2html {
 				} else {
 					$link = "../$'INCS/$no.$'HTML";
 				}
+				# quote path name.
+				$last =~ s/([\[\]\.\*\+])/\\\1/g;
 				if ($sep eq '"') {
 					s!"(.*$last)"!"<A HREF=$link>$1</A>"!;
 				} else {
@@ -1289,12 +1557,12 @@ sub src2html {
 				$lno_printed = 1;
 			}
 			$define_line = $LNO if ($TYPE eq 'D');
-			$db = ($TYPE eq 'D') ? 'GRTAGS' : 'GTAGS';
+			$db = ($TYPE eq 'R') ? 'GTAGS' : 'GRTAGS';
 			local($line) = &cache'get($db, $TAG);
 			if (defined($line)) {
 				local($href);
 				if ($line =~ /^ (.*)/) {
-					local($type) = ($TYPE eq 'D') ? $'REFS : $'DEFS;
+					local($type) = ($TYPE eq 'R') ? $'DEFS : $'REFS;
 					$href = "<A HREF=../$type/$1.$'HTML>$TAG</A>";
 				} else {
 					local($nouse, $lno, $filename) = split(/[ \t]+/, $line);
@@ -1347,9 +1615,8 @@ sub src2html {
 	print "<A NAME=BOTTOM>\n";
 	print &link_format(&anchor'getlinks(-1));
 	print "\n";
-	print $'end_body;
-	print $'end_html;
-	print "\n";
+	print $'body_end, "\n";
+	print $'html_end, "\n";
 	close(SRC);
 	if ($?) { &'error("cannot open file '$file'."); }
 	close(HTML);
@@ -1391,7 +1658,8 @@ sub protect_line {
 				last;
 			}
 		} else {
-			# Thanks to Jeffrey Friedl for his code.
+			# This regular expression was drived from
+			# perl FAQ 4.27 (ftp://ftp.cis.ufl.edu/pub/perl/faq/FAQ)
 			if (s!\032((/\*)?[^*]*\*+([^/*][^*]*\*+)*/)!\004!) {
 				push(@comments, $1);
 				$INCOMMENT = 0;
@@ -1403,10 +1671,10 @@ sub protect_line {
 		}
 	}
 	$line_comment = '';
-	if (s!(//.*)$!\005!) {
+	if (s!(//.*)$!\005! || s!(/\004.*)$!\005!) {
 		$line_comment = $1;
-		# ^     //   /*   $
-		#       (1)  (2)	... (1) invalidate (2).
+		# ^     //   /*   $	... '//' invalidate '/*'.
+		# ^     //*       $	... Assumed '//' + '*', not '/' + '/*'.
 		$INCOMMENT = 0;
 	}
 }
@@ -1446,17 +1714,29 @@ sub unprotect_line {
 #
 sub link_format {
 	local(@tag) = @_;
-	local(@label) = ('&lt;', '&gt;', '^', 'v', 'top', 'bottom');
+	local(@label) = ($'icon_list) ? @'anchor_comment : @'anchor_label;
+	local(@icons) = @'anchor_icons;
 
 	local($line) = "$'comment_begin/* ";
-	while ($label = shift @label) {
-		local($tag) = shift @tag;
-		$line .=  "<A HREF=#$tag>" if ($tag);
-		$line .=  "[$label]";
-		$line .=  "</A>"		if ($tag);
+	for $n (0 .. $#label) {
+		if ($n == 6) {
+			$line .=  "<A HREF=../mains.$'normal_suffix>";
+		} elsif ($n == 7) {
+			$line .=  "<A HREF=../help.$'normal_suffix>";
+		} elsif ($tag[$n]) {
+			$line .=  "<A HREF=#$tag[$n]>";
+		}
+		if ($'icon_list) {
+			$icon = ($tag[$n] || $n > 5) ? "$icons[$n]" : "n_$icons[$n]";
+			$line .= "<IMG SRC=../icons/$icon ALT=\[$label[$n]\] BORDER=0 ALIGN=MIDDLE>";
+		} else {
+			$line .=  "\[$label[$n]\]";
+		}
+		$line .=  "</A>" if ($n > 5 || $tag[$n]);
+		if ($'icon_list && $n < $#label) {
+			$line .= ' ';
+		}
 	}
-	$line .=  "<A HREF=../mains.$'normal_suffix>[index]</A>";
-	$line .=  "<A HREF=../help.$'normal_suffix>[help]</A>";
 	$line .=  " */$'comment_end";
 
 	$line;
@@ -1481,15 +1761,19 @@ sub create {
 	local($fcount) = 1;
 	local($fnumber);
 	foreach $db ('GTAGS', 'GRTAGS') {
-		local($type) = ($db eq 'GTAGS') ? 'D' : 'R';
 		local($option) = ($db eq 'GTAGS') ? '' : 'r';
-		local($command) = "global -nx$option \".*\"";
+		local($command) = "global -nnx$option \".*\"";
 		open(PIPE, "$command |") || &'error("cannot fork.");
 		while (<PIPE>) {
-			local($tag, $lno, $filename) = split;
+			local($tag, $lno, $filename, $image) = split;
 			$fnumber = $PATHLIST{$filename};
 			if (!$fnumber) {
 				$PATHLIST{$filename} = $fnumber = $fcount++;
+			}
+			if ($db eq 'GTAGS') {
+				$type = ($image =~ /^#[ \t]*define/) ? 'M' : 'D';
+			} else {
+				$type = 'R';
 			}
 			print ANCH "$fnumber $lno $tag $type\n";
 		}

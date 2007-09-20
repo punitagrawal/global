@@ -1,56 +1,51 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
- *            Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999
- *            Tama Communications Corporation. All rights reserved.
+ *             Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999, 2000
+ *             Tama Communications Corporation. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Tama Communications
- *      Corporation and its contributors.
- * 4. Neither the name of the author nor the names of any co-contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * This file is part of GNU GLOBAL.
  *
- *	conf.c					25-Aug-99
+ * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
  *
+ * GNU GLOBAL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <assert.h>
 #include <ctype.h>
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "gparam.h"
 #include "conf.h"
 #include "die.h"
 #include "locatestring.h"
 #include "makepath.h"
-#include "mgets.h"
 #include "strbuf.h"
 #include "strmake.h"
 #include "test.h"
 
 static FILE	*fp;
+static STRBUF	*ib;
 static char	*line;
 static int	allowed_nest_level = 8;
 static int	opened;
@@ -58,6 +53,10 @@ static int	opened;
 static void	trim(char *);
 static char	*readrecord(const char *);
 static void	includelabel(STRBUF *, const char *, int);
+
+#ifndef isblank
+#define isblank(c)	((c) == ' ' || (c) == '\t')
+#endif
 
 static void
 trim(l)
@@ -67,7 +66,7 @@ char	*l;
 	int	colon = 0;
 
 	for (f = b = l; *f; f++) {
-		if (colon && isspace(*f))
+		if (colon && isblank(*f))
 			continue;
 		colon = 0;
 		if ((*b++ = *f) == ':')
@@ -80,13 +79,21 @@ readrecord(label)
 const char *label;
 {
 	char	*p, *q;
+	int	flag = STRBUF_NOCRLF;
 
 	rewind(fp);
-	while ((p = mgets(fp, NULL, MGETS_CONT|MGETS_SKIPCOM)) != NULL) {
+	while ((p = strbuf_fgets(ib, fp, flag)) != NULL) {
+		flag &= ~STRBUF_APPEND;
+		if (*p == '#')
+			continue;
+		if (strbuf_unputc(ib, '\\')) {
+			flag |= STRBUF_APPEND;
+			continue;
+		}
 		trim(p);
 		for (;;) {
 			if ((q = strmake(p, "|:")) == NULL)
-				die1("illegal configuration file format (%s).", p);
+				die("illegal configuration file format (%s).", p);
 			if (!strcmp(label, q)) {
 				if (!(p = locatestring(p, ":", MATCH_FIRST)))
 					die("illegal configuration file format.");
@@ -117,11 +124,11 @@ int	level;
 	if (++level > allowed_nest_level)
 		die("nested include= (or tc=) over flow.");
 	if (!(savep = p = readrecord(label)))
-		die1("label '%s' not found.", label);
+		die("label '%s' not found.", label);
 	while ((q = locatestring(p, ":include=", MATCH_FIRST)) || (q = locatestring(p, ":tc=", MATCH_FIRST))) {
 		char	inclabel[MAXPROPLEN+1], *c = inclabel;
 
-		strnputs(sb, p, q - p);
+		strbuf_nputs(sb, p, q - p);
 		q = locatestring(q, "=", MATCH_FIRST) + 1;
 		while (*q && *q != ':')
 			*c++ = *q++;
@@ -129,7 +136,7 @@ int	level;
 		includelabel(sb, inclabel, level);
 		p = q;
 	}
-	strputs(sb, p);
+	strbuf_puts(sb, p);
 	free(savep);
 }
 /*
@@ -174,44 +181,38 @@ openconf()
 	 * for upper compatibility.
 	 */
 	if (*config == 0) {
-		sb = stropen();
-		strputc(sb, ':');
-		strputs(sb, "suffixes=");
-		strputs(sb, DEFAULTSUFFIXES);
-		strputc(sb, ':');
-		strputs(sb, "skip=");
-		strputs(sb, DEFAULTSKIP);
-		strputc(sb, ':');
-		strputs(sb, "format=standard:");
-		strputs(sb, "extractmethod:");
-#ifdef _WIN32
-		strputs(sb, "GTAGS=gctags.exe %s:");
-		strputs(sb, "GRTAGS=gctags.exe -r %s:");
-		strputs(sb, "GSYMS=gctags.exe -s %s:");
-		strputs(sb, "sort_command=sort.exe:");
-		strputs(sb, "sed_command=sed.exe:");
-#else
-		strputs(sb, "GTAGS=gctags %s:");
-		strputs(sb, "GRTAGS=gctags -r %s:");
-		strputs(sb, "GSYMS=gctags -s %s:");
-		strputs(sb, "sort_command=sort:");
-		strputs(sb, "sed_command=sed:");
-#endif /* _WIN32 */
-		line = strdup(strvalue(sb));
+		sb = strbuf_open(0);
+		strbuf_putc(sb, ':');
+		strbuf_puts(sb, "suffixes=");
+		strbuf_puts(sb, DEFAULTSUFFIXES);
+		strbuf_putc(sb, ':');
+		strbuf_puts(sb, "skip=");
+		strbuf_puts(sb, DEFAULTSKIP);
+		strbuf_putc(sb, ':');
+		strbuf_puts(sb, "format=standard:");
+		strbuf_puts(sb, "extractmethod:");
+		strbuf_puts(sb, "GTAGS=gctags %s:");
+		strbuf_puts(sb, "GRTAGS=gctags -r %s:");
+		strbuf_puts(sb, "GSYMS=gctags -s %s:");
+		strbuf_puts(sb, "sort_command=sort:");
+		strbuf_puts(sb, "sed_command=sed:");
+		line = strdup(strbuf_value(sb));
 		if (!line)
 			die("short of memory.");
-		strclose(sb);
+		strbuf_close(sb);
 		opened = 1;
 		return;
 	}
 	if ((label = getenv("GTAGSLABEL")) == NULL)
 		label = "default";
 	if (!(fp = fopen(config, "r")))
-		die1("cannot open '%s'.", config);
-	sb = stropen();
+		die("cannot open '%s'.", config);
+	ib = strbuf_open(MAXBUFLEN);
+	sb = strbuf_open(0);
 	includelabel(sb, label, 0);
-	line = strdup(strvalue(sb));
-	strclose(sb);
+	line = strdup(strbuf_value(sb));
+	strbuf_close(ib);
+	strbuf_close(sb);
 	fclose(fp);
 	opened = 1;
 	return;
@@ -233,7 +234,7 @@ int	*num;
 
 	if (!opened)
 		openconf();
-	sprintf(buf, ":%s#", name);
+	snprintf(buf, sizeof(buf), ":%s#", name);
 	if ((p = locatestring(line, buf, MATCH_FIRST)) != NULL) {
 		p += strlen(buf);
 		if (num != NULL)
@@ -263,17 +264,17 @@ STRBUF	*sb;
 		openconf();
 	if (!strcmp(name, "suffixes") || !strcmp(name, "skip"))
 		all = 1;
-	sprintf(buf, ":%s=", name);
+	snprintf(buf, sizeof(buf), ":%s=", name);
 	p = line;
 	while ((p = locatestring(p, buf, MATCH_FIRST)) != NULL) {
 		if (exist && sb)
-			strputc(sb, ',');		
+			strbuf_putc(sb, ',');		
 		exist = 1;
 		for (p += strlen(buf); *p && *p != ':'; p++) {
 			if (*p == '\\')	/* quoted charactor */
 				p++;
 			if (sb)
-				strputc(sb, *p);
+				strbuf_putc(sb, *p);
 		}
 		if (!all)
 			break;
@@ -286,24 +287,16 @@ STRBUF	*sb;
 		exist = 1;
 		if (!strcmp(name, "suffixes")) {
 			if (sb)
-				strputs(sb, DEFAULTSUFFIXES);
+				strbuf_puts(sb, DEFAULTSUFFIXES);
 		} else if (!strcmp(name, "skip")) {
 			if (sb)
-				strputs(sb, DEFAULTSKIP);
+				strbuf_puts(sb, DEFAULTSKIP);
 		} else if (!strcmp(name, "sort_command")) {
 			if (sb)
-#ifdef _WIN32
-				strputs(sb, "sort.exe");
-#else
-				strputs(sb, "sort");
-#endif
+				strbuf_puts(sb, "sort");
 		} else if (!strcmp(name, "sed_command")) {
 			if (sb)
-#ifdef _WIN32
-				strputs(sb, "sed.exe");
-#else
-				strputs(sb, "sed");
-#endif
+				strbuf_puts(sb, "sed");
 		} else
 			exist = 0;
 	}
@@ -319,15 +312,24 @@ int
 getconfb(name)
 const char *name;
 {
-	char	*p;
 	char	buf[MAXPROPLEN+1];
 
 	if (!opened)
 		openconf();
-	sprintf(buf, ":%s:", name);
-	if ((p = locatestring(line, buf, MATCH_FIRST)) != NULL)
+	snprintf(buf, sizeof(buf), ":%s:", name);
+	if (locatestring(line, buf, MATCH_FIRST) != NULL)
 		return 1;
 	return 0;
+}
+/*
+ * getconfline: print loaded config entry.
+ */
+char *
+getconfline()
+{
+	if (!opened)
+		openconf();
+	return line;
 }
 void
 closeconf()
@@ -335,5 +337,6 @@ closeconf()
 	if (!opened)
 		return;
 	free(line);
+	line = NULL;
 	opened = 0;
 }

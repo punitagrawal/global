@@ -1,45 +1,42 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
- *            Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999
- *            Tama Communications Corporation. All rights reserved.
+ *             Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999, 2000
+ *             Tama Communications Corporation. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Tama Communications
- *      Corporation and its contributors.
- * 4. Neither the name of the author nor the names of any co-contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * This file is part of GNU GLOBAL.
  *
- *	Cpp.c					18-Aug-99
+ * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * GNU GLOBAL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <ctype.h>
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <stdio.h>
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "Cpp.h"
 #include "gctags.h"
@@ -76,7 +73,6 @@ Cpp()
 	int	savelevel;
 	int	target;
 	int	startclass, startthrow, startmacro, startsharp, startequal;
-	int	destruct;
 	char    classname[MAXTOKEN];
 	char    completename[MAXCOMPLETENAME];
 	int     classlevel;
@@ -86,7 +82,7 @@ Cpp()
 		int   level;
 	} stack[MAXCLASSSTACK];
 	const	char *interested = "{}=;~";
-	STRBUF	*sb = stropen();
+	STRBUF	*sb = strbuf_open(0);
 
 	*classname = *completename = 0;
 	stack[0].classname = completename;
@@ -98,16 +94,11 @@ Cpp()
 	startclass = startthrow = startmacro = startsharp = startequal = 0;
 	cmode = 1;			/* allow token like '#xxx' */
 	crflag = 1;			/* require '\n' as a token */
-	cppmode = 1;			/* treat '::' as a reserved word */
-
-	destruct = 0;			/* to pick up destructer */
+	cppmode = 1;			/* treat '::' as a token */
 
 	while ((cc = nexttoken(interested, reserved)) != EOF) {
-		if (cc == '~' && level == stack[classlevel].level) {
-			destruct = 1;
+		if (cc == '~' && level == stack[classlevel].level)
 			continue;
-		}
-
 		switch (cc) {
 		case SYMBOL:		/* symbol	*/
 			if (startclass || startthrow) {
@@ -125,9 +116,9 @@ Cpp()
 					int	savelineno = lineno;
 
 					strcpy(savetok, token);
-					strstart(sb);
-					strnputs(sb, sp, strlen(sp) + 1);
-					saveline = strvalue(sb);
+					strbuf_reset(sb);
+					strbuf_puts(sb, sp);
+					saveline = strbuf_value(sb);
 					if (function_definition(target)) {
 						/* ignore constructor */
 						if (target == DEF && strcmp(stack[classlevel].classname, savetok))
@@ -161,7 +152,7 @@ Cpp()
 				char *q = classname;
 
 				if (++classlevel >= MAXCLASSSTACK)
-					die1("class stack over flow.[%s]", curfile);
+					die("class stack over flow.[%s]", curfile);
 				if (classlevel > 1)
 					*p++ = '.';
 				stack[classlevel].classname = p;
@@ -270,30 +261,9 @@ Cpp()
 					PUT(token, lineno, sp);
 			break;
 		case CPP_EXTERN:
-			if (startmacro)
-				break;
-			while ((c = nexttoken(interested, reserved)) != EOF && c != ';') {
-				switch (c) {
-				case CP_IFDEF:
-				case CP_IFNDEF:
-				case CP_IF:
-				case CP_ELIF:
-				case CP_ELSE:
-				case CP_ENDIF:
-				case CP_UNDEF:
-					condition_macro(c);
-					continue;
-				}
-				if (startmacro && c == '\n')
-					break;
-				if (c == '{')
-					level++;
-				else if (c == '}')
-					level--;
-				else if (c == SYMBOL)
-					if (target == SYM)
-						PUT(token, lineno, sp);
-			}
+			if (level > stack[classlevel].level && target == REF)
+				while ((c = nexttoken(";", reserved)) != EOF && c != ';')
+					;
 			break;
 		case CPP_TEMPLATE:
 			{
@@ -315,8 +285,8 @@ Cpp()
 			}
 			break;
 		case CPP_OPERATOR:
-			while ((c = nexttoken(";{", reserved)) != EOF) {
-				if (c == '{') {
+			while ((c = nexttoken(";{", /* } */ reserved)) != EOF) {
+				if (c == '{') /* } */ {
 					pushbacktoken();
 					break;
 				} else if (c == ';') {
@@ -353,9 +323,8 @@ Cpp()
 		default:
 			break;
 		}
-		destruct = 0;
 	}
-	strclose(sb);
+	strbuf_close(sb);
 	if (wflag) {
 		if (level != 0)
 			fprintf(stderr, "Warning: {} block unmatched. (last at level %d.)[+%d %s]\n", level, lineno, curfile);
@@ -449,7 +418,7 @@ condition_macro(cc)
 	if (cc == CP_IFDEF || cc == CP_IFNDEF || cc == CP_IF) {
 		DBG_PRINT(piflevel, "#if");
 		if (++piflevel >= MAXPIFSTACK)
-			die1("#if pifstack over flow. [%s]", curfile);
+			die("#if pifstack over flow. [%s]", curfile);
 		++cur;
 		cur->start = level;
 		cur->end = -1;
@@ -569,7 +538,7 @@ isCpp()
 	int cc;
 	int Cpp = 0;
 	cmode = 1;			/* allow token like '#xxx' */
-	cppmode = 1;			/* treat '::' as a reserved word */
+	cppmode = 1;			/* treat '::' as a token */
 
 	while ((cc = nexttoken(NULL, reserved)) != EOF) {
 		if (cc == CPP_CLASS || cc == CPP_TEMPLATE ||

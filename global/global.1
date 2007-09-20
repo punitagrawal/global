@@ -1,40 +1,28 @@
 .\"
 .\" Copyright (c) 1996, 1997, 1998, 1999
-.\"            Shigio Yamaguchi. All rights reserved.
-.\" Copyright (c) 1999
-.\"            Tama Communications Corporation. All rights reserved.
+.\"             Shigio Yamaguchi. All rights reserved.
+.\" Copyright (c) 1999, 2000
+.\"             Tama Communications Corporation. All rights reserved.
 .\"
-.\" Redistribution and use in source and binary forms, with or without
-.\" modification, are permitted provided that the following conditions
-.\" are met:
-.\" 1. Redistributions of source code must retain the above copyright
-.\"    notice, this list of conditions and the following disclaimer.
-.\" 2. Redistributions in binary form must reproduce the above copyright
-.\"    notice, this list of conditions and the following disclaimer in the
-.\"    documentation and/or other materials provided with the distribution.
-.\" 3. All advertising materials mentioning features or use of this software
-.\"    must display the following acknowledgement:
-.\"      This product includes software developed by Tama Communications
-.\"      Corporation and its contributors.
-.\" 4. Neither the name of the author nor the names of any co-contributors
-.\"    may be used to endorse or promote products derived from this software
-.\"    without specific prior written permission.
-.\" 
-.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
-.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
-.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-.\" SUCH DAMAGE.
+.\" This file is part of GNU GLOBAL.
 .\"
-.Dd Aug 27, 1999
+.\" GNU GLOBAL is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2, or (at your option)
+.\" any later version.
+.\"
+.\" GNU GLOBAL is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+.\"
+.Dd Dec 6, 1999
 .Dt GLOBAL 1
-.Os BSD 4
+.Os FreeBSD
 .Sh NAME
 .Nm global
 .Nd print the locations of specified object.
@@ -42,10 +30,11 @@
 .Nm global
 .Op Fl alnrstvx
 .Ar pattern
-.Nm global -c
+.Nm global
+.Fl c[sv]
 .Op Ar prefix
 .Nm global
-.Fl f[anrstx]
+.Fl f[anrstvx]
 .Ar files
 .Nm global
 .Fl g[alntvx]
@@ -53,9 +42,12 @@
 .Nm global
 .Fl i[v]
 .Nm global
-.Fl p
+.Fl I[alntvx]
+.Ar pattern
 .Nm global
-.Fl P[alntx]
+.Fl p[rv]
+.Nm global
+.Fl P[alntvx]
 .Op Ar pattern
 .Sh DESCRIPTION
 .Nm Global
@@ -78,67 +70,98 @@ Then you can execute
 at anywhere in the source tree.
 .Sh COMMANDS
 The following commands are available:
-.Bl -tag -width Ds
+.Pp
+.Bl -tag -width Ds -compact
 .It Ar pattern
-print object which match to the
+Print object which match to the
 .Ar pattern .
 It can include POSIX 1003.2 regular expression.
-.It Fl c Op Ar prefix
-print candidate function names which start with specified
+.It Fl c
+.It Fl -completion Op Ar prefix
+Print candidate function names which start with specified
 .Ar prefix .
 If
 .Ar prefix
 is not specified, print all function names.
-.It Fl f Ar files
-print all function definitions in the
+.It Fl f
+.It Fl -file Ar files
+Print all function definitions in the
 .Ar files .
 This option implies -x option.
-.It Fl g Ar pattern
-print all lines which match to the
+.It Fl g
+.It Fl -grep Ar pattern
+Print all lines which match to the
 .Ar pattern .
-It is similar to grep(1).
+This function use grep(1) as a search engine.
 .It Fl i
-locate tag files and reconstruct them incrementally.
+.It Fl -incremental
+Locate tag files and reconstruct them incrementally.
+.It Fl I
+.It Fl -idutils Ar pattern
+Print all lines which match to the
+.Ar pattern .
+This function use id-utils(1) as a search engine.
+To use this command, you need to install id-utils(1) in your system
+and you must execute
+.Xr gtags 1
+with -I option.
 .It Fl p
-print the location of GTAGS.
-.It Fl P Op Ar pattern
-print the path which match to the
+.It Fl -print-dbpath
+Print the location of GTAGS.
+.It Fl P
+.It Fl -path Op Ar pattern
+Print the path which match to the
 .Ar pattern .
 If no pattern specified, print all.
-.It Fl s Ar pattern
-print the locations of specified symbol other than function names.
+.It Fl s
+.It Fl -symbol Ar pattern
+Print the locations of specified symbol other than function names.
 You need GSYMS tags file. See
 .Xr gtags 1 .
+.It Fl -version
+Show version number.
+.It Fl -help
+Show help.
+.El
 .Sh OPTIONS
 The following options are available:
-.Bl -tag -width Ds
+.Pp
+.Bl -tag -width Ds -compact
 .It Fl a
-print absolute path name. By default, print relative path name.
+.It Fl -absolute
+Print absolute path name. By default, print relative path name.
 .It Fl l
-print just objects which exist under the current directory.
+.It Fl -local
+Print just objects which exist under the current directory.
 .It Fl n
-suppress sort filter and path conversion filter.
+.It Fl -nofilter
+Suppress sort filter and path conversion filter.
 .It Fl r
-print the locations of object references. By default, print object
-definitions.
-.It Fl s
-print the locations of specified symbol other than function names.
-You need GSYMS tags file. See gtags(1).
+.It Fl -reference
+.It Fl -rootdir
+Print the locations of object references. By default, print object
+definitions. With the -p option, print the root directory of source tree.
 .It Fl t
-print with standard ctags format.
+.It Fl -tags
+Print with standard ctags format.
+.It Fl v
+.It Fl -verbose
+Verbose mode.
 .It Fl x
+.It Fl -cxref
 In addition to the default output, produce the line number and
 the line contents.
+.El
 .Sh FILES
 .Bl -tag -width tags -compact
 .It Pa GTAGS
-tags file for function definitions.
+Tag file for function definitions.
 .It Pa GRTAGS
-tags file for function references.
+Tag file for function references.
 .It Pa GSYMS
-tags file for symbols other then functions.
+Tag file for symbols other then functions.
 .It Pa GPATH
-tag file for path of source files.
+Tag file for path of source files.
 .El
 .Sh ENVIRONMENT
 The following environment variables affect the execution of global.
@@ -153,11 +176,14 @@ when GTAGSROOT is not defined.
 If this variable is set, its value is used as the path to search for library
 functions. If specified function is not found in a source tree,
 global search in these path too.
+.El
 .Sh DIAGNOSTICS
 .Nm Global
 exits with a non 0 value if an error occurred, 0 otherwise.
 .Sh SEE ALSO
 .Xr btreeop 1 ,
+.Xr gctags 1 ,
+.Xr gozilla 1 ,
 .Xr gtags 1 ,
 .Xr htags 1 ,
 .Xr vi 1 .

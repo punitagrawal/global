@@ -1,46 +1,43 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
- *            Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999
- *            Tama Communications Corporation. All rights reserved.
+ *             Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999, 2000
+ *             Tama Communications Corporation. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Tama Communications
- *      Corporation and its contributors.
- * 4. Neither the name of the author nor the names of any co-contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * This file is part of GNU GLOBAL.
  *
- *      gtagsop.c                               12-Dec-99
+ * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
  *
+ * GNU GLOBAL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "conf.h"
 #include "gparam.h"
@@ -49,7 +46,6 @@
 #include "gtagsop.h"
 #include "locatestring.h"
 #include "makepath.h"
-#include "mgets.h"
 #include "path.h"
 #include "pathop.h"
 #include "strbuf.h"
@@ -58,7 +54,22 @@
 
 static char	*genrecord(GTOP *);
 static int	belongto(GTOP *, char *, char *);
+static regex_t reg;
 
+/*
+ * format version:
+ * GLOBAL-1.0 - 1.8	no idea about format version.
+ * GLOBAL-1.9 - 2.24 	understand format version.
+ *			support format version 1 (default).
+ *			if (format version > 1) then print error message.
+ * GLOBAL-3.0 - 4.0	understand format version.
+ *			support format version 1 and 2.
+ *			if (format version > 2) then print error message.
+ * format version 1:
+ *	original format.
+ * format version 2:
+ *	compact format, path index.
+ */
 static int	support_version = 2;	/* acceptable format version   */
 static const char *tagslist[] = {"GPATH", "GTAGS", "GRTAGS", "GSYMS"};
 /*
@@ -92,16 +103,16 @@ char	*comline;
 char	*path;
 STRBUF	*sb;
 {
-	char	*p;
+	char	*p = locatestring(comline, "%s", MATCH_FIRST);
 
-	if (p = locatestring(comline, "%s", MATCH_FIRST)) {
-		strnputs(sb, comline, p - comline);
-		strputs(sb, path);
-		strputs(sb, p + 2);
+	if (p) {
+		strbuf_nputs(sb, comline, p - comline);
+		strbuf_puts(sb, path);
+		strbuf_puts(sb, p + 2);
 	} else {
-		strputs(sb, comline);
-		strputc(sb, ' ');
-		strputs(sb, path);
+		strbuf_puts(sb, comline);
+		strbuf_putc(sb, ' ');
+		strbuf_puts(sb, path);
 	}
 }
 /*
@@ -117,12 +128,7 @@ char	*s;
 	int	c;
 
 	while ((c = *s++) != '\0')
-		if (	(c >= 'a' && c <= 'z')	||
-			(c >= 'A' && c <= 'Z')	||
-			(c >= '0' && c <= '9')	||
-			(c == '-') || (c == '_'))
-			;
-		else
+		if (!isnamechar(c))
 			return 1;
 	return 0;
 }
@@ -239,8 +245,8 @@ int	flags;
 	gtop->dbop = dbop_open(makepath(dbpath, dbname(db), NULL), dbmode, 0644, DBOP_DUP);
 	if (gtop->dbop == NULL) {
 		if (dbmode == 1)
-			die1("cannot make %s.", dbname(db));
-		die1("%s not found.", dbname(db));
+			die("cannot make %s.", dbname(db));
+		die("%s not found.", dbname(db));
 	}
 	/*
 	 * decide format version.
@@ -258,7 +264,7 @@ int	flags;
 			char	buf[80];
 
 			gtop->format_version = 2;
-			sprintf(buf, "%s %d", VERSIONKEY, gtop->format_version);
+			snprintf(buf, sizeof(buf), "%s %d", VERSIONKEY, gtop->format_version);
 			dbop_put(gtop->dbop, VERSIONKEY, buf);
 			gtop->format |= GTAGS_COMPACT;
 			dbop_put(gtop->dbop, COMPACTKEY, COMPACTKEY);
@@ -304,8 +310,10 @@ int	flags;
 	if (gtop->format & GTAGS_COMPACT) {
 		assert(root != NULL);
 		strcpy(gtop->root, root);
-		if (gtop->mode != GTAGS_READ)
-			gtop->sb = stropen();
+		if (gtop->mode == GTAGS_READ)
+			gtop->ib = strbuf_open(MAXBUFLEN);
+		else
+			gtop->sb = strbuf_open(0);
 	}
 	return gtop;
 }
@@ -327,7 +335,7 @@ char	*record;
 	char	path[MAXPATHLEN+1];
 
 	if (gtop->format == GTAGS_STANDARD) {
-		entab(record);
+		/* entab(record); */
 		dbop_put(gtop->dbop, tag, record);
 		return;
 	}
@@ -354,21 +362,21 @@ char	*record;
 	 */
 	if (strcmp(gtop->prev_tag, tag) || strcmp(gtop->prev_path, path)) {
 		if (gtop->prev_tag[0])
-			dbop_put(gtop->dbop, gtop->prev_tag, strvalue(gtop->sb));
+			dbop_put(gtop->dbop, gtop->prev_tag, strbuf_value(gtop->sb));
 		strcpy(gtop->prev_tag, tag);
 		strcpy(gtop->prev_path, path);
 		/*
 		 * Start creating new record.
 		 */
-		strstart(gtop->sb);
-		strputs(gtop->sb, strmake(record, " \t"));
-		strputc(gtop->sb, ' ');
-		strputs(gtop->sb, path);
-		strputc(gtop->sb, ' ');
-		strputs(gtop->sb, lno);
+		strbuf_reset(gtop->sb);
+		strbuf_puts(gtop->sb, strmake(record, " \t"));
+		strbuf_putc(gtop->sb, ' ');
+		strbuf_puts(gtop->sb, path);
+		strbuf_putc(gtop->sb, ' ');
+		strbuf_puts(gtop->sb, lno);
 	} else {
-		strputc(gtop->sb, ',');
-		strputs(gtop->sb, lno);
+		strbuf_putc(gtop->sb, ',');
+		strbuf_puts(gtop->sb, lno);
 	}
 }
 /*
@@ -388,7 +396,8 @@ int	flags;
 {
 	char	*tagline;
 	FILE	*ip;
-	STRBUF	*sb = stropen();
+	STRBUF	*sb = strbuf_open(0);
+	STRBUF	*ib = strbuf_open(MAXBUFLEN);
 	char	sort_command[MAXFILLEN+1];
 	char	sed_command[MAXFILLEN+1];
 
@@ -398,18 +407,18 @@ int	flags;
 	if (!getconfs("sort_command", sb))
 		die("cannot get sort command name.");
 #ifdef _WIN32
-	if (!locatestring(strvalue(sb), ".exe", MATCH_LAST))
-		strputs(sb, ".exe");
+	if (!locatestring(strbuf_value(sb), ".exe", MATCH_LAST))
+		strbuf_puts(sb, ".exe");
 #endif
-	strcpy(sort_command, strvalue(sb));
-	strstart(sb);
+	strcpy(sort_command, strbuf_value(sb));
+	strbuf_reset(sb);
 	if (!getconfs("sed_command", sb))
 		die("cannot get sed command name.");
 #ifdef _WIN32
-	if (!locatestring(strvalue(sb), ".exe", MATCH_LAST))
-		strputs(sb, ".exe");
+	if (!locatestring(strbuf_value(sb), ".exe", MATCH_LAST))
+		strbuf_puts(sb, ".exe");
 #endif
-	strcpy(sed_command, strvalue(sb));
+	strcpy(sed_command, strbuf_value(sb));
 	/*
 	 * add path index if not yet.
 	 */
@@ -417,7 +426,7 @@ int	flags;
 	/*
 	 * make command line.
 	 */
-	strstart(sb);
+	strbuf_reset(sb);
 	makecommand(comline, path, sb);
 	/*
 	 * Compact format.
@@ -426,33 +435,34 @@ int	flags;
 		char	*pno;
 
 		if ((pno = pathget(path)) == NULL)
-			die1("GPATH is corrupted.('%s' not found)", path);
-		strputs(sb, "| ");
-		strputs(sb, sed_command);
-		strputc(sb, ' ');
-		strputs(sb, "\"s@");
-		strputs(sb, path);
-		strputs(sb, "@");
-		strputs(sb, pno);
-		strputs(sb, "@\"");
+			die("GPATH is corrupted.('%s' not found)", path);
+		strbuf_puts(sb, "| ");
+		strbuf_puts(sb, sed_command);
+		strbuf_putc(sb, ' ');
+		strbuf_puts(sb, "\"s@");
+		strbuf_puts(sb, path);
+		strbuf_puts(sb, "@");
+		strbuf_puts(sb, pno);
+		strbuf_puts(sb, "@\"");
 	}
 	if (gtop->format & GTAGS_COMPACT) {
-		strputs(sb, "| ");
-		strputs(sb, sort_command);
-		strputc(sb, ' ');
-		strputs(sb, "+0 -1 +1n -2");
+		strbuf_puts(sb, "| ");
+		strbuf_puts(sb, sort_command);
+		strbuf_putc(sb, ' ');
+		strbuf_puts(sb, "+0 -1 +1n -2");
 	}
 	if (flags & GTAGS_UNIQUE)
-		strputs(sb, " -u");
+		strbuf_puts(sb, " -u");
 	if (flags & GTAGS_DEBUG)
-		fprintf(stderr, "[DBG] executing '%s'\n", strvalue(sb));
-	if (!(ip = popen(strvalue(sb), "r")))
-		die1("cannot execute '%s'.", strvalue(sb));
-	while ((tagline = mgets(ip, NULL, MGETS_TAILCUT)) != NULL) {
+		fprintf(stderr, "gtagsadd() executing '%s'\n", strbuf_value(sb));
+	if (!(ip = popen(strbuf_value(sb), "r")))
+		die("cannot execute '%s'.", strbuf_value(sb));
+	while ((tagline = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL) {
 		char	*tag, *p;
 
+		strbuf_trim(ib);
 		if (formatcheck(tagline, gtop->format) < 0)
-			die1("illegal parser output.\n'%s'", tagline);
+			die("illegal parser output.\n'%s'", tagline);
 		tag = strmake(tagline, " \t");		 /* tag = $1 */
 		/*
 		 * extract method when class method definition.
@@ -471,7 +481,8 @@ int	flags;
 		gtagsput(gtop, tag, tagline);
 	}
 	pclose(ip);
-	strclose(sb);
+	strbuf_close(sb);
+	strbuf_close(ib);
 }
 /*
  * belongto: wheather or not record belongs to the path.
@@ -498,13 +509,13 @@ char	*p;
 		for (q = p; *q && !isspace(*q); q++)
 			;
 		if (*q == 0)
-			die1("illegal tag format. '%s'", p);
+			die("illegal tag format. '%s'", p);
 		for (; *q && isspace(*q); q++)
 			;
 	} else
 		q = locatestring(p, "./", MATCH_FIRST);
 	if (*q == 0)
-		die1("illegal tag format. '%s'", p);
+		die("illegal tag format. '%s'", p);
 	if (!strncmp(q, path, length) && isspace(*(q + length)))
 		return 1;
 	return 0;
@@ -521,7 +532,6 @@ GTOP	*gtop;
 char	*path;
 {
 	char	*p, *key;
-	int	length;
 
 	/*
 	 * In compact format, a path is saved as a file number.
@@ -529,8 +539,7 @@ char	*path;
 	key = path;
 	if (gtop->format & GTAGS_PATHINDEX)
 		if ((key = pathget(path)) == NULL)
-			die1("GPATH is corrupted.('%s' not found)", path);
-	length = strlen(key);
+			die("GPATH is corrupted.('%s' not found)", path);
 	/*
 	 * read sequentially, because db(1) has just one index.
 	 */
@@ -550,6 +559,8 @@ char	*path;
  *		o may be NULL
  *	i)	flags	GTOP_PREFIX	prefix read
  *			GTOP_KEY	read key only
+ *			GTOP_NOSOURCE	don't read source file(compact format)
+ *			GTOP_NOREGEX	don't use regular expression.
  *	r)		record
  */
 char *
@@ -561,7 +572,7 @@ int	flags;
 	int	dbflags = 0;
 	char	*line;
 	char    buf[IDENTLEN+1], *p;
-	regex_t reg, *preg = &reg;
+	regex_t *preg = &reg;
 	char	*key;
 
 	gtop->flags = flags;
@@ -569,7 +580,11 @@ int	flags;
 		dbflags |= DBOP_PREFIX;
 	if (flags & GTOP_KEY)
 		dbflags |= DBOP_KEY;
-	if (pattern == NULL || !strcmp(pattern, ".*")) {
+
+	if (flags & GTOP_NOREGEX) {
+		key = pattern;
+		preg = NULL;
+	} else if (pattern == NULL || !strcmp(pattern, ".*")) {
 		key = NULL;
 		preg = NULL;
 	} else if (notnamechar(pattern) && regcomp(preg, pattern, REG_EXTENDED) == 0) {
@@ -577,7 +592,7 @@ int	flags;
 			char    *prefix = buf;
 
 			*prefix++ = *p++;
-			while (*p && (isalpha(*p) || isdigit(*p) || *p == '_'))
+			while (*p && isnamechar(*p))
 				*prefix++ = *p++;
 			*prefix = 0;
 			key = buf;
@@ -645,9 +660,11 @@ GTOP	*gtop;
 	if (gtop->format & GTAGS_PATHINDEX || gtop->mode != GTAGS_READ)
 		pathclose();
 	if (gtop->sb && gtop->prev_tag[0])
-		dbop_put(gtop->dbop, gtop->prev_tag, strvalue(gtop->sb));
+		dbop_put(gtop->dbop, gtop->prev_tag, strbuf_value(gtop->sb));
 	if (gtop->sb)
-		strclose(gtop->sb);
+		strbuf_close(gtop->sb);
+	if (gtop->ib)
+		strbuf_close(gtop->ib);
 	dbop_close(gtop->dbop);
 	free(gtop);
 }
@@ -681,7 +698,7 @@ GTOP	*gtop;
 				*q++ = *p++;
 			*q = 0;
 			if ((name = pathget(path)) == NULL)
-				die1("GPATH is corrupted.('%s' not found)", path);
+				die("GPATH is corrupted.('%s' not found)", path);
 			strcpy(gtop->path, name);
 		} else {
 			q = gtop->path;
@@ -694,12 +711,12 @@ GTOP	*gtop;
 		gtop->lnop = p;			/* gtop->lnop = $3 */
 
 		if (gtop->root)
-			sprintf(path, "%s/%s", gtop->root, &gtop->path[2]);
+			snprintf(path, sizeof(path), "%s/%s", gtop->root, &gtop->path[2]);
 		else
-			sprintf(path, "%s", &gtop->path[2]);
-		if ((gtop->fp = fopen(path, "r")) != NULL) {
-			buffer = mgets(gtop->fp, NULL, MGETS_TAILCUT);
-			gtop->lno = 1;
+			snprintf(path, sizeof(path), "%s", &gtop->path[2]);
+		if (!(gtop->flags & GTOP_NOSOURCE)) {
+			if ((gtop->fp = fopen(path, "r")) != NULL)
+				gtop->lno = 0;
 		}
 	}
 
@@ -715,22 +732,24 @@ GTOP	*gtop;
 			if (gtop->lno == tagline)
 				return output;
 			while (gtop->lno < tagline) {
-				if (!(buffer = mgets(gtop->fp, NULL, MGETS_TAILCUT)))
-					die1("unexpected end of file. '%s'", path);
+				if (!(buffer = strbuf_fgets(gtop->ib, gtop->fp, STRBUF_NOCRLF)))
+					die("unexpected end of file. '%s'", path);
+				strbuf_trim(gtop->ib);
 				gtop->lno++;
 			}
 		}
 		if (strlen(gtop->tag) >= 16 && tagline >= 1000)
-			sprintf(output, "%-16s %4d %-16s %s",
+			snprintf(output, sizeof(output), "%-16s %4d %-16s %s",
 					gtop->tag, tagline, gtop->path, buffer);
 		else
-			sprintf(output, "%-16s%4d %-16s %s",
+			snprintf(output, sizeof(output), "%-16s%4d %-16s %s",
 					gtop->tag, tagline, gtop->path, buffer);
 		return output;
 	}
 	if (gtop->opened && gtop->fp != NULL) {
 		gtop->opened = 0;
 		fclose(gtop->fp);
+		gtop->fp = NULL;
 	}
 	return NULL;
 }

@@ -1,50 +1,47 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999
- *            Shigio Yamaguchi. All rights reserved.
- * Copyright (c) 1999
- *            Tama Communications Corporation. All rights reserved.
+ *             Shigio Yamaguchi. All rights reserved.
+ * Copyright (c) 1999, 2000
+ *             Tama Communications Corporation. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Tama Communications
- *      Corporation and its contributors.
- * 4. Neither the name of the author nor the names of any co-contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * This file is part of GNU GLOBAL.
  *
- *	gtags.c					17-Aug-99
+ * GNU GLOBAL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
  *
+ * GNU GLOBAL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <ctype.h>
 #include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <time.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "global.h"
 
@@ -61,20 +58,70 @@ int	printconf(char *);
 char	*now(void);
 
 int	cflag;					/* compact format */
-int	dflag;					/* DEBUG */
 int	iflag;					/* incremental update */
+int	Iflag;					/* make  idutils index */
 int	oflag;					/* suppress making GSYMS */
 int	wflag;					/* warning message */
 int	vflag;					/* verbose mode */
+int     show_version;
+int     show_help;
+int	show_config;
+int	do_find;
+int	do_expand;
+int	debug;
+char	*extra_options;
 
-int	extractmethod = 0;
+int	extractmethod;
+int	total;
+const char *usage_const = "Usage: gtags [-c][-i][-I][-o][-v][-w][dbpath]\n";
+const char *help_const = "\
+Options:\n\
+     -c, --compact\n\
+             make tag files with compact format.\n\
+     -i, --incremental\n\
+             update tag files incrementally.\n\
+     -I, --idutils\n\
+             make index files for idutils(1).\n\
+     -o, --omit-gsyms\n\
+             suppress making GSYMS file.\n\
+     -v, --verbose\n\
+             verbose mode.\n\
+     -w, --warning\n\
+             print warning messages.\n\
+";
 
 static void
 usage()
 {
-	fprintf(stderr, "usage:\t%s [-c][-i][-l][-o][-w][-v][dbpath]\n", progname);
-	exit(1);
+	fputs(usage_const, stderr);
+	exit(2);
 }
+static void
+help()
+{
+	fputs(usage_const, stdout);
+	fputs(help_const, stdout);
+	exit(2);
+}
+
+static struct option const long_options[] = {
+	{"compact", no_argument, NULL, 'c'},
+	{"incremental", no_argument, NULL, 'i'},
+	{"omit-gsyms", no_argument, NULL, 'o'},
+	{"verbose", no_argument, NULL, 'v'},
+	{"warning", no_argument, NULL, 'w'},
+
+	/* long name only */
+	{"config", no_argument, &show_config, 1},
+	{"debug", no_argument, &debug, 1},
+	{"expand", required_argument, &do_expand, 1},
+	{"find", no_argument, &do_find, 1},
+	{"idutils", optional_argument, &Iflag, 1},
+	{"version", no_argument, &show_version, 1},
+	{"help", no_argument, &show_help, 1},
+	{ 0 }
+};
+
 /*
  * Gtags catch signal even if the parent ignore it.
  */
@@ -84,6 +131,7 @@ void
 onintr(signo)
 int     signo;
 {
+	signo = 0;      /* to satisfy compiler */
 	exitflag = 1;
 }
 
@@ -108,89 +156,103 @@ char	*argv[];
 	char	dbpath[MAXPATHLEN+1];
 	char	cwd[MAXPATHLEN+1];
 	char	env[MAXENVLEN+1];
-	STRBUF	*sb = stropen();
+	STRBUF	*sb = strbuf_open(0);
+	const char *p;
 	int	db;
+	int	optchar;
+	int	option_index = 0;
 
-	while (--argc > 0 && (++argv)[0][0] == '-') {
-		char	*p;
-		/*
-		 * Secret option for htags(1).
-		 */
-		if (!strcmp(argv[0], "--config")) {
-			if (argc == 1)
-				fprintf(stdout, "%s\n", configpath());
-			else if (argc == 2) {
-				if (!printconf(argv[1]))
-					exit(1);
-			}
-			exit(0);
-		} else if (!strcmp(argv[0], "--find")) {
-			for (findopen(); (p = findread(NULL)) != NULL; )
-				fprintf(stdout, "%s\n", p);
-			findclose();
-			exit(0);
-		} else if (!strcmp(argv[0], "--expand")) {
-			FILE *ip;
-
-			++argv; --argc;
-			if (argc && argv[0][0] == '-') {
-				settabs(atoi(&argv[0][1]));
-				++argv; --argc;
-			}
-			ip = (argc) ? fopen(argv[0], "r") : stdin;
-			if (ip == NULL)
-				exit(1);
-			while ((p = mgets(ip, NULL, 0)) != NULL)
-				detab(stdout, p);
-			exit(0);
-		} else if (!strcmp(argv[0], "--debug")) {
-			dflag = 1;
-			continue;
-		} else if (!strcmp(argv[0], "--version")) {
-			fprintf(stdout, "%s\n", VERSION);
-			exit(0);
-		}
-
-		for (p = argv[0] + 1; *p; p++) {
-			switch (*p) {
-			case 'c':
-				cflag++;
-				break;
-			case 'i':
-				iflag++;
-				break;
-			case 'o':
-				oflag++;
-				break;
-			case 'w':
-				wflag++;
-				break;
-			case 'v':
-				vflag++;
-				break;
-			/* for compatibility */
-			case 's':
-			case 'e':
-				break;
-			default:
-				usage();
-				break;
-			}
+	while ((optchar = getopt_long(argc, argv, "cGiIovw", long_options, &option_index)) != EOF) {
+		switch (optchar) {
+		case 0:
+			p = long_options[option_index].name;
+			if (!strcmp(p, "expand"))
+				settabs(atoi(optarg + 1));
+			else if (!strcmp(p, "idutils"))
+				extra_options = optarg;
+			break;
+		case 'c':
+			cflag++;
+			break;
+		case 'i':
+			iflag++;
+			break;
+		case 'I':
+			Iflag++;
+			break;
+		case 'o':
+			oflag++;
+			break;
+		case 'w':
+			wflag++;
+			break;
+		case 'v':
+			vflag++;
+			break;
+		/* for compatibility */
+		case 's':
+		case 'e':
+			break;
+		default:
+			usage();
+			break;
 		}
 	}
+	if (show_version)
+		version(NULL, vflag);
+	if (show_help)
+		help();
+
+	argc -= optind;
+        argv += optind;
+
+	if (do_expand) {
+		FILE *ip;
+		STRBUF *ib = strbuf_open(MAXBUFLEN);
+
+		ip = (argc) ? fopen(argv[0], "r") : stdin;
+		if (ip == NULL)
+			exit(1);
+		while (strbuf_fgets(ib, ip, STRBUF_NOCRLF) != NULL)
+			detab(stdout, strbuf_value(ib));
+		strbuf_close(ib);
+		exit(0);
+	} else if (show_config) {
+		if (debug)
+			fprintf(stdout, "getconfline: %s\n", getconfline());
+		if (argc == 0)
+			fprintf(stdout, "%s\n", configpath());
+		else if (!printconf(argv[0]))
+				exit(1);
+		exit(0);
+	} else if (do_find) {
+		char    cwd[MAXPATHLEN+1];
+		char    root[MAXPATHLEN+1];
+		char    dbpath[MAXPATHLEN+1];
+		char	*local;
+		char	*p;
+
+		local = (argc) ? argv[0] : "./";
+		getdbpath(cwd, root, dbpath, 0);
+		for (gfindopen(dbpath, local); (p = gfindread()) != NULL; )
+			fprintf(stdout, "%s\n", p);
+		gfindclose();
+		exit(0);
+	} else if (Iflag) {
+		if (!usable("mkid"))
+			die("mkid not found.");
+	}
+
 	if (!getcwd(cwd, MAXPATHLEN))
 		die("cannot get current directory.");
 	canonpath(cwd);
-	if (argc > 0)
-		realpath(*argv,dbpath) ;
-	else
+	if (argc > 0) {
+		realpath(*argv, dbpath) ;
+	} else {
 		strcpy(dbpath, cwd);
-#ifndef _WIN32
-	if (!strcmp(dbpath, "/"))
-		die("It's root directory! What are you doing?");
-#endif
+	}
 	if (!test("d", dbpath))
-		die1("directory '%s' not found.", dbpath);
+		die("directory '%s' not found.", dbpath);
 	if (vflag)
 		fprintf(stderr, "[%s] Gtags started\n", now());
 	/*
@@ -199,17 +261,25 @@ char	*argv[];
 	openconf();
 	if (getconfb("extractmethod"))
 		extractmethod = 1;
-	strstart(sb);
-	if (getconfs("format", sb) && !strcmp(strvalue(sb), "compact"))
+	strbuf_reset(sb);
+	if (getconfs("format", sb) && !strcmp(strbuf_value(sb), "compact"))
 		cflag++;
 	/*
 	 * teach gctags(1) where is dbpath.
 	 */
-	sprintf(env, "GTAGSDBPATH=%s", dbpath);
-	putenv(env);
+#ifdef HAVE_PUTENV
+        snprintf(env, sizeof(env), "GTAGSDBPATH=%s", dbpath);
+        putenv(env);
+#else
+        setenv("GTAGSDBPATH", dbpath, 1);
+#endif
 	if (wflag) {
-		sprintf(env, "GTAGSWARNING=1");
+#ifdef HAVE_PUTENV
+		snprintf(env, sizeof(env), "GTAGSWARNING=1");
 		putenv(env);
+#else
+        	setenv("GTAGSWARNING", "1", 1);
+#endif
 	}
 	/*
 	 * incremental update.
@@ -220,7 +290,7 @@ char	*argv[];
 		/* open for version check */
 		GTOP *gtop = gtagsopen(dbpath, cwd, GTAGS, GTAGS_MODIFY, 0);
 		gtagsclose(gtop);
-		if (!test("f", makepath(dbpath, "GPATH", NULL)))
+		if (!test("f", makepath(dbpath, dbname(GPATH), NULL)))
 			die("Old version tag file found. Please remake it.");
 		(void)incremental(dbpath, cwd);
 		exit(0);
@@ -231,25 +301,74 @@ char	*argv[];
  	 * create GTAGS, GRTAGS and GSYMS
 	 */
 	signal_setup();
+	total = 0;					/* counting file */
 	for (db = GTAGS; db < GTAGLIM; db++) {
 
 		if (oflag && db == GSYMS)
 			continue;
-		strstart(sb);
+		strbuf_reset(sb);
 		if (!getconfs(dbname(db), sb))
 			continue;
-		if (!usable(strmake(strvalue(sb), " \t")))
-			die1("Parser '%s' not found or not executable.", strmake(strvalue(sb), " \t"));
+		if (!usable(strmake(strbuf_value(sb), " \t")))
+			die("Parser '%s' not found or not executable.", strmake(strbuf_value(sb), " \t"));
 		if (vflag)
 			fprintf(stderr, "[%s] Creating '%s'.\n", now(), dbname(db));
 		createtags(dbpath, cwd, db);
+		strbuf_reset(sb);
+		if (db == GTAGS) {
+			if (getconfs("GTAGS_extra", sb))
+				if (system(strbuf_value(sb)))
+					fprintf(stderr, "GTAGS_extra command failed: %s\n", strbuf_value(sb));
+		} else if (db == GRTAGS) {
+			if (getconfs("GRTAGS_extra", sb))
+				if (system(strbuf_value(sb)))
+					fprintf(stderr, "GRTAGS_extra command failed: %s\n", strbuf_value(sb));
+		} else if (db == GSYMS) {
+			if (getconfs("GSYMS_extra", sb))
+				if (system(strbuf_value(sb)))
+					fprintf(stderr, "GSYMS_extra command failed: %s\n", strbuf_value(sb));
+		}
 		if (exitflag)
 			exit(1);
+	}
+	/*
+	 * create idutils index.
+	 */
+	if (Iflag) {
+		if (vflag)
+			fprintf(stderr, "[%s] Creating indexes for idutils.\n", now());
+		strbuf_reset(sb);
+		strbuf_puts(sb, "mkid --file=");
+		strbuf_puts(sb, makepath(dbpath, "ID", NULL));
+		if (vflag)
+			strbuf_puts(sb, " -v");
+		if (extra_options) {
+			strbuf_putc(sb, ' ');
+			strbuf_puts(sb, extra_options);
+		}
+		strbuf_putc(sb, ' ');
+		strbuf_puts(sb, "`gtags --find`");
+		strbuf_putc(sb, ' ');
+		if (vflag)
+			strbuf_puts(sb, "1>&2");
+		else
+			strbuf_puts(sb, ">/dev/null");
+		if (debug)
+			fprintf(stderr, "executing mkid like: %s\n", strbuf_value(sb));
+		if (system(strbuf_value(sb)))
+			die("mkid failed: %s", strbuf_value(sb));
+		strbuf_reset(sb);
+		strbuf_puts(sb, "chmod 644 ");
+		strbuf_puts(sb, makepath(dbpath, "ID", NULL));
+		if (system(strbuf_value(sb)))
+			die("chmod failed: %s", strbuf_value(sb));
 	}
 	if (vflag)
 		fprintf(stderr, "[%s] Done.\n", now());
 	closeconf();
-	exit(0);
+	strbuf_close(sb);
+
+	return 0;
 }
 /*
  * incremental: incremental update
@@ -265,9 +384,9 @@ char	*root;
 {
 	struct stat statp;
 	time_t	gtags_mtime;
-	STRBUF	*addlist = stropen();
-	STRBUF	*updatelist = stropen();
-	STRBUF	*deletelist = stropen();
+	STRBUF	*addlist = strbuf_open(0);
+	STRBUF	*updatelist = strbuf_open(0);
+	STRBUF	*deletelist = strbuf_open(0);
 	int	updated = 0;
 	char	*path;
 
@@ -280,7 +399,7 @@ char	*root;
 	 */
 	path = makepath(dbpath, dbname(GTAGS), NULL);
 	if (stat(path, &statp) < 0)
-		die1("stat failed '%s'.", path);
+		die("stat failed '%s'.", path);
 	gtags_mtime = statp.st_mtime;
 
 	if (pathopen(dbpath, 0) < 0)
@@ -288,17 +407,17 @@ char	*root;
 	/*
 	 * make add list and update list.
 	 */
-	for (findopen(); (path = findread(NULL)) != NULL; ) {
+	for (ffindopen(); (path = ffindread(NULL)) != NULL; ) {
 		if (locatestring(path, " ", MATCH_FIRST))
-			die1("cannot treat blanks in a path '%s'.", path);
+			die("cannot treat blanks in a path '%s'.", path);
 		if (stat(path, &statp) < 0)
-			die1("stat failed '%s'.", path);
+			die("stat failed '%s'.", path);
 		if (!pathget(path))
-			strnputs(addlist, path, strlen(path) + 1);
+			strbuf_puts0(addlist, path);
 		else if (gtags_mtime < statp.st_mtime)
-			strnputs(updatelist, path, strlen(path) + 1);
+			strbuf_puts0(updatelist, path);
 	}
-	findclose();
+	ffindclose();
 	/*
 	 * make delete list.
 	 */
@@ -309,19 +428,19 @@ char	*root;
 			if ((path = pathiget(i)) == NULL)
 				continue;
 			if (!test("f", path))
-				strnputs(deletelist, path, strlen(path) + 1);
+				strbuf_puts0(deletelist, path);
 		}
 	}
 	pathclose();
-	if (strbuflen(addlist) + strbuflen(deletelist) + strbuflen(updatelist))
+	if (strbuf_getlen(addlist) + strbuf_getlen(deletelist) + strbuf_getlen(updatelist))
 		updated = 1;
 	/*
 	 * execute updating.
 	 */
 	signal_setup();
-	if (strbuflen(updatelist) > 0) {
-		char	*start = strvalue(updatelist);
-		char	*end = start + strbuflen(updatelist);
+	if (strbuf_getlen(updatelist) > 0) {
+		char	*start = strbuf_value(updatelist);
+		char	*end = start + strbuf_getlen(updatelist);
 		char	*p;
 
 		for (p = start; p < end; p += strlen(p) + 1) {
@@ -331,9 +450,9 @@ char	*root;
 		}
 		updated = 1;
 	}
-	if (strbuflen(addlist) > 0) {
-		char	*start = strvalue(addlist);
-		char	*end = start + strbuflen(addlist);
+	if (strbuf_getlen(addlist) > 0) {
+		char	*start = strbuf_value(addlist);
+		char	*end = start + strbuf_getlen(addlist);
 		char	*p;
 
 		for (p = start; p < end; p += strlen(p) + 1) {
@@ -343,9 +462,9 @@ char	*root;
 		}
 		updated = 1;
 	}
-	if (strbuflen(deletelist) > 0) {
-		char	*start = strvalue(deletelist);
-		char	*end = start + strbuflen(deletelist);
+	if (strbuf_getlen(deletelist) > 0) {
+		char	*start = strbuf_value(deletelist);
+		char	*end = start + strbuf_getlen(deletelist);
 		char	*p;
 
 		for (p = start; p < end; p += strlen(p) + 1) {
@@ -372,9 +491,9 @@ char	*root;
 			fprintf(stderr, " Global databases are up to date.\n");
 		fprintf(stderr, "[%s] Done.\n", now());
 	}
-	strclose(addlist);
-	strclose(deletelist);
-	strclose(updatelist);
+	strbuf_close(addlist);
+	strbuf_close(deletelist);
+	strbuf_close(updatelist);
 	return updated;
 }
 /*
@@ -393,7 +512,7 @@ char	*path;
 int	type;
 {
 	GTOP	*gtop;
-	STRBUF	*sb = stropen();
+	STRBUF	*sb = strbuf_open(0);
 	int	db;
 	const char *msg = NULL;
 
@@ -416,14 +535,14 @@ int	type;
 		/*
 		 * get tag command.
 		 */
-		strstart(sb);
+		strbuf_reset(sb);
 		if (!getconfs(dbname(db), sb))
-			die1("cannot get tag command. (%s)", dbname(db));
+			die("cannot get tag command. (%s)", dbname(db));
 		gtop = gtagsopen(dbpath, root, db, GTAGS_MODIFY, 0);
 		/*
 		 * GTAGS needed to make GRTAGS.
 		 */
-		if (db == GRTAGS && !test("f", makepath(dbpath, "GTAGS", NULL)))
+		if (db == GRTAGS && !test("f", makepath(dbpath, dbname(GTAGS), NULL)))
 			die("GTAGS needed to create GRTAGS.");
 		if (type != 1)
 			gtagsdelete(gtop, path);
@@ -434,13 +553,15 @@ int	type;
 				gflags |= GTAGS_UNIQUE;
 			if (extractmethod)
 				gflags |= GTAGS_EXTRACTMETHOD;
-			if (dflag)
+#ifdef DEBUG
+			if (debug)
 				gflags |= GTAGS_DEBUG;
-			gtagsadd(gtop, strvalue(sb), path, gflags);
+#endif
+			gtagsadd(gtop, strbuf_value(sb), path, gflags);
 		}
 		gtagsclose(gtop);
 	}
-	strclose(sb);
+	strbuf_close(sb);
 	if (exitflag)
 		return;
 	if (vflag)
@@ -463,59 +584,75 @@ int	db;
 	GTOP	*gtop;
 	int	flags;
 	char	*comline;
-	STRBUF	*sb = stropen();
+	STRBUF	*sb = strbuf_open(0);
+	int	count = 0;
 
 	/*
 	 * get tag command.
 	 */
 	if (!getconfs(dbname(db), sb))
-		die1("cannot get tag command. (%s)", dbname(db));
-	comline = strdup(strvalue(sb));
+		die("cannot get tag command. (%s)", dbname(db));
+	comline = strdup(strbuf_value(sb));
 	if (!comline)
 		die("short of memory.");
 	/*
 	 * GTAGS needed to make GRTAGS.
 	 */
-	if (db == GRTAGS && !test("f", makepath(dbpath, "GTAGS", NULL)))
+	if (db == GRTAGS && !test("f", makepath(dbpath, dbname(GTAGS), NULL)))
 		die("GTAGS needed to create GRTAGS.");
 	flags = 0;
-	strstart(sb);
 	if (cflag) {
 		flags |= GTAGS_COMPACT;
 		flags |= GTAGS_PATHINDEX;
 	}
-	strstart(sb);
+	strbuf_reset(sb);
 	if (vflag > 1 && getconfs(dbname(db), sb))
-		fprintf(stderr, " using tag command '%s <path>'.\n", strvalue(sb));
+		fprintf(stderr, " using tag command '%s <path>'.\n", strbuf_value(sb));
 	gtop = gtagsopen(dbpath, root, db, GTAGS_CREATE, flags);
-	for (findopen(); (path = findread(NULL)) != NULL; ) {
+	for (ffindopen(); (path = ffindread(NULL)) != NULL; ) {
 		int	gflags = 0;
+		int	skip = 0;
 
 		if (exitflag)
 			break;
+		count++;
 		/*
 		 * GSYMS doesn't treat asembler.
 		 */
-		if (db == GSYMS)
+		if (db == GSYMS) {
 			if (locatestring(path, ".s", MATCH_AT_LAST) != NULL ||
 			    locatestring(path, ".S", MATCH_AT_LAST) != NULL)
-				continue;
-		if (vflag)
-			fprintf(stderr, " extracting tags of %s.\n", path);
+				skip = 1;
+		}
+		if (vflag) {
+			if (total)
+				fprintf(stderr, " [%d/%d]", count, total);
+			else
+				fprintf(stderr, " [%d]", count);
+			fprintf(stderr, " extracting tags of %s", path);
+			if (skip)
+				fprintf(stderr, " (skipped)");
+			fputc('\n', stderr);
+		}
+		if (skip)
+			continue;
 		if (locatestring(path, " ", MATCH_FIRST))
-			die1("cannot treat blanks in a path '%s'.", path);
+			die("cannot treat blanks in a path '%s'.", path);
 		if (db == GSYMS)
 			gflags |= GTAGS_UNIQUE;
 		if (extractmethod)
 			gflags |= GTAGS_EXTRACTMETHOD;
-		if (dflag)
+#ifdef DEBUG
+		if (debug)
 			gflags |= GTAGS_DEBUG;
+#endif
 		gtagsadd(gtop, comline, path, gflags);
 	}
-	findclose();
+	total = count;				/* save total count */
+	ffindclose();
 	gtagsclose(gtop);
 	free(comline);
-	strclose(sb);
+	strbuf_close(sb);
 }
 /*
  * now: current date and time
@@ -525,12 +662,24 @@ int	db;
 char *
 now(void)
 {
-	static	char	buf[80];
+	static	char	buf[128];
+
+#ifdef HAVE_STRFTIME
 	time_t	tval;
 
 	if (time(&tval) == -1)
 		die("cannot get current time.");
 	(void)strftime(buf, sizeof(buf), "%a %b %e %H:%M:%S %Z %Y", localtime(&tval));
+#else
+	FILE	*ip;
+
+	strcpy(buf, "unkown time");
+	if (ip = popen("date", "r")) {
+		if (fgets(buf, sizeof(buf), ip))
+			buf[strlen(buf) - 1] = 0;
+		fclose(ip);
+	}
+#endif
 	return buf;
 }
 /*
@@ -543,7 +692,6 @@ int
 printconf(name)
 char	*name;
 {
-	STRBUF  *sb;
 	int	num;
 	int	exist = 1;
 
@@ -552,12 +700,12 @@ char	*name;
 	else if (getconfb(name))
 		fprintf(stdout, "1\n");
 	else {
-		sb = stropen();
+		STRBUF  *sb = strbuf_open(0);
 		if (getconfs(name, sb))
-			fprintf(stdout, "%s\n", strvalue(sb));
+			fprintf(stdout, "%s\n", strbuf_value(sb));
 		else
 			exist = 0;
-		strclose(sb);
+		strbuf_close(sb);
 	}
 	return exist;
 }

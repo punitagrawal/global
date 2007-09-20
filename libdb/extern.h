@@ -60,11 +60,7 @@ int	 __ovfl_delete(BTREE *, void *);
 int	 __ovfl_get(BTREE *, void *, size_t *, void **, size_t *);
 int	 __ovfl_put(BTREE *, const DBT *, pgno_t *);
 
-#ifdef DEBUG
 void	 __bt_dnpage(DB *, pgno_t);
 void	 __bt_dpage(PAGE *);
 void	 __bt_dump(DB *);
-#endif
-#ifdef STATISTICS
 void	 __bt_stat(DB *);
-#endif
