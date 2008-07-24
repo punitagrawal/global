@@ -1,9 +1,9 @@
 Source: global
 Section: devel
 Priority: optional
-Build-Depends: debhelper (>=4.0), texinfo
+Build-Depends: debhelper (>=6.0.7), texinfo
 Maintainer: Ron Lee <ron@debian.org>
-Standards-Version: 3.7.2.2
+Standards-Version: 3.8.0.1
 
 Package: global
 Architecture: any
@@ -19,7 +19,7 @@ Description: Source code search and browse tools
    o emacs
    o web browser
  .
- Supported languages are C/C++ Yacc and Java.
+ Supported languages are C, C++, yacc and Java.
  You can locate a specified function in the source files and move
  there easily. It is especially useful for hacking large projects
  containing many subdirectories, many '#ifdef' and many main()

@@ -43,6 +43,7 @@ install:
 	dh_installdirs
 
 	$(MAKE) install-exec prefix=`pwd`/debian/$(package)/usr
+	$(MAKE) -C htags install-gtagsDATA prefix=$(CURDIR)/debian/$(package)/usr
 	set -e; cd htmake \
 		&& $(MAKE) install \
 			DESTDIR=`pwd`/../debian/$(package)/usr \
@@ -51,6 +52,7 @@ install:
 
 	dh_install globash.rc	etc
 	dh_install globash	usr/bin
+	dh_lintian
 
 
 binary-indep: build install

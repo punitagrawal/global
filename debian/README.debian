@@ -2,7 +2,7 @@
 	GLOBAL for Debian
 	-----------------
 
-See /usr/doc/global/README.gz and README.htmake.gz or the
+See /usr/share/doc/global/README.gz and README.htmake.gz or the
 global.info and relevant man pages for general usage details.
 
 The Debian version of GLOBAL has been configured to use a
