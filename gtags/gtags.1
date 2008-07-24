@@ -1,5 +1,5 @@
 .\" This file is generated automatically by convert.pl from gtags/manual.in.
-.TH GTAGS 1 "January 2007" "GNU Project"
+.TH GTAGS 1 "March 2008" "GNU Project"
 .SH NAME
 gtags \- create tag files for global.
 .SH SYNOPSIS
@@ -14,8 +14,7 @@ You should execute this command at the root of the source tree.
 .PP
 C, C++, yacc, java, PHP and Assembly source files are supported.
 Files whose names end in \'.c\' or \'.h\' are assumed to be
-C source files and are searched for C style routine and macro
-definitions.
+C source files.
 Files whose names end in \'.c++\' \'.cc\' \'.cpp\' \'.cxx\'
 \'.hxx\' \'.hpp\' \'.C\' \'.H\' are assumed to be C++ source files.
 Files whose names end in \'.y\' are assumed to be YACC source files.
@@ -23,8 +22,8 @@ Files whose names end in \'.java\' are assumed to be Java source files.
 Files whose names end in \'.php\' \'.php3\' \'.phtml\' are
 assumed to be PHP source files.
 Files whose names end in \'.s\' or \'.S\'
-are assumed to be Assembler source files.
-Other files are searched for C style definitions.
+are assumed to be Assembly source files.
+Other files are assumed to be text files.
 .SH OPTIONS
 The following options are available:
 .TP
@@ -47,17 +46,17 @@ Load user's configuration from \fIfile\fP.
 \fIlabel\fP is used as the label of configuration file.
 The default is default.
 .TP
+\fB-I\fP, \fB--idutils\fP
+Make index files for \fBidutils\fP(1) too.
+.TP
 \fB-i\fP, \fB--incremental\fP
 Update tag files incrementally. You had better use
 \fBglobal\fP(1) with the -u option.
 .TP
-\fB-I\fP, \fB--idutils\fP
-Make index files for \fBidutils\fP(1).
-.TP
 \fB-n\fP, \fB--max-args\fP \fInumber\fP
 Maximum number of arguments for \fBgtags-parser\fP(1).
-By default, gtags invokes the parser with arguments
-as a lot as possible to decrease the frequency of invoking.
+By default, gtags invokes \fBgtags-parser\fP with arguments
+as many as possible to decrease the frequency of invoking.
 .TP
 \fB-q\fP, \fB--quiet\fP
 Quiet mode.
@@ -110,25 +109,38 @@ of configuration file. The default is default.
 .TP
 \fBGTAGSCACHE\fP
 If this variable is set, its value is used as the size of
-btree cache. The default is 500000 (bytes).
+B-tree cache. The default is 5000000 (bytes).
+.TP
+\fBGTAGSFORCECPP\fP
+If this variable is set, each file whose suffix is 'h' is treated
+as a C++ source file.
 .SH CONFIGURATION
 The following configuration variables affect the execution of \fBgtags\fP.
 You can see the default value for each variable with the \fB--config\fP option.
 .TP
 GTAGS(string)
 If this variable is set, its value is used as the
-command line of parser for GTAGS. The default is \'gtags-parser -dt %s\'.
+command line of the parser for GTAGS. The default is \'gtags-parser %s\'.
 .TP
 GRTAGS(string)
 If this variable is set, its value is used as the
-command line of parser for GRTAGS. The default is \'gtags-parser -dtr %s\'.
+command line of the parser for GRTAGS. The default is \'gtags-parser -r %s\'.
 .TP
 GSYMS(string)
 If this variable is set, its value is used as the
-command line of parser for GSYMS. The default is \'gtags-parser -dts %s\'.
+command line of the parser for GSYMS. The default is \'gtags-parser -s %s\'.
+.TP
+icase_path(boolean)
+Ignore case distinctions in the path.
+Suffixes check are affected by this capability.
+.TP
+langmap(comma separated list)
+Language mapping. Each comma-separated map consists of
+the language name, a colon, and a list of file extensions.
+Default mapping is 'c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml'.
 .TP
 skip(comma separated list)
-\fBGtags\fP skips files which listed in this list.
+\fBGtags\fP skips files which are listed in this list.
 As a special exception, \fBgtags\fP collect values from multiple skip variables.
 If the value ends with '/', it assumed as a directory and \fBgtags\fP skips all files under it.
 If the value start with '/', it assumed relative path from the root of source directory.
@@ -138,15 +150,6 @@ Suffixes of target source file.
 As a special exception, \fBgtags\fP collect values from multiple suffixes variables.
 This variable is obsoleted. If the langmap variable is defined
 \fBgtags\fP no longer refers this.
-.TP
-icase_path(boolean)
-Ignore case distinctions in the path.
-Suffixes check are affected by this capability.
-.TP
-langmap(comma separated list)
-Language mapping. Each comma-separated map consists of
-the language name, a colon, and a list of file extensions.
-Default mapping is 'c:.c.h,\:yacc:.y,\:asm:.s.S,\:java:.java,\:cpp:.c++.cc.cpp.cxx.hxx.hpp.C.H,\:php:.php.php3.phtml'.
 .SH DIAGNOSTICS
 \fBGtags\fP exits with a non 0 value if an error occurred, 0 otherwise.
 .SH "MESSAGE FORMAT"
@@ -165,13 +168,11 @@ GNU GLOBAL source code tag system
 \'GTAGS\', \'GRTAGS\' and \'GSYMS\' are very large.
 In advance of using this command, check the space of your disk.
 .PP
-Assembler support is far from complete.
+Assembly support is far from complete.
 It extracts only ENTRY() and ALTENTRY() from source file.
 Probably valid only for FreeBSD and Linux kernel source.
 .PP
 There is no concurrency control about tag files.
-.PP
-Symbols in Assembly source files are not extracted for \'GSYMS\'.
 .SH AUTHOR
 Tama Communications Corporation.
 .SH HISTORY

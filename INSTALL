@@ -19,7 +19,7 @@ ___________________________________
 Installation of GNU GLOBAL.
 
 [Note]  Though GNU GLOBAL supports only UNIX(POSIX) environment,
-        some outsite projects develop DOS or Windows 32 version of it.
+        some outside projects develop DOS or Windows 32 version of it.
         Please see:
                 http://www.gnu.org/software/global/download.html
 
@@ -45,24 +45,6 @@ o If you want to use the --form(-f) or --dynamic(-D) option of htags(1) then
 	# make install
 
 3. Using GLOBAL with editors.
-
-o Nvi-1.79
-
-   Please get nvi-1.79 at:
-
-	   http://www.bostic.com/vi/
-
-   and do the followings.
-
-	$ tar xzvf nvi-1.79.tar.gz
-	$ cd nvi-1.79
-	$ patch -p < nvi-1.79-gtags.diff
-	$ cd build
-	$ ./configure
-	$ make
-	# make install
-
-   ('nvi-1.79-gtags.diff' is included in GLOBAL package.)
 
 o Nvi-1.81.5
 
@@ -121,7 +103,7 @@ o Vim
 
 	http://www.vim.org/
 
-   Please copy gtags.vim file to your plugin directory.
+   Please copy gtags.vim file to your plug-in directory.
 
 	$ cp /usr/local/share/gtags/gtags.vim $HOME/.vim/plugin
 

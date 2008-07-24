@@ -272,8 +272,8 @@ generate_guide(int lineno)
 	strbuf_sprintf(sb, "%s/* ", comment_begin);
 	strbuf_puts(sb, link_format(anchor_getlinks(lineno)));
 	if (show_position)
-		strbuf_sprintf(sb, "%s[+%d %s]%s",
-			position_begin, lineno, curpfile, position_end);
+		strbuf_sprintf(sb, "%s%s[+%d %s]%s",
+			quote_space, position_begin, lineno, curpfile, position_end);
 	strbuf_sprintf(sb, " */%s", comment_end);
 
 	return strbuf_value(sb);
@@ -393,6 +393,14 @@ put_anchor(char *name, int type, int lineno)
 			char lno[32];
 			const char *filename;
 
+			/*
+			 * Don't make a link which refers to itself.
+			 * Being used only once means that it is a self link.
+			 */
+			if (db == GSYMS) {
+				strbuf_puts(outbuf, name);
+				return;
+			}
 			strlimcpy(lno, strmake(line, " "), sizeof(lno));
 			filename = strmake(locatestring(line, " ", MATCH_FIRST) + 1, " ")
 						+ 2;	/* remove './' */
@@ -719,7 +727,7 @@ src2html(const char *src, const char *html, int notsource)
 
 	fputs(link_format(anchor_getlinks(0)), out);
 	if (show_position)
-		fprintf(out, "%s[+1 %s]%s", position_begin, src, position_end);
+		fprintf(out, "%s%s[+1 %s]%s", quote_space, position_begin, src, position_end);
 	fputs(" */", out);
 	fputs_nl(comment_end, out);
 	fputs_nl(hr, out);
@@ -858,7 +866,7 @@ src2html(const char *src, const char *html, int notsource)
 	fputs("/* ", out);
 	fputs(link_format(anchor_getlinks(-1)), out);
 	if (show_position)
-		fprintf(out, "%s[+%d %s]%s", position_begin, last_lineno, src, position_end);
+		fprintf(out, "%s%s[+%d %s]%s", quote_space, position_begin, last_lineno, src, position_end);
 	fputs(" */", out);
 	fputs_nl(comment_end, out);
 	if (insert_footer) {

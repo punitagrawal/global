@@ -43,14 +43,13 @@
      ASM_CALL = 259,
      ASM_ENTRY = 260,
      ASM_EXT = 261,
-     ASM_SYMBOL_PAREN = 262,
-     ASM_SYMBOL = 263,
-     ASM_LABEL = 264,
-     ASM_DEFINE = 265,
-     ASM_UNDEF = 266,
-     ASM_DIRECTIVE = 267,
-     ASM_MACRO = 268,
-     ASM_EQU = 269
+     ASM_SYMBOL = 262,
+     ASM_LABEL = 263,
+     ASM_DEFINE = 264,
+     ASM_UNDEF = 265,
+     ASM_DIRECTIVE = 266,
+     ASM_MACRO = 267,
+     ASM_EQU = 268
    };
 #endif
 /* Tokens.  */
@@ -58,14 +57,13 @@
 #define ASM_CALL 259
 #define ASM_ENTRY 260
 #define ASM_EXT 261
-#define ASM_SYMBOL_PAREN 262
-#define ASM_SYMBOL 263
-#define ASM_LABEL 264
-#define ASM_DEFINE 265
-#define ASM_UNDEF 266
-#define ASM_DIRECTIVE 267
-#define ASM_MACRO 268
-#define ASM_EQU 269
+#define ASM_SYMBOL 262
+#define ASM_LABEL 263
+#define ASM_DEFINE 264
+#define ASM_UNDEF 265
+#define ASM_DIRECTIVE 266
+#define ASM_MACRO 267
+#define ASM_EQU 268
 
 
 

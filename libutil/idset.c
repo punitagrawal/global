@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2006 Tama Communications Corporation
+ * Copyright (c) 2005, 2006, 2007 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -31,10 +31,14 @@
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
 #endif
-#ifdef INT_BIT
-#undef INT_BIT
-#endif
-int INT_BIT;				/* maybe 32 or 64 */
+#undef LONG_BIT
+#define LONG_BIT	(sizeof(long) * CHAR_BIT)	/* maybe 32 or 64 */
+
+/*
+ * idset->min is initialized to END_OF_ID.
+ * (You may use idset->max instead of idset->min.)
+ */
+#define IS_EMPTY(idset)	 ((idset)->min == END_OF_ID ? 1 : 0)
 
 /*
 Idset: usage and memory status
@@ -42,13 +46,13 @@ Idset: usage and memory status
 				idset->set
 				[]
 
-idset = idset_open(21)		000000000000000000000000________
+idset = idset_open(21)		000000000000000000000___________
 				 v
-idset_add(idset, 1)		010000000000000000000000________
+idset_add(idset, 1)		010000000000000000000___________
 				  v
-idset_add(idset, 2)		011000000000000000000000________
-				                       v
-idset_add(idset, 20)		011000000000000000001000________
+idset_add(idset, 2)		011000000000000000000___________
+				                    v
+idset_add(idset, 20)		011000000000000000001___________
 
 idset_contains(idset, 2) == true
 idset_contains(idset, 3) == false
@@ -76,7 +80,7 @@ You should define index as an unsigned integer, and use END_OF_ID like follows:
  * bit mask table
  * Prepare all bit mask for performance.
  */
-unsigned int *bit;
+static unsigned long *bit;
 
 /*
  * Allocate memory for new idset.
@@ -88,14 +92,17 @@ idset_open(unsigned int size)
 	int i;
 
 	if (bit == NULL) {
-		INT_BIT = sizeof(unsigned int) * CHAR_BIT;
-		bit = (unsigned int *)check_calloc(sizeof(unsigned int), INT_BIT);
-		for (i = 0; i < INT_BIT; i++)
-			bit[i] = 1 << i;
+		bit = (unsigned long *)check_calloc(sizeof(unsigned long), LONG_BIT);
+		for (i = 0; i < LONG_BIT; i++)
+			bit[i] = 1UL << i;
 	}
-	idset->set = (unsigned int *)check_calloc(sizeof(unsigned int), (size + INT_BIT - 1) / INT_BIT);
+	idset->set = (unsigned long *)check_calloc(sizeof(unsigned long), (size + LONG_BIT - 1) / LONG_BIT);
 	idset->size = size;
-	idset->empty = 1;
+	/*
+	 * Initialize all id expressions using invalid value.
+	 * END_OF_ID means 'no value' or 'out of range'.
+	 */
+	idset->min = idset->max = idset->lastid = END_OF_ID;
 	return idset;
 }
 /*
@@ -107,7 +114,7 @@ idset_open(unsigned int size)
 int
 idset_empty(IDSET *idset)
 {
-	return idset->empty;
+	return IS_EMPTY(idset);
 }
 /*
  * Add id to the idset.
@@ -118,12 +125,17 @@ idset_empty(IDSET *idset)
 void
 idset_add(IDSET *idset, unsigned int id)
 {
+	int empty = IS_EMPTY(idset);
+
 	if (id >= idset->size)
 		die("idset_add: id is out of range.");
-	idset->set[id / INT_BIT] |= bit[id % INT_BIT];
-	if (idset->empty || id > idset->max)
+	idset->set[id / LONG_BIT] |= bit[id % LONG_BIT];
+	if (empty)
+		idset->max = idset->min = id;
+	else if (id > idset->max)
 		idset->max = id;
-	idset->empty = 0;
+	else if (id < idset->min)
+		idset->min = id;
 }
 /*
  * Whether or not idset includes specified id.
@@ -135,8 +147,11 @@ idset_add(IDSET *idset, unsigned int id)
 int
 idset_contains(IDSET *idset, unsigned int id)
 {
-	return (idset->empty || id > idset->max) ? 0 :
-			(idset->set[id / INT_BIT] & bit[id % INT_BIT]);
+	if (IS_EMPTY(idset))
+		return 0;
+	if (id < idset->min || id > idset->max)
+		return 0;
+	return (idset->set[id / LONG_BIT] & bit[id % LONG_BIT]) != 0;
 }
 /*
  * Get first id.
@@ -148,21 +163,9 @@ idset_contains(IDSET *idset, unsigned int id)
 unsigned int
 idset_first(IDSET *idset)
 {
-	unsigned int i, limit;
-	int index0 = 0;
-
-	if (idset->empty)
-		return END_OF_ID;
-	limit = idset->max / INT_BIT + 1;
-	for (i = index0; i < limit && idset->set[i] == 0; i++)
-		;
-	if (i >= limit)
-		return END_OF_ID;
-	index0 = i;
-	for (i = 0; i < INT_BIT; i++)
-		if (bit[i] & idset->set[index0])
-			return idset->lastid = index0 * INT_BIT + i;
-	die("idset_first: internal error.");
+	/* There is no need to check whether idset is empty
+	   because idset->min is initialized with END_OF_ID. */
+	return idset->lastid = idset->min;
 }
 /*
  * Get next id.
@@ -177,25 +180,25 @@ idset_next(IDSET *idset)
 	unsigned int i, limit;
 	int index0, index1;
 
-	if (idset->empty)
+	if (IS_EMPTY(idset))
 		return END_OF_ID;
 	if (idset->lastid >= idset->max)
 		return END_OF_ID;
-	limit = idset->max / INT_BIT + 1;
-	index0 = idset->lastid / INT_BIT;
-	index1 = idset->lastid % INT_BIT;
-	for (i = ++index1; i < INT_BIT; i++)
+	limit = idset->max / LONG_BIT + 1;
+	index0 = idset->lastid / LONG_BIT;
+	index1 = idset->lastid % LONG_BIT;
+	for (i = ++index1; i < LONG_BIT; i++)
 		if (bit[i] & idset->set[index0])
-			return idset->lastid = index0 * INT_BIT + i;
+			return idset->lastid = index0 * LONG_BIT + i;
 	index0++;
 	for (i = index0; i < limit && idset->set[i] == 0; i++)
 		;
 	if (i >= limit)
-		return END_OF_ID;
+		die("idset_next: internal error.");
 	index0 = i;
-	for (i = 0; i < INT_BIT; i++)
+	for (i = 0; i < LONG_BIT; i++)
 		if (bit[i] & idset->set[index0])
-			return idset->lastid = index0 * INT_BIT + i;
+			return idset->lastid = index0 * LONG_BIT + i;
 	die("idset_next: internal error.");
 }
 /*

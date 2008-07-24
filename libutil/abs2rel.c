@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 1999 Tama Communications Corporation
+ * Copyright (c) 1997, 1999, 2008 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -30,6 +30,10 @@
 #endif
 
 #include "abs2rel.h"
+#include "die.h"
+#include "gparam.h"
+#include "locatestring.h"
+#include "strlimcpy.h"
 
 /*
 
@@ -163,6 +167,137 @@ EXAMPLE
          path2 == "/usr/src/sys"
 
 */
+/*
+ * normalize: normalize path name
+ *
+ *	i)	path	path name
+ *	i)	root	root of project (must be end with a '/')
+ *	i)	cwd	current directory
+ *	o)	result	normalized path name
+ *	i)	size	size of the result
+ *	r)		==NULL: error
+ *			!=NULL: result
+ */
+char *
+normalize(const char *path, const char *root, const char *cwd, char *result, const int size)
+{
+	char *p, abs[MAXPATHLEN+1];
+
+	if (normalize_pathname(path, result, size) == NULL)
+		goto toolong;
+	if (*path == '/') {
+		if (strlen(result) > MAXPATHLEN)
+			goto toolong;
+		strcpy(abs, result);
+	} else {
+		if (rel2abs(result, cwd, abs, sizeof(abs)) == NULL)
+			goto toolong;
+	}
+	/*
+	 * Remove the root part of path and insert './'.
+	 *      rootdir  /a/b/
+	 *      path     /a/b/c/d.c -> c/d.c -> ./c/d.c
+	 */
+	p = locatestring(abs, root, MATCH_AT_FIRST);
+	if (p == NULL)
+		return NULL;
+	strlimcpy(result, "./", size);
+	strlimcpy(result + 2, p, size - 2);
+	return result;
+toolong:
+	die("path name is too long.");
+}
+/*
+ * normalize_pathname: normalize relative path name.
+ *
+ *	i)	path	relative path name
+ *	o)	result	result buffer
+ *	i)	size	size of result buffer
+ *	r)		!= NULL: normalized path name
+ *			== NULL: error
+ *
+ * [examples]
+ *
+ * path			result
+ * ---------------------------
+ * /a			/a
+ * ./a/./b/c		a/b/c
+ * a////b///c		a/b/c
+ * ../a/b/c		../a/b/c
+ * a/d/../b/c		a/b/c
+ * a/../b/../c/../d	d
+ * a/../../d		../d
+ * /a/../../d		/d
+ */
+char *
+normalize_pathname(const char *path, char *result, const int size)
+{
+	const char *savep, *p = path;
+	char *final, *q = result;
+	char *endp = result + size - 1;
+
+	/* accept the first '/' */
+	if (*p == '/') {
+		*q++ = *p++;
+		final = q;
+	}
+	do {
+		savep = p;
+		while (!strncmp(p, "./", 2))	/* skip "./" at the head of the path */
+			p += 2;
+		while (!strncmp(p, "../", 3)) {	/* accept the first "../" */
+			if (q + 3 > endp)
+				goto erange;
+			strcpy(q, "../");
+			p += 3;
+			q += 3;
+		}
+	} while (savep != p);
+
+	final = q;
+	while (*p) {
+		if (*p == '/') {
+			p++;
+			do {
+				savep = p;
+				/* skip consecutive '/' */
+				while (*p == '/')	
+					p++;
+				/* skip consecutive './' */
+				while (!strncmp(p, "./", 2))
+					p += 2;
+				/* resolve '../'(parent directory) */
+				while (!strncmp(p, "../", 3)) {
+					p += 3;
+					if (q > final) {
+						while (q > final && *--q != '/')
+							;
+					} else if (!(*result == '/' && result + 1 == q)) {
+						if (q + 3 > endp)
+							goto erange;
+						strcpy(q, "../");
+						q += 3;
+						final = q;
+					}
+				}
+			} while (savep != p);
+			if (q > endp)
+				goto erange;
+			if (q > final) {
+				*q++ = '/';
+			}
+		} else {
+			if (q > endp)
+				goto erange;
+			*q++ = *p++;
+		}
+	}
+	*q = '\0';
+	return result;
+erange:
+	errno = ERANGE;
+	return NULL;
+}
 /*
  * abs2rel: convert an absolute path name into relative.
  *

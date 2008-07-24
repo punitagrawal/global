@@ -4,7 +4,7 @@ gtags-parser - print cross reference list for gtags.
 @unnumberedsubsec SYNOPSIS
 @noindent
 @quotation
-gtags-parser [-bdenrstvw] file ...@*
+gtags-parser [-bdenqrstvw] file ...@*
 @end quotation
 @unnumberedsubsec DESCRIPTION
 Gtags-parser print cross reference list for gtags(1)
@@ -16,11 +16,11 @@ and a line image separated by white-space.
 It's same with the output of ctags(1) with @samp{-x} option.
 
 Depending upon the options provided to gtags-parser,
-objects will consist of function definitions, function references
+objects will consist of object definitions, object references
 and other symbols.
 
 Files whose names end in @file{.c} or @file{.h} are assumed to be C
-source files and are searched for C style routine and macro definitions.
+source files.
 Files whose names end in @file{.c++} @file{.cc} @file{.cpp}
 @file{.cxx} @file{.hxx} @file{.hpp} @file{.C} @file{.H} are assumed to be C++
 source files.
@@ -29,7 +29,7 @@ Files whose names end in @file{.java} are assumed to be Java source files.
 Files whose names end in @file{.php} @file{.php3} @file{.phtml} are
 assumed to be PHP source files.
 Files whose names end in @file{.s} or @file{.S} are assumed to be
-Assembler source files.
+Assembly source files.
 Other files are searched for C style definitions.
 
 Yacc files each have a special tag. yyparse is the start
@@ -40,27 +40,23 @@ This command is the default parser of GLOBAL source code tag system.
 The following options are available:
 @table @asis
 @item @samp{-b}, @samp{--begin-block}
-Force level 1 block to begin when reach a left brace at the first column.
+Force level 1 block to begin when reach the left brace at the first column.
 (C only)
-@item @samp{-d}, @samp{--define}
-Pick up not only function but also macro without argument
-as a definition.
 @item @samp{-e}, @samp{--end-block}
-Force level 1 block to end when reach a right brace at the first column.
+Force level 1 block to end when reach the right brace at the first column.
 (C only)
 @item @samp{-n}, @samp{--no-tags}
 Suppress output of tags. It is useful to use with @samp{-w} option.
+@item @samp{-q}, @samp{--quiet}
+Quiet mode.
 @item @samp{-r}, @samp{--reference}
-Locate function references instead of function definitions.
+Locate object references instead of object definitions.
 @file{GTAGS} is needed at the current directory.
 (C, C++ and Java source only)
-By default, locate function definitions.
+By default, locate object definitions.
 @item @samp{-s}, @samp{--symbol}
-Collect symbols other than functions.
-By default, locate function definitions.
-@item @samp{-t}, @samp{--typedef}
-Pick up not only function but also typedef name and enum member
-as a definition.
+Collect symbols other than object definitions and references.
+By default, locate object definitions.
 @item @samp{-v}, @samp{--verbose}
 Verbose mode.
 @item @samp{-w}, @samp{--warning}
@@ -73,6 +69,13 @@ Default mapping is 'c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.cpp.cxx.hxx.h
 
 The @samp{-r} and @samp{-s} options override each other;
 the last one specified determines the method used.
+@unnumberedsubsec ENVIRONMENT
+The following environment variables affect the execution of gtags-parser:
+@table @asis
+@item @var{GTAGSFORCECPP}
+If this variable is set, each file whose suffix is 'h' is treated
+as a C++ source file.
+@end table
 @unnumberedsubsec DIAGNOSTICS
 Gtags-parser exits with a non 0 value if an error occurred, 0 otherwise.
 Duplicate objects are not considered errors.
@@ -86,9 +89,6 @@ GNU GLOBAL source code tag system@*
 @unnumberedsubsec BUG
 Gtags-parser relies on the input being well formed,
 and any syntactical errors will completely confuse it.
-
-Assembler support is far from complete.
-Probably valid only for FreeBSD and Linux kernel source.
 @unnumberedsubsec AUTHOR
 Tama Communications Corporation.
 @unnumberedsubsec HISTORY

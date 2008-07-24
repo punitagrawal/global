@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006,
- *	2007 Tama Communications Corporation
+ *	2007, 2008 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -47,6 +47,7 @@
 static void usage(void);
 static void help(void);
 static void setcom(int);
+int decide_tag_by_context(const char *, const char *, const char *);
 int main(int, char **);
 void completion(const char *, const char *, const char *);
 void idutils(const char *, const char *);
@@ -89,6 +90,8 @@ int type;				/* path conversion type */
 char cwd[MAXPATHLEN+1];			/* current directory	*/
 char root[MAXPATHLEN+1];		/* root of source tree	*/
 char dbpath[MAXPATHLEN+1];		/* dbpath directory	*/
+char *context_file;
+char *context_lineno;
 
 static void
 usage(void)
@@ -106,6 +109,7 @@ help(void)
 }
 
 #define RESULT		128
+#define FROM_HERE	129
 #define SORT_FILTER     1
 #define PATH_FILTER     2
 #define BOTH_FILTER     (SORT_FILTER|PATH_FILTER)
@@ -136,6 +140,7 @@ static struct option const long_options[] = {
 	{"cxref", no_argument, NULL, 'x'},
 
 	/* long name only */
+	{"from-here", required_argument, NULL, FROM_HERE},
 	{"debug", no_argument, &debug, 1},
 	{"version", no_argument, &show_version, 1},
 	{"help", no_argument, &show_help, 1},
@@ -152,6 +157,67 @@ setcom(int c)
 		command = c;
 	else if (command != c)
 		usage();
+}
+/*
+ * decide_tag_by_context: decide tag type by context
+ *
+ *	i)	tag	tag name
+ *	i)	file	context file
+ *	i)	lineno	context lineno
+ *	r)		GTAGS, GRTAGS, GSYMS
+ */
+int
+decide_tag_by_context(const char *tag, const char *file, const char *lineno)
+{
+	char path[MAXPATHLEN+1], s_fid[32];
+	char rootdir[MAXPATHLEN+1];
+	const char *tagline, *p;
+	DBOP *dbop;
+	int db = GSYMS;
+
+        /*
+         * rootdir always ends with '/'.
+         */
+        if (!strcmp(root, "/"))
+                strlimcpy(rootdir, root, sizeof(rootdir));
+        else
+                snprintf(rootdir, sizeof(rootdir), "%s/", root);
+	if (normalize(file, rootdir, cwd, path, sizeof(path)) == NULL)
+		die("'%s' is out of source tree.", file);
+	/*
+	 * get file id
+	 */
+	if (gpath_open(dbpath, 0) < 0)
+		die("GPATH not found.");
+	if ((p = gpath_path2fid(path, NULL)) == NULL)
+		die("path name in the context is not found.");
+	strlimcpy(s_fid, p, sizeof(s_fid));
+	gpath_close();
+	/*
+	 * read btree records directly to avoid the overhead.
+	 */
+	dbop = dbop_open(makepath(dbpath, dbname(GTAGS), NULL), 0, 0, 0);
+	tagline = dbop_first(dbop, tag, NULL, 0);
+	if (tagline)
+		db = GTAGS;
+	for (; tagline; tagline = dbop_next(dbop)) {
+		/*
+		 * examine whether the definition record include the context.
+		 */
+		p = locatestring(tagline, s_fid, MATCH_AT_FIRST);
+		if (p != NULL && *p == ' ') {
+			for (p++; *p && *p != ' '; p++)
+				;
+			if (*p++ != ' ')
+				die("Impossible!");
+			if ((p = locatestring(p, lineno, MATCH_AT_FIRST)) != NULL && *p == ' ') {
+				db = GRTAGS;
+				break;
+			}
+		}
+	}
+        dbop_close(dbop);
+	return db;
 }
 int
 main(int argc, char **argv)
@@ -247,6 +313,22 @@ main(int argc, char **argv)
 			break;
 		case 'x':
 			xflag++;
+			break;
+		case FROM_HERE:
+			{
+			char *p = optarg;
+			const char *usage = "usage: global --from-here=lineno:path.";
+
+			context_lineno = p;
+			while (*p && isdigit(*p))
+				p++;
+			if (*p != ':')
+				die_with_code(2, usage);
+			*p++ = '\0';
+			if (!*p)
+				die_with_code(2, usage);
+			context_file = p;
+			}
 			break;
 		case RESULT:
 			if (!strcmp(optarg, "ctags-x"))
@@ -402,7 +484,13 @@ main(int argc, char **argv)
 	/*
 	 * decide tag type.
 	 */
-	db = (rflag) ? GRTAGS : ((sflag) ? GSYMS : GTAGS);
+	if (context_file) {
+		if (isregex(av))
+			die_with_code(2, "regular expression is not allowed with the --from-here option.");
+		db = decide_tag_by_context(av, context_file, context_lineno);
+	} else {
+		db = (rflag) ? GRTAGS : ((sflag) ? GSYMS : GTAGS);
+	}
 	/*
 	 * decide format.
 	 * The --result option is given to priority more than the -t and -x option.
@@ -798,17 +886,21 @@ void
 parsefile(int argc, char **argv, const char *cwd, const char *root, const char *dbpath, int db)
 {
 	CONVERT *cv;
-	char rootdir[MAXPATHLEN+1];
-	char buf[MAXPATHLEN+1], *path;
-	const char *basename;
-	STATIC_STRBUF(dir);
 	int count = 0;
+	int file_count = 0;
 	STRBUF *comline = strbuf_open(0);
 	STRBUF *path_list = strbuf_open(MAXPATHLEN);
 	XARGS *xp;
 	char *ctags_x;
+	char rootdir[MAXPATHLEN+1];
 
-	snprintf(rootdir, sizeof(rootdir), "%s/", root);
+        /*
+         * rootdir always ends with '/'.
+         */
+        if (!strcmp(root, "/"))
+                strlimcpy(rootdir, root, sizeof(rootdir));
+        else
+                snprintf(rootdir, sizeof(rootdir), "%s/", root);
 	/*
 	 * teach parser where is dbpath.
 	 */
@@ -836,9 +928,21 @@ parsefile(int argc, char **argv, const char *cwd, const char *root, const char *
 	 */
 	for (; argc > 0; argv++, argc--) {
 		const char *av = argv[0];
+		char path[MAXPATHLEN+1];
 
-		if (!test("f", av)) {
-			if (test("d", av)) {
+		/*
+		 * convert the path into relative from the root directory of source tree.
+		 */
+		if (normalize(av, rootdir, cwd, path, sizeof(path)) == NULL)
+			if (!qflag)
+				fprintf(stderr, "'%s' is out of source tree.\n", path + 2);
+		if (!gpath_path2fid(path, NULL)) {
+			if (!qflag)
+				fprintf(stderr, "'%s' not found in GPATH.\n", path + 2);
+			continue;
+		}
+		if (!test("f", makepath(root, path, NULL))) {
+			if (test("d", NULL)) {
 				if (!qflag)
 					fprintf(stderr, "'%s' is a directory.\n", av);
 			} else {
@@ -847,86 +951,47 @@ parsefile(int argc, char **argv, const char *cwd, const char *root, const char *
 			}
 			continue;
 		}
-		/*
-		 * convert path into relative from root directory of source tree.
-		 */
-		strbuf_clear(dir);
-		basename = locatestring(av, "/", MATCH_LAST);
-		if (basename != NULL) {
-			strbuf_nputs(dir, av, basename - av);
-			basename++;
-		} else {
-			strbuf_putc(dir, '.');
-			basename = av;
-		}
-		/*
-		 * Expand symlink only in directory part.
-		 */
-		path = realpath(strbuf_value(dir), buf);
-		if (path == NULL)
-			die("realpath(%s, buf) failed. (errno=%d).", strbuf_value(dir), errno);
-		if (!isabspath(path))
-			die("realpath(3) is not compatible with BSD version.");
-		if (strcmp(path, "/") != 0)
-			strcat(path, "/");
-		strcat(path, basename);
-		/*
-		 * Remove the root part of path and insert './'.
-		 *      rootdir  /a/b/
-		 *      path     /a/b/c/d.c -> c/d.c -> ./c/d.c
-		 */
-		path = locatestring(path, rootdir, MATCH_AT_FIRST);
-		if (path == NULL) {
-			if (!qflag)
-				fprintf(stderr, "'%s' is out of source tree.\n", buf);
-			continue;
-		}
-		/* normalize path name */
-		path -= 2;
-		*path = '.';
-		if (!gpath_path2fid(path, NULL)) {
-			if (!qflag)
-				fprintf(stderr, "'%s' not found in GPATH.\n", path);
-			continue;
-		}
 		if (lflag && !locatestring(path, localprefix, MATCH_AT_FIRST))
 			continue;
 		/*
 		 * Add a path to the path list.
 		 */
 		strbuf_puts0(path_list, path);
+		file_count++;
 	}
-	/*
-	 * Execute parser in the root directory of source tree.
-	 */
-	if (chdir(root) < 0)
-		die("cannot move to '%s' directory.", root);
-	xp = xargs_open_with_strbuf(strbuf_value(comline), 0, path_list);
-	if (format == FORMAT_PATH) {
-		SPLIT ptable;
-		char curpath[MAXPATHLEN+1];
+	if (file_count > 0) {
+		/*
+		 * Execute parser in the root directory of source tree.
+		 */
+		if (chdir(root) < 0)
+			die("cannot move to '%s' directory.", root);
+		xp = xargs_open_with_strbuf(strbuf_value(comline), 0, path_list);
+		if (format == FORMAT_PATH) {
+			SPLIT ptable;
+			char curpath[MAXPATHLEN+1];
 
-		curpath[0] = '\0';
-		while ((ctags_x = xargs_read(xp)) != NULL) {
-			if (split((char *)ctags_x, 4, &ptable) < 4) {
-				recover(&ptable);
-				die("too small number of parts.\n'%s'", ctags_x);
+			curpath[0] = '\0';
+			while ((ctags_x = xargs_read(xp)) != NULL) {
+				if (split((char *)ctags_x, 4, &ptable) < 4) {
+					recover(&ptable);
+					die("too small number of parts.\n'%s'", ctags_x);
+				}
+				if (strcmp(curpath, ptable.part[PART_PATH].start)) {
+					strlimcpy(curpath, ptable.part[PART_PATH].start, sizeof(curpath));
+					convert_put(cv, curpath);
+					count++;
+				}
 			}
-			if (strcmp(curpath, ptable.part[PART_PATH].start)) {
-				strlimcpy(curpath, ptable.part[PART_PATH].start, sizeof(curpath));
-				convert_put(cv, curpath);
+		} else {
+			while ((ctags_x = xargs_read(xp)) != NULL) {
+				convert_put(cv, ctags_x);
 				count++;
 			}
 		}
-	} else {
-		while ((ctags_x = xargs_read(xp)) != NULL) {
-			convert_put(cv, ctags_x);
-			count++;
-		}
+		xargs_close(xp);
+		if (chdir(cwd) < 0)
+			die("cannot move to '%s' directory.", cwd);
 	}
-	xargs_close(xp);
-	if (chdir(cwd) < 0)
-		die("cannot move to '%s' directory.", cwd);
 	/*
 	 * Settlement
 	 */
@@ -934,6 +999,8 @@ parsefile(int argc, char **argv, const char *cwd, const char *root, const char *
 	convert_close(cv);
 	strbuf_close(comline);
 	strbuf_close(path_list);
+	if (file_count == 0)
+		die("file not found.");
 	if (vflag) {
 		print_count(count);
 		fprintf(stderr, " (no index used).\n");

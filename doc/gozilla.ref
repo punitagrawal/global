@@ -36,20 +36,20 @@ function reference is exist.  If you execute htags(1)
 with @samp{-l} option, you can specify any line.
 @item @samp{-b} browser
 browser to use. By default, it is assumed mozilla.
+@item @samp{-d} name
+print function.
+@item @samp{--help}
+Show help.
 @item @samp{-p}
 just print generated target URL.
 @item file
 path of source file or alias name.
-@item @samp{-d} name
-print function.
 @item @samp{-q}, @samp{--quiet}
 Quiet mode.
 @item @samp{-v}, @samp{--verbose}
 Verbose mode.
 @item @samp{--version}
 Show version number.
-@item @samp{--help}
-Show help.
 @end table
 @unnumberedsubsec FILES
 @table @asis

@@ -1,7 +1,8 @@
 ;;; gtags.el --- gtags facility for Emacs
 
 ;;
-;; Copyright (c) 1997, 1998, 1999, 2000, 2006, 2007 Tama Communications Corporation
+;; Copyright (c) 1997, 1998, 1999, 2000, 2006, 2007, 2008
+;;	Tama Communications Corporation
 ;;
 ;; This file is part of GNU GLOBAL.
 ;;
@@ -21,8 +22,9 @@
 
 ;; GLOBAL home page is at: http://www.gnu.org/software/global/
 ;; Author: Tama Communications Corporation
-;; Version: 2.3
+;; Version: 2.4
 ;; Keywords: tools
+;; Required version: GLOBAL 5.7 or later
 
 ;; Gtags-mode is implemented as a minor mode so that it can work with any
 ;; other major modes. Gtags-select mode is implemented as a major mode.
@@ -46,6 +48,27 @@
   "Non-nil if Gtags mode is enabled.")
 (make-variable-buffer-local 'gtags-mode)
 
+;;;
+;;; Customizing gtags-mode
+;;;
+(defgroup gtags nil
+  "Minor mode for GLOBAL source code tag system."
+  :group 'tools
+  :prefix "gtags-")
+
+(defcustom gtags-path-style 'root
+  "*Controls the style of path in [GTAGS SELECT MODE]."
+  :type '(choice (const :tag "Relative from the root of the current project" root)
+                 (const :tag "Relative from the current directory" relative)
+                 (const :tag "Absolute" absolute))
+  :group 'gtags)
+
+(defcustom gtags-read-only nil
+  "Gtags read only mode"
+  :type 'boolean
+  :group 'gtags)
+
+;; Variables
 (defvar gtags-current-buffer nil
   "Current buffer.")
 (defvar gtags-buffer-stack nil
@@ -58,8 +81,6 @@
   "Regexp matching tag name.")
 (defconst gtags-definition-regexp "#[ \t]*define[ \t]+\\|ENTRY(\\|ALTENTRY("
   "Regexp matching tag definition name.")
-(defvar gtags-read-only nil
-  "Gtags read only mode")
 (defvar gtags-mode-map (make-sparse-keymap)
   "Keymap used in gtags mode.")
 (defvar gtags-running-xemacs (string-match "XEmacs\\|Lucid" emacs-version)
@@ -161,32 +182,15 @@
 (defun gtags-exist-in-stack (buffer)
   (memq buffer gtags-buffer-stack))
 
-;; is it a function?
-(defun gtags-is-function ()
-  (save-excursion
-    (while (and (not (eolp)) (looking-at "[0-9A-Za-z_]"))
-      (forward-char 1))
-    (while (and (not (eolp)) (looking-at "[ \t]"))
-      (forward-char 1))
-    (if (looking-at "(") t nil)))
-
-;; is it a definition?
-(defun gtags-is-definition ()
-  (save-excursion
-    (if (and (string-match "\.java$" buffer-file-name) (looking-at "[^(]+([^)]*)[ \t]*{"))
-	t
-      (if (bolp)
-	  t
-        (forward-word -1)
-        (cond
-         ((looking-at "define")
-	  (forward-char -1)
-	  (while (and (not (bolp)) (looking-at "[ \t]"))
-	    (forward-char -1))
-	  (if (and (bolp) (looking-at "#"))
-	      t nil))
-         ((looking-at "ENTRY\\|ALTENTRY")
-	  (if (bolp) t nil)))))))
+;; get current line number
+(defun gtags-current-lineno ()
+  (if (= 0 (count-lines (point-min) (point-max)))
+      0
+    (save-excursion
+      (end-of-line)
+      (if (equal (point-min) (point))
+          1
+        (count-lines (point-min) (point))))))
 
 ;; completsion function for completing-read.
 (defun gtags-completing-gtags (string predicate code)
@@ -219,24 +223,31 @@
           ((eq code 'lambda)
            (if (intern-soft string complete-list) t nil)))))
 
+;; get the path of gtags root directory.
+(defun gtags-get-rootpath ()
+  (let (path buffer)
+    (save-excursion
+      (setq buffer (generate-new-buffer (generate-new-buffer-name "*rootdir*")))
+      (set-buffer buffer)
+      (setq n (call-process "global" nil t nil "-pr"))
+      (if (= n 0)
+        (setq path (file-name-as-directory (buffer-substring (point-min)(1- (point-max))))))
+      (kill-buffer buffer))
+    path))
+
 ;;
 ;; interactive command
 ;;
 (defun gtags-visit-rootdir ()
   "Tell tags commands the root directory of source tree."
   (interactive)
-  (let (buffer input n)
-    (if (equal gtags-rootdir nil)
-      (save-excursion
-        (setq buffer (generate-new-buffer (generate-new-buffer-name "*rootdir*")))
-        (set-buffer buffer)
-        (setq n (call-process "global" nil t nil "-pr"))
-        (if (= n 0)
-          (setq gtags-rootdir (file-name-as-directory (buffer-substring (point-min)(1- (point-max)))))
-         (setq gtags-rootdir default-directory))
-        (kill-buffer buffer)))
-    (setq input (read-file-name "Visit root directory: "
-			gtags-rootdir gtags-rootdir t))
+  (let (path input n)
+    (if gtags-rootdir
+      (setq path gtags-rootdir)
+     (setq path (gtags-get-rootpath))
+     (if (equal path nil)
+       (setq path default-directory)))
+    (setq input (read-file-name "Visit root directory: " path path t))
     (if (equal "" input) nil
       (if (not (file-directory-p input))
         (message "%s is not directory." input)
@@ -327,27 +338,17 @@
   (interactive)
   (let (tagname flag)
     (setq tagname (gtags-current-token))
-    (if (gtags-is-function)
-        (if (gtags-is-definition) (setq flag "r") (setq flag ""))
-      (setq flag "s"))
     (if (not tagname)
         nil
       (gtags-push-context)
-      (gtags-goto-tag tagname flag))))
+      (gtags-goto-tag tagname "C"))))
 
 ; This function doesn't work with mozilla.
 ; But I will support it in the near future.
 (defun gtags-display-browser ()
   "Display current screen on hypertext browser."
   (interactive)
-  (let (lno)
-    (if (= 0 (count-lines (point-min) (point-max))) nil
-    (save-excursion
-      (end-of-line)
-      (if (equal (point-min) (point))
-          (setq lno 1)
-        (setq lno (count-lines (point-min) (point)))))
-    (call-process "gozilla"  nil nil nil (concat "+" (number-to-string lno)) buffer-file-name))))
+  (call-process "gozilla"  nil nil nil (concat "+" (number-to-string (gtags-current-lineno))) buffer-file-name))
 
 ; Private event-point
 ; (If there is no event-point then we use this version.
@@ -361,15 +362,15 @@
   (interactive "e")
   (let (tagname flag)
     (if (= 0 (count-lines (point-min) (point-max)))
-        (progn (setq tagname "main") (setq flag ""))
-      (if gtags-running-xemacs (goto-char (event-point event))
-       (select-window (posn-window (event-end event)))
+        (progn (setq tagname "main")
+               (setq flag ""))
+      (if gtags-running-xemacs
+          (goto-char (event-point event))
+        (select-window (posn-window (event-end event)))
         (set-buffer (window-buffer (posn-window (event-end event))))
         (goto-char (posn-point (event-end event))))
       (setq tagname (gtags-current-token))
-      (if (gtags-is-function)
-          (if (gtags-is-definition) (setq flag "r") (setq flag ""))
-        (setq flag "s")))
+      (setq flag "C"))
     (if (not tagname)
         nil
       (gtags-push-context)
@@ -428,11 +429,16 @@
 
 ;; goto tag's point
 (defun gtags-goto-tag (tagname flag)
-  (let (option save prefix buffer lines)
+  (let (option context save prefix buffer lines)
     (setq save (current-buffer))
     ; Use always ctags-x format.
-    (setq option (concat "-x" flag))
+    (setq option "-x")
+    (if (equal flag "C")
+        (setq context (concat "--from-here=" (number-to-string (gtags-current-lineno)) ":" buffer-file-name))
+        (setq option (concat option flag)))
     (cond
+     ((equal flag "C")
+      (setq prefix "(CONTEXT)"))
      ((equal flag "P")
       (setq prefix "(P)"))
      ((equal flag "g")
@@ -448,14 +454,24 @@
     (setq buffer (generate-new-buffer (generate-new-buffer-name (concat "*GTAGS SELECT* " prefix tagname))))
     (set-buffer buffer)
     ;
-    ; If project directory is specified, 'Gtags Select Mode' print paths using
-    ; the relative path name from the project directory else absolute path name.
+    ; Path style is defined in gtags-path-style:
+    ;   root: relative from the root of the project (Default)
+    ;   relative: relative from the current directory
+    ;	absolute: absolute (relative from the system root directory)
     ;
-    (if gtags-rootdir
-        (cd gtags-rootdir)
-        (setq option (concat option "a"))) 
+    (cond
+     ((equal gtags-path-style 'absolute)
+      (setq option (concat option "a")))
+     ((equal gtags-path-style 'root)
+      (let (rootdir)
+        (if gtags-rootdir
+          (setq rootdir gtags-rootdir)
+         (setq rootdir (gtags-get-rootpath)))
+        (if rootdir (cd rootdir)))))
     (message "Searching %s ..." tagname)
-    (if (not (= 0 (call-process "global" nil t nil option tagname)))
+    (if (not (= 0 (if (equal flag "C")
+                      (call-process "global" nil t nil option context tagname)
+                      (call-process "global" nil t nil option tagname))))
 	(progn (message (buffer-substring (point-min)(1- (point-max))))
                (gtags-pop-context))
       (goto-char (point-min))

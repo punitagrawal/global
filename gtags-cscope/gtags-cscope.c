@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2008
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -59,6 +59,7 @@ static void search(int, const char *);
 
 int show_version;
 int show_help;
+int qflag;
 int vflag;
 
 #define NA	-1
@@ -81,6 +82,7 @@ help(void)
 
 static struct option const long_options[] = {
 	{"ignore-case", no_argument, NULL, 'C'},
+	{"quiet", no_argument, NULL, 'q'},
 	{"verbose", no_argument, NULL, 'v'},
 	{"version", no_argument, &show_version, 1},
 	{"help", no_argument, &show_help, 1},
@@ -125,18 +127,20 @@ main(int argc, char **argv)
 	int optchar;
 	int option_index = 0;
 
-	while ((optchar = getopt_long(argc, argv, "Cqv", long_options, &option_index)) != EOF) {
+	while ((optchar = getopt_long(argc, argv, "bCcdeF:f:hI:i:kLlp:qRs:TUuVv0123456789", long_options, &option_index)) != EOF) {
 		switch (optchar) {
 		case 0:
 			break;
 		case 'C':
 			ignore_case = 1;
 			break;
+		case 'q':
+			qflag++;
+			break;
 		case 'v':
 			vflag++;
 			break;
 		default:
-			/* usage(); */
 			break;
 		}
 	}

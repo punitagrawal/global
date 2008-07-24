@@ -29,7 +29,7 @@
 #include "version.h"
 
 const char *copy = "\
-Copyright (c) 2007 Tama Communications Corporation\n\
+Copyright (c) 2008 Tama Communications Corporation\n\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
 This is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n\
@@ -52,9 +52,15 @@ version(const char *name, const int verbose)
 {
 	if (name == NULL)
 		name = progname;
-	/* always verbose according to the GNU coding standard */
-	/* fprintf(stdout, "%s\n", VERSION); */
-	fprintf(stdout, "%s - %s\n", name, PACKAGE_STRING);
-	fprintf(stdout, "%s", copy);
+	/*
+	 * if the -q option is not specified then always verbose
+	 * according to the GNU coding standard
+	 */
+	if (qflag)
+		fprintf(stdout, "%s\n", VERSION);
+	else {
+		fprintf(stdout, "%s - %s\n", name, PACKAGE_STRING);
+		fprintf(stdout, "%s", copy);
+	}
 	exit(0);
 }
