@@ -31,7 +31,7 @@ Bert Gijsbers		investigation about mandoc macro and a bug report.
 Bob Bentley		bug report about bless.sh and gtags.
 Bvk chaitanya		bug report about global (it cannot find gtags).
 Christoph Conrad	bug report and advice about S.u.S.E Linux 5.1.
-Daisuke Kawahara	bug report about redifinition in gtags.el.
+Daisuke Kawahara	bug report about redefinition in gtags.el.
 Dan Fandrich		port to Windows 32 environment.
 Darryl Okahata		benchmark report about global(1).
 David Aspinwall		port to Cygwin 32 environment.
@@ -50,7 +50,7 @@ Giuseppe Corbelli	Global.py for glimmer code editor and an advice about vim.
 Hageseter, Trond E.	bug report about gtags-parser.
 Hendrik Visage		bug report about gtags-parser(here document of PHP).
 Hideaki Okada		idea about -g option of global(1).
-Hideki Iwamoto		many bug reports and improvements about gtags-parser(1), htags(1).
+Hideki Iwamoto		many bug reports, fixes  and improvements about GLOBAL. See also AUTHORS file.
 Hideki Mori		advice about the name of parser.
 Hidetaka KOIE		bug report and advice about configure.in for Solaris7.
 Hiroshi MIURA		idea about printing file name on browser's status bar.
@@ -84,17 +84,19 @@ Patrick Strasser	many bug reports about htags(1).
 Paul Lew		advice about the build in Solaris environment.
 Paulius Bulotas		bug report and fix patch for gozilla(1).
 Pawel Wilk		idea about home_etc facility on PLD Linux/GNU.
-Philippe Defert		building on many plathomes and the problem report.
+Per Nordlxw		bug report that gtags-parser(1) cannot treat 'extern "C" { ... }'.
+Philippe Defert		building on many plat-homes and the problem report.
 Ray Simard		detailed investigation about POSIX dirent(3).
 Richard Stallman	advice about gtags.el and GNU style packaging.
 Rob Fitzgerald		bug fix patch for global(1).
 Ron Lee			Debian package, htmake(1) and many bug reports.
+Rongsong Shen		bug report about gtags(1).
 Rui Lopes		report about build error in *BSD and revision of term.
 Ruppert Koch		bug report about htags(1).
 Sadaichi Hayashida	idea about generating relative path.
-Satoru SATOH		profitable materrial for the support of XHTML.
+Satoru SATOH		profitable material for the support of XHTML.
 Sanpei Yoshiro Mihira	bug report of xargs.c in Windows 32.
-Sergio Talens-Oliag	writing online manual for systags(1).
+Sergio Talens-Oliag	writing on-line manual for systags(1).
 Shankar Chakkere	useful method to use vim editor with GLOBAL.
 Shigeyuki Yamano	idea about -h option of htags(1).
 Silas S. Brown		proofreading about manuals.
@@ -107,7 +109,9 @@ Thomas Gerigk		bug report about skip variable in gtags.conf.
 Thomas Klausner		report about groff's command error of *.1.
 Tim Vanderhoek		GLOBAL tag support on more(1).
 Tobias Polzin		suggestion about correct treatment of CVS repository in htags.
+			He also reported C++ parsing problem with constructors and destructors.
 Tomohiko Morioka	advice about deciding emacs version.
+Tom Russell		bug report about parsing error at function definitions with comment.
 Tom Tromey		GTAGS target in automake.
 Tomi Ollila		proposal of adding (provide 'gtags) to gtags.el.
 Toshiyasu Kojima	advice about deciding emacs version.

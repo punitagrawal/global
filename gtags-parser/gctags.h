@@ -33,12 +33,10 @@
 #define YACC	1
 
 extern int bflag;
-extern int dflag;
 extern int eflag;
 extern int nflag;
 extern int rflag;
 extern int sflag;
-extern int tflag;
 extern int vflag;
 extern int wflag;
 extern int debug;
@@ -57,7 +55,7 @@ void yacc(const char *);
 void Cpp(const char *);
 void java(const char *);
 void php(const char *);
-void assembler(const char *);
+void assembly(const char *);
 
 void dbg_print(int, const char *);
 int isnotfunction(char *);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+ * Copyright (c) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2008
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -141,16 +141,11 @@ Cpp(const char *file)
 					}
 				}
 			} else {
-				if (dflag) {
-					if (target == REF) {
-						if (defined(token))
-							PUT(token, lineno, sp);
-					} else if (target == SYM) {
-						if (!defined(token))
-							PUT(token, lineno, sp);
-					}
-				} else {
-					if (target == SYM)
+				if (target == REF) {
+					if (defined(token))
+						PUT(token, lineno, sp);
+				} else if (target == SYM) {
+					if (!defined(token))
 						PUT(token, lineno, sp);
 				}
 			}
@@ -190,10 +185,15 @@ Cpp(const char *file)
 			DBG_PRINT(level, "class");
 			if ((c = nexttoken(interested, cpp_reserved_word)) == SYMBOL) {
 				strlimcpy(classname, token, sizeof(classname));
-				if (target == DEF)
-					PUT(token, lineno, sp);
-				if (peekc(0) != ';')
+				/*
+				 * Ignore forward definitions.
+				 * "class name;"
+				 */
+				if (peekc(0) != ';') {
 					startclass = 1;
+					if (target == DEF)
+						PUT(token, lineno, sp);
+				}
 			}
 			break;
 		case '{':  /* } */
@@ -275,13 +275,8 @@ Cpp(const char *file)
 				if (c == '\n')
 					pushbacktoken();
 			}  else {
-				if (dflag) {
-					if (target == DEF)
-						PUT(token, lineno, sp);
-				} else {
-					if (target == SYM)
-						PUT(token, lineno, sp);
-				}
+				if (target == DEF)
+					PUT(token, lineno, sp);
 			}
 			break;
 		case SHARP_IMPORT:
@@ -313,14 +308,51 @@ Cpp(const char *file)
 					PUT(token, lineno, sp);
 			break;
 		case CPP_STRUCT:
+		case CPP_ENUM:
+		case CPP_UNION:
 			c = nexttoken(interested, cpp_reserved_word);
-			if (c == '{' /* } */) {
-				pushbacktoken();
-				break;
+			if (c == SYMBOL) {
+				if (peekc(0) == '{') /* } */ {
+					if (target == DEF)
+						PUT(token, lineno, sp);
+				} else if (target == REF) {
+					if (defined(token))
+						PUT(token, lineno, sp);
+				} else if (target == SYM) {
+					if (!defined(token))
+						PUT(token, lineno, sp);
+				}
+				c = nexttoken(interested, cpp_reserved_word);
 			}
-			if (c == SYMBOL)
-				if (target == SYM)
-					PUT(token, lineno, sp);
+			if (c == '{' /* } */ && cc == CPP_ENUM) {
+				int savelevel = level;
+
+				for (; c != EOF; c = nexttoken(interested, cpp_reserved_word)) {
+					switch (c) {
+					case SHARP_IFDEF:
+					case SHARP_IFNDEF:
+					case SHARP_IF:
+					case SHARP_ELIF:
+					case SHARP_ELSE:
+					case SHARP_ENDIF:
+						condition_macro(c, target);
+						continue;
+					default:
+						break;
+					}
+					if (c == '{')
+						level++;
+					else if (c == '}') {
+						if (--level == savelevel)
+							break;
+					} else if (c == SYMBOL) {
+						if (target == DEF)
+							PUT(token, lineno, sp);
+					}
+				}
+			} else {
+				pushbacktoken();
+			}
 			break;
 		case CPP_TEMPLATE:
 			{
@@ -378,7 +410,11 @@ Cpp(const char *file)
 				warning("Out of function. %8s [+%d %s]", token, lineno, curfile);
 			break;
 		case CPP_TYPEDEF:
-			if (tflag) {
+			{
+				/*
+				 * This parser is too complex to maintain.
+				 * We should rewrite the whole.
+				 */
 				char savetok[MAXTOKEN];
 				int savelineno = 0;
 				int typedef_savelevel = level;
@@ -400,8 +436,16 @@ Cpp(const char *file)
 					c = nexttoken(interest_enum, cpp_reserved_word);
 					/* read enum name if exist */
 					if (c == SYMBOL) {
-						if (target == SYM)
-							PUT(token, lineno, sp);
+						if (peekc(0) == '{') /* } */ {
+							if (target == DEF)
+								PUT(token, lineno, sp);
+						} else if (target == REF) {
+							if (defined(token))
+								PUT(token, lineno, sp);
+						} else if (target == SYM) {
+							if (!defined(token))
+								PUT(token, lineno, sp);
+						}
 						c = nexttoken(interest_enum, cpp_reserved_word);
 					}
 					for (; c != EOF; c = nexttoken(interest_enum, cpp_reserved_word)) {
@@ -706,10 +750,10 @@ condition_macro(int cc, int target)
 	while ((cc = nexttoken(NULL, cpp_reserved_word)) != EOF && cc != '\n') {
                 if (cc == SYMBOL && strcmp(token, "defined") != 0) {
 			if (target == REF) {
-				if (dflag && defined(token))
+				if (defined(token))
 		                        PUT(token, lineno, sp);
 			} else if (target == SYM) {
-				if (!dflag || !defined(token))
+				if (!defined(token))
 		                	PUT(token, lineno, sp);
 			}
 		}

@@ -133,6 +133,11 @@ repeat_find_next(void)
 /*
  * Common processing for each XARGS_XXXX type.
  */
+#ifdef _WIN32
+#define QUOTE	'"'
+#else
+#define QUOTE	'\''
+#endif
 #define APPEND_ARGUMENT(p) {\
 	char *path = (p);\
 	length = strlen(path);\
@@ -141,7 +146,7 @@ repeat_find_next(void)
 			gpath_put(path, GPATH_OTHER);\
 		continue;\
 	}\
-	if (strbuf_getlen(comline) + length > limit)\
+	if (strbuf_getlen(comline) + length + 2 > limit)\
 		break;\
 	xp->seqno++;\
 	if (xp->put_gpath)\
@@ -153,7 +158,9 @@ repeat_find_next(void)
 		if (xp->verbose)\
 			xp->verbose(path + 2, xp->seqno, 0);\
 		strbuf_putc(comline, ' ');\
+		strbuf_putc(comline, QUOTE);\
 		strbuf_puts(comline, path);\
+		strbuf_putc(comline, QUOTE);\
 		count++;\
 	}\
 }

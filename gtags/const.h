@@ -17,15 +17,15 @@ const char *help_const = "Options:\n\
 --gtagslabel label\n\
        label is used as the label of configuration file.\n\
        The default is default.\n\
+-I, --idutils\n\
+       Make index files for idutils(1) too.\n\
 -i, --incremental\n\
        Update tag files incrementally. You had better use\n\
        global(1) with the -u option.\n\
--I, --idutils\n\
-       Make index files for idutils(1).\n\
 -n, --max-args number\n\
        Maximum number of arguments for gtags-parser(1).\n\
-       By default, gtags invokes the parser with arguments\n\
-       as a lot as possible to decrease the frequency of invoking.\n\
+       By default, gtags invokes gtags-parser with arguments\n\
+       as many as possible to decrease the frequency of invoking.\n\
 -q, --quiet\n\
        Quiet mode.\n\
 -v, --verbose\n\

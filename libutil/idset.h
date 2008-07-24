@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2006 Tama Communications Corporation
+ * Copyright (c) 2005, 2006, 2007 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -19,14 +19,17 @@
 #ifndef _IDSET_H_
 #define _IDSET_H_
 
+/*
+ * Any id is not equal to END_OF_ID.
+ */
 #define END_OF_ID ((unsigned int)(-1))
 
 typedef struct {
-	int size;
-	int empty;
+	unsigned int size;
+	unsigned int min;
 	unsigned int max;
-	unsigned int *set;
 	unsigned int lastid;		/* used by idset_first() and idset_next() */
+	unsigned long *set;
 } IDSET;
 
 IDSET *idset_open(unsigned int);
@@ -35,7 +38,7 @@ void idset_add(IDSET *, unsigned int);
 int idset_contains(IDSET *, unsigned int);
 unsigned int idset_first(IDSET *);
 unsigned int idset_next(IDSET *);
-unsigned idset_count(IDSET *);
+unsigned int idset_count(IDSET *);
 void idset_close(IDSET *);
 
 #endif /* ! _IDSET_H_ */

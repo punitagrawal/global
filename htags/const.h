@@ -15,7 +15,7 @@ const char *help_const = "Options:\n\
 --cvsweb url\n\
        Include cvsweb URL. url is used as base of URL.\n\
        When directory CVS exists in the root directory of source project,\n\
-       content of CVS/Repository is used as relative path from the base.\n\
+       the content of CVS/Repository is used as the relative path from the base.\n\
 --cvsweb-cvsroot cvsroot\n\
        Specifies cvsroot in cvsweb URL.\n\
 -D, --dynamic\n\
@@ -23,22 +23,29 @@ const char *help_const = "Options:\n\
        By default, object lists are generated statically.\n\
        Though this option decrease both the size and the generation\n\
        time of the hypertext, you need to set up a web server, and \n\
-       you cannot move the hypertext from the source directroy.\n\
+       you cannot move the hypertext from the source directory.\n\
 -d, --dbpath dbpath\n\
        Specifies the directory in which GTAGS and GRTAGS\n\
        exist. The default is the current directory.\n\
+--disable-grep\n\
+       Disable grep in the search form(-f,--form).\n\
+-F, --frame\n\
+       Use frame for each part of the contents.\n\
 -f, --form\n\
        Support search form using CGI program.\n\
        You need to set up a web server, and you cannot move\n\
-       the hypertext from the source directroy.\n\
--F, --frame\n\
-       Use frame for each part of the contents.\n\
+       the hypertext from the source directory.\n\
 --full-path\n\
-       List file names with full path in file index.\n\
+       List file names with full path in the file index.\n\
        By default, list just the last component of a path.\n\
 -g, --gtags\n\
        Execute gtags(1) before creating hypertext.\n\
        The -v, -w and dbpath are passed to gtags.\n\
+--gtagsconf file\n\
+       Load user's configuration from file.\n\
+--gtagslabel label\n\
+       label is used for the label of configuration file.\n\
+       The default is default.\n\
 -h, --func-header[=position]\n\
        Insert function header for each function.\n\
        By default, htags doesn't generates it.\n\
@@ -47,17 +54,10 @@ const char *help_const = "Options:\n\
        The default position is after.\n\
 -I, --icon\n\
        Use icons instead of text for some links.\n\
---disable-grep\n\
-       Disable grep in search form(-f,--form).\n\
---gtagsconf file\n\
-       Load user's configuration from file.\n\
---gtagslabel label\n\
-       label is used for the label of configuration file.\n\
-       The default is default.\n\
---insert-header file\n\
-       Insert custom header derived from file after <body> tag.\n\
 --insert-footer file\n\
        Insert custom footer derived from file before </body> tag.\n\
+--insert-header file\n\
+       Insert custom header derived from file after <body> tag.\n\
 --item-order spec\n\
        Specify order of items in the top page.\n\
        The spec is a string consists of item signs in order.\n\
@@ -68,7 +68,7 @@ const char *help_const = "Options:\n\
 -m, --main-func name\n\
        Specify the main function name. The default is main.\n\
 -n, --line-number[=columns]\n\
-       Print line numbers. By default, doesn't print them.\n\
+       Print line numbers. By default, doesn't print line numbers.\n\
        The default value of columns is 4.\n\
 --no-map-file\n\
        Doesn't generate MAP and FILEMAP file.\n\
@@ -76,23 +76,25 @@ const char *help_const = "Options:\n\
 -o, --other\n\
        Pick up not only source files but also other files except for\n\
        binary files.\n\
---statistics\n\
-       Print statistics information.\n\
--s, --symbol\n\
-       Make anchors not only for functions but also other symbols.\n\
-       GSYMS tag file needed.\n\
 -S, --secure-cgi cgidir\n\
        Write CGI programs into the cgidir to realize\n\
        a centralised CGI program.\n\
        Script alias is /cgi-bin by default.\n\
        You can overwrite this value using config variable\n\
        script_alias in gtags.conf.\n\
--t, --title title\n\
-       The title of this hypertext. The default is the last\n\
-       component of the current directory.\n\
+-s, --symbol\n\
+       Make anchors not only for object definitions and references but also other symbols.\n\
+--statistics\n\
+       Print statistics information.\n\
+--suggest\n\
+       Htags selects popular options instead of beginners.\n\
+       It is equivalent to '-afghInosTxv --show-position' now.\n\
 -T, --table-flist[=fields]\n\
        Generate file list using <table> tag.\n\
        The fields is used for field number in a line. The default is 5.\n\
+-t, --title title\n\
+       The title of this hypertext. The default is the last\n\
+       component of the current directory.\n\
 --table-list\n\
        List tags using <table> tag.\n\
 --tabs number\n\

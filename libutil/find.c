@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2008
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -47,6 +47,7 @@
 #include "gparam.h"
 #include "regex.h"
 
+#include "abs2rel.h"
 #include "char.h"
 #include "checkalloc.h"
 #include "conf.h"
@@ -80,6 +81,7 @@ static char **listarray;		/* list for skipping full path */
 static FILE *ip;
 static FILE *temp;
 static char rootdir[MAXPATHLEN+1];
+static char cwddir[MAXPATHLEN+1];
 static int status;
 #define FIND_OPEN	1
 #define FILELIST_OPEN	2
@@ -359,25 +361,14 @@ getdirs(const char *dir, STRBUF *sb)
 			continue;
 		if (!strcmp(dp->d_name, ".."))
 			continue;
-#ifdef HAVE_LSTAT
-		if (lstat(makepath(dir, dp->d_name, NULL), &st) < 0) {
-			warning("cannot lstat '%s'. (Ignored)", dp->d_name);
-			continue;
-		}
-#else
 		if (stat(makepath(dir, dp->d_name, NULL), &st) < 0) {
 			warning("cannot stat '%s'. (Ignored)", dp->d_name);
 			continue;
 		}
-#endif
 		if (S_ISDIR(st.st_mode))
 			strbuf_putc(sb, 'd');
 		else if (S_ISREG(st.st_mode))
 			strbuf_putc(sb, 'f');
-#ifdef S_ISLNK
-		else if (S_ISLNK(st.st_mode))
-			strbuf_putc(sb, 'l');
-#endif
 		else
 			strbuf_putc(sb, ' ');
 		strbuf_puts(sb, dp->d_name);
@@ -455,10 +446,10 @@ find_open_filelist(const char *filename, const char *root)
 	 * rootdir always ends with '/'.
 	 */
 	if (!strcmp(root, "/"))
-		strcpy(rootdir, root);
+		strlimcpy(rootdir, root, sizeof(rootdir));
 	else
 		snprintf(rootdir, sizeof(rootdir), "%s/", root);
-
+	strlimcpy(cwddir, root, sizeof(cwddir));
 	/*
 	 * prepare regular expressions.
 	 */
@@ -502,7 +493,7 @@ find_read_traverse(void)
 			const char *unit = curp->p + 1;
 
 			curp->p += strlen(curp->p) + 1;
-			if (type == 'f' || type == 'l') {
+			if (type == 'f') {
 				char path[MAXPATHLEN];
 
 				/* makepath() returns unsafe module local area. */
@@ -623,26 +614,13 @@ find_read_filelist(void)
 			}
 			continue;
 		}
-		if (realpath(path, buf) == NULL) {
-			if (!qflag)
-				warning("realpath(\"%s\", buf) failed.", path);
-			continue;
-		}
-		if (!isabspath(buf))
-			die("realpath(3) is not compatible with BSD version.");
 		/*
-		 * Remove the root part of buf and insert './'.
+		 * normalize path name.
+		 *
 		 *	rootdir  /a/b/
 		 *	buf      /a/b/c/d.c -> c/d.c -> ./c/d.c
 		 */
-		path = locatestring(buf, rootdir, MATCH_AT_FIRST);
-		if (path == NULL) {
-			if (!qflag)
-				warning("'%s' is out of source tree.", buf);
-			continue;
-		}
-		path -= 2;
-		*path = '.';
+		path = normalize(path, rootdir, cwddir, buf, sizeof(buf));
 		/*
 		 * GLOBAL cannot treat path which includes blanks.
 		 * It will be improved in the future.

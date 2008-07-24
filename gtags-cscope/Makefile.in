@@ -330,8 +330,6 @@ GTAGS:
 	here=`$(am__cd) $(top_builddir) && pwd` \
 	  && cd $(top_srcdir) \
 	  && gtags -i $(GTAGS_ARGS) $$here
-	  && if test '$(top_srcdir)' != '$(top_builddir)'; then \
-	       echo '$(top_srcdir)' >$(top_builddir)/GTAGSROOT; fi
 
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
