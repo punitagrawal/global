@@ -2,7 +2,7 @@
 set -e
 if [ "$1" = "configure" ];
 then
-	HOST=`hostname --fqdn`
+	HOST=$(hostname --fqdn) || HOST="localhost"
 	htconfig -I -a http://${HOST}/cgi-bin/gsearch.cgi -p /var/lib/gsearch/pathdata /usr/lib/cgi-bin
 fi
 
