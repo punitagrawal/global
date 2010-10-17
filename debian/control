@@ -3,11 +3,11 @@ Section: devel
 Priority: optional
 Build-Depends: debhelper (>=6.0.7), texinfo
 Maintainer: Ron Lee <ron@debian.org>
-Standards-Version: 3.8.0.1
+Standards-Version: 3.9.1.0
 
 Package: global
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: dpkg (>= 1.15.4) | install-info, ${shlibs:Depends}
 Suggests: lynx | www-browser, doxygen (>=1.4.3), apache | httpd, id-utils
 Description: Source code search and browse tools
  GNU GLOBAL is a source code tag system that works the same way across
