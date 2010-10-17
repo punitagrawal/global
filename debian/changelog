@@ -1,3 +1,12 @@
+global (5.7.1-2) unstable; urgency=low
+
+  * Fall back to localhost if `hostname --fqdn` fails.
+    This shouldn't usually happen, but may in some corner cases,
+    and the postinst shouldn't abort if it does.  Closes: #541322
+  * Extra deps for the Lenny info trigger transition.
+
+ -- Ron Lee <ron@debian.org>  Sun, 17 Oct 2010 11:42:50 +1030
+
 global (5.7.1-1) unstable; urgency=low
 
   * New upstream release.  Closes: #491713
