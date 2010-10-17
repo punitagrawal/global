@@ -1,0 +1,55 @@
+
+	GLOBAL for Debian
+	-----------------
+
+See /usr/share/doc/global/README.gz and README.htmake.gz or the
+global.info and relevant man pages for general usage details.
+
+The Debian version of GLOBAL has been configured to use a
+centralised cgi search mechanism which I developed for it.
+If you want to generate searchable html source but don't
+like to have .htaccess files or cgi execution enabled all
+over the place, then consider using 'htmake' in place of
+'htags' to generate your hypertext source.  See the htmake
+manual page for details.
+
+I've also added a -C option for htags which produces gzipped
+html files with a suffix of html.gz -- This makes use of the
+ghtml.cgi file unnecessary for Debian systems, as they should
+decompress html.gz files transparently.
+
+(UPDATE: FreeBSD (the upstream authors platform) does not
+presently deal with html.gz files the same way that Debian
+does, hence htags -c option creates .ghtml files by default.
+The -C option has been added as a convenience for Debian
+users, but this facility may be implemented differently
+in the future.  An alternate option for Debian users is
+to specify html.gz as the default suffix in a global.conf
+file which will override the suffix created with -c, but
+be aware that this may raise platform dependency issues
+in cross platform environments.  We hope this issue will
+be cleanly resolved in the future.) 
+
+UPDATE-UPDATE: This issue is confused a little more, since
+mozilla no longer does a sane thing by default with html.gz
+(though lynx still does), while Debian apache will happily
+decompress both html.gz and .ghtml on the fly, so either
+way you do not need a helper cgi there.  The -C option
+still supresses its generation, while -c does not.
+
+In the ./examples directory you should find:
+
+ - The gtags.vim plugin.
+ - Patches and a helper script for nvi.
+ - An example of the optional gtags.conf file.
+
+The globash.rc is now installed in /etc and may be invoked
+via the globash(1) wrapper.
+
+Enjoy!
+
+ Ron
+
+
+Sat, 13 Feb 1999 03:18:28 +1030
+

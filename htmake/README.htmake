@@ -1,0 +1,41 @@
+
+htmake(1) and htconfig(1) are used to implement a centralised cgi
+mechanism in conjunction with Shigio Yamaguchi's GLOBAL. See the
+relevant manual pages for a more comprehensive guide.
+
+to setup:
+	If you installed GLOBAL as a Debian binary package this
+	is already done.  See /etc/gtags/htmake.conf if you
+	wish to edit the defaults.
+
+	# make install
+	# htconfig -v -I -a http://hostname/cgi-bin/gsearch.cgi \
+		-p /var/gsearch/pathdata /yoursystems/cgi-bindir
+
+	where '-a url' is the url to your cgi-bin dir
+	'-p path' is wherever you choose to put the path data file
+	'/yoursystems/cgi-bindir' is wherever your cgi's usually go.
+
+example use (with default htags behaviour):
+	$ cd /somesource
+	$ gtags
+	$ htmake --verbose
+	$ lynx HTML/index.html	( should be immediately searchable.. )
+
+to create html files in public webspace:
+	$ cd /somesource
+	$ gtags
+	$ htmake --url=http://host/~user/prog/HTML /home/user/public_html/prog
+	$ lynx http://host/~user/prog/HTML
+
+The user that you run htmake as _must_ have write permission for the file
+/var/gsearch/pathdata -- since there are many ways to arrange this I have
+left it entirely up to the sysadmin to do - if you do htconfig -I to
+install files as root, then by default only root can write to this file.
+
+Comments, patches, praise, and blathering flames can
+be sent along with suggestions for improvement to
+Ron Lee <ron@debian.org>
+
+See the included file 'COPYING' or 'copyright' for licence information.
+

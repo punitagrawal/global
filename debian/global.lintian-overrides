@@ -1,0 +1,4 @@
+global: package-contains-empty-directory
+global: script-not-executable ./usr/share/gtags/bless.sh.tmpl
+global: script-not-executable ./usr/share/gtags/ghtml.cgi.tmpl
+global: script-not-executable ./usr/share/gtags/global.cgi.tmpl

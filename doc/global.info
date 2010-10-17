@@ -548,6 +548,10 @@ invoke Bash(1) with `--rcfile' option.
 
          $ bash --rcfile /usr/local/share/gtags/globash.rc
 
+   On Debian systems you may instead simply invoke globash(1).
+
+         $ globash
+
    You will see a prompt like this:
 
          [/usr/src/sys]/kern _
