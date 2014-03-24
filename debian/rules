@@ -50,8 +50,8 @@ install:
 			MANDIR=`pwd`/../debian/$(package)/usr/share/man
 	cp -p gtags.el `pwd`/debian/$(package)/usr/share/emacs/site-lisp/$(package)
 
-	dh_install globash.rc	etc
-	dh_install globash	usr/bin
+	dh_install globash/globash.rc	etc
+	dh_install globash/globash	usr/bin
 	dh_lintian
 
 

@@ -8,6 +8,7 @@ global (6.2.11-1.1) UNRELEASED; urgency=medium
   * Migrate local changes to latest upstream version - 6.2.11
     Drop globash patch as it seems to be integrated with upstream
     Drop alternate compressed suffix functionality for htags
+  * Update debian/rules in line with 6.2.11
 
  -- Punit Agrawal <punitagrawal@gmail.com>  Fri, 28 Mar 2014 17:23:57 +0000
 
