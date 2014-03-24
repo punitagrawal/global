@@ -1,4 +1,2 @@
-0001-Escape-colons-in-man-page.patch
-0002-Debianisation-of-htags.patch
-0003-Introduce-htmake-for-global.patch
-0004-Introduce-globash-for-global.patch
+0001-Debianisation-of-htags.patch
+0002-Introduce-htmake-for-global.patch

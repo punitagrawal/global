@@ -1,0 +1,30 @@
+From: Punit Agrawal <punitagrawal@gmail.com>
+Date: Mon, 24 Mar 2014 15:04:20 +0000
+Subject: Debianisation of htags
+
+* Change default perl location
+---
+ htags/completion.cgi.tmpl | 2 +-
+ htags/global.cgi.tmpl     | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/htags/completion.cgi.tmpl b/htags/completion.cgi.tmpl
+index 81ed281..17b0978 100644
+--- a/htags/completion.cgi.tmpl
++++ b/htags/completion.cgi.tmpl
+@@ -1,4 +1,4 @@
+-#! /opt/local/bin/perl
++#! /usr/bin/perl
+ #
+ # Copyright (c) 2010 Tama Communications Corporation
+ #
+diff --git a/htags/global.cgi.tmpl b/htags/global.cgi.tmpl
+index 273b6c4..d4cd441 100644
+--- a/htags/global.cgi.tmpl
++++ b/htags/global.cgi.tmpl
+@@ -1,4 +1,4 @@
+-#! /opt/local/bin/perl
++#! /usr/bin/perl
+ #------------------------------------------------------------------
+ # YOU ARE COMING TO THE DESTINATION ALMOST. PLEASE DO A LITTLE EFFORT.
+ #
