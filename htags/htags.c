@@ -98,7 +98,7 @@ char *item_order = "csmdf";
  * options
  */
 int aflag;				/* --alphabet(-a) option	*/
-int cflag;				/* --compact(-c|-C) option	*/
+int cflag;				/* --compact(-c) option		*/
 int fflag;				/* --form(-f) option		*/
 int Fflag;				/* --frame(-F) option		*/
 int gflag;				/* --gtags(-g) option		*/
@@ -231,7 +231,6 @@ int table_flist = 0;			/* file list using table tag	*/
 int colorize_warned_line = 0;		/* colorize warned line		*/
 const char *script_alias = "/cgi-bin";	/* script alias of WWW server	*/
 const char *gzipped_suffix = "ghtml";	/* suffix of gzipped html file	*/
-const char *alt_gz_suffix = "html.gz";	/* suffix of -C compressed file	*/
 const char *normal_suffix = "html";	/* suffix of normal html file	*/
 const char *HTML;
 const char *action = "cgi-bin/global.cgi";/* default action		*/
@@ -1453,7 +1452,7 @@ main(int argc, char **argv)
 	if (htags_options)
 		argv = append_options(&argc, argv);
 
-	while ((optchar = getopt_long(argc, argv, "acCd:DfFghIm:noqsS:t:Tvwx", long_options, &option_index)) != EOF) {
+	while ((optchar = getopt_long(argc, argv, "acd:DfFghIm:noqsS:t:Tvwx", long_options, &option_index)) != EOF) {
 		switch (optchar) {
 		case 0:
 			/* already flags set */
@@ -1492,10 +1491,7 @@ main(int argc, char **argv)
                         aflag++;
                         break;
                 case 'c':
-                        cflag = 'c';
-                        break;
-                case 'C':
-                        cflag = 'C';
+                        cflag++;
                         break;
                 case 'd':
 			strlimcpy(arg_dbpath, optarg, sizeof(arg_dbpath));
@@ -1674,7 +1670,7 @@ main(int argc, char **argv)
 		strlimcpy(dbpath, cwdpath, sizeof(dbpath));
 
 	if (cflag && !usable("gzip")) {
-		warning("'gzip' command not found. -%c option ignored.", cflag );
+		warning("'gzip' command not found. -c option ignored.");
 		cflag = 0;
 	}
 	if (!title) {
@@ -1772,7 +1768,7 @@ main(int argc, char **argv)
 	/*
 	 * check directories
 	 */
-	if (fflag || cflag == 'c' || dynamic) {
+	if (fflag || cflag || dynamic) {
 		if (cgidir && !test("d", cgidir))
 			die("'%s' not found.", cgidir);
 		if (!Sflag) {
@@ -1789,7 +1785,7 @@ main(int argc, char **argv)
 	 *------------------------------------------------------------------
 	 *       HTML/cgi-bin/global.cgi ... CGI program (1)
 	 *       HTML/cgi-bin/ghtml.cgi  ... unzip script (1)
-	 *       HTML/.htaccess.skel     ... skeleton of .htaccess (1)
+	 *       HTML/.htaccess          ... skeleton of .htaccess (1)
 	 *       HTML/help.html          ... help file (2)
 	 *       HTML/R/                 ... references (3)
 	 *       HTML/D/                 ... definitions (3)
@@ -1810,8 +1806,7 @@ main(int argc, char **argv)
 	signal_setup();
 	sethandler(clean);
 
-        HTML = (cflag == 'c') ? gzipped_suffix
-                              : (cflag == 'C') ? alt_gz_suffix : normal_suffix;
+        HTML = (cflag) ? gzipped_suffix : normal_suffix;
 
 	message("[%s] Htags started", now());
 	start_all_time = time(NULL);
@@ -1839,7 +1834,7 @@ main(int argc, char **argv)
 		if (symbol)
 			make_directory_in_distpath(SYMS);
 	}
-	if (cgi && (fflag || cflag == 'c' || dynamic))
+	if (cgi && (fflag || cflag || dynamic))
 		make_directory_in_distpath("cgi-bin");
 	if (Iflag)
 		make_directory_in_distpath("icons");
@@ -1863,9 +1858,9 @@ main(int argc, char **argv)
 	} else {
 		message("[%s] (1) making CGI program ...(skipped)", now());
 	}
-	if (cgi && cflag == 'c') {
-		makehtaccess(".htaccess.skel");
-		if (chmod(makepath(distpath, ".htaccess.skel", NULL), 0644) < 0)
+	if (cgi && cflag) {
+		makehtaccess(".htaccess");
+		if (chmod(makepath(distpath, ".htaccess", NULL), 0644) < 0)
 			die("cannot chmod .htaccess skeleton.");
 		if (cgidir) {
 			makeghtml(cgidir, "ghtml.cgi");
@@ -1990,7 +1985,7 @@ main(int argc, char **argv)
 			message(" Your system may need to be setup to decompress *.%s files.", gzipped_suffix);
 			message(" This can be done by having your browser compiled with the relevant");
 			message(" options, or by configuring your http server to treat these as");
-			message(" gzipped files. (Please see 'HTML/.htaccess.skel')\n");
+			message(" gzipped files. (Please see 'HTML/.htaccess')\n");
 		}
 		if (fflag || dynamic) {
 			const char *format = " You need to setup http server so that %s is executed as a CGI script.";

@@ -647,13 +647,6 @@ And you can invoke Bash(1) with @samp{--rcfile} option.
 
 @end example
 
-On Debian systems you may instead simply invoke globash(1).
-@example
-
-    $ globash
-
-@end example
-
 You will see a prompt like this:
 @example
 

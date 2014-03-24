@@ -1,3 +1,11 @@
+global (5.7.1-2.1) UNRELEASED; urgency=medium
+
+  * Non-maintainer upload.
+  * Switch to dpkg-source 3.0 (quilt) format
+    Split diff into individual patches by functionality.
+
+ -- Punit Agrawal <punitagrawal@gmail.com>  Mon, 24 Mar 2014 15:10:41 +0000
+
 global (5.7.1-2) unstable; urgency=low
 
   * Fall back to localhost if `hostname --fqdn` fails.
