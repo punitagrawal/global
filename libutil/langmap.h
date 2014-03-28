@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Tama Communications Corporation
+ * Copyright (c) 2004, 2011 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -22,8 +22,9 @@
 
 #include "strbuf.h"
 
-#define DEFAULTLANGMAP  "c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml"
-#define DEFAULTSKIP     "GPATH,GTAGS,GRTAGS,GSYMS,HTML/,HTML.pub/,html/,tags,TAGS,ID,y.tab.c,y.tab.h,.notfunction,cscope.out,cscope.po.out,cscope.in.out,.gdbinit,SCCS/,RCS/,CVS/,CVSROOT/,{arch}/,.svn/,.git/,.cvsrc,.cvsignore,.gitignore,.cvspass,.cvswrappers,.deps/,autom4te.cache/,.snprj/"
+#define DEFAULTLANGMAP  "c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml"
+#define DEFAULTSKIP     "HTML/,HTML.pub/,tags,TAGS,ID,y.tab.c,y.tab.h,gtags.files,cscope.files,cscope.out,cscope.po.out,cscope.in.out,SCCS/,RCS/,CVS/,CVSROOT/,{arch}/,autom4te.cache/,*.orig,*.rej,*.bak,*~,#*#,*.swp,*.tmp,*_flymake.*,*_flymake"
+#define DEFAULTINCLUDEFILESUFFIXES "h,hh,hxx,hpp,H,inc.php"
 
 void setup_langmap(const char *);
 const char *decide_lang(const char *);

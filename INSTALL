@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000, 2002, 2003, 2004, 2006 Tama Communications Corporation
+ Copyright (c) 2000, 2002, 2003, 2004, 2006, 2011 Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
  unlimited permission to copy and/or distribute it, with or without
@@ -32,7 +32,7 @@ o If you want to use the -I option of global(1) then idutils(1) is needed.
 	ftp://ftp.gnu.org/pub/gnu/idutils/
   
 o If you want to use the --form(-f) or --dynamic(-D) option of htags(1) then
-  Perl version 4 or later is needed.
+  Perl version 5 or later is needed.
 
    If you don't have it, you can fetch it from this site.
 
@@ -44,32 +44,9 @@ o If you want to use the --form(-f) or --dynamic(-D) option of htags(1) then
 	$ make
 	# make install
 
+	(You can see the options of configure by invoking './configure --help')
+
 3. Using GLOBAL with editors.
-
-o Nvi-1.81.5
-
-   Please get nvi-1.81.5 at:
-
-
-	   http://www.kotnet.org/~skimo/nvi/
-
-   build it with '--enable-perlinterp' option and do the followings.
-   ($HOME/perl is an example. Please replace it with any directory you like.)
-
-	$ mkdir $HOME/perl
-	$ cp gtags.pl $HOME/perl
-	$ vi $HOME/.nexrc
-	+-----------------------------------------
-	|perl use lib qw($ENV{HOME}/perl)
-	|perl require 'gtags.pl'
-	|map ^P :tagprev^M
-	|map ^N :tagnext^M
-	|map ^] :perl tag^M
-	|ab gtag perl tag qw(
-	|ab gta perl tag qw(
-	|ab gt perl tag qw(
-
-   ('gtags.pl' is included in GLOBAL package.)
 
 o Emacs
 
@@ -83,11 +60,7 @@ o Emacs
 	XEmacs:
 		http://www.xemacs.org
 
-   Please copy gtags.el file to emacs lisp library directory or place it in
-   a directory (for example "~/lisp") and write $HOME/.emacs like this.
-
-	+-----------------------------------------------
-	|(setq load-path (cons "~/lisp" load-path))
+   Installation procedure is written in gtags.el itself.
 
 o Elvis
 
@@ -95,16 +68,20 @@ o Elvis
 
 	http://elvis.vi-editor.org/
 
-   You need not any patch for it.
+   Please copy an elvis script to your home directory.
+
+	$ cp /usr/local/share/gtags/elvis.rc $HOME/.elvisrc
+	$ PATH=/usr/local/share/gtags/script:$PATH
 
 o Vim
 
-   You can get them at:
+   You can get it at:
 
 	http://www.vim.org/
 
-   Please copy gtags.vim file to your plug-in directory.
+   Please copy vim scripts to your plug-in directory.
 
 	$ cp /usr/local/share/gtags/gtags.vim $HOME/.vim/plugin
+	$ cp /usr/local/share/gtags/gtags-cscope.vim $HOME/.vim/plugin
 
 Good luck!

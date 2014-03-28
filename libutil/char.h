@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003 Tama Communications Corporation
+ * Copyright (c) 2003, 2011 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -24,15 +24,21 @@ extern const unsigned char chartype[256];
 
 #define REGEXCHAR		1
 #define URLCHAR			2
+#define BINARYCHAR		4
 #define test_chartype(c, t)	(chartype[(unsigned char)(c)] & (t))
 
-/* test whether or not regular expression char. */
+/** test whether or not regular expression char. */
 #define isregexchar(c)		test_chartype(c, REGEXCHAR)
 
-/* test whether can be included in URL without escaping. */
+/** test whether can be included in URL without escaping. */
 #define isurlchar(c)		test_chartype(c, URLCHAR)
+
+/** test whether or not cahr included in binary file. */
+#define isbinarychar(c)		test_chartype(c, BINARYCHAR)
 
 int isregex(const char *);
 const char *quote_string(const char *);
+const char *quote_chars(const char *, unsigned int);
+const char *quote_shell(const char *);
 
 #endif /* ! _CHAR_H_ */

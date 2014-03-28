@@ -1,5 +1,5 @@
 #
-# Copyright (c) 1998, 1999, 2000, 2001, 2002, 2003
+# Copyright (c) 1998, 1999, 2000, 2001, 2002, 2003, 2010, 2011, 2013
 #	Tama Communications Corporation
 #
 # This file is part of GNU GLOBAL.
@@ -15,71 +15,135 @@
 # *
 # Configuration file for GNU GLOBAL source code tag system.
 #
-# GLOBAL doesn't need 'gtags.conf' because it has the default values in it.
-# But if you have this file as '/etc/gtags.conf' or "$HOME/.globalrc"
-# then GLOBAL system overwrite default values with the values from the file.
+# Basically, GLOBAL doesn't need this file ('gtags.conf'), because it has
+# default values in itsself. If you have the file as '/etc/gtags.conf' or
+# "$HOME/.globalrc" in your system then GLOBAL overwrite the default values
+# with the values in the file.
 #
-# 'gtags.conf' is termcap style file.
-# 'default' is default target.
-# You can specify target with GTAGSLABEL environment variable.
-#
-# Variable 'suffixes' is obsoleted but is acceptable because it is needed
-# for plugged-in parser. If you use gtags-parser(1) then you should use
-# variable 'langmap' instead.
+# The format is similar to termcap(5). You can specify a target with
+# GTAGSLABEL environment variable. Default target is 'default'.
 #
 default:\
+	:tc=native:
+native:\
 	:tc=gtags:tc=htags:
+user:\
+	:tc=user-custom:tc=htags:
+ctags:\
+	:tc=exuberant-ctags:tc=htags:
 #---------------------------------------------------------------------
 # Configuration for gtags(1)
 # See gtags(1).
 #---------------------------------------------------------------------
 common:\
-	:skip=@DEFAULTSKIP@:\
-	:langmap=@DEFAULTLANGMAP_QUOTED@:
+	:skip=@DEFAULTSKIP@:
 #
-# [gtags-parser]
-#
-# This command is distributed as part of GLOBAL.
-# The %s is replaced with the path of source file.
-# You need not use --langmap=xxx option. Gtags-parser(1) get the value
-# from environment variable.
+# Built-in parsers.
 #
 gtags:\
 	:tc=common:\
-	:GTAGS=gtags-parser %s:\
-	:GRTAGS=gtags-parser -r %s:\
-	:GSYMS=gtags-parser -s %s:
+	:tc=builtin-parser:
+builtin-parser:\
+	:langmap=@DEFAULTLANGMAP_QUOTED@:
 #
-# [Exuberant Ctags]
+# skeleton for user's custom parser.
 #
-# This ctags is distributed as a part of Vim editor.
-#
-# [Installation]
-# % cd <Vim source directory>/src/ctags
-# % make
-# # cp ctags /usr/local/bin/ctags-exuberant
-#
-ctags-exuberant|Exuberant Ctags|ctags by Darren Hiebert:\
+user-custom|User custom plugin parser:\
 	:tc=common:\
-	:suffixes=s,a,sa,asm,C,H,cpp,cxx,hxx,hpp,cc,c,h,y:\
-	:extractmethod:\
-	:GTAGS=/usr/local/bin/ctags-exuberant -xu %s | perl -ne '\
-		if (/^operator \\S+\\s+function\\s/) { s/^operator //; }\
-		($name, $type, $no, $path, $line) = split(/[ \\t]+/, $_, 5);\
-		printf(STDOUT "%-16s %4d %-16s %s", $name, $no, $path, $line);':
+	:langmap=c\:.c.h:\
+	:gtags_parser=c\:@prefix@/lib/gtags/user-custom.la:
+#
+# Plug-in parser to use Exuberant Ctags.
+#
+exuberant-ctags|plugin-example|setting to use Exuberant Ctags plug-in parser:\
+	:tc=common:\
+	:langmap=Asm\:.asm.ASM.s.S:\
+	:langmap=Asp\:.asp.asa:\
+	:langmap=Awk\:.awk.gawk.mawk:\
+	:langmap=Basic\:.bas.bi.bb.pb:\
+	:langmap=BETA\:.bet:\
+	:langmap=C\:.c:\
+	:langmap=C++\:.c++.cc.cp.cpp.cxx.h.h++.hh.hp.hpp.hxx.C.H:\
+	:langmap=C#\:.cs:\
+	:langmap=Cobol\:.cbl.cob.CBL.COB:\
+	:langmap=DosBatch\:.bat.cmd:\
+	:langmap=Eiffel\:.e:\
+	:langmap=Erlang\:.erl.ERL.hrl.HRL:\
+	:langmap=Flex\:.as.mxml:\
+	:langmap=Fortran\:.f.for.ftn.f77.f90.f95.F.FOR.FTN.F77.F90.F95:\
+	:langmap=HTML\:.htm.html:\
+	:langmap=Java\:.java:\
+	:langmap=JavaScript\:.js:\
+	:langmap=Lisp\:.cl.clisp.el.l.lisp.lsp:\
+	:langmap=Lua\:.lua:\
+	:langmap=MatLab\:.m:\
+	:langmap=OCaml\:.ml.mli:\
+	:langmap=Pascal\:.p.pas:\
+	:langmap=Perl\:.pl.pm.plx.perl:\
+	:langmap=PHP\:.php.php3.phtml:\
+	:langmap=Python\:.py.pyx.pxd.pxi.scons:\
+	:langmap=REXX\:.cmd.rexx.rx:\
+	:langmap=Ruby\:.rb.ruby:\
+	:langmap=Scheme\:.SCM.SM.sch.scheme.scm.sm:\
+	:langmap=Sh\:.sh.SH.bsh.bash.ksh.zsh:\
+	:langmap=SLang\:.sl:\
+	:langmap=SML\:.sml.sig:\
+	:langmap=SQL\:.sql:\
+	:langmap=Tcl\:.tcl.tk.wish.itcl:\
+	:langmap=Tex\:.tex:\
+	:langmap=Vera\:.vr.vri.vrh:\
+	:langmap=Verilog\:.v:\
+	:langmap=VHDL\:.vhdl.vhd:\
+	:langmap=Vim\:.vim:\
+	:langmap=YACC\:.y:\
+	:gtags_parser=Asm\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Asp\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Awk\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Basic\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=BETA\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=C\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=C++\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=C#\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Cobol\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=DosBatch\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Eiffel\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Erlang\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Flex\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Fortran\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=HTML\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Java\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=JavaScript\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Lisp\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Lua\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=MatLab\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=OCaml\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Pascal\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Perl\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=PHP\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Python\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=REXX\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Ruby\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Scheme\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Sh\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=SLang\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=SML\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=SQL\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Tcl\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Tex\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Vera\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Verilog\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=VHDL\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=Vim\:@prefix@/lib/gtags/exuberant-ctags.la:\
+	:gtags_parser=YACC\:@prefix@/lib/gtags/exuberant-ctags.la:
+#
+# Drupal configuration.
+#
+drupal|Drupal content management platform:\
+	:tc=common:\
+	:langmap=php\:.php.module.inc.profile.install.test:
 #---------------------------------------------------------------------
 # Configuration for htags(1)
-# Let's paint hypertext with your favorite colors!
 # See htags(1).
 #---------------------------------------------------------------------
 htags:\
-	:body_begin=<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>:body_end=</body>:\
-	:table_begin=<table>:table_end=</table>:\
-	:title_begin=<h1><font color='#cc0000'>:title_end=</font></h1>:\
-	:comment_begin=<i><font color='green'>:comment_end=</font></i>:\
-	:sharp_begin=<font color='darkred'>:sharp_end=</font>:\
-	:brace_begin=<font color='red'>:brace_end=</font>:\
-	:warned_line_begin=<span style='background-color\:yellow'>:warned_line_end=</span>:\
-	:reserved_begin=<b>:reserved_end=</b>:script_alias=/cgi-bin/:\
-	:ncol#4:tabs#8:normal_suffix=html:gzipped_suffix=ghtml:\
-	:definition_header=no:
+	:script_alias=/cgi-bin/:ncol#4:tabs#8:normal_suffix=html:gzipped_suffix=ghtml:

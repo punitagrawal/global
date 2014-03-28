@@ -35,6 +35,7 @@
 #include "global.h"
 #include "anchor.h"
 #include "htags.h"
+#include "path2url.h"
 
 static XARGS *anchor_input[GTAGLIM];
 static struct anchor *table;
@@ -45,23 +46,25 @@ static struct anchor *curp;
 static struct anchor *end;
 static struct anchor *CURRENT;
 
-/* compare routine for qsort(3) */
+/** compare routine for @XREF{qsort,3} */
 static int
 cmp(const void *s1, const void *s2)
 {
 	return ((struct anchor *)s1)->lineno - ((struct anchor *)s2)->lineno;
 }
-/*
- * Pointers (as lineno).
+/**
+ * @name Pointers (as lineno).
  */
+/** @{ */
 static int FIRST;
 static int LAST;
 static struct anchor *CURRENTDEF;
+/** @} */
 
-/*
+/**
  * anchor_prepare: setup input stream.
  *
- *	i)	anchor_stream	file pointer of path list
+ *	@param[in]	anchor_stream	file pointer of path list
  */
 void
 anchor_prepare(FILE *anchor_stream)
@@ -72,7 +75,7 @@ anchor_prepare(FILE *anchor_stream)
 	 * not to change the command length. This length influences
 	 * the number of arguments in the xargs processing.
 	 */
-	char *options[] = {NULL, " ", "r", "s"};
+	static const char *const options[] = {NULL, " ", "r", "s"};
 	char comline[MAXFILLEN];
 	int db;
 
@@ -92,21 +95,28 @@ anchor_prepare(FILE *anchor_stream)
 		 * the same file are consecutive.
 		 */
 		if (gtags_exist[db] == 1) {
-			snprintf(comline, sizeof(comline), "%s -f%s --nofilter=path", global_path, options[db]);
+			snprintf(comline, sizeof(comline), "%s -f%s --encode-path=\" \t\" --result=ctags-xid --nofilter=path", quote_shell(global_path), options[db]);
 			anchor_input[db] = xargs_open_with_file(comline, 0, anchor_stream);
 		}
 	}
 }
-/*
+/**
  * anchor_load: load anchor table
  *
- *	i)	path	path name
+ *	@param[in]	path	path name
  */
 void
 anchor_load(const char *path)
 {
-	int db;
+	int db, current_fid;
 
+	/* Get fid of the path */
+	{
+		const char *p = path2fid(path);
+		if (p == NULL)
+			die("anchor_load: internal error. file '%s' not found in GPATH.", path);
+		current_fid = atoi(p);
+	}
 	FIRST = LAST = 0;
 	end = CURRENT = NULL;
 
@@ -117,7 +127,7 @@ anchor_load(const char *path)
 
 	for (db = GTAGS; db < GTAGLIM; db++) {
 		XARGS *xp;
-		char *ctags_x;
+		char *ctags_xid;
 
 		if ((xp = anchor_input[db]) == NULL)
 			continue;
@@ -125,23 +135,22 @@ anchor_load(const char *path)
 		 * Read from input stream until it reaches end of file
 		 * or the line of another file appears.
 		 */
-		while ((ctags_x = xargs_read(xp)) != NULL) {
+		while ((ctags_xid = xargs_read(xp)) != NULL) {
 			SPLIT ptable;
 			struct anchor *a;
-			int type;
+			int type, fid;
+			const char *ctags_x = parse_xid(ctags_xid, NULL, &fid);
 
+			/*
+			 * It is the following file.
+			 */
+			if (current_fid != fid) {
+				xargs_unread(xp);
+				break;
+			}
 			if (split(ctags_x, 4, &ptable) < 4) {
 				recover(&ptable);
 				die("too small number of parts in anchor_load().\n'%s'", ctags_x);
-			}
-			if (!locatestring(ptable.part[PART_PATH].start, "./", MATCH_AT_FIRST)) {
-				recover(&ptable);
-				die("The output of parser is illegal.\n%s", ctags_x);
-			}
-			if (strcmp(ptable.part[PART_PATH].start, path) != 0) {
-				recover(&ptable);
-				xargs_unread(xp);
-				break;
 			}
 			if (db == GTAGS) {
 				char *p = ptable.part[PART_LINE].start;
@@ -181,7 +190,7 @@ anchor_load(const char *path)
 			settag(a, ptable.part[PART_TAG].start);
 			recover(&ptable);
 		}
-		if (ctags_x == NULL) {
+		if (ctags_xid == NULL) {
 			xargs_close(anchor_input[db]);
 			anchor_input[db] = NULL;
 		}
@@ -217,7 +226,7 @@ anchor_load(const char *path)
 	end = &table[vb->length];
 	/* anchor_dump(stderr, 0);*/
 }
-/*
+/**
  * anchor_unload: unload anchor table
  */
 void
@@ -236,7 +245,7 @@ anchor_unload(void)
 	FIRST = LAST = 0;
 	start = curp = end = NULL;
 }
-/*
+/**
  * anchor_first: return the first anchor
  */
 struct anchor *
@@ -249,7 +258,7 @@ anchor_first(void)
 		CURRENTDEF = CURRENT;
 	return CURRENT;
 }
-/*
+/**
  * anchor_next: return the next anchor
  */
 struct anchor *
@@ -263,13 +272,14 @@ anchor_next(void)
 		CURRENTDEF = CURRENT;
 	return CURRENT;
 }
-/*
+/**
  * anchor_get: return the specified anchor
  *
- *	i)	name	name of anchor
- *	i)	length	lenght of the name
- *	i)	type	==0: not specified
+ *	@param[in]	name	name of anchor
+ *	@param[in]	length	lenght of the name
+ *	@param[in]	type	==0: not specified <br>
  *			!=0: D, M, T, R, Y
+ *	@param[in]	lineno	line number
  */
 struct anchor *
 anchor_get(const char *name, int length, int type, int lineno)
@@ -294,12 +304,14 @@ anchor_get(const char *name, int length, int type, int lineno)
 				return p;
 	return NULL;
 }
-/*
+/**
  * define_line: check whether or not this is a define line.
  *
- *	i)	lineno	line number
- *	go)	curp	pointer to the current cluster
- *	r)		1: definition, 0: not definition
+ *	@param[in]	lineno	line number
+ *	@par Globals used (output):
+ *		#curp	pointer to the current cluster
+ *
+ *	@return		1: definition, 0: not definition
  */
 int
 define_line(int lineno)
@@ -323,9 +335,11 @@ define_line(int lineno)
 			return 1;
 	return 0;
 }
-/*
+/**
  * anchor_getlinks: return anchor link array
  *		(previous, next, first, last, top, bottom)
+ *
+ *	@param[in]	lineno	line number
  */
 int *
 anchor_getlinks(int lineno)

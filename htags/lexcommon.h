@@ -22,16 +22,19 @@
 #include "incop.h"
 #include "tab.h"
 
-/*
- * Definition of LEXTEXT, LEXLENG, LEXIN and LEXRESTART.
+/**
+ * @name Definition of LEXTEXT, LEXLENG, LEXIN and LEXRESTART.
  *
- * These symbols are substitutions of yytext, yyleng, yyin and yyrestart.
- * You should write lex code using them.
- * The usage of this file is, for instance, in c.l:
+ * These symbols are substitutions of @CODE{yytext}, @CODE{yyleng}, @CODE{yyin} and @CODE{yyrestart}.
+ * You should write @NAME{lex} code using them.
+ * The usage of this file is, for instance, in @FILE{c.l}:
  *
+ *	@code
  *	#define lex_symbol_generation_rule(x) c_ ## x
  *	#include "lexcommon.h"
+ *	@endcode
  */
+/** @{ */
 #ifndef lex_symbol_generation_rule
 ERROR: lex_symbol_generation_rule(x) macro not defined.
 lexcommon.h requires the lex_symbol_generation_rule(x) macro for each language
@@ -41,26 +44,33 @@ to generate language specific symbols.
 #define LEXLENG lex_symbol_generation_rule(leng)
 #define LEXIN lex_symbol_generation_rule(in)
 #define LEXRESTART lex_symbol_generation_rule(restart)
+/** @} */
 
-/*
+/**
+ * @name
  * The default action for line control.
- * These can be applicable to most languages.
- * You must define C_COMMENT, CPP_COMMENT SHELL_COMMENT, LITERAL, STRING
- * and PREPROCESSOR_LINE as %start values, even if they are not used.
- * It assumed that CPP_COMMENT and SHELL_COMMENT is one line comment.
+ * These can be applicable to most languages. <br>
+ * You must define @VAR{C_COMMENT}, @VAR{CPP_COMMENT} @VAR{SHELL_COMMENT}, @VAR{LITERAL}, @VAR{STRING}
+ * and @VAR{PREPROCESSOR_LINE} as @CODE{\%start} values, even if they are not used. <br>
+ * It assumed that @VAR{CPP_COMMENT} and @VAR{SHELL_COMMENT} is one line comment.
  */
+/** @{ */
 static int lexcommon_lineno;
 static int begin_line;
-/*
+/** @} */
+
+/**
  * If you want newline to terminate string, set this variable to 1.
  */
 static int newline_terminate_string = 0;
 
-/*
- * Variables for converting tabs to spaces.
+/**
+ * @name Variables for converting tabs to spaces.
  */
+/** @{ */
 static int dest_column;
 static int left_spaces;
+/** @} */
 
 #define YY_INPUT(buf, result, max_size) do {				\
 	result = read_file_detabing(buf, max_size, LEXIN,		\
@@ -137,7 +147,9 @@ extern void echoc(int);
 extern void echos(const char *);
 extern const char *generate_guide(int);
 extern void put_anchor(char *, int, int);
+extern void put_anchor_force(char *, int, int);
 extern void put_include_anchor(struct data *, const char *);
+extern void put_include_anchor_direct(const char *, const char *);
 extern void put_reserved_word(const char *);
 extern void put_macro(const char *);
 extern void unknown_preprocessing_directive(const char *, int);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2004
+ * Copyright (c) 1997, 1998, 1999, 2000, 2004, 2011
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -27,19 +27,17 @@
 #else
 #include <strings.h>
 #endif
-#ifdef DEBUG
-#include <stdio.h>
-extern int debug;
-#endif
 
+#include "die.h"
 #include "locatestring.h"
 
-/*
+/** @file
 
 String locator: usage and memory status
 
         'v': result pointer
  
+@code
 string = "ABC XYZ XYZ ABC"
 
 pointer = locatestring(string, "XYZ", MATCH_FIRST);
@@ -69,13 +67,13 @@ pointer = locatestring(string, "ABC XYZ XYZ ABC", MATCH_COMPLETE);
 pointer = locatestring(string, "xyZ", MATCH_FIRST|IGNORE_CASE);
              v
         "ABC XYZ XYZ ABC"
-
+@endcode
  */
 
-/*
+/**
  * strincmp: strncmp with ignoring case.
  *
- *	Interface is same with strncmp.
+ *	Interface is same with @NAME{strncmp}.
  */
 static int
 strincmp(const char *string, const char *pattern, size_t len)
@@ -83,30 +81,36 @@ strincmp(const char *string, const char *pattern, size_t len)
 	unsigned char s, p;
 
 	while (len--) {
-		s = tolower((unsigned char)*string++);
-		p = tolower((unsigned char)*pattern++);
+		/*
+		 * In some systems, tolower() are #define macros,
+		 * where the argument gets evaluated more than once.
+		 */
+		s = tolower((unsigned char)*string);
+		p = tolower((unsigned char)*pattern);
 		if (s != p)
 			return s - p;
 		if (s == 0)
 			break;
+		string++;
+		pattern++;
 	}
 	return 0;
 }
 
-/*
+/**
  * locatestring: locate pattern from string
  *
- *	i)	string	string
- *	i)	pattern	pattern
- *	i)	flag	MATCH_FIRST:	match first
- *			MATCH_AT_FIRST: match only at first column
- *			MATCH_LAST:	match last
- *			MATCH_AT_LAST:	match only at last column
- *			MATCH_COMPLETE	match completely
+ *	@param[in]	string	string
+ *	@param[in]	pattern	pattern
+ *	@param[in]	flag	MATCH_FIRST:	match first <br>
+ *			MATCH_AT_FIRST: match only at first column <br>
+ *			MATCH_LAST:	match last <br>
+ *			MATCH_AT_LAST:	match only at last column <br>
+ *			MATCH_COMPLETE	match completely <br>
  *			IGNORE_CASE:	Ignore case
- *	r)		pointer or NULL
- *			If the flag == MATCH_AT_FIRST then the pointer
- *			points the following character of the matched
+ *	@return		pointer or NULL
+ *			If the flag == MATCH_AT_FIRST then the pointer <br>
+ *			points the following character of the matched <br>
  *			string, else points at the head of it.
  *
  * This function is made to avoid compatibility problems.
@@ -114,59 +118,41 @@ strincmp(const char *string, const char *pattern, size_t len)
 char *
 locatestring(const char *string, const char *pattern, int flag)
 {
-	int c = *pattern;
 	int plen = strlen(pattern);
 	const char *p = NULL;
-	int slen;
 	int (*cmpfunc) (const char *, const char*, size_t);
-#ifdef DEBUG
-	FILE *dbg = stderr;
-	const char *pre = string;
-#endif
 
 	cmpfunc = (flag & IGNORE_CASE) ? strincmp : strncmp;
 	flag &= ~IGNORE_CASE;
 
 	if (flag == MATCH_COMPLETE) {
 		if (strlen(string) == plen && !(*cmpfunc)(string, pattern, plen))
-			return (char *)string;
-		else
-			return NULL;
-	}
-	if (flag == MATCH_AT_LAST && (slen = strlen(string)) > plen)
-		string += (slen - plen);
-	for (; *string; string++) {
-		if (*string == c)
+			p = string;
+	} else if (flag == MATCH_AT_FIRST) {
+		if (!(*cmpfunc)(string, pattern, plen))
+			p = string + plen;
+	} else if (flag == MATCH_AT_LAST) {
+		int slen = strlen(string);
+
+		if (slen >= plen) {
+			string += (slen - plen);
+			if (!(*cmpfunc)(string, pattern, plen))
+				p = string;
+		}
+	} else if (flag == MATCH_FIRST || flag == MATCH_LAST) {
+		int slen = strlen(string);
+
+		for (; *string; string++, slen--) {
+			if (slen < plen)
+				break;
 			if (!(*cmpfunc)(string, pattern, plen)) {
 				p = string;
 				if (flag == MATCH_FIRST)
 					break;
 			}
-		if (flag == MATCH_AT_FIRST || flag == MATCH_AT_LAST)
-			break;
-	}
-#ifdef DEBUG
-	if (debug) {
-		fprintf(dbg, "locatestring: ");
-		if (p == NULL)
-			fprintf(dbg, "%s", pre);
-		else {
-			const char *pp = p;
-			const char *post = pp + strlen(pattern);
-
-			for (; *pre && pre < pp; pre++)
-				fputc(*pre, dbg);
-			fputc('[', dbg);
-			for (; *pp && pp < post; pp++)
-				fputc(*pp, dbg);
-			fputc(']', dbg);
-			for (; *post; post++)
-				fputc(*post, dbg);
 		}
-		fputc('\n', dbg);
+	} else {
+		die("usage error of locatestring() (flag = %d).", flag);
 	}
-#endif
-	if (p && flag == MATCH_AT_FIRST)
-		p += plen;
 	return (char *)p;
 }

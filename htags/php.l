@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 2002, 2004, 2005, 2006 Tama Communications Corporation
+ * Copyright (c) 2002, 2004, 2005, 2006, 2008 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -38,7 +38,7 @@
 #include "common.h"
 #include "incop.h"
 #include "htags.h"
-#include "../gtags-parser/php_res.h"
+#include "../libparser/php_res.h"
 
 #define lex_symbol_generation_rule(x) php_ ## x
 #include "lexcommon.h"
@@ -49,9 +49,10 @@
 #define ECHO	echos(LEXTEXT)
 
 #define YY_USER_ACTION DEFAULT_YY_USER_ACTION
+#define LEFT_BRACE '('
 
 static int pre_here_document;
-static char end_of_here_document[IDENTLEN+1];
+static char end_of_here_document[IDENTLEN];
 
 %}
  /* Definitions */
@@ -117,41 +118,51 @@ WORD		{ALPHA}{ALPHANUM}*
 			yy_pop_state();
 		}
 	}
-<PHP>^[ \t]*include[ \t]*\( {
+<PHP>^[ \t]*(include|require|require_once) {
 		int c;
 
-		ECHO;
+		put_reserved_word(LEXTEXT);
 		/*
-		 * include|('aaa/bbb.h');
-		 *          ^
+		 * include  ('aaa/bbb.h');
+		 * include   'aaa/bbb.h';
+		 *        ^
 		 */
-		while ((c = input()) && c != '\n' && isspace(c))
+		while ((c = input()) && c != EOF && c != '\n' && isspace(c))
 			echoc(c);
+		if (c == EOF)
+			c = '\n';
 		if (c == '\n')
 			unput(c);
 		else if (c) {
-			char path[MAXPATHLEN+1], *p = path;
+			char path[MAXPATHLEN], *p = path;
 			int sep = 0;
 
+			if (c == LEFT_BRACE) {
+				c = input();
+				if (c == EOF)
+					c = '\n';
+			}
 			if (c == '"' || c == '\'')
 				sep = c;
 			echoc(c);
 
 			/* pick up path name */
-			while ((c = input()) && c != '\n' && c != sep)
+			while ((c = input()) && c != EOF && c != '\n' && c != sep)
 				*p++ = c;
 			*p = '\0';
+			if (c == EOF)
+				c = '\n';
 			if (c == sep) {
-				struct data *inc;
-				const char *basename = locatestring(path, "/", MATCH_LAST);
+				char tmp[MAXPATHLEN];
+				char normalized_path[MAXPATHLEN];
 
-				if (basename)
-					basename++;
-				else
-					basename = path;
-				inc = get_inc(basename);
-				if (inc)
-					put_include_anchor(inc, path);
+				snprintf(tmp, sizeof(tmp), "%s/%s", get_current_dir(), path);
+				/*
+				 * pick up the file only when it exists.
+				 */
+				if (normalize(tmp, get_root_with_slash(), get_cwd(), normalized_path, sizeof(normalized_path))
+					&& test("f", normalized_path))
+					put_include_anchor_direct(normalized_path, path);
 				else
 					echos(path);
 				echoc(sep);
@@ -194,6 +205,13 @@ WORD		{ALPHA}{ALPHANUM}*
 			if (brace)
 				echoc('}');
 			a->done = 1;
+		} else if (grtags_is_empty) {
+			echoc('$');
+			if (brace)
+				echoc('{');
+			put_anchor_force(LEXTEXT, LEXLENG, LINENO);
+			if (brace)
+				echoc('}');
 		} else {
 			ECHO;
 		}
@@ -207,6 +225,8 @@ WORD		{ALPHA}{ALPHANUM}*
 			if (a) {
 				put_anchor(gettag(a), a->type, LINENO);
 				a->done = 1;
+			} else if (grtags_is_empty) {
+				put_anchor_force(LEXTEXT, LEXLENG, LINENO);
 			} else {
 				ECHO;
 			}

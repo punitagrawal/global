@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2004
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2008, 2011
  *	Tama Communications Corporation
  * #ifdef __DJGPP__
  * Contributed by Jason Hood <jadoxa@yahoo.com.au>, 2001.
@@ -29,6 +29,8 @@
 #else
 #include <strings.h>
 #endif
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #ifdef __DJGPP__
 #include <fcntl.h>			/* for _USE_LFN */
@@ -36,13 +38,20 @@
 
 #include "gparam.h"
 #include "path.h"
+#include "strbuf.h"
 #include "strlimcpy.h"
+#include "test.h"
 
-/*
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#define mkdir(path,mode) mkdir(path)
+#endif
+
+
+/**
  * isabspath: whether absolute path or not
  *
- *	i)	path	path
- *	r)		1: absolute, 0: not absolute
+ *	@param[in]	p	path
+ *	@return		1: absolute, 0: not absolute
  */
 int
 isabspath(const char *p)
@@ -58,13 +67,13 @@ isabspath(const char *p)
 	return 0;
 }
 
-/*
+/**
  * canonpath: make canonical path name.
  *
- *	io)	path	path
- *	r)		path
+ *	@param[in,out]	path	path
+ *	@return		path
  *
- * Note: canonpath rewrite argument buffer.
+ * @attention canonpath() rewrite argument buffer.
  */
 char *
 canonpath(char *path)
@@ -147,7 +156,7 @@ canonpath(char *path)
 }
 
 #if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
-/*
+/**
  * realpath: get the complete path
  */
 char *
@@ -171,3 +180,62 @@ realpath(const char *in_path, char *out_path)
 	return out_path;
 }
 #endif
+
+#define SEP '/'
+
+/**
+ * makedirectories: make directories on the path like @XREF{mkdir,1} with the @OPTION{-p} option.
+ *
+ *	@param[in]	base	base directory
+ *	@param[in]	rest	path from the base
+ *	@param[in]	verbose 1: verbose mode, 0: not verbose mode
+ *	@return		0: success <br>
+ *			-1: base directory not found <br>
+ *			-2: permission error <br>
+ *			-3: cannot make directory
+ */
+int
+makedirectories(const char *base, const char *rest, int verbose)
+{
+	STRBUF *sb;
+	const char *p, *q;
+
+	if (!test("d", base))
+		return -1;
+	if (!test("drw", base))
+		return -2;
+	sb = strbuf_open(0);
+	strbuf_puts(sb, base);
+	if (*rest == SEP)
+		rest++;
+	for (q = rest; *q;) {
+		p = q;
+		while (*q && *q != SEP)
+			q++;
+		strbuf_putc(sb, SEP);
+		strbuf_nputs(sb, p, q - p);
+		p = strbuf_value(sb);
+		if (!test("d", p)) {
+			if (verbose)
+				fprintf(stderr, " Making directory '%s'.\n", p);
+			if (mkdir(p, 0775) < 0) {
+				strbuf_close(sb);
+				return -3;
+			}
+		}
+		if (*q == SEP)
+			q++;
+	}
+	strbuf_close(sb);
+	return 0;
+}
+/**
+ * trimpath: trim path name
+ */
+const char *
+trimpath(const char *path)
+{
+	if (*path == '.' && *(path + 1) == '/')
+		path += 2;
+	return path;
+}
