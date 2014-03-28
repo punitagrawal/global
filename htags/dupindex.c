@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+ * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2010
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -21,6 +21,7 @@
 #include <config.h>
 #endif
 #include <stdio.h>
+#include <errno.h>
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -40,7 +41,7 @@ static const char *dirs[]    = {NULL, DEFS,         REFS,        SYMS};
 static const char *kinds[]   = {NULL, "definition", "reference", "symbol"};
 static const char *options[] = {NULL, "",           "r",         "s"};
 
-/*
+/**
  * Make duplicate object index.
  *
  * If referred tag is only one, direct link which points the tag is generated.
@@ -51,11 +52,11 @@ int
 makedupindex(void)
 {
 	STRBUF *sb = strbuf_open(0);
+	STRBUF *tmp = strbuf_open(0);
 	STRBUF *command = strbuf_open(0);
 	int definition_count = 0;
 	char srcdir[MAXPATHLEN];
 	int db;
-	char buf[1024];
 	FILEOP *fileop = NULL;
 	FILE *op = NULL;
 	FILE *ip = NULL;
@@ -67,7 +68,8 @@ makedupindex(void)
 		int writing = 0;
 		int count = 0;
 		int entry_count = 0;
-		char *ctags_x, tag[IDENTLEN], prev[IDENTLEN], first_line[MAXBUFLEN];
+		const char *ctags_xid, *ctags_x;
+		char tag[IDENTLEN], prev[IDENTLEN], first_line[MAXBUFLEN];
 
 		if (gtags_exist[db] == 0)
 			continue;
@@ -77,7 +79,10 @@ makedupindex(void)
 		 * construct command line.
 		 */
 		strbuf_reset(command);
-		strbuf_sprintf(command, "%s -x%s --nofilter=path", global_path, option);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+		strbuf_putc(command, '"');
+#endif
+		strbuf_sprintf(command, "%s -x%s --result=ctags-xid --encode-path=\" \t\" --nofilter=path", quote_shell(global_path), option);
 		/*
 		 * Optimization when the --dynamic option is specified.
 		 */
@@ -87,18 +92,17 @@ makedupindex(void)
 				strbuf_puts(command, " --nofilter=sort");
 		}
 		strbuf_puts(command, " \".*\"");
+#if defined(_WIN32) && !defined(__CYGWIN__)
+		strbuf_putc(command, '"');
+#endif
 		if ((ip = popen(strbuf_value(command), "r")) == NULL)
-			die("cannot execute command '%s'.", strbuf_value(command));
-		while ((ctags_x = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
-			SPLIT ptable;
+			die("cannot execute '%s'.", strbuf_value(command));
+		while ((ctags_xid = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
+			char fid[MAXFIDLEN];
 
-			if (split(ctags_x, 2, &ptable) < 2) {
-				recover(&ptable);
-				die("too small number of parts.(1)\n'%s'", ctags_x);
-			}
-			strlimcpy(tag, ptable.part[PART_TAG].start, sizeof(tag));
-			recover(&ptable);
-
+			ctags_x = parse_xid(ctags_xid, fid, NULL);
+			/* tag name */
+			(void)strcpy_withterm(tag, ctags_x, sizeof(tag), ' ');
 			if (strcmp(prev, tag)) {
 				count++;
 				if (vflag)
@@ -113,34 +117,43 @@ makedupindex(void)
 					}
 					writing = 0;
 					/*
-					 * cache record: " <file id> <entry number>"
+					 * cache record: " <fid>\0<entry number>\0"
 					 */
-					snprintf(buf, sizeof(buf), " %d %d", count - 1, entry_count);
-					cache_put(db, prev, buf);
+					strbuf_reset(tmp);
+					strbuf_putc(tmp, ' ');
+					strbuf_putn(tmp, count - 1);
+					strbuf_putc(tmp, '\0');
+					strbuf_putn(tmp, entry_count);
+					cache_put(db, prev, strbuf_value(tmp), strbuf_getlen(tmp) + 1);
 				}				
 				/* single entry */
 				if (first_line[0]) {
-					if (split(first_line, 4, &ptable) < 4) {
-						recover(&ptable);
-						die("too small number of parts.(2)\n'%s'", ctags_x);
-					}
-					snprintf(buf, sizeof(buf), "%s %s", ptable.part[PART_LNO].start, ptable.part[PART_PATH].start);
-					cache_put(db, prev, buf);
-					recover(&ptable);
+					char fid[MAXFIDLEN];
+					const char *ctags_x = parse_xid(first_line, fid, NULL);
+					const char *lno = nextelement(ctags_x);
+
+					strbuf_reset(tmp);
+					strbuf_puts_withterm(tmp, lno, ' ');
+					strbuf_putc(tmp, '\0');
+					strbuf_puts(tmp, fid);
+					cache_put(db, prev, strbuf_value(tmp), strbuf_getlen(tmp) + 1);
 				}
 				/*
 				 * Chop the tail of the line. It is not important.
 				 * strlimcpy(first_line, ctags_x, sizeof(first_line));
 				 */
-				strncpy(first_line, ctags_x, sizeof(first_line));
+				strncpy(first_line, ctags_xid, sizeof(first_line));
 				first_line[sizeof(first_line) - 1] = '\0';
 				strlimcpy(prev, tag, sizeof(prev));
 				entry_count = 0;
 			} else {
 				/* duplicate entry */
 				if (first_line[0]) {
+					char fid[MAXFIDLEN];
+					const char *ctags_x = parse_xid(first_line, fid, NULL);
+
 					if (!dynamic) {
-						char path[MAXPATHLEN+1];
+						char path[MAXPATHLEN];
 
 						snprintf(path, sizeof(path), "%s/%s/%d.%s", distpath, dirs[db], count, HTML);
 						fileop = open_output_file(path, cflag);
@@ -148,14 +161,14 @@ makedupindex(void)
 						fputs_nl(gen_page_begin(tag, SUBDIR), op);
 						fputs_nl(body_begin, op);
 						fputs_nl(gen_list_begin(), op);
-						fputs_nl(gen_list_body(srcdir, first_line), op);
+						fputs_nl(gen_list_body(srcdir, ctags_x, fid), op);
 					}
 					writing = 1;
 					entry_count++;
 					first_line[0] = 0;
 				}
 				if (!dynamic) {
-					fputs_nl(gen_list_body(srcdir, ctags_x), op);
+					fputs_nl(gen_list_body(srcdir, ctags_x, fid), op);
 				}
 				entry_count++;
 			}
@@ -163,7 +176,7 @@ makedupindex(void)
 		if (db == GTAGS)
 			definition_count = count;
 		if (pclose(ip) != 0)
-			die("'%s' failed.", strbuf_value(command));
+			die("terminated abnormally '%s' (errno = %d).", strbuf_value(command), errno);
 		if (writing) {
 			if (!dynamic) {
 				fputs_nl(gen_list_end(), op);
@@ -173,24 +186,29 @@ makedupindex(void)
 				html_count++;
 			}
 			/*
-			 * cache record: " <file id> <entry number>"
+			 * cache record: " <fid>\0<entry number>\0"
 			 */
-			snprintf(buf, sizeof(buf), " %d %d", count, entry_count);
-			cache_put(db, prev, buf);
+			strbuf_reset(tmp);
+			strbuf_putc(tmp, ' ');
+			strbuf_putn(tmp, count);
+			strbuf_putc(tmp, '\0');
+			strbuf_putn(tmp, entry_count);
+			cache_put(db, prev, strbuf_value(tmp), strbuf_getlen(tmp) + 1);
 		}
 		if (first_line[0]) {
-			SPLIT ptable;
+			char fid[MAXFIDLEN];
+			const char *ctags_x = parse_xid(first_line, fid, NULL);
+			const char *lno = nextelement(ctags_x);
 
-			if (split(first_line, 4, &ptable) < 4) {
-				recover(&ptable);
-				die("too small number of parts.(3)\n'%s'", ctags_x);
-			}
-			snprintf(buf, sizeof(buf), "%s %s", ptable.part[PART_LNO].start, ptable.part[PART_PATH].start);
-			cache_put(db, prev, buf);
-			recover(&ptable);
+			strbuf_reset(tmp);
+			strbuf_puts_withterm(tmp, lno, ' ');
+			strbuf_putc(tmp, '\0');
+			strbuf_puts(tmp, fid);
+			cache_put(db, prev, strbuf_value(tmp), strbuf_getlen(tmp) + 1);
 		}
 	}
 	strbuf_close(sb);
+	strbuf_close(tmp);
 	strbuf_close(command);
 	return definition_count;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006
+ * Copyright (c) 2006, 2013, 2014
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -26,6 +26,7 @@
 #include <stdio.h>
 
 #include "gparam.h"
+#include "strbuf.h"
 
 #define FILEOP_INPUT	1
 #define FILEOP_OUTPUT	2
@@ -34,13 +35,16 @@
 typedef struct {
 	int type;
 	FILE *fp;
-	char command[MAXFILLEN+1];
-	char path[MAXPATHLEN+1];
+	char command[MAXFILLEN];
+	char path[MAXPATHLEN];
 } FILEOP;
 
 FILEOP *open_input_file(const char *);
 FILEOP *open_output_file(const char *, int);
 FILE *get_descripter(FILEOP *);
 void close_file(FILEOP *);
+void copyfile(const char *, const char *);
+void copydirectory(const char *, const char *);
+int read_first_line(const char *, STRBUF *);
 
 #endif /* ! _FILEOP_H */

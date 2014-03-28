@@ -29,14 +29,12 @@
 #include "version.h"
 
 const char *copy = "\
-Copyright (c) 2008 Tama Communications Corporation\n\
+Copyright (c) 2014 Tama Communications Corporation\n\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
-This is free software: you are free to change and redistribute it.\n\
+This is free software; you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n\
-This is also commercial (for-profit) software based on BOKIN model.\n\
-Please see the donation page <http://www.gnu.org/software/global/donation.html>.\n\
 ";
-/*
+/**
  * get_version: get version string.
  */
 char *
@@ -44,8 +42,11 @@ get_version(void)
 {
 	return VERSION;
 }
-/*
+/**
  * version: print version information.
+ *
+ *	@param[in]	name
+ *	@param[in]	verbose
  */
 void
 version(const char *name, const int verbose)
@@ -59,7 +60,7 @@ version(const char *name, const int verbose)
 	if (qflag)
 		fprintf(stdout, "%s\n", VERSION);
 	else {
-		fprintf(stdout, "%s - %s\n", name, PACKAGE_STRING);
+		fprintf(stdout, "%s (%s) %s\n", name, PACKAGE_NAME, VERSION);
 		fprintf(stdout, "%s", copy);
 	}
 	exit(0);

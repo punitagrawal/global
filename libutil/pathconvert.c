@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2006 Tama Communications Corporation
+ * Copyright (c) 2005, 2006, 2010 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -24,6 +24,11 @@
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "abs2rel.h"
 #include "checkalloc.h"
@@ -31,68 +36,165 @@
 #include "format.h"
 #include "gparam.h"
 #include "gpathop.h"
+#include "gtagsop.h"
 #include "pathconvert.h"
 #include "strbuf.h"
 #include "strlimcpy.h"
 
-/*
- * Path filter for the output of global(1).
+static unsigned char encode[256];
+static int encoding;
+static int newline = '\n';
+
+#define required_encode(c) encode[(unsigned char)c]
+/**
+ * set_encode_chars: stores chars to be encoded.
+ */
+void
+set_encode_chars(const unsigned char *chars)
+{
+	unsigned int i;
+
+	/* clean the table */
+	memset(encode, 0, sizeof(encode));
+	/* set bits */
+	for (i = 0; chars[i]; i++) {
+		encode[(unsigned char)chars[i]] = 1;
+	}
+	/* You cannot encode '.' and '/'. */
+	encode['.'] = 0;
+	encode['/'] = 0;
+	/* '%' is always encoded when encode is enable. */
+	encode['%'] = 1;
+	encoding = 1;
+}
+/**
+ * set_print0: change newline to @CODE{'\0'}.
+ */
+void
+set_print0(void)
+{
+	newline = '\0';
+}
+#define outofrange(c)	(c < '0' || c > 'f')
+#define h2int(c) (c >= 'a' ? c - 'a' + 10 : c - '0')
+/**
+ * decode_path: decode encoded path name.
+ *
+ *	@param[in]	path	encoded path name
+ *	@return		decoded path name
+ */
+char *
+decode_path(const char *path)
+{
+	STATIC_STRBUF(sb);
+	const char *p;
+
+	if (strchr(path, '%') == NULL)
+		return (char *)path;
+	strbuf_clear(sb);
+	for (p = path; *p; p++) {
+		if (*p == '%') {
+			unsigned char c1, c2;
+			c1 = *++p;
+			c2 = *++p;
+			if (outofrange(c1) || outofrange(c2))
+				die("decode_path: unexpected character. (%%%c%c)", c1, c2);
+			strbuf_putc(sb, h2int(c1) * 16 + h2int(c2));
+		} else
+			strbuf_putc(sb, *p);
+	}
+	return strbuf_value(sb);
+}
+/**
+ * Path filter for the output of @XREF{global,1}.
  */
 static const char *
 convert_pathname(CONVERT *cv, const char *path)
 {
-	static char buf[MAXPATHLEN+1];
+	static char buf[MAXPATHLEN];
 	const char *a, *b;
 
-	/*
-	 * print without conversion.
-	 */
-	if (cv->type == PATH_THROUGH)
-		return path;
-	/*
-	 * make absolute path name.
-	 * 'path + 1' means skipping "." at the head.
-	 */
-	strbuf_setlen(cv->abspath, cv->start_point);
-	strbuf_puts(cv->abspath, path + 1);
-	/*
-	 * print path name with converting.
-	 */
-	switch (cv->type) {
-	case PATH_ABSOLUTE:
-		path = strbuf_value(cv->abspath);
-		break;
-	case PATH_RELATIVE:
-		a = strbuf_value(cv->abspath);
-		b = cv->basedir;
+	if (cv->type != PATH_THROUGH) {
+		/*
+		 * make absolute path name.
+		 * 'path + 1' means skipping "." at the head.
+		 */
+		strbuf_setlen(cv->abspath, cv->start_point);
+		strbuf_puts(cv->abspath, path + 1);
+		/*
+		 * print path name with converting.
+		 */
+		switch (cv->type) {
+		case PATH_ABSOLUTE:
+			path = strbuf_value(cv->abspath);
+			break;
+		case PATH_RELATIVE:
+		case PATH_SHORTER:
+			a = strbuf_value(cv->abspath);
+			b = cv->basedir;
 #if defined(_WIN32) || defined(__DJGPP__)
-		while (*a != '/')
-			a++;
-		while (*b != '/')
-			b++;
+			while (*a != '/')
+				a++;
+			while (*b != '/')
+				b++;
 #endif
-		if (!abs2rel(a, b, buf, sizeof(buf)))
-			die("abs2rel failed. (path=%s, base=%s).", a, b);
-		path = buf;
-		break;
-	default:
-		die("unknown path type.");
-		break;
+			if (!abs2rel(a, b, buf, sizeof(buf)))
+				die("abs2rel failed. (path=%s, base=%s).", a, b);
+			path = buf;
+			if (cv->type == PATH_SHORTER && strlen(path) > strbuf_getlen(cv->abspath))
+				path = strbuf_value(cv->abspath);
+			break;
+		default:
+			die("unknown path type.");
+			break;
+		}
+	}
+	/*
+	 * encoding of the path name.
+	 */
+	if (encoding) {
+		const char *p;
+		int required = 0;
+
+		for (p = path; *p; p++) {
+			if (required_encode(*p)) {
+				required = 1;
+				break;
+			}
+		}
+		if (required) {
+			static char buf[MAXPATHLEN];
+			char c[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+			char *q = buf;
+
+			for (p = path; *p; p++) {
+				if (required_encode(*p)) {
+					*q++ = '%';
+					*q++ = c[*p / 16];
+					*q++ = c[*p % 16];
+				} else
+					*q++ = *p;
+			}
+			*q = '\0';
+			path = buf;
+		}
 	}
 	return (const char *)path;
 }
-/*
+/**
  * convert_open: open convert filter
  *
- *	i)	type	PATH_ABSOLUTE, PATH_RELATIVE, PATH_THROUGH
- *	i)	format	tag record format
- *	i)	root	root directory of source tree
- *	i)	cwd	current directory
- *	i)	dbpath	dbpath directory
- *	i)	op	output file
+ *	@param[in]	type	#PATH_ABSOLUTE, #PATH_RELATIVE, #PATH_THROUGH
+ *	@param[in]	format	tag record format
+ *	@param[in]	root	root directory of source tree
+ *	@param[in]	cwd	current directory
+ *	@param[in]	dbpath	dbpath directory
+ *	@param[in]	op	output file
+ *	@param[in]	db	tag type (#GTAGS, #GRTAGS, #GSYMS, #GPATH, #NOTAGS) <br>
+ *			only for @NAME{cscope} format
  */
 CONVERT *
-convert_open(int type, int format, const char *root, const char *cwd, const char *dbpath, FILE *op)
+convert_open(int type, int format, const char *root, const char *cwd, const char *dbpath, FILE *op, int db)
 {
 	CONVERT *cv = (CONVERT *)check_calloc(sizeof(CONVERT), 1);
 	/*
@@ -111,6 +213,7 @@ convert_open(int type, int format, const char *root, const char *cwd, const char
 	cv->type = type;
 	cv->format = format;
 	cv->op = op;
+	cv->db = db;
 	/*
 	 * open GPATH.
 	 */
@@ -118,27 +221,30 @@ convert_open(int type, int format, const char *root, const char *cwd, const char
 		die("GPATH not found.");
 	return cv;
 }
-/*
+/**
  * convert_put: convert path into relative or absolute and print.
  *
- *	i)	cv	CONVERT structure
- *	i)	tagline	output record
+ *	@param[in]	cv	#CONVERT structure
+ *	@param[in]	ctags_x	tag record (@NAME{ctags-x} format)
+ *
+ * @note This function is only called by @NAME{gtags} with the @OPTION{--path} option.
  */
 void
-convert_put(CONVERT *cv, const char *tagline)
+convert_put(CONVERT *cv, const char *ctags_x)
 {
 	char *tagnextp = NULL;
 	int tagnextc = 0;
 	char *tag = NULL, *lineno = NULL, *path, *rest = NULL;
+	const char *fid = NULL;
 
+	if (cv->format == FORMAT_PATH)
+		die("convert_put: internal error.");	/* Use convert_put_path() */
 	/*
 	 * parse tag line.
 	 * Don't use split() function not to destroy line image.
 	 */
-	if (cv->format == FORMAT_PATH) {
-		path = (char *)tagline;
-	} else {
-		char *p = (char *)tagline;
+	{
+		char *p = (char *)ctags_x;
 		/*
 		 * tag name
 		 */
@@ -180,10 +286,11 @@ convert_put(CONVERT *cv, const char *tagline)
 		*p++ = '\0';
 		rest = p;
 	}
+	/*
+	 * The path name has already been encoded.
+	 */
+	path = decode_path(path);
 	switch (cv->format) {
-	case FORMAT_PATH:
-		fputs(convert_pathname(cv, path), cv->op);
-		break;
 	case FORMAT_CTAGS:
 		fputs(tag, cv->op);
 		fputc('\t', cv->op);
@@ -192,7 +299,10 @@ convert_put(CONVERT *cv, const char *tagline)
 		fputs(lineno, cv->op);
 		break;
 	case FORMAT_CTAGS_XID:
-		fputs(gpath_path2fid(path, NULL), cv->op);
+		fid = gpath_path2fid(path, NULL);
+		if (fid == NULL)
+			die("convert_put: unknown file. '%s'", path);
+		fputs(fid, cv->op);
 		fputc(' ', cv->op);
 		/* PASS THROUGH */
 	case FORMAT_CTAGS_X:
@@ -200,13 +310,20 @@ convert_put(CONVERT *cv, const char *tagline)
 		 * print until path name.
 		 */
 		*tagnextp = tagnextc;
-		fputs(tagline, cv->op);
+		fputs(ctags_x, cv->op);
 		fputc(' ', cv->op);
 		/*
 		 * print path name and the rest.
 		 */
 		fputs(convert_pathname(cv, path), cv->op);
 		fputc(' ', cv->op);
+		fputs(rest, cv->op);
+		break;
+	case FORMAT_CTAGS_MOD:
+		fputs(convert_pathname(cv, path), cv->op);
+		fputc('\t', cv->op);
+		fputs(lineno, cv->op);
+		fputc('\t', cv->op);
 		fputs(rest, cv->op);
 		break;
 	case FORMAT_GREP:
@@ -225,24 +342,42 @@ convert_put(CONVERT *cv, const char *tagline)
 		fputc(' ', cv->op);
 		for (; *rest && isspace(*rest); rest++)
 			;
-		fputs(rest, cv->op);
+		if (*rest)
+			fputs(rest, cv->op);
+		else
+			fputs("<unknown>", cv->op);
 		break;
 	default:
 		die("unknown format type.");
 	}
-	(void)fputc('\n', cv->op);
+	(void)fputc(newline, cv->op);
 }
-/*
- * convert_put_using: convert path into relative or absolute and print.
+/**
+ * convert_put_path: convert @a path into relative or absolute and print.
  *
- *	i)	cv	CONVERT structure
- *      i)      tag     tag name
- *      i)      path    path name
- *      i)      lineno  line number
- *      i)      line    line image
+ *	@param[in]	cv	#CONVERT structure
+ *	@param[in]	path	path name
  */
 void
-convert_put_using(CONVERT *cv, const char *tag, const char *path, int lineno, const char *rest)
+convert_put_path(CONVERT *cv, const char *path)
+{
+	if (cv->format != FORMAT_PATH)
+		die("convert_put_path: internal error.");
+	fputs(convert_pathname(cv, path), cv->op);
+	(void)fputc(newline, cv->op);
+}
+/**
+ * convert_put_using: convert @a path into relative or absolute and print.
+ *
+ *	@param[in]	cv	#CONVERT structure
+ *      @param[in]      tag     tag name
+ *      @param[in]      path    path name
+ *      @param[in]      lineno  line number
+ *      @param[in]      rest    line image
+ *	@param[in]	fid	file id (only when @CODE{fid != NULL})
+ */
+void
+convert_put_using(CONVERT *cv, const char *tag, const char *path, int lineno, const char *rest, const char *fid)
 {
 	switch (cv->format) {
 	case FORMAT_PATH:
@@ -256,12 +391,24 @@ convert_put_using(CONVERT *cv, const char *tag, const char *path, int lineno, co
 		fprintf(cv->op, "%d", lineno);
 		break;
 	case FORMAT_CTAGS_XID:
-		fputs(gpath_path2fid(path, NULL), cv->op);
+		if (fid == NULL) {
+			fid = gpath_path2fid(path, NULL);
+			if (fid == NULL)
+				die("convert_put_using: unknown file. '%s'", path);
+		}
+		fputs(fid, cv->op);
 		fputc(' ', cv->op);
 		/* PASS THROUGH */
 	case FORMAT_CTAGS_X:
 		fprintf(cv->op, "%-16s %4d %-16s %s",
 			tag, lineno, convert_pathname(cv, path), rest);
+		break;
+	case FORMAT_CTAGS_MOD:
+		fputs(convert_pathname(cv, path), cv->op);
+		fputc('\t', cv->op);
+		fprintf(cv->op, "%d", lineno);
+		fputc('\t', cv->op);
+		fputs(rest, cv->op);
 		break;
 	case FORMAT_GREP:
 		fputs(convert_pathname(cv, path), cv->op);
@@ -279,12 +426,15 @@ convert_put_using(CONVERT *cv, const char *tag, const char *path, int lineno, co
 		fputc(' ', cv->op);
 		for (; *rest && isspace(*rest); rest++)
 			;
-		fputs(rest, cv->op);
+		if (*rest)
+			fputs(rest, cv->op);
+		else
+			fputs("<unknown>", cv->op);
 		break;
 	default:
 		die("unknown format type.");
 	}
-	(void)fputc('\n', cv->op);
+	(void)fputc(newline, cv->op);
 }
 void
 convert_close(CONVERT *cv)

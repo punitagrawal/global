@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+ * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2011
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -25,29 +25,41 @@
 
 #if defined(_WIN32) || defined(__DJGPP__)
 #define W32	1
-#define NULL_DEVICE	"NUL"
 #else
 #define W32	0
-#define NULL_DEVICE	"/dev/null"
 #endif
+#define SITEKEYDIRNAME "sitekeys"
 
 /*
- * definition_header
+ * dumb CMD.EXE requires the entire popen command to be quoted
  */
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#define PQUOTE "\""
+#else
+#define PQUOTE
+#endif
+
+/**
+ * @name definition_header
+ */
+/** @{ */
 #define NO_HEADER	0
 #define BEFORE_HEADER	1
 #define RIGHT_HEADER	2
 #define AFTER_HEADER	3
+/** @} */
 
-/*
- * Directory names.
+/**
+ * @name Directory names.
  */
+/** @{ */
 #define SRCS	"S"
 #define DEFS	"D"
 #define REFS	"R"
 #define INCS	"I"
 #define INCREFS "J"
 #define SYMS	"Y"
+/** @} */
 
 extern int w32;
 extern const char *www;
@@ -66,6 +78,8 @@ extern char global_path[MAXFILLEN];
 extern int gtags_exist[GTAGLIM];
 extern const char *null_device;
 extern const char *tmpdir;
+extern const char *tree_view_type;
+extern const char *sitekey;
 
 extern int aflag;
 extern int cflag;
@@ -83,6 +97,9 @@ extern int debug;
 extern int show_help;
 extern int show_version;
 extern int caution;
+extern int auto_completion;
+extern int tree_view;
+extern int fixed_guide;
 extern int dynamic;
 extern int symbol;
 extern int statistics;
@@ -93,9 +110,6 @@ extern int enable_grep;
 extern int enable_idutils;
 extern int enable_xhtml;
 
-extern const char *action_value;
-extern const char *id_value;
-extern const char *cgidir;
 extern const char *main_func;
 extern const char *cvsweb_url;
 extern int use_cvs_module;
@@ -105,9 +119,13 @@ extern const char *title;
 extern const char *xhtml_version;
 extern const char *insert_header;
 extern const char *insert_footer;
+extern const char *html_header;
+extern const char *jscode;
 
 extern const char *title_define_index;
 extern const char *title_file_index;
+extern const char *title_call_tree;
+extern const char *title_callee_tree;
 extern const char *title_included_from;
 
 extern const char *anchor_label[];
@@ -124,6 +142,7 @@ extern int tabs;
 extern int flist_fields;
 extern int full_path;
 extern int map_file;
+extern int filemap_file;
 extern const char *icon_suffix;
 extern const char *icon_spec;
 extern const char *prolog_script;
@@ -137,11 +156,9 @@ extern const char *gzipped_suffix;
 extern const char *normal_suffix;
 extern const char *HTML;
 extern const char *action;
-extern const char *saction;
-extern const char *id;
-extern int cgi;
 extern int definition_header;
 extern const char *htags_options;
 extern const char *include_file_suffixes;
+extern int grtags_is_empty;
 
 #endif /* _HTAGS_H_ */

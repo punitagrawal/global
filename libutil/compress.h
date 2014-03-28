@@ -21,12 +21,12 @@
 #ifndef _COMPRESS_H
 #define _COMPRESS_H
 
-#include <stdio.h>
-
-/*
+/**
  * Please list words which appear in definition line.
  *
+ * @code
  * 'ddefine' means 'd => define'.
+ * @endcode
  */
 #define DEFAULT_ABBREVIATION	"ddefine ttypedef"
 

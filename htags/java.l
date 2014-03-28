@@ -32,7 +32,7 @@
 #include "anchor.h"
 #include "common.h"
 #include "htags.h"
-#include "../gtags-parser/java_res.h"
+#include "../libparser/java_res.h"
 
 #define lex_symbol_generation_rule(x) java_ ## x
 #include "lexcommon.h"
@@ -79,8 +79,10 @@ WORD		{ALPHA}{ALPHANUM}*
 		int c = 0;
 
 		put_reserved_word(LEXTEXT);
-		while ((c = input()) && c != '\n' && c != ';')
+		while ((c = input()) && c != EOF && c != '\n' && c != ';')
 			echoc(c);
+		if (c == EOF)
+			c = '\n';
 		if (c == '\n')
 			unput(c);
 		else if (c)
@@ -96,6 +98,8 @@ WORD		{ALPHA}{ALPHANUM}*
 			if (a) {
 				put_anchor(gettag(a), a->type, LINENO);
 				a->done = 1;
+			} else if (grtags_is_empty) {
+				put_anchor_force(LEXTEXT, LEXLENG, LINENO);
 			} else {
 				ECHO;
 			}

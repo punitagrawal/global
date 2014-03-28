@@ -61,30 +61,33 @@ dbopen(fname, flags, mode, type, openinfo)
 		case DB_BTREE:
 			return (__bt_open(fname, (flags & USE_OPEN_FLAGS) | O_BINARY,
 			    mode, openinfo, flags & DB_FLAGS));
-		/*
 		case DB_HASH:
+			;
+			/*
 			return (__hash_open(fname, (flags & USE_OPEN_FLAGS) | O_BINARY,
 			    mode, openinfo, flags & DB_FLAGS));
+			*/
 		case DB_RECNO:
+			;
+			/*
 			return (__rec_open(fname, (flags & USE_OPEN_FLAGS) | O_BINARY,
 			    mode, openinfo, flags & DB_FLAGS));
-		*/
+			*/
 		}
 	errno = EINVAL;
 	return (NULL);
 }
 
 static int
-__dberr()
+__dberr(void)
 {
 	return (RET_ERROR);
 }
 
-/*
+/**
  * __DBPANIC -- Stop.
  *
- * Parameters:
- *	dbp:	pointer to the DB structure.
+ *	@param dbp	pointer to the #DB structure.
  */
 void
 __dbpanic(dbp)

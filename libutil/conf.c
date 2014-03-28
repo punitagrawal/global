@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 1999, 2000, 2001, 2002, 2005
+ * Copyright (c) 1998, 1999, 2000, 2001, 2002, 2005, 2010, 2011
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -33,6 +33,7 @@
 #endif
 
 #include "gparam.h"
+#include "char.h"
 #include "checkalloc.h"
 #include "conf.h"
 #include "die.h"
@@ -50,10 +51,10 @@
 static FILE *fp;
 static STRBUF *ib;
 static char *confline;
-/*
- * 8 level nested tc= or include= is allowed.
+/**
+ * 32 level nested @CODE{tc=} or @CODE{include=} is allowed.
  */
-static int allowed_nest_level = 8;
+static int allowed_nest_level = 32;
 static int opened;
 
 static void trim(char *);
@@ -64,13 +65,15 @@ static void includelabel(STRBUF *, const char *, int);
 #define isblank(c)	((c) == ' ' || (c) == '\t')
 #endif
 
-/*
+/**
  * trim: trim string.
  *
+ * @code
  * : var1=a b :
  *	|
  *	v
  * :var1=a b :
+ * @endcode
  */
 static void
 trim(char *l)
@@ -100,22 +103,22 @@ trim(char *l)
 	}
 	*b = 0;
 }
-/*
+/**
  * readrecord: read recoed indexed by label.
  *
- *	i)	label	label in config file
- *	r)		record
+ *	@param[in]	label	label in config file
+ *	@return		record
  *
- * Jobs:
- * o skip comment.
- * o append following line.
- * o format check.
+ * @par Jobs:
+ * - skip comment.
+ * - append following line.
+ * - format check.
  */
 static const char *
 readrecord(const char *label)
 {
 	char *p;
-	int flag = STRBUF_NOCRLF;
+	int flag = STRBUF_NOCRLF|STRBUF_SHARPSKIP;
 	int count = 0;
 
 	rewind(fp);
@@ -125,7 +128,7 @@ readrecord(const char *label)
 		 * ignore \<new line>.
 		 */
 		flag &= ~STRBUF_APPEND;
-		if (*p == '#' || *p == '\0')
+		if (*p == '\0')
 			continue;
 		if (strbuf_unputc(ib, '\\')) {
 			flag |= STRBUF_APPEND;
@@ -161,12 +164,12 @@ readrecord(const char *label)
 	 */
 	return NULL;
 }
-/*
- * includelabel: procedure for tc= (or include=)
+/**
+ * includelabel: procedure for @CODE{tc=} (or @CODE{include=})
  *
- *	o)	sb	string buffer
- *	i)	label	record label
- *	i)	level	nest level for check
+ *	@param[out]	sb	string buffer
+ *	@param[in]	label	record label
+ *	@param[in]	level	nest level for check
  */
 static void
 includelabel(STRBUF *sb, const char *label, int	level)
@@ -191,7 +194,7 @@ includelabel(STRBUF *sb, const char *label, int	level)
 	strbuf_puts(sb, p);
 	free((void *)savep);
 }
-/*
+/**
  * configpath: get path of configuration file.
  */
 static char *
@@ -217,20 +220,19 @@ configpath(void)
 #endif
 	else if (test("r", GTAGSCONF))
 		strbuf_puts(sb, GTAGSCONF);
-	else if (test("r", OLD_GTAGSCONF))
-		strbuf_puts(sb, OLD_GTAGSCONF);
 	else if (test("r", DEBIANCONF))
 		strbuf_puts(sb, DEBIANCONF);
-	else if (test("r", OLD_DEBIANCONF))
-		strbuf_puts(sb, OLD_DEBIANCONF);
+	else if (test("r", makepath(SYSCONFDIR, "gtags.conf", NULL)))
+		strbuf_puts(sb, makepath(SYSCONFDIR, "gtags.conf", NULL));
 	else
 		return NULL;
 	return strbuf_value(sb);
 }
-/*
+/**
  * openconf: load configuration file.
  *
- *	go)	line	specified entry
+ * @par Globals used (output):
+ *	#confline:	 specified entry
  */
 void
 openconf(void)
@@ -286,61 +288,19 @@ openconf(void)
 		fclose(fp);
 	}
 	/*
-	 * make up lacked variables.
+	 * make up required variables.
 	 */
 	sb = strbuf_open(0);
 	strbuf_puts(sb, confline);
 	strbuf_unputc(sb, ':');
 
-	if (!getconfs("suffixes", NULL)) {
-		STRBUF *tmp = strbuf_open(0);
-		const char *langmap = NULL;
-
-		/*
-		 * Variable 'suffixes' is obsoleted. But it is generated
-		 * internally from the value of variable 'langmap'.
-		 */
-		if (getconfs("langmap", tmp))
-			langmap = strbuf_value(tmp);
-		else
-			langmap = DEFAULTLANGMAP;
-		strbuf_puts(sb, ":suffixes=");
-		make_suffixes(langmap, sb);
-		strbuf_close(tmp);
+	if (!getconfs("langmap", NULL)) {
+		strbuf_puts(sb, ":langmap=");
+		strbuf_puts(sb, quote_chars(DEFAULTLANGMAP, ':'));
 	}
 	if (!getconfs("skip", NULL)) {
 		strbuf_puts(sb, ":skip=");
 		strbuf_puts(sb, DEFAULTSKIP);
-	}
-	/*
-	 * GTAGS, GRTAGS and GSYMS have no default values but non of them
-	 * specified then use default values.
-	 * (Otherwise, nothing to do for gtags.)
-	 */
-	if (!getconfs("GTAGS", NULL) && !getconfs("GRTAGS", NULL) && !getconfs("GSYMS", NULL)) {
-		const char *path;
-
-		/*
-		 * usable search in BINDIR at first.
-		 */
-#if defined(_WIN32)
-		path = "gtags-parser.exe";
-#elif defined(__DJGPP__)
-		path = usable("gtags-parser") ? "gtags-parser.exe" : "gtags-~1.exe";
-#else
-		path = usable("gtags-parser");
-		if (!path)
-			path = "gtags-parser";
-#endif /* _WIN32 */
-		strbuf_puts(sb, ":GTAGS=");
-		strbuf_puts(sb, path);
-		strbuf_puts(sb, " %s");
-		strbuf_puts(sb, ":GRTAGS=");
-		strbuf_puts(sb, path);
-		strbuf_puts(sb, " -r %s");
-		strbuf_puts(sb, ":GSYMS=");
-		strbuf_puts(sb, path);
-		strbuf_puts(sb, " -s %s");
 	}
 	strbuf_unputc(sb, ':');
 	strbuf_putc(sb, ':');
@@ -349,18 +309,18 @@ openconf(void)
 	trim(confline);
 	return;
 }
-/*
+/**
  * getconfn: get property number
  *
- *	i)	name	property name
- *	o)	num	value (if not NULL)
- *	r)		1: found, 0: not found
+ *	@param[in]	name	property name
+ *	@param[out]	num	value (if not @VAR{NULL})
+ *	@return		1: found, 0: not found
  */
 int
 getconfn(const char *name, int *num)
 {
 	const char *p;
-	char buf[MAXPROPLEN+1];
+	char buf[MAXPROPLEN];
 
 	if (!opened)
 		openconf();
@@ -373,24 +333,24 @@ getconfn(const char *name, int *num)
 	}
 	return 0;
 }
-/*
+/**
  * getconfs: get property string
  *
- *	i)	name	property name
- *	o)	sb	string buffer (if not NULL)
- *	r)		1: found, 0: not found
+ *	@param[in]	name	property name
+ *	@param[out]	sb	string buffer (if not @VAR{NULL})
+ *	@return		1: found, 0: not found
  */
 int
 getconfs(const char *name, STRBUF *sb)
 {
 	const char *p;
-	char buf[MAXPROPLEN+1];
+	char buf[MAXPROPLEN];
 	int all = 0;
 	int exist = 0;
 
 	if (!opened)
 		openconf();
-	if (!strcmp(name, "suffixes") || !strcmp(name, "skip"))
+	if (!strcmp(name, "skip") || !strcmp(name, "gtags_parser") || !strcmp(name, "langmap"))
 		all = 1;
 	snprintf(buf, sizeof(buf), ":%s=", name);
 	p = confline;
@@ -398,8 +358,10 @@ getconfs(const char *name, STRBUF *sb)
 		if (exist && sb)
 			strbuf_putc(sb, ',');		
 		exist = 1;
-		for (p += strlen(buf); *p && *p != ':'; p++) {
-			if (*p == '\\')	/* quoted character */
+		for (p += strlen(buf); *p; p++) {
+			if (*p == ':')
+				break;
+			if (*p == '\\' && *(p + 1) == ':')	/* quoted character */
 				p++;
 			if (sb)
 				strbuf_putc(sb, *p);
@@ -416,22 +378,43 @@ getconfs(const char *name, STRBUF *sb)
 			strbuf_puts(sb, BINDIR);
 			exist = 1;
 		} else if (!strcmp(name, "datadir")) {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+			/*
+			 * Test if this directory exists, and if not, take the
+			 * directory relative to the binary.
+			 */
+			if (test("d", DATADIR))
+				strbuf_puts(sb, DATADIR);
+			else {
+				const char *name = strrchr(_pgmptr, '\\');
+				if (name)
+					strbuf_nputs(sb, _pgmptr, name+1 - _pgmptr);
+				strbuf_puts(sb, "..\\share");
+			}
+#else
 			strbuf_puts(sb, DATADIR);
+#endif
+			exist = 1;
+		} else if (!strcmp(name, "localstatedir")) {
+			strbuf_puts(sb, LOCALSTATEDIR);
+			exist = 1;
+		} else if (!strcmp(name, "sysconfdir")) {
+			strbuf_puts(sb, SYSCONFDIR);
 			exist = 1;
 		}
 	}
 	return exist;
 }
-/*
+/**
  * getconfb: get property bool value
  *
- *	i)	name	property name
- *	r)		1: TRUE, 0: FALSE
+ *	@param[in]	name	property name
+ *	@return		1: @VAR{TRUE}, 0: @VAR{FALSE}
  */
 int
 getconfb(const char *name)
 {
-	char buf[MAXPROPLEN+1];
+	char buf[MAXPROPLEN];
 
 	if (!opened)
 		openconf();
@@ -440,7 +423,7 @@ getconfb(const char *name)
 		return 1;
 	return 0;
 }
-/*
+/**
  * getconfline: print loaded config entry.
  */
 const char *
