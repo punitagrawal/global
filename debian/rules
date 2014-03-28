@@ -33,7 +33,7 @@ clean:
 	# buildd at least seem to crap out trying to chmod it later.
 	if test -e config.status; then touch config.status; fi
 
-	-$(MAKE) distclean
+	[ ! -f Makefile ] || $(MAKE) distclean
 	dh_clean
 
 install:
