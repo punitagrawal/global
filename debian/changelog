@@ -13,6 +13,7 @@ global (6.2.11-1.1) UNRELEASED; urgency=medium
   * Fix an error encountered while installing gtags.el
   * Add debian/emacsen-compat
   * Fix lintian warning debian-rules-ignores-make-clean
+  * Fix lintian warning debian-rules-missing-recommended-target
 
  -- Punit Agrawal <punitagrawal@gmail.com>  Fri, 28 Mar 2014 17:23:57 +0000
 
