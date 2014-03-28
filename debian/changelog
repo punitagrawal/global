@@ -10,6 +10,7 @@ global (6.2.11-1.1) UNRELEASED; urgency=medium
     Drop alternate compressed suffix functionality for htags
   * Update debian/rules in line with 6.2.11
   * Update debian/global.manpages for 6.2.11
+  * Fix an error encountered while installing gtags.el
 
  -- Punit Agrawal <punitagrawal@gmail.com>  Fri, 28 Mar 2014 17:23:57 +0000
 
