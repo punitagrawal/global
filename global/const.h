@@ -1,11 +1,11 @@
 /* This file is generated automatically by convert.pl from global/manual.in. */
 const char *progname = "global";
-const char *usage_const = "Usage: global [-adGilnqrsStTvx][-e] pattern\n\
+const char *usage_const = "Usage: global [-adGilnqrstTvx][-S dir][-e] pattern\n\
        global -c[diIoOPrsT] prefix\n\
-       global -f[adlnqrsStvx][-L file-list] files\n\
-       global -g[aGilnoOqStvVx][-L file-list][-e] pattern [files]\n\
-       global -I[ailnqStvx][-e] pattern\n\
-       global -P[aGilnoOqStvVx][-e] pattern\n\
+       global -f[adlnqrstvx][-L file-list][-S dir] files\n\
+       global -g[aGilnoOqtvVx][-L file-list][-S dir][-e] pattern [files]\n\
+       global -I[ailnqtvx][-S dir][-e] pattern\n\
+       global -P[aGilnoOqtvVx][-S dir][-e] pattern\n\
        global -p[qrv]\n\
        global -u[qv]\n";
 const char *help_const = "Commands:\n\
@@ -43,6 +43,12 @@ const char *help_const = "Commands:\n\
 Options:\n\
 -a, --absolute\n\
        Print absolute path names. By default, print relative path names.\n\
+--color when\n\
+       Use color to highlight the pattern within the line; when may be one of:\n\
+       never, always or auto (default).\n\
+       The default color is bold red text on current background; the environment\n\
+       variable GREP_COLOR defines it.\n\
+       This option is effective to the following commands: <no command>, -f, -g, -I, -P.\n\
 -d, --definition\n\
        Print locations of definitions.\n\
 -e, --regexp pattern\n\

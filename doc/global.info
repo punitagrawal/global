@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU GLOBAL source code tag system
 *********************************
 
-This manual documents version 6.2.11 of the GNU GLOBAL source code tag
+This manual documents version 6.2.12 of the GNU GLOBAL source code tag
 system.
 
 * Menu:
@@ -1651,12 +1651,12 @@ global - print locations of given symbols
 SYNOPSIS
 --------
 
-     global [-adGilnqrsStTvx][-e] pattern
+     global [-adGilnqrstTvx][-S dir][-e] pattern
      global -c[diIoOPrsT] prefix
-     global -f[adlnqrsStvx][-L file-list] files
-     global -g[aGilnoOqStvVx][-L file-list][-e] pattern [files]
-     global -I[ailnqStvx][-e] pattern
-     global -P[aGilnoOqStvVx][-e] pattern
+     global -f[adlnqrstvx][-L file-list][-S dir] files
+     global -g[aGilnoOqtvVx][-L file-list][-S dir][-e] pattern [files]
+     global -I[ailnqtvx][-S dir][-e] pattern
+     global -P[aGilnoOqtvVx][-S dir][-e] pattern
      global -p[qrv]
      global -u[qv]
 
@@ -1721,6 +1721,12 @@ The following options are available:
 
 '-a', '--absolute'
      Print absolute path names.  By default, print relative path names.
+'--color' when
+     Use color to highlight the pattern within the line; when may be one
+     of: never, always or auto (default).  The default color is bold red
+     text on current background; the environment variable GREP_COLOR
+     defines it.  This option is effective to the following commands:
+     <no command>, -f, -g, -I, -P.
 '-d', '--definition'
      Print locations of definitions.
 '-e', '--regexp' pattern
@@ -1863,6 +1869,8 @@ ENVIRONMENT
 
 The following environment variables affect the execution of global:
 
+GREP_COLOR
+     The color to use for '--color'.
 GTAGSBLANKENCODE
      If this variable is set, the '--encode-path=" <TAB>"' option is
      specified.
@@ -3518,13 +3526,13 @@ Node: Plug-in50387
 Node: Incremental updating51356
 Node: Reference52540
 Node: global53112
-Node: gtags63188
-Node: htags69946
-Node: gozilla81163
-Node: gtags-cscope83993
-Node: globash95451
-Node: Copying This Manual96612
-Node: GNU Free Documentation License96849
-Node: Index119240
+Node: gtags63606
+Node: htags70364
+Node: gozilla81581
+Node: gtags-cscope84411
+Node: globash95869
+Node: Copying This Manual97030
+Node: GNU Free Documentation License97267
+Node: Index119658
 
 End Tag Table
