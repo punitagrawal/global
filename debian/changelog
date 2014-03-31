@@ -1,4 +1,4 @@
-global (6.2.11-1.1) UNRELEASED; urgency=medium
+global (6.2.12-1.1) UNRELEASED; urgency=medium
 
   [ Punit Agrawal ]
   * Non-maintainer upload.
@@ -16,7 +16,10 @@ global (6.2.11-1.1) UNRELEASED; urgency=medium
   * Fix lintian warning debian-rules-missing-recommended-target
   * Replace deprecated dh_clean -k with dh_prep in debian/rules
 
- -- Punit Agrawal <punitagrawal@gmail.com>  Fri, 28 Mar 2014 17:23:57 +0000
+  [ Punit Agrawal <punitagrawal@gmail.com> ]
+  * Update to upstream release - 6.2.12
+
+ -- Punit Agrawal <punitagrawal@gmail.com>  Mon, 31 Mar 2014 17:17:52 +0100
 
 global (5.7.1-2) unstable; urgency=low
 
