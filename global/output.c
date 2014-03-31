@@ -24,6 +24,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "global.h"
+#include "convert.h"
 
 /**
  * Stuff for the compact format
@@ -50,7 +51,7 @@ extern int format;
         } while (0)
 
 void
-start_output()
+start_output(void)
 {
 	curpath[0] = curtag[0] = '\0';
 	cur_lineno = last_lineno = 0;
@@ -58,7 +59,7 @@ start_output()
 	src = "";
 }
 void
-end_output()
+end_output(void)
 {
 	if (fp)
 		fclose(fp);
@@ -77,7 +78,7 @@ output_with_formatting(CONVERT *cv, GTP *gtp, int flags)
 	int count = 0;
 
 	if (format == FORMAT_PATH) {
-		convert_put_path(cv, gtp->path);
+		convert_put_path(cv, NULL, gtp->path);
 		count++;
 	} else if (flags & GTAGS_COMPACT) {
 		count += put_compact_format(cv, gtp, flags);

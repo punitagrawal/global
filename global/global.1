@@ -1,19 +1,19 @@
 .\" This file is generated automatically by convert.pl from global/manual.in.
-.TH GLOBAL 1 "Jun 2013" "GNU Project"
+.TH GLOBAL 1 "March 2014" "GNU Project"
 .SH NAME
 global \- print locations of given symbols
 .SH SYNOPSIS
-\fBglobal\fP [-adGilnqrsStTvx][-e] \fIpattern\fP
+\fBglobal\fP [-adGilnqrstTvx][-S dir][-e] \fIpattern\fP
 .br
 \fBglobal\fP -c[diIoOPrsT] \fIprefix\fP
 .br
-\fBglobal\fP -f[adlnqrsStvx][-L file-list] \fIfiles\fP
+\fBglobal\fP -f[adlnqrstvx][-L file-list][-S dir] \fIfiles\fP
 .br
-\fBglobal\fP -g[aGilnoOqStvVx][-L file-list][-e] \fIpattern\fP [\fIfiles\fP]
+\fBglobal\fP -g[aGilnoOqtvVx][-L file-list][-S dir][-e] \fIpattern\fP [\fIfiles\fP]
 .br
-\fBglobal\fP -I[ailnqStvx][-e] \fIpattern\fP
+\fBglobal\fP -I[ailnqtvx][-S dir][-e] \fIpattern\fP
 .br
-\fBglobal\fP -P[aGilnoOqStvVx][-e] \fIpattern\fP
+\fBglobal\fP -P[aGilnoOqtvVx][-S dir][-e] \fIpattern\fP
 .br
 \fBglobal\fP -p[qrv]
 .br
@@ -88,6 +88,13 @@ The following options are available:
 .TP
 \fB-a\fP, \fB--absolute\fP
 Print absolute path names. By default, print relative path names.
+.TP
+\fB--color\fP \fIwhen\fP
+Use color to highlight the pattern within the line; \fIwhen\fP may be one of:
+\fInever\fP, \fIalways\fP or \fIauto\fP (default).
+The default color is bold red text on current background; the environment
+variable \fBGREP_COLOR\fP defines it.
+This option is effective to the following commands: <no command>, -f, -g, -I, -P.
 .TP
 \fB-d\fP, \fB--definition\fP
 Print locations of definitions.
@@ -255,6 +262,9 @@ Configuration files.
 .SH ENVIRONMENT
 The following environment variables affect the execution of \fBglobal\fP:
 .PP
+.TP
+\fBGREP_COLOR\fP
+The color to use for \fB--color\fP.
 .TP
 \fBGTAGSBLANKENCODE\fP
 If this variable is set, the \fB--encode-path=" <TAB>"\fP

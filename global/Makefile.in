@@ -96,7 +96,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_global_OBJECTS = global.$(OBJEXT) literal.$(OBJEXT) \
-	output.$(OBJEXT)
+	output.$(OBJEXT) convert.$(OBJEXT)
 global_OBJECTS = $(am_global_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -341,8 +341,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-global_SOURCES = global.c literal.c output.c
-noinst_HEADERS = literal.h
+global_SOURCES = global.c literal.c output.c convert.c
+noinst_HEADERS = literal.h convert.h output.h
 global_LDADD = $(LDADD) $(LIBLTDL)
 global_DEPENDENCIES = $(LDADD) $(LTDLDEPS)
 man_MANS = global.1
@@ -441,6 +441,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/literal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/output.Po@am__quote@

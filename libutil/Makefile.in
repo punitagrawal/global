@@ -110,9 +110,10 @@ am_libgloutil_a_OBJECTS = assoc.$(OBJEXT) conf.$(OBJEXT) \
 	split.$(OBJEXT) strlimcpy.$(OBJEXT) linetable.$(OBJEXT) \
 	env.$(OBJEXT) char.$(OBJEXT) date.$(OBJEXT) langmap.$(OBJEXT) \
 	varray.$(OBJEXT) idset.$(OBJEXT) strhash.$(OBJEXT) \
-	xargs.$(OBJEXT) pathconvert.$(OBJEXT) compress.$(OBJEXT) \
-	checkalloc.$(OBJEXT) pool.$(OBJEXT) fileop.$(OBJEXT) \
-	statistics.$(OBJEXT) args.$(OBJEXT) logging.$(OBJEXT)
+	xargs.$(OBJEXT) encodepath.$(OBJEXT) rewrite.$(OBJEXT) \
+	compress.$(OBJEXT) checkalloc.$(OBJEXT) pool.$(OBJEXT) \
+	fileop.$(OBJEXT) statistics.$(OBJEXT) args.$(OBJEXT) \
+	logging.$(OBJEXT)
 libgloutil_a_OBJECTS = $(am_libgloutil_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -344,15 +345,15 @@ assoc.h conf.h dbop.h defined.h die.h find.h getdbpath.h global.h gparam.h \
 gtagsop.h locatestring.h makepath.h path.h gpathop.h strbuf.h \
 strmake.h tab.h test.h token.h usable.h version.h is_unixy.h abs2rel.h \
 split.h strlimcpy.h linetable.h env.h char.h date.h langmap.h \
-varray.h idset.h strhash.h xargs.h format.h pathconvert.h \
+varray.h idset.h strhash.h xargs.h format.h encodepath.h rewrite.h \
 compress.h checkalloc.h pool.h fileop.h statistics.h args.h logging.h
 
 libgloutil_a_SOURCES = \
 assoc.c conf.c dbop.c defined.c die.c find.c getdbpath.c gtagsop.c locatestring.c \
 makepath.c path.c gpathop.c strbuf.c strmake.c tab.c test.c \
 token.c usable.c version.c is_unixy.c abs2rel.c split.c strlimcpy.c linetable.c \
-env.c char.c date.c langmap.c varray.c idset.c strhash.c xargs.c \
-pathconvert.c compress.c checkalloc.c pool.c fileop.c statistics.c args.c logging.c
+env.c char.c date.c langmap.c varray.c idset.c strhash.c xargs.c encodepath.c rewrite.c \
+compress.c checkalloc.c pool.c fileop.c statistics.c args.c logging.c
 
 AM_CFLAGS = -DBINDIR='"$(bindir)"' -DDATADIR='"$(datadir)"' -DLOCALSTATEDIR='"$(localstatedir)"' -DSYSCONFDIR='"$(sysconfdir)"'
 libgloutil_a_DEPENDENCIES = $(libgloutil_a_LIBADD)
@@ -418,6 +419,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/defined.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/die.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/encodepath.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/find.Po@am__quote@
@@ -432,8 +434,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logging.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/makepath.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/path.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pathconvert.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pool.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rewrite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/split.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/statistics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strbuf.Po@am__quote@

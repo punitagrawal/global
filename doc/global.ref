@@ -3,12 +3,12 @@
 global - print locations of given symbols
 @unnumberedsubsec SYNOPSIS
 @quotation
-global [-adGilnqrsStTvx][-e] pattern@*
+global [-adGilnqrstTvx][-S dir][-e] pattern@*
 global -c[diIoOPrsT] prefix@*
-global -f[adlnqrsStvx][-L file-list] files@*
-global -g[aGilnoOqStvVx][-L file-list][-e] pattern [files]@*
-global -I[ailnqStvx][-e] pattern@*
-global -P[aGilnoOqStvVx][-e] pattern@*
+global -f[adlnqrstvx][-L file-list][-S dir] files@*
+global -g[aGilnoOqtvVx][-L file-list][-S dir][-e] pattern [files]@*
+global -I[ailnqtvx][-S dir][-e] pattern@*
+global -P[aGilnoOqtvVx][-S dir][-e] pattern@*
 global -p[qrv]@*
 global -u[qv]@*
 @end quotation
@@ -73,6 +73,12 @@ The following options are available:
 @table @asis
 @item @samp{-a}, @samp{--absolute}
 Print absolute path names. By default, print relative path names.
+@item @samp{--color} when
+Use color to highlight the pattern within the line; when may be one of:
+never, always or auto (default).
+The default color is bold red text on current background; the environment
+variable @var{GREP_COLOR} defines it.
+This option is effective to the following commands: <no command>, -f, -g, -I, -P.
 @item @samp{-d}, @samp{--definition}
 Print locations of definitions.
 @item @samp{-e}, @samp{--regexp} pattern
@@ -213,6 +219,8 @@ Configuration files.
 The following environment variables affect the execution of global:
 
 @table @asis
+@item @var{GREP_COLOR}
+The color to use for @samp{--color}.
 @item @var{GTAGSBLANKENCODE}
 If this variable is set, the @samp{--encode-path=" <TAB>"}
 option is specified.
