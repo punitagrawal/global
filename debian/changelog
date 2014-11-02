@@ -1,4 +1,4 @@
-global (6.2.12-1.1) UNRELEASED; urgency=medium
+global (6.2.12-1.2) UNRELEASED; urgency=medium
 
   [ Punit Agrawal ]
   * Non-maintainer upload.
@@ -19,7 +19,10 @@ global (6.2.12-1.1) UNRELEASED; urgency=medium
   [ Punit Agrawal <punitagrawal@gmail.com> ]
   * Update to upstream release - 6.2.12
 
- -- Punit Agrawal <punitagrawal@gmail.com>  Mon, 31 Mar 2014 17:17:52 +0100
+  [ Volker Mische ]
+  * Install plugins from plugin-factory
+
+ -- Volker Mische <volker.mische@gmail.com>  Sun, 02 Nov 2014 18:43:06 +0100
 
 global (5.7.1-2) unstable; urgency=low
 
