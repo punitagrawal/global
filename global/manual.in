@@ -26,12 +26,12 @@
 @HEADER	GLOBAL,1,March 2014,GNU Project
 @NAME	global - print locations of given symbols
 @SYNOPSIS
-	@name{global} [-adGilnqrstTvx][-S dir][-e] @arg{pattern}
-	@name{global} -c[diIoOPrsT] @arg{prefix}
+	@name{global} [-adEFGilMnqrstTvx][-S dir][-e] @arg{pattern}
+	@name{global} -c[dFiIMoOPrsT] @arg{prefix}
 	@name{global} -f[adlnqrstvx][-L file-list][-S dir] @arg{files}
-	@name{global} -g[aGilnoOqtvVx][-L file-list][-S dir][-e] @arg{pattern} [@arg{files}]
-	@name{global} -I[ailnqtvx][-S dir][-e] @arg{pattern}
-	@name{global} -P[aGilnoOqtvVx][-S dir][-e] @arg{pattern}
+	@name{global} -g[aEGilMnoOqtvVx][-L file-list][-S dir][-e] @arg{pattern} [@arg{files}]
+	@name{global} -I[ailMnqtvx][-S dir][-e] @arg{pattern}
+	@name{global} -P[aEGilMnoOqtvVx][-S dir][-e] @arg{pattern}
 	@name{global} -p[qrv]
 	@name{global} -u[qv]
 @DESCRIPTION
@@ -99,16 +99,23 @@
 		Use color to highlight the pattern within the line; @arg{when} may be one of:
 		@arg{never}, @arg{always} or @arg{auto} (default).
 		The default color is bold red text on current background; the environment
-		variable @var{GREP_COLOR} defines it.
-		This option is effective to the following commands: <no command>, -f, -g, -I, -P.
+		variable @var{GREP_COLORS} or @var{GREP_COLOR} defines it.
+		This option is effective to the following commands:
+		<no command>, -f, -g, -I, -P.
 	@item{@option{-d}, @option{--definition}}
 		Print locations of definitions.
 	@item{@option{-e}, @option{--regexp} @arg{pattern}}
 		Use @arg{pattern} as the pattern; useful to protect patterns starting with @samp{-}.
+	@item{@option{-E}, @option{--extended-regexp}}
+		Interpret @arg{pattern} as a extended regular expression.
+		This is the default.
 	@item{@option{--encode-path} @arg{chars}}
 		Convert path characters in @arg{chars} into a @samp{%} symbol, followed by the
 		two-digit hexadecimal representation of the character.
 		A blank will be converted to @samp{%20}.
+	@item{@option{-F}, @option{--first-match}}
+		End the search without go through all the tag files listed in @var{GTAGSLIBPATH}
+		when tags are found in a tag file. This is the default.
 	@item{@option{--from-here} @arg{context}}
 		Decide tag type by @arg{context}, which must be @samp{lineno:path}.
 		If this option is specified then @option{-s} and @option{-r} are ignored.
@@ -118,6 +125,10 @@
 	@item{@option{-G}, @option{--basic-regexp}}
 		Interpret @arg{pattern} as a basic regular expression.
 		The default is an extended regular expression.
+	@item{@option{--gtagsconf} @arg{file}}
+		Set environment variable @var{GTAGSCONF} to @arg{file}.
+	@item{@option{--gtagslabel} @arg{label}}
+		Set environment variable @var{GTAGSLABEL} to @arg{label}.
 	@item{@option{-i}, @option{--ignore-case}}
 		Ignore case distinctions in the pattern.
 	@item{@option{-L}, @option{--file-list} @arg{file}}
@@ -129,11 +140,12 @@
 	@item{@option{--literal}}
 		Execute literal search instead of regular expression search.
 		This option is only valid when the @option{-g} command is specified.
+	@item{@option{-M}, @option{--match-case}}
+		Search is case-sensitive. This is the default.
 	@item{@option{--match-part @arg{part}}}
 		Specify how path name completion should match, where @arg{part} is one of:
 		@val{first}, @val{last} or @val{all} (default).
 		This option is valid only with the @option{-c} command in conjunction with @option{-P}.
-
 	@item{@option{-n}, @option{--nofilter}}
 		Suppress sort filter and path conversion filter.
 	@item{@option{-O}, @option{--only-other}}
@@ -234,15 +246,27 @@
 		If environment variable @var{GTAGSROOT} is not set
 		and file @file{GTAGSROOT} exists in the same directory as @file{GTAGS}
 		then @name{global} sets @var{GTAGSROOT} to the contents of the file.
-	@item{@file{$HOME/.globalrc}, @file{/etc/gtags.conf}, @file{[sysconfdir]/gtags.conf}}
-		Configuration files.
+	@item{@file{$HOME/.globalrc}, @file{gtags.conf}}
+		@name{Global} load a configuration file according to the following
+		priority (Lower number means higher priority).
+		@begin_verbatim
+		(1) $GTAGSCONF
+		(2) [project root]/gtags.conf
+		(3) $HOME/.globalrc
+		(4) /etc/gtags.conf
+		(5) [sysconfdir]/gtags.conf
+		@end_verbatim
 	@end_itemize
 @ENVIRONMENT
 	The following environment variables affect the execution of @name{global}:
 
 	@begin_itemize
 	@item{@var{GREP_COLOR}}
-		The color to use for @option{--color}.
+		The color to use for @option{--color}; @var{GREP_COLORS} has precedence.
+	@item{@var{GREP_COLORS}}
+		The color (@arg{mt} or @arg{ms}) to use for @option{--color}; see @xref{grep,1}.
+	@item{@var{GLOBAL_OPTIONS}}
+		The value of this variable is inserted in the head of arguments.
 	@item{@var{GTAGSBLANKENCODE}}
 		If this variable is set, the @option{--encode-path=" <TAB>"}
 		option is specified.
@@ -253,6 +277,7 @@
 	@item{@var{GTAGSDBPATH}}
 		The directory in which the tag files exist.
 		This value is ignored when @var{GTAGSROOT} is not defined.
+		Use of this variable is not recommended.
 	@item{@var{GTAGSFORCECPP}}
 		If this variable is set, each file whose suffix is @file{.h} is treated
 		as a C++ source file.
@@ -269,6 +294,8 @@
 		of a log file. There is no default value.
 	@item{@var{GTAGSROOT}}
 		The root directory of the project.
+		Usually, it is recognized by existence of @file{GTAGS}.
+		Use of this variable is not recommended.
 	@item{@var{GTAGSTHROUGH}}
 		If this variable is set, the @option{-T} option is specified.
 	@item{@var{MAKEOBJDIR}}
@@ -285,6 +312,12 @@
 	@item{@code{icase_path} (boolean)}
 		Ignore case distinctions in @arg{pattern}.
 	@end_itemize
+
+	Addition to these, the variables listed in the ENVIRONMENT section except for
+	GTAGSCONF, GTAGSLABEL, GTAGSROOT and GTAGSDBPATH  are also available
+	as configuration variables.
+	Each environment variable is given more priority than configuration variable
+	of the same name.
 @DIAGNOSTICS
 	@name{Global} exits with a non-0 value if an error occurred, 0 otherwise.
 @SEE ALSO

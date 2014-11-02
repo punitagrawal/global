@@ -1,11 +1,11 @@
 /* This file is generated automatically by convert.pl from global/manual.in. */
 const char *progname = "global";
-const char *usage_const = "Usage: global [-adGilnqrstTvx][-S dir][-e] pattern\n\
-       global -c[diIoOPrsT] prefix\n\
+const char *usage_const = "Usage: global [-adEFGilMnqrstTvx][-S dir][-e] pattern\n\
+       global -c[dFiIMoOPrsT] prefix\n\
        global -f[adlnqrstvx][-L file-list][-S dir] files\n\
-       global -g[aGilnoOqtvVx][-L file-list][-S dir][-e] pattern [files]\n\
-       global -I[ailnqtvx][-S dir][-e] pattern\n\
-       global -P[aGilnoOqtvVx][-S dir][-e] pattern\n\
+       global -g[aEGilMnoOqtvVx][-L file-list][-S dir][-e] pattern [files]\n\
+       global -I[ailMnqtvx][-S dir][-e] pattern\n\
+       global -P[aEGilMnoOqtvVx][-S dir][-e] pattern\n\
        global -p[qrv]\n\
        global -u[qv]\n";
 const char *help_const = "Commands:\n\
@@ -47,16 +47,23 @@ Options:\n\
        Use color to highlight the pattern within the line; when may be one of:\n\
        never, always or auto (default).\n\
        The default color is bold red text on current background; the environment\n\
-       variable GREP_COLOR defines it.\n\
-       This option is effective to the following commands: <no command>, -f, -g, -I, -P.\n\
+       variable GREP_COLORS or GREP_COLOR defines it.\n\
+       This option is effective to the following commands:\n\
+       <no command>, -f, -g, -I, -P.\n\
 -d, --definition\n\
        Print locations of definitions.\n\
 -e, --regexp pattern\n\
        Use pattern as the pattern; useful to protect patterns starting with -.\n\
+-E, --extended-regexp\n\
+       Interpret pattern as a extended regular expression.\n\
+       This is the default.\n\
 --encode-path chars\n\
        Convert path characters in chars into a % symbol, followed by the\n\
        two-digit hexadecimal representation of the character.\n\
        A blank will be converted to %20.\n\
+-F, --first-match\n\
+       End the search without go through all the tag files listed in GTAGSLIBPATH\n\
+       when tags are found in a tag file. This is the default.\n\
 --from-here context\n\
        Decide tag type by context, which must be lineno:path.\n\
        If this option is specified then -s and -r are ignored.\n\
@@ -66,6 +73,10 @@ Options:\n\
 -G, --basic-regexp\n\
        Interpret pattern as a basic regular expression.\n\
        The default is an extended regular expression.\n\
+--gtagsconf file\n\
+       Set environment variable GTAGSCONF to file.\n\
+--gtagslabel label\n\
+       Set environment variable GTAGSLABEL to label.\n\
 -i, --ignore-case\n\
        Ignore case distinctions in the pattern.\n\
 -L, --file-list file\n\
@@ -77,11 +88,12 @@ Options:\n\
 --literal\n\
        Execute literal search instead of regular expression search.\n\
        This option is only valid when the -g command is specified.\n\
+-M, --match-case\n\
+       Search is case-sensitive. This is the default.\n\
 --match-part part\n\
        Specify how path name completion should match, where part is one of:\n\
        first, last or all (default).\n\
        This option is valid only with the -c command in conjunction with -P.\n\
-       \n\
 -n, --nofilter\n\
        Suppress sort filter and path conversion filter.\n\
 -O, --only-other\n\

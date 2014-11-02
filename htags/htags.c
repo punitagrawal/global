@@ -40,6 +40,7 @@
 #include <sys/param.h>
 #include <errno.h>
 
+#include "args.h"
 #include "checkalloc.h"
 #include "getopt.h"
 #include "regex.h"
@@ -260,7 +261,6 @@ const char *HTML;					/**< HTML */
 const char *action = "cgi-bin/global.cgi"; /**< default action		*/
 const char *completion_action = "cgi-bin/completion.cgi";	/**< completion_action */
 int definition_header=NO_HEADER;	/**< (NO|BEFORE|RIGHT|AFTER)_HEADER */
-const char *htags_options = NULL;	/**< htags_options */
 const char *include_file_suffixes = DEFAULTINCLUDEFILESUFFIXES;	/**< include_file_suffixes */
 static const char *langmap = DEFAULTLANGMAP;	/**< langmap */
 int grtags_is_empty = 0;						/**< grtags_is_empty */
@@ -296,12 +296,14 @@ static struct option const long_options[] = {
 	 */
 	/* flag value */
         {"caution", no_argument, &caution, 1},
+        {"colorize-warned-line", no_argument, &colorize_warned_line, 1},
         {"debug", no_argument, &debug, 1},
         {"disable-grep", no_argument, &enable_grep, 0},
         {"disable-idutils", no_argument, &enable_idutils, 0},
         {"full-path", no_argument, &full_path, 1},
         {"fixed-guide",  no_argument, &fixed_guide, 1},
         {"map-file", no_argument, &map_file, 1},
+        {"no-order-list", no_argument, &no_order_list, 1},
         {"overwrite-key", no_argument, &overwrite_key, 1},
         {"show-position", no_argument, &show_position, 1},
         {"statistics", no_argument, &statistics, STATISTICS_STYLE_TABLE},
@@ -1041,10 +1043,10 @@ makecommonpart(const char *title, const char *defines, const char *files)
 			if (caution) {
 				strbuf_puts_nl(sb, caution_begin);
 				strbuf_sprintf(sb, "<font size='+2' color='red'>CAUTION</font>%s\n", br);
-				strbuf_sprintf(sb, "This hypertext consist of %d files.\n", html_count);
-				strbuf_puts_nl(sb, "Please don't download whole hypertext using hypertext copy tools.");
+				strbuf_sprintf(sb, "This hypertext consists of %d files.\n", html_count);
+				strbuf_puts_nl(sb, "Please don't download the whole hypertext using a hypertext copy tool.");
 				strbuf_puts_nl(sb, "Our network cannot afford such traffic.");
-				strbuf_puts_nl(sb, "Instead, you can generate same thing in your computer using");
+				strbuf_puts_nl(sb, "Instead, you can generate the same thing in your computer using");
 				strbuf_puts(sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, NULL, "_top"));
 				strbuf_puts(sb, "GLOBAL source code tag system");
 				strbuf_puts_nl(sb, gen_href_end());
@@ -1187,55 +1189,12 @@ basic_check(void)
  * load configuration variables.
  */
 static void
-configuration(int argc, char *const *argv)
+configuration()
 {
 	STRBUF *sb = strbuf_open(0);
-	int i, n;
 	char *p, *q;
+	int n;
 
-	/*
-	 * Setup the GTAGSCONF and the GTAGSLABEL environment variable
-	 * according to the --gtagsconf and --gtagslabel option.
-	 */
-	{
-		char *confpath = NULL;
-		char *label = NULL;
-		char *opt_gtagsconf = "--gtagsconf";
-		char *opt_gtagslabel = "--gtagslabel";
-
-		for (i = 1; i < argc; i++) {
-			if ((p = locatestring(argv[i], opt_gtagsconf, MATCH_AT_FIRST))) {
-				if (*p == '\0') {
-					if (++i >= argc)
-						die("%s needs an argument.", opt_gtagsconf);
-					confpath = argv[i];
-				} else {
-					if (*p++ == '=' && *p)
-						confpath = p;
-				}
-			} else if ((p = locatestring(argv[i], opt_gtagslabel, MATCH_AT_FIRST))) {
-				if (*p == '\0') {
-					if (++i >= argc)
-						die("%s needs an argument.", opt_gtagslabel);
-					label = argv[i];
-				} else {
-					if (*p++ == '=' && *p)
-						label = p;
-				}
-			}
-		}
-		if (confpath) {
-			char real[MAXPATHLEN];
-
-			if (!test("f", confpath))
-				die("%s file not found.", opt_gtagsconf);
-			if (!realpath(confpath, real))
-				die("cannot get absolute path of %s file.", opt_gtagsconf);
-			set_env("GTAGSCONF", real);
-		}
-		if (label)
-			set_env("GTAGSLABEL", label);
-	}
 	/*
 	 * Config variables.
 	 */
@@ -1293,10 +1252,6 @@ configuration(int argc, char *const *argv)
 	strbuf_reset(sb);
 	if (getconfs("xhtml_version", sb))
 		xhtml_version = check_strdup(strbuf_value(sb));
-	/* insert htags_options into the head of ARGSV array. */
-	strbuf_reset(sb);
-	if (getconfs("htags_options", sb))
-		htags_options = check_strdup(strbuf_value(sb));
 	strbuf_close(sb);
 }
 /**
@@ -1370,62 +1325,6 @@ save_environment(int argc, char *const *argv)
 	/* strbuf_close(save_a); */
 }
 
-char **
-append_options(int *argc, char *const *argv)
-{
-
-	STRBUF *sb = strbuf_open(0);
-	const char *p, *opt = check_strdup(htags_options);
-	int count = 1;
-	int quote = 0;
-	const char **newargv;
-	int i = 0, j = 1;
-
-	if (!opt)
-		die("Short of memory.");
-	for (p = opt; *p && isspace(*p); p++)
-		;
-	for (; *p; p++) {
-		int c = *p;
-
-		if (quote) {
-			if (quote == c)
-				quote = 0;
-			else
-				strbuf_putc(sb, c);
-		} else if (c == '\\') {
-			strbuf_putc(sb, c);
-		} else if (c == '\'' || c == '"') {
-			quote = c;
-		} else if (isspace(c)) {
-			strbuf_putc(sb, '\0');
-			count++;
-			while (*p && isspace(*p))
-				p++;
-			p--;
-		} else {
-			strbuf_putc(sb, *p);
-		}
-	}
-	newargv = (const char **)check_malloc(sizeof(char *) * (*argc + count + 1));
-	newargv[i++] = argv[0];
-	p = strbuf_value(sb);
-	while (count--) {
-		newargv[i++] = p;
-		p += strlen(p) + 1;
-	}
-	while (j < *argc)
-		newargv[i++] = argv[j++];
-	newargv[i] = NULL;
-	*argc = i;
-#ifdef DEBUG
-	for (i = 0; i < *argc; i++)
-		fprintf(stderr, "newargv[%d] = '%s'\n", i, newargv[i]);
-#endif
-	/* doesn't close string buffer. */
-
-	return (char **)newargv;
-}
 int
 main(int argc, char **argv)
 {
@@ -1439,17 +1338,33 @@ main(int argc, char **argv)
 
 	arg_dbpath[0] = 0;
 	basic_check();
-	configuration(argc, argv);
+	/*
+	 * Setup GTAGSCONF and GTAGSLABEL environment variable
+	 * according to the --gtagsconf and --gtagslabel option.
+	 */
+	preparse_options(argc, argv);
+	/*
+	 * Load configuration values.
+	 */
+	if (!vgetcwd(cwdpath, sizeof(cwdpath)))
+		die("cannot get current directory.");
+	openconf(cwdpath);
+	configuration();
+	/*
+	 * Setup langmap
+	 */
 	setup_langmap(langmap);
 	save_environment(argc, argv);
-
 	/*
 	 * insert htags_options at the head of argv.
 	 */
-	if (htags_options)
-		argv = append_options(&argc, argv);
-
-	while ((optchar = getopt_long(argc, argv, "acd:DfFghIm:noqst:Tvwx", long_options, &option_index)) != EOF) {
+	setenv_from_config();
+	{
+		char *env = getenv("HTAGS_OPTIONS");
+		if (env && *env)
+			argv = prepend_options(&argc, argv, env);
+	}
+	while ((optchar = getopt_long(argc, argv, "acd:DfFghIm:nNoqst:Tvwx", long_options, &option_index)) != EOF) {
 		switch (optchar) {
 		case 0:
 			/* already flags set */
@@ -1478,8 +1393,9 @@ main(int argc, char **argv)
 		case OPT_CVSWEB_CVSROOT:
 			cvsweb_cvsroot = optarg;
 			break;
-		case OPT_GTAGSCONF:	/* --gtagsconf is estimated only once. */
-		case OPT_GTAGSLABEL:	/* --gtagslabel is estimated only once. */
+		case OPT_GTAGSCONF:
+		case OPT_GTAGSLABEL:
+			/* These options are already parsed in preparse_options() */
 			break;
 		case OPT_INSERT_FOOTER:
 			insert_footer = optarg;
@@ -1492,6 +1408,7 @@ main(int argc, char **argv)
 				STATIC_STRBUF(sb);
 				if (!test("r", optarg))
 					die("file '%s' not found.", optarg);
+				strbuf_clear(sb);
 				loadfile_asis(optarg, sb);
 				html_header = strbuf_value(sb);
 			}
@@ -1620,6 +1537,7 @@ main(int argc, char **argv)
 		suggest = 1;
 	if (suggest) {
 		int gtags_not_found = 0;
+		char dbpath[MAXPATHLEN];
 
 		aflag = Iflag = nflag = vflag = 1;
 		setverbose();
@@ -1628,9 +1546,8 @@ main(int argc, char **argv)
 		if (arg_dbpath[0]) {
 			if (!test("f", makepath(arg_dbpath, dbname(GTAGS), NULL)))
 				gtags_not_found = 1;
-		} else {
-			if (!test("f", dbname(GTAGS)))
-				gtags_not_found = 1;
+		} else if (gtagsexist(".", dbpath, sizeof(dbpath), 0) == 0) {
+			gtags_not_found = 1;
 		}
 		if (gtags_not_found)
 			gflag = 1;
@@ -1698,8 +1615,6 @@ main(int argc, char **argv)
 	/*
 	 * get dbpath.
 	 */
-	if (!getcwd(cwdpath, sizeof(cwdpath)))
-		die("cannot get current directory.");
 	if (arg_dbpath[0]) {
 		strlimcpy(dbpath, arg_dbpath, sizeof(dbpath));
 	} else {
@@ -1728,7 +1643,7 @@ main(int argc, char **argv)
 			die("'%s' is not writable directory.", av);
 		if (chdir(av) < 0)
 			die("directory '%s' not found.", av);
-		if (!getcwd(realpath, sizeof(realpath)))
+		if (!vgetcwd(realpath, sizeof(realpath)))
 			die("cannot get current directory");
 		if (chdir(cwdpath) < 0)
 			die("cannot return to original directory.");

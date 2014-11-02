@@ -21,7 +21,7 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
-AC_INIT([GNU GLOBAL],[6.2.12])
+AC_INIT([GNU GLOBAL],[6.3.2])
 AC_CONFIG_SRCDIR(global/global.c)
 AC_CONFIG_HEADERS([config.h:config-h.in])
 AC_PREREQ(2.59)
@@ -33,14 +33,15 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AM_PATH_LISPDIR
 dnl
-dnl Currently, the absolute path name of perl is required only for CGI script.
+dnl Currently, absolute path name of perl is required only for CGI script.
 dnl So, if you don't use the -f(--form) option of htags(1), it is not required.
 dnl
-AC_PATH_PROG(PERL, perl, no)
-if test ${ac_cv_path_PERL} = no; then
-	PERL=SPECIFY_ABSOLUTE_PATH_OF_PERL
-fi
+AC_PATH_PROG(PERL, perl, [/usr/bin/env perl])
 AC_CHECK_TOOL(AR, ar)
+dnl
+dnl for "plugin-factory/pygments_parser.py"
+dnl
+AM_PATH_PYTHON([2.6],,[PYTHON="/usr/bin/env python"])
 
 AC_GNU_SOURCE
 
@@ -342,10 +343,15 @@ AC_SUBST(DEFAULTLANGMAP)
 AC_SUBST(DEFAULTINCLUDEFILESUFFIXES)
 
 dnl
-dnl Quoted langmap. It is only for gtags.conf.
+dnl Quoted langmap & prefix. It is only for gtags.conf.
 dnl
 DEFAULTLANGMAP_QUOTED=`echo $DEFAULTLANGMAP | sed 's/:/\\\\:/g'`
+case "$prefix" in
+NONE)   prefix_QUOTED=`echo $ac_default_prefix | sed 's/:/\\\\:/g'`;;
+*)      prefix_QUOTED=`echo $prefix | sed 's/:/\\\\:/g'`;;
+esac
 AC_SUBST(DEFAULTLANGMAP_QUOTED)
+AC_SUBST(prefix_QUOTED)
 
 AC_CONFIG_FILES([Makefile
 	gtags.conf
@@ -362,6 +368,7 @@ AC_CONFIG_FILES([Makefile
 	gtags-cscope/Makefile
 	globash/Makefile
 	htags-refkit/Makefile
+	htags-server/Makefile
 	libglibc/Makefile
 	doc/Makefile
 	icons/Makefile
@@ -370,6 +377,7 @@ AC_CONFIG_FILES([Makefile
 	script/Makefile
 	libparser/Makefile
 	plugin-factory/Makefile
+	plugin-factory/pygments_parser.py
 	libltdl/Makefile
 ])
 AC_OUTPUT

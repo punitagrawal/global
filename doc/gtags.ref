@@ -93,8 +93,16 @@ Tag file for definitions.
 Tag file for references.
 @item @file{GPATH}
 Tag file for source files.
-@item @file{$HOME/.globalrc}, @file{/etc/gtags.conf}, @file{[sysconfdir]/gtags.conf}
-Configuration file.
+@item @file{$HOME/.globalrc}, @file{gtags.conf}
+Gtags load a configuration file according to the following
+priority (Lower number means higher priority).
+@example
+		(1) $GTAGSCONF
+		(2) [project root]/gtags.conf
+		(3) $HOME/.globalrc
+		(4) /etc/gtags.conf
+		(5) [sysconfdir]/gtags.conf
+@end example
 @item @file{gtags.files}
 The list of candidates of target files.
 @end table
@@ -114,6 +122,8 @@ Configuration label. The default is @samp{default}.
 @item @var{GTAGSLOGGING}
 If this variable is set, @file{$GTAGSLOGGING} is used as the path name
 of a log file. There is no default value.
+@item @var{GTAGS_OPTIONS}
+The value of this variable is inserted in the head of arguments.
 @item @var{MAKEOBJDIR}
 If this variable is set, @file{$MAKEOBJDIR} is used as the name
 of BSD-style objdir. The default is @file{obj}.
@@ -146,15 +156,21 @@ from multiple @code{langmap} variables.
 Default mapping is:@*
 @samp{c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml}.
 @item @code{skip} (comma separated list)
-Gtags skips files which are given in this list.
+Gtags skips files and directories which are given in this list.
 As a special exception, gtags collects values from multiple
 @code{skip} variables.
 If the value ends with @samp{/}, it is assumed as a directory and
 gtags skips all files under it.
-If the value starts with @samp{/}, it is assumed a relative path
-from the root of source directory.
 The value may include glob patterns (*, ?, [...], [!...], [^...]).
+If the value starts with @samp{/}, it is assumed a relative path name
+from the root directory of the project. You cannot use glob patterns
+for a path name.
 @end table
+
+Addition to these, the variables listed in the ENVIRONMENT section except for
+GTAGSCONF and GTAGSLABEL are also available as configuration variables.
+Each environment variable is given more priority than configuration variable 
+of the same name.
 @unnumberedsubsec DIAGNOSTICS
 Gtags exits with a non-0 value if an error occurred, 0 otherwise.
 @unnumberedsubsec SEE ALSO

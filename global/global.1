@@ -3,17 +3,17 @@
 .SH NAME
 global \- print locations of given symbols
 .SH SYNOPSIS
-\fBglobal\fP [-adGilnqrstTvx][-S dir][-e] \fIpattern\fP
+\fBglobal\fP [-adEFGilMnqrstTvx][-S dir][-e] \fIpattern\fP
 .br
-\fBglobal\fP -c[diIoOPrsT] \fIprefix\fP
+\fBglobal\fP -c[dFiIMoOPrsT] \fIprefix\fP
 .br
 \fBglobal\fP -f[adlnqrstvx][-L file-list][-S dir] \fIfiles\fP
 .br
-\fBglobal\fP -g[aGilnoOqtvVx][-L file-list][-S dir][-e] \fIpattern\fP [\fIfiles\fP]
+\fBglobal\fP -g[aEGilMnoOqtvVx][-L file-list][-S dir][-e] \fIpattern\fP [\fIfiles\fP]
 .br
-\fBglobal\fP -I[ailnqtvx][-S dir][-e] \fIpattern\fP
+\fBglobal\fP -I[ailMnqtvx][-S dir][-e] \fIpattern\fP
 .br
-\fBglobal\fP -P[aGilnoOqtvVx][-S dir][-e] \fIpattern\fP
+\fBglobal\fP -P[aEGilMnoOqtvVx][-S dir][-e] \fIpattern\fP
 .br
 \fBglobal\fP -p[qrv]
 .br
@@ -93,8 +93,9 @@ Print absolute path names. By default, print relative path names.
 Use color to highlight the pattern within the line; \fIwhen\fP may be one of:
 \fInever\fP, \fIalways\fP or \fIauto\fP (default).
 The default color is bold red text on current background; the environment
-variable \fBGREP_COLOR\fP defines it.
-This option is effective to the following commands: <no command>, -f, -g, -I, -P.
+variable \fBGREP_COLORS\fP or \fBGREP_COLOR\fP defines it.
+This option is effective to the following commands:
+<no command>, -f, -g, -I, -P.
 .TP
 \fB-d\fP, \fB--definition\fP
 Print locations of definitions.
@@ -102,10 +103,18 @@ Print locations of definitions.
 \fB-e\fP, \fB--regexp\fP \fIpattern\fP
 Use \fIpattern\fP as the pattern; useful to protect patterns starting with \'-\'.
 .TP
+\fB-E\fP, \fB--extended-regexp\fP
+Interpret \fIpattern\fP as a extended regular expression.
+This is the default.
+.TP
 \fB--encode-path\fP \fIchars\fP
 Convert path characters in \fIchars\fP into a \'%\' symbol, followed by the
 two-digit hexadecimal representation of the character.
 A blank will be converted to \'%20\'.
+.TP
+\fB-F\fP, \fB--first-match\fP
+End the search without go through all the tag files listed in \fBGTAGSLIBPATH\fP
+when tags are found in a tag file. This is the default.
 .TP
 \fB--from-here\fP \fIcontext\fP
 Decide tag type by \fIcontext\fP, which must be \'lineno:path\'.
@@ -117,6 +126,12 @@ editors and IDEs.
 \fB-G\fP, \fB--basic-regexp\fP
 Interpret \fIpattern\fP as a basic regular expression.
 The default is an extended regular expression.
+.TP
+\fB--gtagsconf\fP \fIfile\fP
+Set environment variable \fBGTAGSCONF\fP to \fIfile\fP.
+.TP
+\fB--gtagslabel\fP \fIlabel\fP
+Set environment variable \fBGTAGSLABEL\fP to \fIlabel\fP.
 .TP
 \fB-i\fP, \fB--ignore-case\fP
 Ignore case distinctions in the pattern.
@@ -133,11 +148,13 @@ Print only tags which exist under the current directory.
 Execute literal search instead of regular expression search.
 This option is only valid when the \fB-g\fP command is specified.
 .TP
+\fB-M\fP, \fB--match-case\fP
+Search is case-sensitive. This is the default.
+.TP
 \fB--match-part \fIpart\fP\fP
 Specify how path name completion should match, where \fIpart\fP is one of:
 \'first\', \'last\' or \'all\' (default).
 This option is valid only with the \fB-c\fP command in conjunction with \fB-P\fP.
-.PP
 .TP
 \fB-n\fP, \fB--nofilter\fP
 Suppress sort filter and path conversion filter.
@@ -257,14 +274,28 @@ If environment variable \fBGTAGSROOT\fP is not set
 and file \'GTAGSROOT\' exists in the same directory as \'GTAGS\'
 then \fBglobal\fP sets \fBGTAGSROOT\fP to the contents of the file.
 .TP
-\'$HOME/.globalrc\', \'/etc/gtags.conf\', \'[sysconfdir]/gtags.conf\'
-Configuration files.
+\'$HOME/.globalrc\', \'gtags.conf\'
+\fBGlobal\fP load a configuration file according to the following
+priority (Lower number means higher priority).
+.nf
+(1) $GTAGSCONF
+(2) [project root]/gtags.conf
+(3) $HOME/.globalrc
+(4) /etc/gtags.conf
+(5) [sysconfdir]/gtags.conf
+.fi
 .SH ENVIRONMENT
 The following environment variables affect the execution of \fBglobal\fP:
 .PP
 .TP
 \fBGREP_COLOR\fP
-The color to use for \fB--color\fP.
+The color to use for \fB--color\fP; \fBGREP_COLORS\fP has precedence.
+.TP
+\fBGREP_COLORS\fP
+The color (\fImt\fP or \fIms\fP) to use for \fB--color\fP; see \fBgrep\fP(1).
+.TP
+\fBGLOBAL_OPTIONS\fP
+The value of this variable is inserted in the head of arguments.
 .TP
 \fBGTAGSBLANKENCODE\fP
 If this variable is set, the \fB--encode-path=" <TAB>"\fP
@@ -279,6 +310,7 @@ Configuration file. The default is \'$HOME/.globalrc\'.
 \fBGTAGSDBPATH\fP
 The directory in which the tag files exist.
 This value is ignored when \fBGTAGSROOT\fP is not defined.
+Use of this variable is not recommended.
 .TP
 \fBGTAGSFORCECPP\fP
 If this variable is set, each file whose suffix is \'.h\' is treated
@@ -300,6 +332,8 @@ of a log file. There is no default value.
 .TP
 \fBGTAGSROOT\fP
 The root directory of the project.
+Usually, it is recognized by existence of \'GTAGS\'.
+Use of this variable is not recommended.
 .TP
 \fBGTAGSTHROUGH\fP
 If this variable is set, the \fB-T\fP option is specified.
@@ -317,6 +351,12 @@ The following configuration variables affect the execution of \fBglobal\fP:
 .TP
 icase_path (boolean)
 Ignore case distinctions in \fIpattern\fP.
+.PP
+Addition to these, the variables listed in the ENVIRONMENT section except for
+GTAGSCONF, GTAGSLABEL, GTAGSROOT and GTAGSDBPATH  are also available
+as configuration variables.
+Each environment variable is given more priority than configuration variable
+of the same name.
 .SH DIAGNOSTICS
 \fBGlobal\fP exits with a non-0 value if an error occurred, 0 otherwise.
 .SH "SEE ALSO"

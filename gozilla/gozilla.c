@@ -319,7 +319,7 @@ main(int argc, char **argv)
 				char cwd[MAXPATHLEN];
 				char result[MAXPATHLEN];
 
-				if (getcwd(cwd, sizeof(cwd)) == NULL)
+				if (vgetcwd(cwd, sizeof(cwd)) == NULL)
 					die("cannot get current directory.");
 				if (rel2abs(argument, cwd, result, sizeof(result)) == NULL)
 					die("rel2abs failed.");
@@ -370,7 +370,7 @@ getdefinitionURL(const char *arg, const char *htmldir, STRBUF *URL)
 		die("cannot open '%s'.", path);
 	while ((p = strbuf_fgets(sb, fp, STRBUF_NOCRLF)) != NULL) {
 		if (split(p, 2, &ptable) != 2)
-			die("illegal format.");
+			die("invalid format.");
 		if (!strcmp(arg, ptable.part[0].start)) {
 			status = 0;
 			break;
