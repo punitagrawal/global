@@ -1,11 +1,12 @@
 " File: gtags.vim
 " Author: Tama Communications Corporation
-" Version: 0.6.5
-" Last Modified: Oct 21, 2013
+" Version: 0.6.7
+" Last Modified: July 30, 2014
 "
-" Copyright and licence
+" Copyright and license
 " ---------------------
-" Copyright (c) 2004, 2008, 2010, 2011, 2012 Tama Communications Corporation
+" Copyright (c) 2004, 2008, 2010, 2011, 2012, 2014
+" Tama Communications Corporation
 "
 " This file is part of GNU GLOBAL.
 "
@@ -30,8 +31,7 @@
 " Installation
 " ------------
 " Drop the file in your plug-in directory or source it from your vimrc.
-" To use this script, you need the GNU GLOBAL-6.0 or later installed
-" in your machine.
+" To use this script, you need GLOBAL-6.0 or later installed in your machine.
 "
 " Usage
 " -----
@@ -42,29 +42,36 @@
 "	$ cd /var/src
 "	$ gtags
 "
-" And you will find four tag files in the directory.
+" And you will find three tag files in the directory.
+"
+"	$ ls G*
+"	GPATH	GRTAGS	GTAGS
 "
 " General form of Gtags command is as follows:
 "
 "	:Gtags [option] pattern
 "
-" To go to func, you can say
+" You can use all options of global(1) except for the -c, -p, -u and
+" all long name options. They are sent to global(1) as is.
+"
+" To go to 'func', you can say
 "
 "       :Gtags func
 "
-" Input completion is available. If you forgot function name but recall
-" only some characters of the head, please input them and press <TAB> key.
+" Input completion is available. If you forgot the name of a function
+" but recall only some characters of the head, please input them and
+" press <TAB> key.
 "
 "       :Gtags fu<TAB>
 "       :Gtags func			<- Vim will append 'nc'.
 "
-" If you omitted argument, vim ask it like this:
+" If you omitted an argument, vim ask it as follow:
 "
 "       Gtags for pattern: <current token>
 "
-" Vim execute `global -x main', parse the output, list located
-" objects in quickfix window and load the first entry.  The quickfix
-" windows is like this:
+" Inputting 'main' to the prompt, vim executes `global -x main',
+" parse the output, list located objects in the quickfix window
+" and load the first entry. The quickfix window shows like this:
 "
 "      gozilla/gozilla.c|200| main(int argc, char **argv)
 "      gtags-cscope/gtags-cscope.c|124| main(int argc, char **argv)
@@ -77,18 +84,18 @@
 " You can go to any entry using quickfix command.
 "
 " :cn'
-"      go to the next entry.
+"      go to the next line.
 "
 " :cp'
-"      go to the previous entry.
+"      go to the previous line.
 "
 " :ccN'
-"      go to the Nth entry.
+"      go to the Nth line.
 "
 " :cl'
-"      list all entries.
+"      list all lines.
 "
-" You can see the help of quickfix like this:
+" You can see a help for quickfix like this:
 "
 "          :h quickfix
 "
@@ -98,7 +105,7 @@
 "
 " It will match to both of 'set_value' and 'get_value'.
 "
-" To go to the referenced point of func, add -r option.
+" To go to the referenced point of 'func', add -r option.
 "
 "       :Gtags -r func
 "
@@ -111,7 +118,7 @@
 "       :Gtags -g ^[sg]et_
 "
 " This command accomplishes the same function as grep(1) but is more convenient
-" because it retrieves the entire directory structure.
+" because it retrieves an entire directory structure.
 "
 " To get list of objects in a file 'main.c', use -f command.
 "
@@ -121,18 +128,19 @@
 "
 "       :Gtags -f %
 "
-" You can browse project files whose path includes specified pattern.
+" You can get a list of files whose path include specified pattern.
 " For example:
 "
 "       :Gtags -P /vm/			<- all files under 'vm' directory.
 "       :Gtags -P \.h$			<- all include files.
 "	:Gtags -P init			<- all paths includes 'init'
 "
-" If you omitted the argument and input only <ENTER> key to the prompt,
-" vim shows list of all files in your project.
+" If you omitted an argument and input only <ENTER> key to the prompt,
+" vim shows list of all files in the project.
 "
-" You can use all options of global(1) except for the -c, -p, -u and
-" all long name options. They are sent to global(1) as is.
+" Since all short options are sent to global(1) as is, you can 
+" use the -i, -o, -O, and so on.
+" 
 " For example, if you want to ignore case distinctions in pattern.
 "
 "       :Gtags -gi paTtern
@@ -152,8 +160,17 @@
 "
 " See global(1) for other options.
 "
+" The Gtagsa (Gtags + append) command is almost the same as Gtags command.
+" But it differs from Gtags in that it adds the results to the present list.
+" If you want to get the union of ':Gtags -d foo' and ':Gtags -r foo' then
+" you can invoke the following commands:
+"
+"       :Gtags  -d foo
+"       :Gtagsa -r foo
+"
 " The GtagsCursor command brings you to the definition or reference of
-" the current token.
+" the current token. If it is a definition, you are taken to the references.
+" If it is a reference, you are taken to the definitions.
 "
 "       :GtagsCursor
 "
@@ -170,10 +187,20 @@
 "
 "	% info global
 "
-" You can use the suggested key mapping with the following code:
+" The following custom variables are available.
+"
+" Gtags_VerticalWindow    open windows vitically
+" Gtags_Auto_Map          use a suggested key-mapping
+" Gtags_Auto_Update       keep tag files up-to-date automatically
+" Gtags_No_Auto_Jump      don't jump to the first tag at the time of search
+"
+" You can use the variables like follows:
 "
 "	[$HOME/.vimrc]
 "	let Gtags_Auto_Map = 1
+"
+" If you want to use the tag stack, please use gtags-cscope.vim.
+" You can use the plug-in together with this script.
 "
 if exists("loaded_gtags")
     finish
@@ -189,7 +216,7 @@ endif
 " Open the Gtags output window.  Set this variable to zero, to not open
 " the Gtags output window by default.  You can open it manually by using
 " the :cwindow command.
-" (This code was drived from 'grep.vim'.)
+" (This code was derived from 'grep.vim'.)
 if !exists("g:Gtags_OpenQuickfixWindow")
     let g:Gtags_OpenQuickfixWindow = 1
 endif
@@ -346,7 +373,7 @@ endfunction
 "
 " Execute global and load the result into quickfix window.
 "
-function! s:ExecLoad(option, long_option, pattern)
+function! s:ExecLoad(option, long_option, pattern, flags)
     " Execute global(1) command and write the result to a temporary file.
     let l:isfile = 0
     let l:option = ''
@@ -407,10 +434,12 @@ function! s:ExecLoad(option, long_option, pattern)
     " Parse the output of 'global -x or -t' and show in the quickfix window.
     let l:efm_org = &efm
     let &efm = g:Gtags_Efm
-    if g:Gtags_No_Auto_Jump == 1
-        cgete l:result
+    if a:flags =~# 'a'
+        cadde l:result		" append mode
+    elseif g:Gtags_No_Auto_Jump == 1
+        cgete l:result		" does not jump
     else
-        cexpr! l:result
+        cexpr! l:result		" jump
     endif
     let &efm = l:efm_org
 endfunction
@@ -418,7 +447,7 @@ endfunction
 "
 " RunGlobal()
 "
-function! s:RunGlobal(line)
+function! s:RunGlobal(line, flags)
     let l:pattern = s:Extract(a:line, 'pattern')
 
     if l:pattern == '%'
@@ -441,7 +470,7 @@ function! s:RunGlobal(line)
             return
         endif
     endif
-    call s:ExecLoad(l:option, '', l:pattern)
+    call s:ExecLoad(l:option, '', l:pattern, a:flags)
 endfunction
 
 "
@@ -450,7 +479,7 @@ endfunction
 function! s:GtagsCursor()
     let l:pattern = expand("<cword>")
     let l:option = "--from-here=\"" . line('.') . ":" . expand("%") . "\""
-    call s:ExecLoad('', l:option, l:pattern)
+    call s:ExecLoad('', l:option, l:pattern, '')
 endfunction
 
 "
@@ -497,7 +526,8 @@ function! GtagsCandidateCore(lead, line, pos)
 endfunction
 
 " Define the set of Gtags commands
-command! -nargs=* -complete=custom,GtagsCandidate Gtags call s:RunGlobal(<q-args>)
+command! -nargs=* -complete=custom,GtagsCandidate Gtags call s:RunGlobal(<q-args>, '')
+command! -nargs=* -complete=custom,GtagsCandidate Gtagsa call s:RunGlobal(<q-args>, 'a')
 command! -nargs=0 GtagsCursor call s:GtagsCursor()
 command! -nargs=0 Gozilla call s:Gozilla()
 command! -nargs=0 GtagsUpdate call s:GtagsAutoUpdate()

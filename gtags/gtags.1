@@ -110,8 +110,16 @@ Tag file for references.
 \'GPATH\'
 Tag file for source files.
 .TP
-\'$HOME/.globalrc\', \'/etc/gtags.conf\', \'[sysconfdir]/gtags.conf\'
-Configuration file.
+\'$HOME/.globalrc\', \'gtags.conf\'
+\fBGtags\fP load a configuration file according to the following
+priority (Lower number means higher priority).
+.nf
+(1) $GTAGSCONF
+(2) [project root]/gtags.conf
+(3) $HOME/.globalrc
+(4) /etc/gtags.conf
+(5) [sysconfdir]/gtags.conf
+.fi
 .TP
 \'gtags.files\'
 The list of candidates of target files.
@@ -135,6 +143,9 @@ Configuration label. The default is \'default\'.
 \fBGTAGSLOGGING\fP
 If this variable is set, \'$GTAGSLOGGING\' is used as the path name
 of a log file. There is no default value.
+.TP
+\fBGTAGS_OPTIONS\fP
+The value of this variable is inserted in the head of arguments.
 .TP
 \fBMAKEOBJDIR\fP
 If this variable is set, \'$MAKEOBJDIR\' is used as the name
@@ -173,14 +184,20 @@ Default mapping is:
 \'c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml\'.
 .TP
 skip (comma separated list)
-\fBGtags\fP skips files which are given in this list.
+\fBGtags\fP skips files and directories which are given in this list.
 As a special exception, \fBgtags\fP collects values from multiple
 skip variables.
 If the value ends with \'/\', it is assumed as a directory and
 \fBgtags\fP skips all files under it.
-If the value starts with \'/\', it is assumed a relative path
-from the root of source directory.
 The value may include glob patterns (*, ?, [...], [!...], [^...]).
+If the value starts with \'/\', it is assumed a relative path name
+from the root directory of the project. You cannot use glob patterns
+for a path name.
+.PP
+Addition to these, the variables listed in the ENVIRONMENT section except for
+GTAGSCONF and GTAGSLABEL are also available as configuration variables.
+Each environment variable is given more priority than configuration variable 
+of the same name.
 .SH DIAGNOSTICS
 \fBGtags\fP exits with a non-0 value if an error occurred, 0 otherwise.
 .SH "SEE ALSO"

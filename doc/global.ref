@@ -3,12 +3,12 @@
 global - print locations of given symbols
 @unnumberedsubsec SYNOPSIS
 @quotation
-global [-adGilnqrstTvx][-S dir][-e] pattern@*
-global -c[diIoOPrsT] prefix@*
+global [-adEFGilMnqrstTvx][-S dir][-e] pattern@*
+global -c[dFiIMoOPrsT] prefix@*
 global -f[adlnqrstvx][-L file-list][-S dir] files@*
-global -g[aGilnoOqtvVx][-L file-list][-S dir][-e] pattern [files]@*
-global -I[ailnqtvx][-S dir][-e] pattern@*
-global -P[aGilnoOqtvVx][-S dir][-e] pattern@*
+global -g[aEGilMnoOqtvVx][-L file-list][-S dir][-e] pattern [files]@*
+global -I[ailMnqtvx][-S dir][-e] pattern@*
+global -P[aEGilMnoOqtvVx][-S dir][-e] pattern@*
 global -p[qrv]@*
 global -u[qv]@*
 @end quotation
@@ -77,16 +77,23 @@ Print absolute path names. By default, print relative path names.
 Use color to highlight the pattern within the line; when may be one of:
 never, always or auto (default).
 The default color is bold red text on current background; the environment
-variable @var{GREP_COLOR} defines it.
-This option is effective to the following commands: <no command>, -f, -g, -I, -P.
+variable @var{GREP_COLORS} or @var{GREP_COLOR} defines it.
+This option is effective to the following commands:
+<no command>, -f, -g, -I, -P.
 @item @samp{-d}, @samp{--definition}
 Print locations of definitions.
 @item @samp{-e}, @samp{--regexp} pattern
 Use pattern as the pattern; useful to protect patterns starting with @samp{-}.
+@item @samp{-E}, @samp{--extended-regexp}
+Interpret pattern as a extended regular expression.
+This is the default.
 @item @samp{--encode-path} chars
 Convert path characters in chars into a @samp{%} symbol, followed by the
 two-digit hexadecimal representation of the character.
 A blank will be converted to @samp{%20}.
+@item @samp{-F}, @samp{--first-match}
+End the search without go through all the tag files listed in @var{GTAGSLIBPATH}
+when tags are found in a tag file. This is the default.
 @item @samp{--from-here} context
 Decide tag type by context, which must be @samp{lineno:path}.
 If this option is specified then @samp{-s} and @samp{-r} are ignored.
@@ -96,6 +103,10 @@ editors and IDEs.
 @item @samp{-G}, @samp{--basic-regexp}
 Interpret pattern as a basic regular expression.
 The default is an extended regular expression.
+@item @samp{--gtagsconf} file
+Set environment variable @var{GTAGSCONF} to file.
+@item @samp{--gtagslabel} label
+Set environment variable @var{GTAGSLABEL} to label.
 @item @samp{-i}, @samp{--ignore-case}
 Ignore case distinctions in the pattern.
 @item @samp{-L}, @samp{--file-list} file
@@ -107,11 +118,12 @@ Print only tags which exist under the current directory.
 @item @samp{--literal}
 Execute literal search instead of regular expression search.
 This option is only valid when the @samp{-g} command is specified.
+@item @samp{-M}, @samp{--match-case}
+Search is case-sensitive. This is the default.
 @item @samp{--match-part part}
 Specify how path name completion should match, where part is one of:
 @samp{first}, @samp{last} or @samp{all} (default).
 This option is valid only with the @samp{-c} command in conjunction with @samp{-P}.
-
 @item @samp{-n}, @samp{--nofilter}
 Suppress sort filter and path conversion filter.
 @item @samp{-O}, @samp{--only-other}
@@ -212,15 +224,27 @@ Tag file for source files.
 If environment variable @var{GTAGSROOT} is not set
 and file @file{GTAGSROOT} exists in the same directory as @file{GTAGS}
 then global sets @var{GTAGSROOT} to the contents of the file.
-@item @file{$HOME/.globalrc}, @file{/etc/gtags.conf}, @file{[sysconfdir]/gtags.conf}
-Configuration files.
+@item @file{$HOME/.globalrc}, @file{gtags.conf}
+Global load a configuration file according to the following
+priority (Lower number means higher priority).
+@example
+		(1) $GTAGSCONF
+		(2) [project root]/gtags.conf
+		(3) $HOME/.globalrc
+		(4) /etc/gtags.conf
+		(5) [sysconfdir]/gtags.conf
+@end example
 @end table
 @unnumberedsubsec ENVIRONMENT
 The following environment variables affect the execution of global:
 
 @table @asis
 @item @var{GREP_COLOR}
-The color to use for @samp{--color}.
+The color to use for @samp{--color}; @var{GREP_COLORS} has precedence.
+@item @var{GREP_COLORS}
+The color (mt or ms) to use for @samp{--color}; see grep(1).
+@item @var{GLOBAL_OPTIONS}
+The value of this variable is inserted in the head of arguments.
 @item @var{GTAGSBLANKENCODE}
 If this variable is set, the @samp{--encode-path=" <TAB>"}
 option is specified.
@@ -231,6 +255,7 @@ Configuration file. The default is @file{$HOME/.globalrc}.
 @item @var{GTAGSDBPATH}
 The directory in which the tag files exist.
 This value is ignored when @var{GTAGSROOT} is not defined.
+Use of this variable is not recommended.
 @item @var{GTAGSFORCECPP}
 If this variable is set, each file whose suffix is @file{.h} is treated
 as a C++ source file.
@@ -247,6 +272,8 @@ If this variable is set, @file{$GTAGSLOGGING} is used as the path name
 of a log file. There is no default value.
 @item @var{GTAGSROOT}
 The root directory of the project.
+Usually, it is recognized by existence of @file{GTAGS}.
+Use of this variable is not recommended.
 @item @var{GTAGSTHROUGH}
 If this variable is set, the @samp{-T} option is specified.
 @item @var{MAKEOBJDIR}
@@ -263,6 +290,12 @@ The following configuration variables affect the execution of global:
 @item @code{icase_path} (boolean)
 Ignore case distinctions in pattern.
 @end table
+
+Addition to these, the variables listed in the ENVIRONMENT section except for
+GTAGSCONF, GTAGSLABEL, GTAGSROOT and GTAGSDBPATH  are also available
+as configuration variables.
+Each environment variable is given more priority than configuration variable
+of the same name.
 @unnumberedsubsec DIAGNOSTICS
 Global exits with a non-0 value if an error occurred, 0 otherwise.
 @unnumberedsubsec SEE ALSO

@@ -56,6 +56,7 @@ Gary Kline		advice about the name of parser.
 Geoffrey Robson		bug report about global (-t option didn't work correctly).
 George Neville-Neil	report about the useless inspection of gtags(1).
 Giuseppe Corbelli	Global.py for glimmer code editor and an advice about vim.
+Gordon Grimes		bug report about the java parser of gtags.
 Hageseter, Trond E.	bug report about gtags-parser.
 Hendrik Visage		bug report about gtags-parser(here document of PHP).
 Hideaki Okada		idea about -g option of global(1).
@@ -88,6 +89,7 @@ Klaus Borchers		advice about deciding emacs version.
 Koen Hufkens		advice about HP-UX 10.x.
 Koie Hidetaka		bug report about global.conf.
 Leo Liu			idea about the --path-style=shorter option.
+			idea about project based gtags.conf.
 			bug report about the combination of -v and -g option.
 			bug report about the --from-here with a path includes symbolic links.
 			Besides very much bug reports and suggestions.
@@ -127,7 +129,7 @@ Sergio Talens-Oliag	writing on-line manual for systags(1).
 Shankar Chakkere	useful method to use vim editor with GLOBAL.
 Shigeyuki Yamano	idea about -h option of htags(1).
 Silas S. Brown		proofreading about manuals.
-Simon Dommett		bug report and fix patch on the usage of tolower().
+Simon Dommett		many bug reports and fix patches.
 			He also rewrote GLOBAL's comments in the Doxygen style.
 Sven Verdoolaege	support for gtags.pl(nvi-1.81.5).
 Steve Kirkendall	two commands of Elvis for external tag system.
@@ -150,6 +152,7 @@ Tom Russell		bug report about parsing error at function definitions with comment
 Tom Tromey		GTAGS target in automake.
 Tomi Ollila		proposal of adding (provide 'gtags) to gtags.el.
 Toshiyasu Kojima	advice about deciding emacs version.
+Tu Do			bug reports about the C++ parser of gtags.
 Van Trinh		bug report about db(3) and patch information.
 Wes Wojtas		bug report about htags's segmentation fault.
 Whity Pig		bug fix patch for global(1) on Cygwin environment.

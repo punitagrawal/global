@@ -14,7 +14,7 @@ SUBDIRS = libglibc libutil libparser libltdl plugin-factory
 if !USE_DB185_COMPAT
         SUBDIRS += libdb
 endif
-SUBDIRS += global gozilla gtags htags htags-refkit globash \
+SUBDIRS += global gozilla gtags htags htags-refkit htags-server globash \
 	doc icons jquery jquery/images script
 if USE_GTAGSCSCOPE
         SUBDIRS += gtags-cscope
@@ -24,7 +24,7 @@ gtagsdir = ${datadir}/gtags
 gtags_DATA = AUTHORS COPYING COPYING.LIB ChangeLog FAQ INSTALL LICENSE NEWS README THANKS \
 	BOKIN_MODEL BOKIN_MODEL_FAQ DONORS BUILD_TOOLS \
         gtags.conf gtags.el gtags.pl gtags.vim gtags-cscope.vim \
-	elvis.rc elvis-2.2_0.patch ctags-5.8.patch
+	elvis.rc elvis-2.2_0.patch ctags-5.8.patch geco.rc
 
 EXTRA_DIST = ${gtags_DATA} reconf.sh convert.pl mainpage.dox head.in
 

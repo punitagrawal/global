@@ -145,14 +145,16 @@ help(void)
 	exit(0);
 }
 
-#define RESULT		128
-#define FROM_HERE	129
-#define ENCODE_PATH	130
-#define MATCH_PART	131
-#define SINGLE_UPDATE	132
-#define PATH_STYLE	133
-#define PATH_CONVERT	134
-#define USE_COLOR	135
+#define OPT_RESULT		128
+#define OPT_FROM_HERE		129
+#define OPT_ENCODE_PATH		130
+#define OPT_MATCH_PART		131
+#define OPT_SINGLE_UPDATE	132
+#define OPT_PATH_STYLE		133
+#define OPT_PATH_CONVERT	134
+#define OPT_USE_COLOR		135
+#define OPT_GTAGSCONF		136
+#define OPT_GTAGSLABEL		137
 #define SORT_FILTER     1
 #define PATH_FILTER     2
 #define BOTH_FILTER     (SORT_FILTER|PATH_FILTER)
@@ -164,10 +166,13 @@ static struct option const long_options[] = {
 	{"absolute", no_argument, NULL, 'a'},
 	{"completion", no_argument, NULL, 'c'},
 	{"definition", no_argument, NULL, 'd'},
+	{"extended-regexp", no_argument, NULL, 'E'},
 	{"regexp", required_argument, NULL, 'e'},
 	{"file", no_argument, NULL, 'f'},
+	{"first-match", no_argument, NULL, 'F'},
 	{"local", no_argument, NULL, 'l'},
 	{"file-list", required_argument, NULL, 'L'},
+	{"match-case", no_argument, NULL, 'M'},
 	{"nofilter", optional_argument, NULL, 'n'},
 	{"grep", no_argument, NULL, 'g'},
 	{"basic-regexp", no_argument, NULL, 'G'},
@@ -190,20 +195,22 @@ static struct option const long_options[] = {
 	{"cxref", no_argument, NULL, 'x'},
 
 	/* long name only */
-	{"color", optional_argument, NULL, USE_COLOR},
-	{"encode-path", required_argument, NULL, ENCODE_PATH},
-	{"from-here", required_argument, NULL, FROM_HERE},
+	{"color", optional_argument, NULL, OPT_USE_COLOR},
+	{"encode-path", required_argument, NULL, OPT_ENCODE_PATH},
+	{"from-here", required_argument, NULL, OPT_FROM_HERE},
 	{"debug", no_argument, &debug, 1},
+	{"gtagsconf", required_argument, NULL, OPT_GTAGSCONF},
+	{"gtagslabel", required_argument, NULL, OPT_GTAGSLABEL},
 	{"literal", no_argument, &literal, 1},
-	{"match-part", required_argument, NULL, MATCH_PART},
-	{"path-style", required_argument, NULL, PATH_STYLE},
-	{"path-convert", required_argument, NULL, PATH_CONVERT},
+	{"match-part", required_argument, NULL, OPT_MATCH_PART},
+	{"path-style", required_argument, NULL, OPT_PATH_STYLE},
+	{"path-convert", required_argument, NULL, OPT_PATH_CONVERT},
 	{"print0", no_argument, &print0, 1},
 	{"version", no_argument, &show_version, 1},
 	{"help", no_argument, &show_help, 1},
-	{"result", required_argument, NULL, RESULT},
+	{"result", required_argument, NULL, OPT_RESULT},
 	{"nosource", no_argument, &nosource, 1},
-	{"single-update", required_argument, NULL, SINGLE_UPDATE},
+	{"single-update", required_argument, NULL, OPT_SINGLE_UPDATE},
 	{ 0 }
 };
 
@@ -356,9 +363,34 @@ main(int argc, char **argv)
 	int db;
 	int optchar;
 	int option_index = 0;
+	int status = 0;
 
+	/*
+	 * get path of following directories.
+	 *	o current directory
+	 *	o root of source tree
+	 *	o dbpath directory
+	 *
+	 * if GTAGS not found, exit with an error message.
+	 */
+	status = setupdbpath(0);
+	if (status == 0) {
+		cwd = get_cwd();
+		root = get_root();
+		dbpath = get_dbpath();
+	}
+	/*
+	 * Setup GTAGSCONF and GTAGSLABEL environment variable
+	 * according to the --gtagsconf and --gtagslabel option.
+	 */
+	preparse_options(argc, argv);
+	/*
+	 * Open configuration file.
+	 */
+	openconf(root);
+	setenv_from_config();
 	logging_arguments(argc, argv);
-	while ((optchar = getopt_long(argc, argv, "acCde:ifgGIlL:noOpPqrsS:tTuvVx", long_options, &option_index)) != EOF) {
+	while ((optchar = getopt_long(argc, argv, "acde:EifFgGIlL:MnoOpPqrsS:tTuvVx", long_options, &option_index)) != EOF) {
 		switch (optchar) {
 		case 0:
 			break;
@@ -375,10 +407,16 @@ main(int argc, char **argv)
 		case 'e':
 			av = optarg;
 			break;
+		case 'E':
+			Gflag = 0;
+			break;
 		case 'f':
 			fflag++;
 			xflag++;
 			setcom(optchar);
+			break;
+		case 'F':
+			Tflag = 0;
 			break;
 		case 'g':
 			gflag++;
@@ -400,6 +438,9 @@ main(int argc, char **argv)
 			break;
 		case 'L':
 			file_list = optarg;
+			break;
+		case 'M':
+			iflag = 0;
 			break;
 		case 'n':
 			nflag++;
@@ -460,7 +501,7 @@ main(int argc, char **argv)
 		case 'x':
 			xflag++;
 			break;
-		case USE_COLOR:
+		case OPT_USE_COLOR:
 			if (optarg) {
 				if (!strcmp(optarg, "never"))
 					use_color = 0;
@@ -474,10 +515,10 @@ main(int argc, char **argv)
 				use_color = 2;
 			}
 			break;
-		case ENCODE_PATH:
+		case OPT_ENCODE_PATH:
 			encode_chars = optarg;
 			break;
-		case FROM_HERE:
+		case OPT_FROM_HERE:
 			{
 			char *p = optarg;
 			const char *usage = "usage: global --from-here=lineno:path.";
@@ -493,7 +534,11 @@ main(int argc, char **argv)
 			context_file = p;
 			}
 			break;
-		case MATCH_PART:
+		case OPT_GTAGSCONF:
+		case OPT_GTAGSLABEL:
+			/* These options are already parsed in preparse_options() */
+			break;
+		case OPT_MATCH_PART:
 			if (!strcmp(optarg, "first"))
 				match_part = MATCH_PART_FIRST;
 			else if (!strcmp(optarg, "last"))
@@ -503,7 +548,7 @@ main(int argc, char **argv)
 			else
 				die_with_code(2, "unknown part type for the --match-part option.");
 			break;
-		case PATH_CONVERT:
+		case OPT_PATH_CONVERT:
 			do_path = 1;
 			if (!strcmp("absolute", optarg))
 				convert_type = PATH_ABSOLUTE;
@@ -514,10 +559,10 @@ main(int argc, char **argv)
 			else
 				die("Unknown path type.");
 			break;
-		case PATH_STYLE:
+		case OPT_PATH_STYLE:
 			path_style = optarg;
 			break;
-		case RESULT:
+		case OPT_RESULT:
 			if (!strcmp(optarg, "ctags-x"))
 				format = FORMAT_CTAGS_X;
 			else if (!strcmp(optarg, "ctags-xid"))
@@ -535,7 +580,7 @@ main(int argc, char **argv)
 			else
 				die_with_code(2, "unknown format type for the --result option.");
 			break;
-		case SINGLE_UPDATE:
+		case OPT_SINGLE_UPDATE:
 			single_update = optarg;
 			break;
 		default:
@@ -543,6 +588,14 @@ main(int argc, char **argv)
 			break;
 		}
 	}
+	if (qflag)
+		vflag = 0;
+	if (show_version)
+		version(av, vflag);
+	if (show_help)
+		help();
+	if (dbpath == NULL)
+		die_with_code(-status, gtags_dbpath_error);
 	/*
 	 * decide format.
 	 * The --result option is given to priority more than the -t and -x option.
@@ -575,8 +628,6 @@ main(int argc, char **argv)
 	}
 	if (getenv("GTAGSTHROUGH"))
 		Tflag++;
-	if (qflag)
-		vflag = 0;
 	if (use_color) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
 		if (!(getenv("ANSICON") || LoadLibrary("ANSI32.dll")) && use_color == 2)
@@ -587,9 +638,6 @@ main(int argc, char **argv)
 		if (Vflag)
 			use_color = 0;
 	}
-	if (show_help)
-		help();
-
 	argc -= optind;
 	argv += optind;
 	/*
@@ -602,7 +650,7 @@ main(int argc, char **argv)
 		 * replace it with the relative or the absolute path name.
 		 *
 		 * By default, if we are in src/ directory, the output
-		 * should be converted like follws:
+		 * should be converted like follows:
 		 *
 		 * main      10 ./src/main.c  main(argc, argv)\n
 		 * main      22 ./libc/func.c   main(argc, argv)\n
@@ -610,7 +658,7 @@ main(int argc, char **argv)
 		 * main      10 main.c  main(argc, argv)\n
 		 * main      22 ../libc/func.c   main(argc, argv)\n
 		 *
-		 * Similarly, the --path-covert=absolute option specified, then
+		 * Similarly, the --path-convert=absolute option specified, then
 		 *		v
 		 * main      10 /prj/xxx/src/main.c  main(argc, argv)\n
 		 * main      22 /prj/xxx/libc/func.c   main(argc, argv)\n
@@ -620,7 +668,7 @@ main(int argc, char **argv)
 		char *ctags_x;
 
 		if (argc < 3)
-			die("global --path-covert: 3 arguments needed.");
+			die("global --path-convert: 3 arguments needed.");
 		cv = convert_open(convert_type, FORMAT_CTAGS_X, argv[0], argv[1], argv[2], stdout, NOTAGS);
 		while ((ctags_x = strbuf_fgets(ib, stdin, STRBUF_NOCRLF)) != NULL)
 			convert_put(cv, ctags_x);
@@ -641,8 +689,6 @@ main(int argc, char **argv)
 		if (gflag && av)
 			argv++;
 	}
-	if (show_version)
-		version(av, vflag);
 	if (single_update) {
 		if (command == 0) {
 			uflag++;
@@ -697,27 +743,6 @@ main(int argc, char **argv)
 			;
 	if (cflag && !Pflag && av && isregex(av))
 		die_with_code(2, "only name char is allowed with -c option.");
-	/*
-	 * get path of following directories.
-	 *	o current directory
-	 *	o root of source tree
-	 *	o dbpath directory
-	 *
-	 * if GTAGS not found, exit with an error message.
-	 */
-	{
-		int status = setupdbpath(pflag && vflag);
-		if (status < 0)
-			die_with_code(-status, gtags_dbpath_error);
-		cwd = get_cwd();
-		root = get_root();
-		dbpath = get_dbpath();
-	}
-	/*
-	 * Logical current directory.
-	 * We force idutils to follow the same rule as GLOBAL.
-	 */
-	set_env("PWD", cwd);
 	/*
 	 * print dbpath or rootdir.
 	 */
@@ -864,7 +889,7 @@ main(int argc, char **argv)
 			type = PATH_RELATIVE;
 			abslib++;
 		} else
-			die("illegal path style.");
+			die("invalid path style.");
 	}
 	/*
 	 * exec lid(idutils).
@@ -1025,7 +1050,7 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 		for (p = line; *p && *p != ' '; p++)
 			;
 		if (*p == '\0') {
-			warning("Illegal line: %s", line);
+			warning("Invalid line: %s", line);
 			continue;
 		}
 		*p = '\0';
@@ -1169,7 +1194,11 @@ idutils(const char *pattern, const char *dbpath)
 	 * make lid command line.
 	 * Invoke lid with the --result=grep option to generate grep format.
 	 */
+#if _WIN32 || __DJGPP__
 	strbuf_puts(ib, lid);
+#else
+	strbuf_sprintf(ib, "PWD=%s %s", quote_shell(root), lid);
+#endif
 	strbuf_sprintf(ib, " --file=%s/ID", quote_shell(dbpath));
 	strbuf_puts(ib, " --separator=newline");
 	if (format == FORMAT_PATH)
