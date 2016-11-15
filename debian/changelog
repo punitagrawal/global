@@ -1,3 +1,13 @@
+global (5.7.1-3) unstable; urgency=medium
+
+  * Update for the new hoops that emacs needs us to jump through to ship
+    the gtags.el file.  Thanks to Wookey for investigating that and
+    providing pointers to what needed to change and why.  Closes: #844330
+  * Typo fix in globash.1, thanks to Reuben Thomas for proof reading.
+    Closes: #661550
+
+ -- Ron Lee <ron@debian.org>  Wed, 16 Nov 2016 03:12:22 +1030
+
 global (5.7.1-2) unstable; urgency=low
 
   * Fall back to localhost if `hostname --fqdn` fails.
