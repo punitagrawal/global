@@ -5,7 +5,7 @@ Build-Depends: debhelper (>=6.0.7), texinfo
 Maintainer: Ron Lee <ron@debian.org>
 Standards-Version: 3.9.8.0
 Vcs-Git: git://git.debian.org/users/ron/global.git
-Vcs-Browser: http://git.debian.org/?p=users/ron/global.git;a=summary
+Vcs-Browser: http://git.debian.org/?p=users/ron/global.git
 
 Package: global
 Architecture: any
