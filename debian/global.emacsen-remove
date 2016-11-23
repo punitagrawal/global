@@ -1,0 +1,14 @@
+#!/bin/sh -e
+
+FLAVOR=$1
+PACKAGE=global
+
+echo remove/${PACKAGE}: Handling removal of emacsen flavor ${FLAVOR}
+
+if [ ${FLAVOR} != emacs ]
+then
+	echo emacsen-common: purging byte-compiled files for ${FLAVOR}
+	rm -rf /usr/share/${FLAVOR}/site-lisp/${PACKAGE}
+fi
+exit 0;
+
