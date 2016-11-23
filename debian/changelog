@@ -1,3 +1,47 @@
+global (6.5.5-0.1) experimental; urgency=medium
+
+  [ Punit Agrawal ]
+  * Non-maintainer upload.
+  * Switch to dpkg-source 3.0 (quilt) format
+    Split diff into individual patches by functionality.
+  * Add watch file
+  * Migrate local changes to latest upstream version - 6.2.11
+    Drop globash patch as it seems to be integrated with upstream
+    Drop alternate compressed suffix functionality for htags
+  * Update debian/rules in line with 6.2.11
+  * Update debian/global.manpages for 6.2.11
+  * Fix an error encountered while installing gtags.el
+  * Add debian/emacsen-compat
+  * Fix lintian warning debian-rules-ignores-make-clean
+  * Fix lintian warning debian-rules-missing-recommended-target
+  * Replace deprecated dh_clean -k with dh_prep in debian/rules
+
+  [ Javi Merino ]
+  * Build-depend on libncurses5-dev, as global requires curses
+
+  [ Punit Agrawal ]
+  * Fix lintian warning script-not-executable
+  * New upstream release - 6.2.12
+  * Add links to global and the package repository
+  * Update debian/copyright
+  * Fix cscope manpage error
+
+  [ Volker Mische ]
+  * Install plugins from plugin-factory
+  * Update to upstream release - 6.3.2
+
+  [ Wookey ]
+  * Non-maintainer upload.
+  * Update to upstream release - 6.5.5
+  * Add missing emacsen-common build-dep 
+  * Remove obsolete dpkg|install-info dependency
+  * Bump standards to 3.9.6
+  * Use system libltdl instead of embedded one
+  * Ensure cgi scripts are regenerated to set perl path correctly
+  * Recommend python for pygments support
+
+ -- Wookey <wookey@debian.org>  Wed, 23 Nov 2016 17:51:44 +0000
+
 global (5.7.1-4) unstable; urgency=medium
 
   * Orphan this package.  Being caught between an uncooperative upstream

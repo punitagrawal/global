@@ -1,16 +1,21 @@
 Source: global
 Section: devel
 Priority: optional
-Build-Depends: debhelper (>=6.0.7), texinfo
+Build-Depends: debhelper (>=9), autotools-dev,
+ texinfo,
+ libncurses5-dev, libltdl-dev,
+ emacsen-common
 Maintainer: Debian QA Group <packages@qa.debian.org>
+Homepage: http://www.gnu.org/software/global/global.html
+Vcs-Git: git://anonscm.debian.org/collab-maint/global.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/global.git;a=summary
 Standards-Version: 3.9.8.0
-Vcs-Git: git://git.debian.org/users/ron/global.git
-Vcs-Browser: http://git.debian.org/?p=users/ron/global.git
 
 Package: global
 Architecture: any
-Depends: dpkg (>= 1.15.4) | install-info, emacsen-common (>= 2.0.8), ${shlibs:Depends}
-Suggests: lynx | www-browser, doxygen (>=1.4.3), apache | httpd, id-utils
+Depends: ${shlibs:Depends}, emacsen-common, ${misc:Depends}
+Recommends: python
+Suggests: lynx | www-browser, doxygen (>=1.4.3), apache | httpd, id-utils, exuberant-ctags, python-pygments
 Description: Source code search and browse tools
  GNU GLOBAL is a source code tag system that works the same way across
  diverse environments. Currently, it supports the following:

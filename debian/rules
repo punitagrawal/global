@@ -9,6 +9,7 @@ clean:
 	dh_testdir
 	dh_testroot
 	-rm -f build-stamp
+	-rm -f htags/*.cgi
 
 	# Ensure the auto-update stuff does not trigger if the
 	# timestamps are skewed (by cvs etc.)
@@ -24,28 +25,30 @@ clean:
 	# buildd at least seem to crap out trying to chmod it later.
 	if test -e config.status; then touch config.status; fi
 
-	-$(MAKE) distclean
+	[ ! -f Makefile ] || $(MAKE) distclean
+	dh_autotools-dev_restoreconfig
 	dh_clean
 
 
-build: build-arch
-build-arch: build-stamp
-build-indep:
 
 build-stamp:
 	dh_testdir
+	dh_autotools-dev_updateconfig
 	./configure --prefix=/usr \
 		&& $(MAKE)
 	touch $@
 
 
-install: install-arch
+build-indep: build-stamp
+build-arch: build-stamp
+build: build-arch build-indep
+
 install-indep:
 
 install-arch: build-arch
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	$(MAKE) install-exec prefix=`pwd`/debian/$(package)/usr
@@ -54,15 +57,17 @@ install-arch: build-arch
 		&& $(MAKE) install \
 			DESTDIR=`pwd`/../debian/$(package)/usr \
 			MANDIR=`pwd`/../debian/$(package)/usr/share/man
+	$(MAKE) -C plugin-factory install-data prefix=$(CURDIR)/debian/$(package)/usr
 	cp -p gtags.el `pwd`/debian/$(package)/usr/share/emacs/site-lisp/$(package)
 
-	dh_install globash.rc	etc
-	dh_install globash	usr/bin
+	dh_install globash/globash.rc	etc
+	dh_install globash/globash	usr/bin
 	dh_lintian
 
+install: install-arch
 
-binary: binary-arch
 binary-indep:
+# no architecture-independent files generates by this package.
 
 binary-arch: install-arch
 	dh_testdir
@@ -81,6 +86,8 @@ binary-arch: install-arch
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
+
+binary: binary-indep binary-arch
 
 
 .PHONY: clean build build-arch build-indep \

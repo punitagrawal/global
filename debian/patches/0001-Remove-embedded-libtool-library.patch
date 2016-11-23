@@ -1,0 +1,48 @@
+Description: Upstream has local ltdl embedded - remove it
+ Embedded libraries are wrong and bad. Libtool doubly so :-)
+
+Author: Wookey <wookey@debian.org>
+Last-Update: 2016-11-23
+
+Index: global-6.5.5/Makefile.am
+===================================================================
+--- global-6.5.5.orig/Makefile.am
++++ global-6.5.5/Makefile.am
+@@ -10,7 +10,7 @@
+ # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+ # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ #
+-SUBDIRS = libglibc libutil libparser libltdl plugin-factory
++SUBDIRS = libglibc libutil libparser plugin-factory
+ if !USE_DB185_COMPAT
+         SUBDIRS += libdb
+ endif
+Index: global-6.5.5/configure.ac
+===================================================================
+--- global-6.5.5.orig/configure.ac
++++ global-6.5.5/configure.ac
+@@ -47,14 +47,9 @@ AM_PATH_PYTHON([2.6],,[PYTHON="/usr/bin/
+ AC_GNU_SOURCE
+ 
+ LT_PREREQ([2.2.6b])
+-LT_CONFIG_LTDL_DIR([libltdl])
+-dnl
+-dnl Because autoreconf up to version 2.59 doesn't know LT_INIT,
+-dnl we use the old name AC_PROG_LIBTOOL.
+-dnl
+-AC_LIBTOOL_DLOPEN
+-AC_PROG_LIBTOOL
+-LTDL_INIT([recursive])
++LT_CONFIG_LTDL_DIR([/usr/share/libtool])
++LT_INIT([dlopen,disable-static])
++LTDL_INIT
+ 
+ dnl Checks for libraries.
+ 
+@@ -402,6 +397,5 @@ AC_CONFIG_FILES([Makefile
+ 	libparser/Makefile
+ 	plugin-factory/Makefile
+ 	plugin-factory/pygments_parser.py
+-	libltdl/Makefile
+ ])
+ AC_OUTPUT
