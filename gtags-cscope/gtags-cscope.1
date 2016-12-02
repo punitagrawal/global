@@ -1,0 +1,409 @@
+.\" This file is generated automatically by convert.pl from gtags-cscope/manual.in.
+.TH GTAGS-CSCOPE 1 "March 2011" "GNU Project"
+.SH NAME
+gtags\-cscope - interactively examine a C program
+.SH SYNOPSIS
+\fBgtags-cscope\fP [-bCdehLlVv][-F file ][-012345678 \fIpattern\fP][-p n]
+.br
+.SH DESCRIPTION
+\fBgtags-cscope\fP is an interactive, screen-oriented tool that allows the user to
+browse through source files for specified elements of code.
+.PP
+\fBgtags-cscope\fP builds the symbol cross-reference the first time it is used on
+the source files for the program being browsed. On a subsequent invocation, 
+\fBgtags-cscope\fP rebuilds the cross-reference only if a source file
+has changed or the list of source files is different. When the
+cross-reference is rebuilt, it is updated incrementally, which makes rebuilding faster
+than the initial build.
+.PP
+\fBgtags-cscope\fP is a tool which just borrows user interface of cscope; it is GLOBAL
+itself for the substance.
+.SH OPTIONS
+Some command line arguments can only occur as the only argument in
+the execution of \fBgtags-cscope\fP.  They cause the program to just print out
+some output and exit immediately:
+.PP
+.TP
+\fB-h\fP
+View the long usage help display.
+.TP
+\fB-V\fP
+Print the version number of \fBgtags-cscope\fP.
+.TP
+\fB--help\fP
+Same as \fB-h\fP
+.TP
+\fB--version\fP
+Same as \fB-V\fP
+.PP
+The following options can appear in any combination:
+.PP
+.TP
+\fB-a\fP
+Print absolute path names.
+.TP
+\fB-b\fP
+Build the cross-reference only.
+.TP
+\fB-C\fP
+Ignore letter case when searching.
+.TP
+\fB-d\fP
+Do not update the cross-reference.
+.TP
+\fB-e\fP
+Suppress the \'^e\' command prompt between files.
+.TP
+\fB-F\fP \fIfile\fP
+Read symbol reference lines from \fIfile\fP. 
+(A symbol reference file is created by > and >>,
+and can also be read using the < command,
+described under ``Issuing Subsequent Requests'', below.)
+.TP
+\fB-i\fP
+Ignore SIGINT signal in line-oriented mode.
+.TP
+\fB-L\fP
+Do a single search with line-oriented output when used with the
+-num pattern option.
+.TP
+\fB-l\fP
+Line-oriented interface.
+This option implies the \fB-d\fP option.
+.TP
+\fB-[0-9]\fP \fIpattern\fP
+Go to input field \fInum\fP (counting from 0) and find \fIpattern\fP.
+.TP
+\fB-p\fP \fIn\fP
+Display the last \fIn\fP file path components instead of
+the default (1). Use \'0\' to not display the file name at all.
+.TP
+\fB-v\fP
+Be more verbose in line-oriented mode.
+.SH "Requesting the initial search"
+After the cross-reference is ready, \fBgtags-cscope\fP will display this menu:
+.PP
+.nf
+Find this symbol:
+Find this function definition:
+Find functions called by this function (N/A):
+Find references of this function:
+Find this text string:
+Change this text string:
+Find this egrep pattern:
+Find this file:
+Find files #including this file:
+.fi
+.PP
+Press the <Up> or <Down> keys repeatedly to move to the desired input
+field, type the text to search for, and then press the <Return> key.
+.SH "Issuing subsequent requests"
+If the search is successful, any of these single-character commands
+can be used:
+.PP
+.TP
+0-9a-zA-Z
+Edit the file referenced by the given line number.
+.TP
+<Space>
+Display next set of matching lines.
+.TP
+<Tab>
+Alternate between the menu and the list of matching lines
+.TP
+<Up>
+Move to the previous menu item (if the cursor is in the menu)
+or move to the previous matching line (if the cursor is in the
+matching line list).
+.TP
+<Down>
+Move to the next menu item (if the cursor is in the menu)
+or move to the next matching line (if the cursor is in the
+matching line list).
+.TP
++
+Display next set of matching lines.
+.TP
+-
+Display previous set of matching lines.
+.TP
+^e
+Edit displayed files in order.
+.TP
+>
+Write the displayed list of lines to a file.
+.TP
+>>
+Append the displayed list of lines to a file.
+.TP
+<
+Read lines from a file that is in symbol reference format
+(created by \'>\' or \'>>\'), just like the \fB-F\fP option.
+.TP
+^
+Filter all lines through a shell command and display the
+resulting lines, replacing the lines that were already there.
+.TP
+|
+Pipe all lines to a shell command and display them without
+changing them.
+.TP
+^g
+Read lines from the result of the execution of \fBglobal\fP(1).
+.PP
+At any time these single-character commands can also be used:
+.TP
+<Return>
+Move to next input field.
+.TP
+^n
+Move to next input field.
+.TP
+^p
+Move to previous input field.
+.TP
+^y
+Search with the last text typed.
+.TP
+^b
+Move to previous input field and search pattern.
+.TP
+^f
+Move to next input field and search pattern.
+.TP
+^c
+Toggle ignore/use letter case when searching. (When ignoring
+letter case, a search for \'FILE\' will match \'File\'
+and \'file\'.)
+.TP
+^r
+Rebuild the cross-reference.
+.TP
+!
+Start an interactive shell (type \'^d\' to return to \fBgtags-cscope\fP).
+.TP
+^l
+Redraw the screen.
+.TP
+?
+Give help information about \fBgtags-cscope\fP commands.
+.TP
+^d
+Exit \fBgtags-cscope\fP.
+.PP
+NOTE: If the first character of the text to be searched for matches
+one of the above commands, escape it by typing a \'\\' (backslash) first.
+.PP
+Substituting new text for old text
+.PP
+After the text to be changed has been typed, \fBgtags-cscope\fP will prompt for
+the new text, and then it will display the lines containing the old
+text. Select the lines to be changed with these single-character
+commands:
+.TP
+0-9a-zA-Z
+Mark or unmark the line to be changed.
+.TP
+*
+Mark or unmark all displayed lines to be changed.
+.TP
+<Space>
+Display next set of lines.
+.TP
++
+Display next set of lines.
+.TP
+-
+Display previous set of lines.
+.TP
+^a
+Mark or unmark all lines to be changed.
+.TP
+^d
+Change the marked lines and exit.
+.TP
+<Esc>
+Exit without changing the marked lines.
+.TP
+!
+Start an interactive shell (type \'^d\' to return to \fBgtags-cscope\fP).
+.TP
+^l
+Redraw the screen.
+.TP
+?
+Give help information about \fBgtags-cscope\fP commands.
+.TP
+Special keys
+If your terminal has arrow keys that work in \fBvi\fP, you can use them
+to move around the input fields. The up-arrow key is useful to move to
+the previous
+input field instead of using the <Tab> key repeatedly. If you have
+<CLEAR>, <NEXT>, or <PREV> keys they will act as the \'^l\', \'+\',
+and \'-\' commands, respectively.
+.SH "Line-Oriented interface"
+The \fB-l\fP option lets you use \fBgtags-cscope\fP
+where a screen-oriented interface
+would not be useful, for example, from another screen-oriented program.
+.PP
+\fBgtags-cscope\fP will prompt with \'>>\' when it is ready
+for an input line, which starts
+with the field number (counting from 0), immediately followed by the
+search pattern. For example, \'1main\' finds the definition of the
+\'main\' function.
+.PP
+If you just want a single search, instead of the \fB-l\fP option use
+the \fB-L\fP and \fB-num \fIpattern\fP\fP options,
+and you won't get the \'>>\' prompt.
+.PP
+For \fB-l\fP, \fBgtags-cscope\fP outputs the number of reference lines:
+.br
+cscope: 2 lines
+.PP
+For each reference found, \fBgtags-cscope\fP outputs a line consisting of the file
+name, function name, line number, and line text, separated by spaces.
+For example:
+.br
+main.c main 161 main(argc, argv)
+.PP
+Note that the editor is not called to display a single reference,
+unlike the screen-oriented interface.
+.PP
+You can use the \'c\' command to toggle ignore/use letter case when
+searching. (When ignoring letter case, a search for \'FILE\' will
+match \'File\' and \'file\'.)
+.PP
+You can use the \'r\' command to rebuild the database.
+.PP
+\fBgtags-cscope\fP will quit when it detects end-of-file, or when the first
+character of an input line is \'^d\' or \'q\'.
+.SH "ENVIRONMENT VARIABLES"
+The following environment variables are of \fBcscope\fP origin.
+.PP
+.TP
+\fBCSCOPE_EDITOR\fP
+Overrides the \fBEDITOR\fP and \fBVIEWER\fP variables.
+Use this if you wish to use a different editor with \fBcscope\fP
+than that specified by your \fBEDITOR\fP/\fBVIEWER\fP variables.
+.TP
+\fBCSCOPE_LINEFLAG\fP
+Format of the line number flag for your editor.
+By default, \fBcscope\fP invokes your editor via the equivalent of
+\'editor +\fIN\fP \fIfile\fP\', where \fIN\fP is the line number
+that the editor should jump to.
+This format is used by both \fBemacs\fP and \fBvi\fP.
+If your editor needs something different, specify it in this variable,
+with \'%s\' as a placeholder for the line number.
+Eg: if your editor needs to be invoked as \'editor -#103 \fIfile\fP\'
+to go to line 103, set this variable to \'-#%s\'.
+.TP
+\fBCSCOPE_LINEFLAG_AFTER_FILE\fP
+Set this variable to \'yes\' if your editor needs to be invoked with
+the line number option after the filename to be edited. To continue
+the example from \fBCSCOPE_LINEFLAG\fP, above: if your editor needs to see
+\'editor \fIfile\fP -#\fInumber\fP\', set this environment variable.
+Users of most standard editors (\fBvi\fP, \fBemacs\fP) do not need
+to set this variable.
+.TP
+\fBEDITOR\fP
+Preferred editor, which defaults to \fBvi\fP.
+.TP
+\fBHOME\fP
+Home directory, which is automatically set at login.
+.TP
+\fBSHELL\fP
+Preferred shell, which defaults to \fBsh\fP.
+.TP
+\fBTERM\fP
+Terminal type, which must be a screen terminal.
+.TP
+\fBTERMINFO\fP
+Terminal information directory full path name. If your terminal
+is not in the standard terminfo directory, see \fBcurses\fP
+and \fBterminfo\fP for how to make your own terminal description.
+.TP
+\fBTMPDIR\fP
+Temporary file directory, which defaults to \'/tmp\'.
+.TP
+\fBVIEWER\fP
+Preferred file display program (such as \fBless\fP), which overrides
+\fBEDITOR\fP (see above).
+.PP
+The following environment variables are of \fBGLOBAL\fP origin.
+.PP
+.TP
+\fBGTAGSCONF\fP
+Configuration file.
+.TP
+\fBGTAGSGLOBAL\fP
+If this variable is set, \'$GTAGSGLOBAL\' is used as the name
+of \fBglobal\fP(1). The default is \fBglobal\fP.
+.TP
+\fBGTAGSGTAGS\fP
+If this variable is set, \'$GTAGSGTAGS\' is used as the name
+of \fBgtags\fP(1). The default is \fBgtags\fP.
+.TP
+\fBGTAGSDBPATH\fP
+The directory in which the tag files exist.
+This value is ignored when \fBGTAGSROOT\fP is not defined.
+.TP
+\fBGTAGSLABEL\fP
+Configuration label. The default is \'default\'.
+.TP
+\fBGTAGSLIBPATH\fP
+If this variable is set, it is used as the path to search
+for library functions. If the specified tags is not
+found in the project, \fBglobal\fP also searches in these paths.
+Since only \'GTAGS\' is targeted in the retrieval, this variable is
+ignored when \fB-r\fP or \fB-s\fP is specified.
+.TP
+\fBGTAGSROOT\fP
+The root directory of the project.
+.TP
+\fBMAKEOBJDIR\fP
+If this variable is set, \'$MAKEOBJDIR\' is used as the name
+of BSD-style objdir. The default is \'obj\'.
+.TP
+\fBMAKEOBJDIRPREFIX\fP
+If this variable is set, \'$MAKEOBJDIRPREFIX\' is used as the prefix
+of BSD-style objdir. The default is \'/usr/obj\'.
+.SH FILES
+.TP
+\'GTAGS\'
+Tag file for definitions.
+.TP
+\'GRTAGS\'
+Tag file for references.
+.TP
+\'GPATH\'
+Tag file for source files.
+.TP
+\'GTAGSROOT\'
+If environment variable \fBGTAGSROOT\fP is not set
+and file \'GTAGSROOT\' exists in the same directory as \'GTAGS\'
+then \fBglobal\fP sets \fBGTAGSROOT\fP to the contents of the file.
+.TP
+\'gtags.conf\', \'$HOME/.globalrc\'
+See \fBgtags.conf\fP(5).
+.SH "SEE ALSO"
+\fBgtags\fP(1),
+\fBglobal\fP(1),
+\fBhtags\fP(1).
+.PP
+GNU GLOBAL source code tag system
+.br
+(http://www.gnu.org/software/global/).
+.SH BUG
+The function field of the display is almost <unknown> since
+\fBGLOBAL\fP doesn't recognize it.
+.PP
+'Find functions called by this function' is not implemented.
+.SH AUTHOR
+Joe Steffen (original author) and others.
+.SH HISTORY
+\fBCscope\fP was originally developed at Bell Labs in the early 1980s,
+and was released as free software under the BSD license in April 2000.
+\fBGtags-cscope\fP is a derivative of \fBcscope\fP to use \fBGLOBAL\fP
+as the back-end.
+Its line-oriented interface was originally written in 2006, and was
+re-implemented in 2011 using \fBcscope\fP itself.

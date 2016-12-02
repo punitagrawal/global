@@ -1,0 +1,317 @@
+@c This file is generated automatically by convert.pl from global/manual.in.
+@unnumberedsubsec NAME
+global - print locations of given symbols
+@unnumberedsubsec SYNOPSIS
+@quotation
+global [-adEFGilMnNqrstTvx][-S dir][-e] pattern@*
+global -c[dFiIMoOPrsT] prefix@*
+global -f[adlnqrstvx][-L file-list][-S dir] files@*
+global -g[aEGilMnoOqtvVx][-L file-list][-S dir][-e] pattern [files]@*
+global -I[ailMnqtvx][-S dir][-e] pattern@*
+global -P[aEGilMnoOqtvVx][-S dir][-e] pattern@*
+global -p[qrv]@*
+global -u[qv]@*
+@end quotation
+@unnumberedsubsec DESCRIPTION
+Global finds locations of given symbols
+in C, C++, Yacc, Java, PHP and Assembly source files,
+and prints the path name, line number and line image of the locations.
+Global can locate not only definitions but also references
+and other symbols.
+
+Global can treat a source tree, that is, a directory that has
+sub-directories and source files, as a project.
+In advance of using this command, you must execute gtags(1)
+at the root directory of the project which you want to investigate
+to make tag files.
+Then you can use global command anywhere in the project.
+You need not specify where the tag file is.
+Instead, global locates it by itself.
+
+You can specify a regular expression for pattern.
+Global understands two different versions of regular expression
+syntax: basic and extended (default).
+@unnumberedsubsec COMMANDS
+The following commands are available:
+
+@table @asis
+@item <no command> pattern
+No command means tag search command.
+Print tags which match to pattern.
+By default, print definition tags.
+@item @samp{-c}, @samp{--completion} [prefix]
+Print symbols which start with prefix.
+If prefix is not given, print all symbols.
+@item @samp{-f}, @samp{--file} files
+Print all tags in the files.
+This command implies the @samp{-x} option.
+@item @samp{-g}, @samp{--grep} pattern [files]
+Print all lines which match to the pattern.
+If files are given, this command searches in those files.
+@item @samp{--help}
+Print a usage message.
+@item @samp{-I}, @samp{--idutils} pattern
+Print all lines which match to pattern.
+This function uses idutils(1) as a search engine.
+To use this command, you need to install idutils(1)
+in your system and execute gtags(1) with the @samp{-I} option.
+@item @samp{-P}, @samp{--path} [pattern]
+Print path names which match to pattern.
+If no pattern is given, print all paths in the project.
+@item @samp{-p}, @samp{--print-dbpath}
+Print location of @file{GTAGS}.
+@item @samp{-u}, @samp{--update}
+Update tag files incrementally.
+This command internally invokes gtags(1).
+You can execute this command anywhere in the project,
+differing from gtags(1).
+@item @samp{--version}
+Show version number.
+@end table
+@unnumberedsubsec OPTIONS
+The following options are available:
+
+@table @asis
+@item @samp{-a}, @samp{--absolute}
+Print absolute path names. By default, print relative path names.
+@item @samp{--color} when
+Use color to highlight the pattern within the line; when may be one of:
+never, always or auto (default).
+The default color is bold red text on current background; the environment
+variable @var{GREP_COLORS} (only @var{mt} and @var{ms} are effective at present)
+or @var{GREP_COLOR} defines it.
+This option is effective to the following commands:
+<no command>, -f, -g, -I, -P.
+@item @samp{-d}, @samp{--definition}
+Print locations of definitions.
+@item @samp{-e}, @samp{--regexp} pattern
+Use pattern as the pattern; useful to protect patterns starting with @samp{-}.
+@item @samp{-E}, @samp{--extended-regexp}
+Interpret pattern as a extended regular expression.
+This is the default.
+@item @samp{--encode-path} chars
+Convert path characters in chars into a @samp{%} symbol, followed by the
+two-digit hexadecimal representation of the character.
+A blank will be converted to @samp{%20}.
+@item @samp{-F}, @samp{--first-match}
+End the search without going through all the tag files listed in
+@var{GTAGSLIBPATH} when tags are found in a tag file. This is the default.
+@item @samp{--from-here} context
+Decide tag type by context. Its syntax should be @samp{lineno:path}.
+If this option is specified then @samp{-s} and @samp{-r} are ignored.
+Regular expression is not allowed for pattern.
+This option assumes use in conversational environments such as
+editors and IDEs.
+@item @samp{-G}, @samp{--basic-regexp}
+Interpret pattern as a basic regular expression.
+The default is an extended regular expression.
+@item @samp{--gtagsconf} file
+Set environment variable @var{GTAGSCONF} to file.
+@item @samp{--gtagslabel} label
+Set environment variable @var{GTAGSLABEL} to label.
+@item @samp{-i}, @samp{--ignore-case}
+Ignore case distinctions in the pattern.
+@item @samp{-L}, @samp{--file-list} file
+Obtain files from file in addition to the arguments.
+The argument file can be set to '-' to accept a list of files
+from the standard input. File names must be separated by newline.
+@item @samp{-l}, @samp{--local}
+Print only tags which exist under the current directory.
+@item @samp{--literal}
+Execute literal search instead of regular expression search.
+This option works with the tag search command, @samp{-g} command, 
+@samp{-P} command and @samp{-I} command.
+@item @samp{-M}, @samp{--match-case}
+Search is case-sensitive. This is the default.
+@item @samp{--match-part part}
+Specify how path name completion should match, where part is one of:
+@samp{first}, @samp{last} or @samp{all} (default).
+This option is valid only with the @samp{-c} command in conjunction with @samp{-P}.
+@item @samp{-n}, @samp{--nofilter}
+Suppress sort filter and path conversion filter.
+@item @samp{-N}, @samp{--nearness}[=start]
+Use Nearness sort method for the output. By default, alphabetical sort
+method is used.
+This option is effective for the tag search command, @samp{-P} command
+and @samp{-g} command. As an exception, @samp{-g} command ignores this
+option when files are specified by arguments.
+The nearness is defined by how many parent directories to go up to reach
+the target. The result of nearness sort is concatenation of the following
+([1]-[n]) in this order. The default of start is the current directory.
+@example
+[1] Output of local search in the start directory.
+[2] Output of local search in the parent directory except for [1].
+[3] Output of local search in the grandparent directory except for [1]-[2].
+... (repeat until the project root directory)
+[n] Output of local search in the project root directory except for [1]-[n-1].
+@end example
+In each directory, they are sorted by alphabetical order.
+@item @samp{-O}, @samp{--only-other}
+Treat only text files other than source code, like @file{README}.
+This option is valid only with the @samp{-g} or @samp{-P} command.
+This option overrides the @samp{-o} option.
+@item @samp{-o}, @samp{--other}
+Treat not only source files but also text files other than source code,
+like @file{README}.
+This option is valid only with the @samp{-g} or @samp{-P} command.
+@item @samp{--path-style} format
+Print path names using format, which may be one of:
+@samp{relative}, @samp{absolute}, @samp{shorter}, @samp{abslib} or @samp{through}.
+The @samp{--path-style} option is given more priority than the @samp{-a} option.
+@item @samp{--print0}
+Print each record followed by a null character instead of a newline.
+@item @samp{-q}, @samp{--quiet}
+Quiet mode.
+@item @samp{-r}, @samp{--reference}, @samp{--rootdir}
+Print reference tags.
+Reference means the reference to a symbol which has definitions.
+With the @samp{-p} option, print the root directory of the project.
+@item @samp{--result} format
+Print out using format, which may be one of:
+@samp{path} (default), @samp{ctags}, @samp{ctags-x}, @samp{grep} or @samp{cscope}.
+The @samp{--result=ctags} and @samp{--result=ctags-x} options are
+equivalent to the @samp{-t} and @samp{-x} options respectively.
+The @samp{--result} option is given more priority than the @samp{-t} and @samp{-x} options.
+@item @samp{--single-update} file
+Update tag files using gtags(1) with the @samp{--single-update} option.
+It is considered that file was added, updated or deleted,
+and there is no change in other files.
+This option implies the @samp{-u} option.
+@item @samp{-s}, @samp{--symbol}
+Print other symbol tags.
+Other symbol means the reference to a symbol which has no definition.
+@item @samp{-S}, @samp{--scope} dir
+Print only tags which exist under dir directory.
+It is similar to the @samp{-l} option, but you need not change directory.
+@item @samp{-T}, @samp{--through}
+Go through all the tag files listed in @var{GTAGSLIBPATH}.
+By default, stop searching when tag is found.
+This option is ignored when either @samp{-s}, @samp{-r}
+or @samp{-l} option is specified.
+@item @samp{-t}, @samp{--tags}
+Use standard ctags format.
+@item @samp{-V}, @samp{--invert-match}
+Invert the sense of matching, to select non-matching lines.
+This option is valid only with the @samp{-g} or @samp{-P} commands.
+@item @samp{-v}, @samp{--verbose}
+Verbose mode.
+@item @samp{-x}, @samp{--cxref}
+Use standard ctags cxref (with @samp{-x}) format.
+@end table
+@unnumberedsubsec EXAMPLES
+@example
+$ ls -F
+Makefile      src/    lib/
+$ gtags
+$ ls G*
+GPATH   GRTAGS  GTAGS
+$ global main
+src/main.c
+$ (cd src; global main)
+main.c
+$ global -x main
+main              10 src/main.c  main (argc, argv) @{
+$ global -f src/main.c
+main              10 src/main.c  main (argc, argv) @{
+func1             55 src/main.c  func1() @{
+func2             72 src/main.c  func2() @{
+func3            120 src/main.c  func3() @{
+$ global -x '^[sg]et'
+set_num           20 lib/util.c  set_num(values) @{
+get_num           30 lib/util.c  get_num() @{
+$ global -rx set_num
+set_num          113 src/op.c            set_num(32);
+set_num          225 src/opop.c               if (set_num(0) > 0) @{
+$ global strlen
+$ (cd /usr/src/sys; gtags)
+$ export GTAGSLIBPATH=/usr/src/sys
+$ global -a strlen
+/usr/src/sys/libkern/strlen.c
+$ (cd /usr/src/lib; gtags)
+$ GTAGSLIBPATH=/usr/src/lib:/usr/src/sys
+$ global -a strlen
+/usr/src/lib/libc/string/strlen.c
+@end example
+@unnumberedsubsec FILES
+@table @asis
+@item @file{GTAGS}
+Tag file for definitions.
+@item @file{GRTAGS}
+Tag file for references.
+@item @file{GPATH}
+Tag file for source files.
+@item @file{GTAGSROOT}
+If environment variable @var{GTAGSROOT} is not set
+and file @file{GTAGSROOT} exists in the same directory as @file{GTAGS}
+then global sets @var{GTAGSROOT} to the contents of the file.
+@item @file{gtags.conf}, @file{$HOME/.globalrc}
+See gtags.conf(5).
+@end table
+@unnumberedsubsec ENVIRONMENT
+The following environment variables affect the execution of global:
+
+@table @asis
+@item @var{GREP_COLOR}
+The color to use for @samp{--color}; @var{GREP_COLORS} has precedence.
+@item @var{GREP_COLORS}
+The color (mt or ms) to use for @samp{--color}; see grep(1).
+@item @var{GTAGSBLANKENCODE}
+If this variable is set, the @samp{--encode-path=" <TAB>"}
+option is specified.
+@item @var{GTAGSCACHE}
+The size of the B-tree cache. The default is 50000000 (bytes).
+@item @var{GTAGSCONF}
+Configuration file.
+@item @var{GTAGSDBPATH}
+The directory in which the tag files exist.
+This value is ignored when @var{GTAGSROOT} is not defined.
+Use of this variable is not recommended.
+@item @var{GTAGSFORCECPP}
+If this variable is set, each file whose suffix is @file{.h} is treated
+as a C++ source file.
+@item @var{GTAGSLABEL}
+Configuration label. The default is default.
+@item @var{GTAGSLIBPATH}
+If this variable is set, it is used as the path to search
+for library functions. If the given symbol is not
+found in the project, global also searches in these paths.
+Since only @file{GTAGS} is targeted in the retrieval, this variable is
+ignored when @samp{-r} or @samp{-s} is specified.
+@item @var{GTAGSLOGGING}
+If this variable is set, @file{$GTAGSLOGGING} is used as the path name
+of a log file. There is no default value.
+@item @var{GTAGSROOT}
+The root directory of the project.
+Usually, it is recognized by existence of @file{GTAGS}.
+Use of this variable is not recommended.
+@item @var{GTAGSTHROUGH}
+If this variable is set, the @samp{-T} option is specified.
+@item @var{MAKEOBJDIR}
+If this variable is set, @file{$MAKEOBJDIR} is used as the name
+of BSD-style objdir. The default is @file{obj}.
+@item @var{MAKEOBJDIRPREFIX}
+If this variable is set, @file{$MAKEOBJDIRPREFIX} is used as the prefix
+of BSD-style objdir. The default is @file{/usr/obj}.
+@end table
+@unnumberedsubsec CONFIGURATION
+The following configuration variables affect the execution of global:
+
+@table @asis
+@item @code{icase_path} (boolean)
+Ignore case distinctions in pattern.
+@end table
+
+@unnumberedsubsec DIAGNOSTICS
+Global exits with a non-0 value if an error occurred, 0 otherwise.
+@unnumberedsubsec SEE ALSO
+gtags(1),
+htags(1),
+less(1),
+gtags.conf(5).
+
+GNU GLOBAL source code tag system@*
+(http://www.gnu.org/software/global/).
+@unnumberedsubsec AUTHOR
+Shigio YAMAGUCHI, Hideki IWAMOTO and others.
+@unnumberedsubsec HISTORY
+The global command appeared in FreeBSD 2.2.2.

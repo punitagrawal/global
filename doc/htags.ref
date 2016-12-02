@@ -1,0 +1,258 @@
+@c This file is generated automatically by convert.pl from htags/manual.in.
+@unnumberedsubsec NAME
+htags - generate a hypertext from a set of source files
+@unnumberedsubsec SYNOPSIS
+@quotation
+htags [-aDfFghInosTvw][-d dbpath][-m name][-t title][dir]@*
+@end quotation
+@unnumberedsubsec DESCRIPTION
+Htags generates a hypertext from a set of source files of
+C, C++, Yacc, Java, PHP and Assembly.
+
+In advance of using this command, you should execute gtags(1)
+in the root directory of a source project.
+Then you can execute htags in the same place.
+Htags makes a directory named @file{HTML}, and puts a hypertext in it.
+You can start browsing at @file{HTML/index.html}.
+
+Since htags generates a static hypertext as long as the @samp{-D} or @samp{-f}
+option is not specified, you can move it anywhere and browse it by any browser without
+any HTTP server.
+
+This command has so many options.
+If you are new to htags, it is recommended to use the @samp{--suggest} option.
+With that option, htags chooses popular options on your behalf.
+@unnumberedsubsec OPTIONS
+The following options are available:
+
+@table @asis
+@item @samp{-a}, @samp{--alphabet}
+Make an alphabetical index suitable for a large project.
+@item @samp{--auto-completion}[=limit]
+Enable auto-completion facility for the input form.
+If limit is specified, number of candidates is limited to the value.
+Please note this function requires javascript language in your browser.
+@item @samp{--caution}
+Display a caution message on the top page.
+@item @samp{--cflow} cflowfile
+Add a call tree by cflow(1). cflowfile must be posix format.
+If you use GNU cflow, invoke the command at the project root
+directory with the @samp{--format=posix} option.
+This option is deprecated; please use @samp{--call-tree} or
+@samp{--callee-tree} instead.
+@item @samp{--call-tree} callfile
+Add a call tree by cflow(1); callfile must be posix format.
+If you use GNU cflow, invoke the command at the project root
+directory with the @samp{--format=posix} option.
+@item @samp{--callee-tree} calleefile
+Add a callee tree by cflow(1); calleefile must be posix format.
+If you use GNU cflow, invoke the command at the project root
+directory with the @samp{--format=posix} and @samp{--reverse} options.
+@item @samp{--colorize-warned-line}
+Use color to highlight warned lines.
+@item @samp{--cvsweb} url
+Add a link to cvsweb; url is used as the base of URL.
+When directory @file{CVS} exists in the root directory of the project,
+the content of @file{CVS/Repository} is used as the relative path from the base.
+@item @samp{--cvsweb-cvsroot} cvsroot
+Specify cvsroot in cvsweb URL.
+@item @samp{-D}, @samp{--dynamic}
+Generate a tag list dynamically using CGI program.
+Though this option decreases both the size and generation time of
+hypertext, you need to start up HTTP server.
+@item @samp{-d}, @samp{--dbpath} dbpath
+Specify the directory in which @file{GTAGS} exists.
+The default is the current directory.
+@item @samp{--disable-grep}
+Disable grep in the search form (@samp{-f}, @samp{--form}).
+@item @samp{--disable-idutils}
+Disable idutils in the search form (@samp{-f}, @samp{--form}).
+@item @samp{-F}, @samp{--frame}
+Use frames for the top page.
+@item @samp{-f}, @samp{--form}
+Add a search form using CGI program.
+You need to start a HTTP server for it.
+@item @samp{--fixed-guide}
+Put a fixed guide at the bottom of the screen of the browser.
+@item @samp{--full-path}
+Use full path name in the file index.
+By default, use just the last component of a path.
+@item @samp{-g}, @samp{--gtags}
+Execute gtags(1) before starting job.
+The @samp{-v}, @samp{-w} and dbpath options are
+passed to gtags.
+@item @samp{--gtagsconf} file
+Set environment variable @var{GTAGSCONF} to file.
+@item @samp{--gtagslabel} label
+Set environment variable @var{GTAGSLABEL} to label.
+@item @samp{-h}, @samp{--func-header}[=position]
+Insert a function header for each function.
+By default, htags doesn't generate them.
+You can choose the position using position,
+which allows one of @samp{before}, @samp{right} or @samp{after} (default).
+@item @samp{--html-header} file
+Insert a header record derived from file
+into the HTML header of each file.
+@item @samp{-I}, @samp{--icon}
+Use icons instead of text for some links.
+@item @samp{--insert-footer} file
+Insert custom footer derived from file before @code{</body>} tag.
+@item @samp{--insert-header} file
+Insert custom header derived from file after @code{<body>} tag.
+@item @samp{--item-order} spec
+Specify the order of the items in the top page.
+The spec is a string consisting of item signs in order.
+Each sign means as follows:
+@samp{c}: caution; @samp{s}: search form;
+@samp{m}: mains; @samp{d}: definitions; @samp{f}: files; @samp{t}: call tree.
+The default is @samp{csmdf}.
+@item @samp{-m}, @samp{--main-func} name
+Specify startup function name; the default is @samp{main}.
+@item @samp{--map-file}
+Generate file @file{MAP}.
+@item @samp{-n}, @samp{--line-number}[=columns]
+Print line numbers. By default, don't print line numbers.
+The default value of columns is 4.
+@item @samp{--no-order-list}
+Numbers are not given in list form.
+@item @samp{-o}, @samp{--other}
+Pick up not only source files but also other files for the file index.
+@item @samp{-s}, @samp{--symbol}
+Make anchors not only for definitions and references
+but also other symbols.
+@item @samp{--show-position}
+Print the position string per function definition. The string can be
+interpreted by general editors in UNIX. The default is false.
+@item @samp{--statistics}
+Print statistics information.
+@item @samp{--suggest}
+Htags chooses popular options on behalf of beginners.
+It is equivalent to
+@samp{-aghInosTxv --show-position --fixed-guide}
+now.
+@item @samp{--suggest2}
+Htags chooses popular options on behalf of beginners.
+This option enables frame, AJAX and CGI facility in addition
+to the facilities by the @samp{--suggest} option.
+It is equivalent to
+@samp{--suggest  -DfF --auto-completion --tree-view=filetree}
+now.
+@item @samp{-T}, @samp{--table-flist}[=rows]
+Use @code{<table>} tag to display the file index.
+You can optionally specify the number of rows; the default is 5.
+@item @samp{-t}, @samp{--title} title
+Title of the hypertext.
+The default is the last component of the path of the current directory.
+@item @samp{--tabs} cols
+Tab stops. The default is 8.
+@item @samp{--table-list}
+Use @code{<table>} tag to display the tag list.
+@item @samp{--tree-view}[=type]
+Use treeview for the file index.
+Please note this function requires javascript language in your browser.
+Possible values of type are as follows: treeview, filetree,
+treeview-red, treeview-black, treeview-gray,
+treeview-famfamfam. The default is treeview.
+@item @samp{-v}, @samp{--verbose}
+Verbose mode.
+@item @samp{-w}, @samp{--warning}
+Print warning messages.
+@item dir
+The directory in which the result of this command is stored.
+The default is the current directory.
+@end table
+@unnumberedsubsec EXAMPLES
+@example
+$ gtags -v
+$ htags -sanohITvt 'Welcome to XXX source tour!'
+$ firefox HTML/index.html
+$ htags --suggest
+@end example
+@unnumberedsubsec FILES
+@table @asis
+@item @file{GTAGS}
+Tag file for definitions.
+@item @file{GRTAGS}
+Tag file for references.
+@item @file{GPATH}
+Tag file for source files.
+@item @file{gtags.conf}, @file{$HOME/.globalrc}
+See gtags.conf(5).
+@item @file{HTML/FILEMAP}
+Mapping file for converting file name into the path of the file.
+@item @file{HTML/GTAGSROOT}
+If this file exists, CGI program @file{global.cgi} sets
+environment variable @var{GTAGSROOT} to the contents of it.
+If you move directory @file{HTML} from the original place,
+please make this file.
+@item @file{HTML/.htaccess}
+Local configuration file for Apache. This file is generated when
+the @samp{-f} or @samp{-D} options are specified.
+@item @file{HTML/index.html}
+Start-up file.
+@item @file{HTML/MAP}
+Mapping file for converting tag name into the path of tag list.
+@item @file{HTML/style.css}
+Style sheet file.
+@item @file{/usr/local/share/gtags/style.css.tmpl}
+The template of the style sheet file (@file{HTML/style.css}).
+@end table
+@unnumberedsubsec ENVIRONMENT
+The following environment variables affect the execution of htags:
+
+@table @asis
+@item @var{GTAGSCACHE}
+The size of the B-tree cache. The default is 50000000 (bytes).
+@item @var{GTAGSCONF}
+Configuration file.
+@item @var{GTAGSLABEL}
+Configuration label. The default is @samp{default}.
+@item @var{HTAGS_OPTIONS}
+The value of this variable is inserted in the head of arguments.
+@item @var{TMPDIR}
+The location used to stored temporary files. The default is @file{/tmp}.
+@item @var{GTAGSFORCECPP}
+If this variable is set, each file whose suffix is @file{.h} is treated
+as a C++ source file.
+@end table
+@unnumberedsubsec CONFIGURATION
+The following configuration variables affect the execution of htags:
+
+@table @asis
+@item @code{datadir}(string)
+Shared data directory. The default is @file{/usr/local/share} but
+you can change the value using configure script.
+Htags looks up template files in the @file{gtags} directory
+in this data directory.
+@item @code{include_file_suffixes}(comma separated list)
+Suffixes of include files. The default is:@*
+@samp{h,hh,hxx,hpp,H,inc.php}.
+@item @code{langmap}(comma separated list)
+Language mapping. Each comma-separated map consists of
+the language name, a colon, and a list of file extensions.
+Default mapping is:@*
+@samp{c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml}.
+@end table
+@unnumberedsubsec DIAGNOSTICS
+Htags exits with a non-0 value if an error occurred, 0 otherwise.
+@unnumberedsubsec SEE ALSO
+global(1),
+gtags(1),
+gtags.conf(5).
+
+GNU GLOBAL source code tag system@*
+(http://www.gnu.org/software/global/).
+@unnumberedsubsec BUG
+Generated hypertext is VERY LARGE.
+In advance, check the space of your disk.
+
+PHP support is far from complete.
+
+The @samp{-f} and @samp{-D} options generate CGI programs.
+If you open the hypertext to the public, please recognize security dangers.
+
+Htags does not support plug-in parser.
+@unnumberedsubsec AUTHOR
+Shigio YAMAGUCHI, Hideki IWAMOTO and others.
+@unnumberedsubsec HISTORY
+The htags command appeared in FreeBSD 2.2.2.

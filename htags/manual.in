@@ -1,0 +1,280 @@
+#
+# Copyright (c} 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
+#	2006, 2007, 2008, 2010, 2013 Tama Communications Corporation
+#
+# This file is part of GNU GLOBAL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This file is converted to the following files:
+#	o command source file (for usage and help).
+#	o man format reference manual.
+#	o texinfo format reference manual.
+#
+@HEADER	HTAGS,1,June 2013,GNU Project
+@NAME	htags - generate a hypertext from a set of source files
+@SYNOPSIS
+	@name{htags} [-aDfFghInosTvw][-d @arg{dbpath}][-m @arg{name}][-t @arg{title}][@arg{dir}]
+@DESCRIPTION
+	@name{Htags} generates a hypertext from a set of source files of
+	C, C++, Yacc, Java, PHP and Assembly.
+
+	In advance of using this command, you should execute @xref{gtags,1}
+	in the root directory of a source project.
+	Then you can execute @name{htags} in the same place.
+	@name{Htags} makes a directory named @file{HTML}, and puts a hypertext in it.
+	You can start browsing at @file{HTML/index.html}.
+
+	Since @name{htags} generates a static hypertext as long as the @option{-D} or @option{-f}
+	option is not specified, you can move it anywhere and browse it by any browser without
+	any HTTP server.
+
+	This command has so many options.
+	If you are new to @name{htags}, it is recommended to use the @option{--suggest} option.
+	With that option, @name{htags} chooses popular options on your behalf.
+@OPTIONS
+	The following options are available:
+
+	@begin_itemize
+	@item{@option{-a}, @option{--alphabet}}
+		Make an alphabetical index suitable for a large project.
+	@item{@option{--auto-completion}[=@arg{limit}]}
+		Enable auto-completion facility for the input form.
+		If @arg{limit} is specified, number of candidates is limited to the value.
+		Please note this function requires javascript language in your browser.
+	@item{@option{--caution}}
+		Display a caution message on the top page.
+	@item{@option{--cflow} @arg{cflowfile}}
+		Add a call tree by @xref{cflow,1}. @arg{cflowfile} must be posix format.
+		If you use GNU @name{cflow}, invoke the command at the project root
+		directory with the @option{--format=posix} option.
+		This option is deprecated; please use @option{--call-tree} or
+		@option{--callee-tree} instead.
+	@item{@option{--call-tree} @arg{callfile}}
+		Add a call tree by @xref{cflow,1}; @arg{callfile} must be posix format.
+		If you use GNU @name{cflow}, invoke the command at the project root
+		directory with the @option{--format=posix} option.
+	@item{@option{--callee-tree} @arg{calleefile}}
+		Add a callee tree by @xref{cflow,1}; @arg{calleefile} must be posix format.
+		If you use GNU @name{cflow}, invoke the command at the project root
+		directory with the @option{--format=posix} and @option{--reverse} options.
+	@item{@option{--colorize-warned-line}}
+		Use color to highlight warned lines.
+	@item{@option{--cvsweb} @arg{url}}
+		Add a link to cvsweb; @arg{url} is used as the base of URL.
+		When directory @file{CVS} exists in the root directory of the project,
+		the content of @file{CVS/Repository} is used as the relative path from the base.
+	@item{@option{--cvsweb-cvsroot} @arg{cvsroot}}
+		Specify cvsroot in cvsweb URL.
+	@item{@option{-D}, @option{--dynamic}}
+		Generate a tag list dynamically using CGI program.
+		Though this option decreases both the size and generation time of
+		hypertext, you need to start up HTTP server.
+	@item{@option{-d}, @option{--dbpath} @arg{dbpath}}
+		Specify the directory in which @file{GTAGS} exists.
+		The default is the current directory.
+	@item{@option{--disable-grep}}
+		Disable @name{grep} in the search form (@option{-f}, @option{--form}).
+	@item{@option{--disable-idutils}}
+		Disable @name{idutils} in the search form (@option{-f}, @option{--form}).
+	@item{@option{-F}, @option{--frame}}
+		Use frames for the top page.
+	@item{@option{-f}, @option{--form}}
+		Add a search form using CGI program.
+		You need to start a HTTP server for it.
+	@item{@option{--fixed-guide}}
+		Put a fixed guide at the bottom of the screen of the browser.
+	@item{@option{--full-path}}
+		Use full path name in the file index.
+		By default, use just the last component of a path.
+	@item{@option{-g}, @option{--gtags}}
+		Execute @xref{gtags,1} before starting job.
+		The @option{-v}, @option{-w} and @arg{dbpath} options are
+		passed to @name{gtags}.
+	@item{@option{--gtagsconf} @arg{file}}
+		Set environment variable @var{GTAGSCONF} to @arg{file}.
+	@item{@option{--gtagslabel} @arg{label}}
+		Set environment variable @var{GTAGSLABEL} to @arg{label}.
+	@item{@option{-h}, @option{--func-header}[=@arg{position}]}
+		Insert a function header for each function.
+		By default, @name{htags} doesn't generate them.
+		You can choose the position using @arg{position},
+		which allows one of @val{before}, @val{right} or @val{after} (default).
+	@item{@option{--html-header} @arg{file}}
+		Insert a header record derived from @arg{file}
+		into the HTML header of each file.
+	@item{@option{-I}, @option{--icon}}
+		Use icons instead of text for some links.
+	@item{@option{--insert-footer} @arg{file}}
+		Insert custom footer derived from @arg{file} before @code{</body>} tag.
+	@item{@option{--insert-header} @arg{file}}
+		Insert custom header derived from @arg{file} after @code{<body>} tag.
+	@item{@option{--item-order} @arg{spec}}
+		Specify the order of the items in the top page.
+		The @arg{spec} is a string consisting of item signs in order.
+		Each sign means as follows:
+		@val{c}: caution; @val{s}: search form;
+		@val{m}: mains; @val{d}: definitions; @val{f}: files; @val{t}: call tree.
+		The default is @val{csmdf}.
+	@item{@option{-m}, @option{--main-func} @arg{name}}
+		Specify startup function name; the default is @val{main}.
+	@item{@option{--map-file}}
+		Generate file @file{MAP}.
+	@item{@option{-n}, @option{--line-number}[=@arg{columns}]}
+		Print line numbers. By default, don't print line numbers.
+		The default value of @arg{columns} is 4.
+	@item{@option{--no-order-list}}
+		Numbers are not given in list form.
+	@item{@option{-o}, @option{--other}}
+		Pick up not only source files but also other files for the file index.
+	@item{@option{-s}, @option{--symbol}}
+		Make anchors not only for definitions and references
+		but also other symbols.
+	@item{@option{--show-position}}
+		Print the position string per function definition. The string can be
+		interpreted by general editors in UNIX. The default is false.
+	@item{@option{--statistics}}
+		Print statistics information.
+	@item{@option{--suggest}}
+		@name{Htags} chooses popular options on behalf of beginners.
+		It is equivalent to
+		@option{-aghInosTxv --show-position --fixed-guide}
+		now.
+	@item{@option{--suggest2}}
+		@name{Htags} chooses popular options on behalf of beginners.
+		This option enables frame, AJAX and CGI facility in addition
+		to the facilities by the @option{--suggest} option.
+		It is equivalent to
+		@option{--suggest  -DfF --auto-completion --tree-view=filetree}
+		now.
+	@item{@option{-T}, @option{--table-flist}[=@arg{rows}]}
+		Use @code{<table>} tag to display the file index.
+		You can optionally specify the number of rows; the default is 5.
+	@item{@option{-t}, @option{--title} @arg{title}}
+		Title of the hypertext.
+		The default is the last component of the path of the current directory.
+	@item{@option{--tabs} @arg{cols}}
+		Tab stops. The default is 8.
+	@item{@option{--table-list}}
+		Use @code{<table>} tag to display the tag list.
+	@item{@option{--tree-view}[=@arg{type}]}
+		Use treeview for the file index.
+		Please note this function requires javascript language in your browser.
+		Possible values of @arg{type} are as follows: @arg{treeview}, @arg{filetree},
+		@arg{treeview-red}, @arg{treeview-black}, @arg{treeview-gray},
+		@arg{treeview-famfamfam}. The default is @arg{treeview}.
+	@item{@option{-v}, @option{--verbose}}
+		Verbose mode.
+	@item{@option{-w}, @option{--warning}}
+		Print warning messages.
+	@item{@arg{dir}}
+		The directory in which the result of this command is stored.
+		The default is the current directory.
+	@end_itemize
+@EXAMPLES
+	@begin_verbatim
+	$ gtags -v
+	$ htags -sanohITvt 'Welcome to XXX source tour!'
+	$ firefox HTML/index.html
+
+	$ htags --suggest
+	@end_verbatim
+@FILES
+	@begin_itemize
+	@item{@file{GTAGS}}
+		Tag file for definitions.
+	@item{@file{GRTAGS}}
+		Tag file for references.
+	@item{@file{GPATH}}
+		Tag file for source files.
+	@item{@file{gtags.conf}, @file{$HOME/.globalrc}}
+		See @xref{gtags.conf,5}.
+	@item{@file{HTML/FILEMAP}}
+		Mapping file for converting file name into the path of the file.
+	@item{@file{HTML/GTAGSROOT}}
+		If this file exists, CGI program @file{global.cgi} sets
+		environment variable @var{GTAGSROOT} to the contents of it.
+		If you move directory @file{HTML} from the original place,
+		please make this file.
+	@item{@file{HTML/.htaccess}}
+		Local configuration file for Apache. This file is generated when
+		the @option{-f} or @option{-D} options are specified.
+	@item{@file{HTML/index.html}}
+		Start-up file.
+	@item{@file{HTML/MAP}}
+		Mapping file for converting tag name into the path of tag list.
+	@item{@file{HTML/style.css}}
+		Style sheet file.
+	@item{@file{/usr/local/share/gtags/style.css.tmpl}}
+		The template of the style sheet file (@file{HTML/style.css}).
+	@end_itemize
+@ENVIRONMENT
+	The following environment variables affect the execution of @name{htags}:
+
+	@begin_itemize
+	@item{@var{GTAGSCACHE}}
+		The size of the B-tree cache. The default is 50000000 (bytes).
+	@item{@var{GTAGSCONF}}
+		Configuration file.
+	@item{@var{GTAGSLABEL}}
+		Configuration label. The default is @val{default}.
+	@item{@var{HTAGS_OPTIONS}}
+		The value of this variable is inserted in the head of arguments.
+	@item{@var{TMPDIR}}
+		The location used to stored temporary files. The default is @file{/tmp}.
+        @item{@var{GTAGSFORCECPP}}
+		If this variable is set, each file whose suffix is @file{.h} is treated
+		as a C++ source file.
+	@end_itemize
+@CONFIGURATION
+	The following configuration variables affect the execution of @name{htags}:
+
+	@begin_itemize
+	@item{@code{datadir}(string)}
+		Shared data directory. The default is @file{/usr/local/share} but
+		you can change the value using configure script.
+		@name{Htags} looks up template files in the @file{gtags} directory
+		in this data directory.
+	@item{@code{include_file_suffixes}(comma separated list)}
+		Suffixes of include files. The default is:@br
+		@samp{@DEFAULTINCLUDEFILESUFFIXES@}.
+	@item{@code{langmap}(comma separated list)}
+		Language mapping. Each comma-separated map consists of
+		the language name, a colon, and a list of file extensions.
+		Default mapping is:@br
+		@samp{@DEFAULTLANGMAP@}.
+	@end_itemize
+@DIAGNOSTICS
+	@name{Htags} exits with a non-0 value if an error occurred, 0 otherwise.
+@SEE ALSO
+	@xref{global,1},
+	@xref{gtags,1},
+	@xref{gtags.conf,5}.
+
+        GNU GLOBAL source code tag system@br
+        (http://www.gnu.org/software/global/).
+@BUG
+	Generated hypertext is VERY LARGE.
+	In advance, check the space of your disk.
+
+	PHP support is far from complete.
+
+	The @option{-f} and @option{-D} options generate CGI programs.
+	If you open the hypertext to the public, please recognize security dangers.
+
+	Htags does not support plug-in parser.
+@AUTHOR
+	Shigio YAMAGUCHI, Hideki IWAMOTO and others.
+@HISTORY
+	The @name{htags} command appeared in FreeBSD 2.2.2.

@@ -1,0 +1,41 @@
+## Process this file with automake to create Makefile.in
+#
+# Copyright (c) 2000, 2001 Tama Communications Corporation
+#
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+noinst_LIBRARIES = libgloutil.a
+
+noinst_HEADERS = \
+assoc.h conf.h dbop.h defined.h die.h find.h getdbpath.h global.h gparam.h \
+gtagsop.h locatestring.h makepath.h path.h gpathop.h strbuf.h \
+strmake.h tab.h test.h token.h usable.h version.h is_unixy.h abs2rel.h \
+split.h strlimcpy.h linetable.h env.h char.h date.h langmap.h \
+varray.h idset.h strhash.h xargs.h format.h encodepath.h rewrite.h \
+compress.h checkalloc.h pool.h fileop.h statistics.h args.h logging.h nearsort.h
+
+libgloutil_a_SOURCES = \
+assoc.c conf.c dbop.c defined.c die.c find.c getdbpath.c gtagsop.c locatestring.c \
+makepath.c path.c gpathop.c strbuf.c strmake.c tab.c test.c \
+token.c usable.c version.c is_unixy.c abs2rel.c split.c strlimcpy.c linetable.c \
+env.c char.c date.c langmap.c varray.c idset.c strhash.c xargs.c encodepath.c rewrite.c \
+compress.c checkalloc.c pool.c fileop.c statistics.c args.c logging.c nearsort.c
+
+AM_CPPFLAGS = @AM_CPPFLAGS@ \
+	-DBINDIR='"$(bindir)"' \
+	-DDATADIR='"$(datadir)"' \
+	-DLIBDIR='"$(libdir)"' \
+	-DLOCALSTATEDIR='"$(localstatedir)"' \
+	-DSYSCONFDIR='"$(sysconfdir)"'
+
+libgloutil_a_DEPENDENCIES = $(libgloutil_a_LIBADD)
+
+man_MANS = gtags.conf.5
+
+EXTRA_DIST = $(man_MANS) manual.in

@@ -1,0 +1,318 @@
+.\" This file is generated automatically by convert.pl from htags/manual.in.
+.TH HTAGS 1 "June 2013" "GNU Project"
+.SH NAME
+htags \- generate a hypertext from a set of source files
+.SH SYNOPSIS
+\fBhtags\fP [-aDfFghInosTvw][-d \fIdbpath\fP][-m \fIname\fP][-t \fItitle\fP][\fIdir\fP]
+.br
+.SH DESCRIPTION
+\fBHtags\fP generates a hypertext from a set of source files of
+C, C++, Yacc, Java, PHP and Assembly.
+.PP
+In advance of using this command, you should execute \fBgtags\fP(1)
+in the root directory of a source project.
+Then you can execute \fBhtags\fP in the same place.
+\fBHtags\fP makes a directory named \'HTML\', and puts a hypertext in it.
+You can start browsing at \'HTML/index.html\'.
+.PP
+Since \fBhtags\fP generates a static hypertext as long as the \fB-D\fP or \fB-f\fP
+option is not specified, you can move it anywhere and browse it by any browser without
+any HTTP server.
+.PP
+This command has so many options.
+If you are new to \fBhtags\fP, it is recommended to use the \fB--suggest\fP option.
+With that option, \fBhtags\fP chooses popular options on your behalf.
+.SH OPTIONS
+The following options are available:
+.PP
+.TP
+\fB-a\fP, \fB--alphabet\fP
+Make an alphabetical index suitable for a large project.
+.TP
+\fB--auto-completion\fP[=\fIlimit\fP]
+Enable auto-completion facility for the input form.
+If \fIlimit\fP is specified, number of candidates is limited to the value.
+Please note this function requires javascript language in your browser.
+.TP
+\fB--caution\fP
+Display a caution message on the top page.
+.TP
+\fB--cflow\fP \fIcflowfile\fP
+Add a call tree by \fBcflow\fP(1). \fIcflowfile\fP must be posix format.
+If you use GNU \fBcflow\fP, invoke the command at the project root
+directory with the \fB--format=posix\fP option.
+This option is deprecated; please use \fB--call-tree\fP or
+\fB--callee-tree\fP instead.
+.TP
+\fB--call-tree\fP \fIcallfile\fP
+Add a call tree by \fBcflow\fP(1); \fIcallfile\fP must be posix format.
+If you use GNU \fBcflow\fP, invoke the command at the project root
+directory with the \fB--format=posix\fP option.
+.TP
+\fB--callee-tree\fP \fIcalleefile\fP
+Add a callee tree by \fBcflow\fP(1); \fIcalleefile\fP must be posix format.
+If you use GNU \fBcflow\fP, invoke the command at the project root
+directory with the \fB--format=posix\fP and \fB--reverse\fP options.
+.TP
+\fB--colorize-warned-line\fP
+Use color to highlight warned lines.
+.TP
+\fB--cvsweb\fP \fIurl\fP
+Add a link to cvsweb; \fIurl\fP is used as the base of URL.
+When directory \'CVS\' exists in the root directory of the project,
+the content of \'CVS/Repository\' is used as the relative path from the base.
+.TP
+\fB--cvsweb-cvsroot\fP \fIcvsroot\fP
+Specify cvsroot in cvsweb URL.
+.TP
+\fB-D\fP, \fB--dynamic\fP
+Generate a tag list dynamically using CGI program.
+Though this option decreases both the size and generation time of
+hypertext, you need to start up HTTP server.
+.TP
+\fB-d\fP, \fB--dbpath\fP \fIdbpath\fP
+Specify the directory in which \'GTAGS\' exists.
+The default is the current directory.
+.TP
+\fB--disable-grep\fP
+Disable \fBgrep\fP in the search form (\fB-f\fP, \fB--form\fP).
+.TP
+\fB--disable-idutils\fP
+Disable \fBidutils\fP in the search form (\fB-f\fP, \fB--form\fP).
+.TP
+\fB-F\fP, \fB--frame\fP
+Use frames for the top page.
+.TP
+\fB-f\fP, \fB--form\fP
+Add a search form using CGI program.
+You need to start a HTTP server for it.
+.TP
+\fB--fixed-guide\fP
+Put a fixed guide at the bottom of the screen of the browser.
+.TP
+\fB--full-path\fP
+Use full path name in the file index.
+By default, use just the last component of a path.
+.TP
+\fB-g\fP, \fB--gtags\fP
+Execute \fBgtags\fP(1) before starting job.
+The \fB-v\fP, \fB-w\fP and \fIdbpath\fP options are
+passed to \fBgtags\fP.
+.TP
+\fB--gtagsconf\fP \fIfile\fP
+Set environment variable \fBGTAGSCONF\fP to \fIfile\fP.
+.TP
+\fB--gtagslabel\fP \fIlabel\fP
+Set environment variable \fBGTAGSLABEL\fP to \fIlabel\fP.
+.TP
+\fB-h\fP, \fB--func-header\fP[=\fIposition\fP]
+Insert a function header for each function.
+By default, \fBhtags\fP doesn't generate them.
+You can choose the position using \fIposition\fP,
+which allows one of \'before\', \'right\' or \'after\' (default).
+.TP
+\fB--html-header\fP \fIfile\fP
+Insert a header record derived from \fIfile\fP
+into the HTML header of each file.
+.TP
+\fB-I\fP, \fB--icon\fP
+Use icons instead of text for some links.
+.TP
+\fB--insert-footer\fP \fIfile\fP
+Insert custom footer derived from \fIfile\fP before </body> tag.
+.TP
+\fB--insert-header\fP \fIfile\fP
+Insert custom header derived from \fIfile\fP after <body> tag.
+.TP
+\fB--item-order\fP \fIspec\fP
+Specify the order of the items in the top page.
+The \fIspec\fP is a string consisting of item signs in order.
+Each sign means as follows:
+\'c\': caution; \'s\': search form;
+\'m\': mains; \'d\': definitions; \'f\': files; \'t\': call tree.
+The default is \'csmdf\'.
+.TP
+\fB-m\fP, \fB--main-func\fP \fIname\fP
+Specify startup function name; the default is \'main\'.
+.TP
+\fB--map-file\fP
+Generate file \'MAP\'.
+.TP
+\fB-n\fP, \fB--line-number\fP[=\fIcolumns\fP]
+Print line numbers. By default, don't print line numbers.
+The default value of \fIcolumns\fP is 4.
+.TP
+\fB--no-order-list\fP
+Numbers are not given in list form.
+.TP
+\fB-o\fP, \fB--other\fP
+Pick up not only source files but also other files for the file index.
+.TP
+\fB-s\fP, \fB--symbol\fP
+Make anchors not only for definitions and references
+but also other symbols.
+.TP
+\fB--show-position\fP
+Print the position string per function definition. The string can be
+interpreted by general editors in UNIX. The default is false.
+.TP
+\fB--statistics\fP
+Print statistics information.
+.TP
+\fB--suggest\fP
+\fBHtags\fP chooses popular options on behalf of beginners.
+It is equivalent to
+\fB-aghInosTxv --show-position --fixed-guide\fP
+now.
+.TP
+\fB--suggest2\fP
+\fBHtags\fP chooses popular options on behalf of beginners.
+This option enables frame, AJAX and CGI facility in addition
+to the facilities by the \fB--suggest\fP option.
+It is equivalent to
+\fB--suggest  -DfF --auto-completion --tree-view=filetree\fP
+now.
+.TP
+\fB-T\fP, \fB--table-flist\fP[=\fIrows\fP]
+Use <table> tag to display the file index.
+You can optionally specify the number of rows; the default is 5.
+.TP
+\fB-t\fP, \fB--title\fP \fItitle\fP
+Title of the hypertext.
+The default is the last component of the path of the current directory.
+.TP
+\fB--tabs\fP \fIcols\fP
+Tab stops. The default is 8.
+.TP
+\fB--table-list\fP
+Use <table> tag to display the tag list.
+.TP
+\fB--tree-view\fP[=\fItype\fP]
+Use treeview for the file index.
+Please note this function requires javascript language in your browser.
+Possible values of \fItype\fP are as follows: \fItreeview\fP, \fIfiletree\fP,
+\fItreeview-red\fP, \fItreeview-black\fP, \fItreeview-gray\fP,
+\fItreeview-famfamfam\fP. The default is \fItreeview\fP.
+.TP
+\fB-v\fP, \fB--verbose\fP
+Verbose mode.
+.TP
+\fB-w\fP, \fB--warning\fP
+Print warning messages.
+.TP
+\fIdir\fP
+The directory in which the result of this command is stored.
+The default is the current directory.
+.SH EXAMPLES
+.nf
+$ gtags -v
+$ htags -sanohITvt 'Welcome to XXX source tour!'
+$ firefox HTML/index.html
+.PP
+$ htags --suggest
+.fi
+.SH FILES
+.TP
+\'GTAGS\'
+Tag file for definitions.
+.TP
+\'GRTAGS\'
+Tag file for references.
+.TP
+\'GPATH\'
+Tag file for source files.
+.TP
+\'gtags.conf\', \'$HOME/.globalrc\'
+See \fBgtags.conf\fP(5).
+.TP
+\'HTML/FILEMAP\'
+Mapping file for converting file name into the path of the file.
+.TP
+\'HTML/GTAGSROOT\'
+If this file exists, CGI program \'global.cgi\' sets
+environment variable \fBGTAGSROOT\fP to the contents of it.
+If you move directory \'HTML\' from the original place,
+please make this file.
+.TP
+\'HTML/.htaccess\'
+Local configuration file for Apache. This file is generated when
+the \fB-f\fP or \fB-D\fP options are specified.
+.TP
+\'HTML/index.html\'
+Start-up file.
+.TP
+\'HTML/MAP\'
+Mapping file for converting tag name into the path of tag list.
+.TP
+\'HTML/style.css\'
+Style sheet file.
+.TP
+\'/usr/local/share/gtags/style.css.tmpl\'
+The template of the style sheet file (\'HTML/style.css\').
+.SH ENVIRONMENT
+The following environment variables affect the execution of \fBhtags\fP:
+.PP
+.TP
+\fBGTAGSCACHE\fP
+The size of the B-tree cache. The default is 50000000 (bytes).
+.TP
+\fBGTAGSCONF\fP
+Configuration file.
+.TP
+\fBGTAGSLABEL\fP
+Configuration label. The default is \'default\'.
+.TP
+\fBHTAGS_OPTIONS\fP
+The value of this variable is inserted in the head of arguments.
+.TP
+\fBTMPDIR\fP
+The location used to stored temporary files. The default is \'/tmp\'.
+.TP
+\fBGTAGSFORCECPP\fP
+If this variable is set, each file whose suffix is \'.h\' is treated
+as a C++ source file.
+.SH CONFIGURATION
+The following configuration variables affect the execution of \fBhtags\fP:
+.PP
+.TP
+datadir(string)
+Shared data directory. The default is \'/usr/local/share\' but
+you can change the value using configure script.
+\fBHtags\fP looks up template files in the \'gtags\' directory
+in this data directory.
+.TP
+include_file_suffixes(comma separated list)
+Suffixes of include files. The default is:
+.br
+\'h,hh,hxx,hpp,H,inc.php\'.
+.TP
+langmap(comma separated list)
+Language mapping. Each comma-separated map consists of
+the language name, a colon, and a list of file extensions.
+Default mapping is:
+.br
+\'c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml\'.
+.SH DIAGNOSTICS
+\fBHtags\fP exits with a non-0 value if an error occurred, 0 otherwise.
+.SH "SEE ALSO"
+\fBglobal\fP(1),
+\fBgtags\fP(1),
+\fBgtags.conf\fP(5).
+.PP
+GNU GLOBAL source code tag system
+.br
+(http://www.gnu.org/software/global/).
+.SH BUG
+Generated hypertext is VERY LARGE.
+In advance, check the space of your disk.
+.PP
+PHP support is far from complete.
+.PP
+The \fB-f\fP and \fB-D\fP options generate CGI programs.
+If you open the hypertext to the public, please recognize security dangers.
+.PP
+Htags does not support plug-in parser.
+.SH AUTHOR
+Shigio YAMAGUCHI, Hideki IWAMOTO and others.
+.SH HISTORY
+The \fBhtags\fP command appeared in FreeBSD 2.2.2.
