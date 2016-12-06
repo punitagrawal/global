@@ -1,5 +1,4 @@
 0001-Remove-embedded-libtool-library.patch
 0002-Fix-cscope-manpage.patch
-0002-Introduce-htmake-for-global.patch
 0003-Fix-gtags.el-to-not-use-goto-line.patch
 0004-Regenerate-cgi-scripts.patch

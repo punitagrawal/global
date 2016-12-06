@@ -53,10 +53,6 @@ install-arch: build-arch
 
 	$(MAKE) install-exec prefix=`pwd`/debian/$(package)/usr
 	$(MAKE) -C htags install-gtagsDATA prefix=$(CURDIR)/debian/$(package)/usr
-	set -e; cd htmake \
-		&& $(MAKE) install \
-			DESTDIR=`pwd`/../debian/$(package)/usr \
-			MANDIR=`pwd`/../debian/$(package)/usr/share/man
 	$(MAKE) -C plugin-factory install-data prefix=$(CURDIR)/debian/$(package)/usr
 	cp -p gtags.el `pwd`/debian/$(package)/usr/share/emacs/site-lisp/$(package)
 
