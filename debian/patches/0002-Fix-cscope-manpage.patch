@@ -1,4 +1,4 @@
-From: Punit Agrawal <punit.agrawal@arm.com>
+From: Punit Agrawal <punitagrawal@gmail.com>
 Date: Tue, 29 Apr 2014 23:10:26 +0100
 Subject: Fix lintian reported error in gtags-cscope manpage
 
@@ -6,10 +6,10 @@ Subject: Fix lintian reported error in gtags-cscope manpage
  gtags-cscope/gtags-cscope.1 | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-Index: global-6.5.5.working/gtags-cscope/gtags-cscope.1
-===================================================================
---- global-6.5.5.working.orig/gtags-cscope/gtags-cscope.1
-+++ global-6.5.5.working/gtags-cscope/gtags-cscope.1
+diff --git a/gtags-cscope/gtags-cscope.1 b/gtags-cscope/gtags-cscope.1
+index 6f63633..9b3601c 100644
+--- a/gtags-cscope/gtags-cscope.1
++++ b/gtags-cscope/gtags-cscope.1
 @@ -397,7 +397,7 @@ GNU GLOBAL source code tag system
  The function field of the display is almost <unknown> since
  \fBGLOBAL\fP doesn't recognize it.

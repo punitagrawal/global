@@ -1,13 +1,17 @@
-Description: Upstream has local ltdl embedded - remove it
- Embedded libraries are wrong and bad. Libtool doubly so :-)
+From: Wookey <wookey@debian.org>
+Date: Tue, 6 Dec 2016 21:14:03 +0000
+Subject: Upstream has local ltdl embedded - remove it
 
-Author: Wookey <wookey@debian.org>
-Last-Update: 2016-11-23
+Embedded libraries are wrong and bad. Libtool doubly so :-)
+---
+ Makefile.am  |  2 +-
+ configure.ac | 12 +++---------
+ 2 files changed, 4 insertions(+), 10 deletions(-)
 
-Index: global-6.5.5/Makefile.am
-===================================================================
---- global-6.5.5.orig/Makefile.am
-+++ global-6.5.5/Makefile.am
+diff --git a/Makefile.am b/Makefile.am
+index bee90e8..c219027 100644
+--- a/Makefile.am
++++ b/Makefile.am
 @@ -10,7 +10,7 @@
  # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
  # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -17,11 +21,11 @@ Index: global-6.5.5/Makefile.am
  if !USE_DB185_COMPAT
          SUBDIRS += libdb
  endif
-Index: global-6.5.5/configure.ac
-===================================================================
---- global-6.5.5.orig/configure.ac
-+++ global-6.5.5/configure.ac
-@@ -47,14 +47,9 @@ AM_PATH_PYTHON([2.6],,[PYTHON="/usr/bin/
+diff --git a/configure.ac b/configure.ac
+index 40d3b34..e61b275 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -47,14 +47,9 @@ AM_PATH_PYTHON([2.6],,[PYTHON="/usr/bin/env python"])
  AC_GNU_SOURCE
  
  LT_PREREQ([2.2.6b])

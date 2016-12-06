@@ -6,10 +6,10 @@ Subject: Fix gtags.el to not use goto-line
  gtags.el | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
-Index: global-6.5.5/gtags.el
-===================================================================
---- global-6.5.5.orig/gtags.el
-+++ global-6.5.5/gtags.el
+diff --git a/gtags.el b/gtags.el
+index c399ef5..da38467 100644
+--- a/gtags.el
++++ b/gtags.el
 @@ -875,7 +875,8 @@
  	    (find-file-other-window file)))
          (if delete (kill-buffer prev-buffer)))
