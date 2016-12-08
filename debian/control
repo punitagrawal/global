@@ -7,8 +7,8 @@ Build-Depends: debhelper (>=9), autotools-dev,
  emacsen-common
 Maintainer: Debian QA Group <packages@qa.debian.org>
 Homepage: http://www.gnu.org/software/global/global.html
-Vcs-Git: git://anonscm.debian.org/collab-maint/global.git
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/global.git;a=summary
+Vcs-Git: https://github.com/punitagrawal/global.git
+Vcs-Browser: https://github.com/punitagrawal/global
 Standards-Version: 3.9.8.0
 
 Package: global
