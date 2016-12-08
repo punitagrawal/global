@@ -35,7 +35,7 @@ mozilla no longer does a sane thing by default with html.gz
 (though lynx still does), while Debian apache will happily
 decompress both html.gz and .ghtml on the fly, so either
 way you do not need a helper cgi there.  The -C option
-still supresses its generation, while -c does not.
+still suppresses its generation, while -c does not.
 
 In the ./examples directory you should find:
 
