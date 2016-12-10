@@ -34,10 +34,6 @@ Description: Source code search and browse tools
  containing many subdirectories, many '#ifdef' and many main()
  functions, like X or kernel source.
  .
- This package include the htmake(1) extension which allows GLOBAL's
- hypertext search function to be implemented from a single central
- cgi script.
- .
  Doxygen now supports using global as its source browser, with the
  USE_HTAGS option.
 
