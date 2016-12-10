@@ -4,7 +4,8 @@ Priority: optional
 Build-Depends: debhelper (>=9), autotools-dev,
  texinfo,
  libncurses5-dev, libltdl-dev,
- emacsen-common
+ emacsen-common, flex, bison, gperf,
+ libtool-bin
 Maintainer: Wookey <wookey@debian.org>
 Uploaders: Punit Agrawal <punitagrawal@gmail.com>
 Homepage: http://www.gnu.org/software/global/global.html

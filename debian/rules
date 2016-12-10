@@ -34,6 +34,7 @@ clean:
 build-stamp:
 	dh_testdir
 	dh_autotools-dev_updateconfig
+	sh reconf.sh
 	./configure --prefix=/usr --with-exuberant-ctags=/usr/bin/ctags \
 		&& $(MAKE)
 	touch $@
