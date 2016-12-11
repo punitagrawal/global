@@ -1,3 +1,2 @@
-global: package-contains-empty-directory
 global: script-not-executable usr/share/gtags/completion.cgi
 global: script-not-executable usr/share/gtags/global.cgi
