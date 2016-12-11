@@ -33,7 +33,14 @@
 /*
  * now: current date and time
  *
- *	r)		date and time
+ *	@return		date and time
+ *
+ * If function strftime() is available on your system, the format of the date
+ * and time returned is '%a %b %d %H:%M:%S %Z %Y' using local time, otherwise
+ * the date shell command is used. If there's an error with the date command version
+ * of this function, the string returned will be 'unknown time'.
+ *
+ *	[Note] The returned string will be overwritten on the next call of this function.
  */
 const char *
 now(void)
@@ -49,7 +56,7 @@ now(void)
 #else
 	FILE *ip;
 
-	strlimcpy(buf, "unkown time", sizeof(buf));
+	strlimcpy(buf, "unknown time", sizeof(buf));
 	if ((ip = popen("date", "r")) != NULL) {
 		if (fgets(buf, sizeof(buf), ip))
 			buf[strlen(buf) - 1] = 0;

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1997, 1999, 2008 Tama Communications Corporation
+ * Copyright (c) 1997, 1999, 2008, 2014
+ *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -34,9 +35,26 @@
 #include "gparam.h"
 #include "locatestring.h"
 #include "strlimcpy.h"
+#include "path.h"
+#if defined(_WIN32) || defined(__DJGPP__)
+#include "checkalloc.h"
+#define LOCATEFLAG MATCH_AT_FIRST|IGNORE_CASE
+#define PATHCHAR(c) tolower(c)
+#else
+#define LOCATEFLAG MATCH_AT_FIRST
+#define PATHCHAR(c) c
+#endif
+
+#define COLOR_PATH
+#ifdef COLOR_PATH
+/*
+ * coloring support using ANSI escape sequence (SGR)
+ */
+#define ESC '\033'
+#define EOE 'm'
+#endif
 
 /*
-
 NAME
      abs2rel - make a relative path name from an absolute path
 
@@ -167,25 +185,27 @@ EXAMPLE
          path2 == "/usr/src/sys"
 
 */
-/*
+/**
  * normalize: normalize path name
  *
- *	i)	path	path name
- *	i)	root	root of project (must be end with a '/')
- *	i)	cwd	current directory
- *	o)	result	normalized path name
- *	i)	size	size of the result
- *	r)		==NULL: error
+ *	@param[in]	path	path name
+ *	@param[in]	root	root of project (must be end with a '/')
+ *	@param[in]	cwd	current directory
+ *	@param[out]	result	normalized path name
+ *	@param[in]	size	size of the result
+ *	@return		==NULL: error,
  *			!=NULL: result
+ *
+ *	[Note] Calls die() if the result path name is too long (MAXPATHLEN).
  */
 char *
-normalize(const char *path, const char *root, const char *cwd, char *result, const int size)
+normalize(const char *path, const char *root, const char *cwd, char *result, int size)
 {
-	char *p, abs[MAXPATHLEN+1];
+	char *p, abs[MAXPATHLEN];
 
 	if (normalize_pathname(path, result, size) == NULL)
 		goto toolong;
-	if (*path == '/') {
+	if (isabspath(path)) {
 		if (strlen(result) > MAXPATHLEN)
 			goto toolong;
 		strcpy(abs, result);
@@ -198,26 +218,33 @@ normalize(const char *path, const char *root, const char *cwd, char *result, con
 	 *      rootdir  /a/b/
 	 *      path     /a/b/c/d.c -> c/d.c -> ./c/d.c
 	 */
-	p = locatestring(abs, root, MATCH_AT_FIRST);
-	if (p == NULL)
-		return NULL;
+	p = locatestring(abs, root, LOCATEFLAG);
+	if (p == NULL) {
+		p = locatestring(root, abs, LOCATEFLAG);
+		/*
+		 * abs == /usr/src should be considered to be equal to root == /usr/src/.
+		 */
+		if (p && !strcmp(p, "/"))
+			result[0] = '\0';
+		else
+			return NULL;
+	}
 	strlimcpy(result, "./", size);
 	strlimcpy(result + 2, p, size - 2);
 	return result;
 toolong:
 	die("path name is too long.");
 }
-/*
+/**
  * normalize_pathname: normalize relative path name.
  *
- *	i)	path	relative path name
- *	o)	result	result buffer
- *	i)	size	size of result buffer
- *	r)		!= NULL: normalized path name
- *			== NULL: error
+ *	@param[in]	path	relative path name
+ *	@param[out]	result	result buffer
+ *	@param[in]	size	size of result buffer
+ *	@return		!= NULL: normalized path name,
+ *			== NULL: error (ERANGE)
  *
- * [examples]
- *
+ * Examples:
  * path			result
  * ---------------------------
  * /a			/a
@@ -230,15 +257,30 @@ toolong:
  * /a/../../d		/d
  */
 char *
-normalize_pathname(const char *path, char *result, const int size)
+normalize_pathname(const char *path, char *result, int size)
 {
 	const char *savep, *p = path;
 	char *final, *q = result;
 	char *endp = result + size - 1;
+#if defined(_WIN32) || defined(__DJGPP__)
+	char *spath = check_strdup(path), *pp = spath;
+	while (*pp) {
+		if (*pp == '\\')
+			*pp = '/';
+		++pp;
+	}
+	p = spath;
+#endif
 
 	/* accept the first '/' */
-	if (*p == '/') {
+	if (isabspath(p)) {
 		*q++ = *p++;
+#if defined(_WIN32) || defined(__DJGPP__)
+		if (*p == ':') {
+			*q++ = *p++;
+			*q++ = *p++;
+		}
+#endif
 		final = q;
 	}
 	do {
@@ -293,37 +335,47 @@ normalize_pathname(const char *path, char *result, const int size)
 		}
 	}
 	*q = '\0';
+#if defined(_WIN32) || defined(__DJGPP__)
+	free(spath);
+#endif
 	return result;
 erange:
 	errno = ERANGE;
+#if defined(_WIN32) || defined(__DJGPP__)
+	free(spath);
+#endif
 	return NULL;
 }
-/*
+/**
  * abs2rel: convert an absolute path name into relative.
  *
- *	i)	path	absolute path
- *	i)	base	base directory (must be absolute path)
- *	o)	result	result buffer
- *	i)	size	size of result buffer
- *	r)		!= NULL: relative path
- *			== NULL: error
+ *	@param[in]	path	absolute path
+ *	@param[in]	base	base directory (must be absolute path)
+ *	@param[out]	result	result buffer
+ *	@param[in]	size	size of result buffer
+ *	@return		!= NULL: relative path,
+ *			== NULL: error (ERANGE or EINVAL)
  */
 char *
-abs2rel(const char *path, const char *base, char *result, const int size)
+abs2rel(const char *path, const char *base, char *result, int size)
 {
-	const char *pp, *bp, *branch;
+	const char *pp, *bp, *branch, *branch_b;
 	/*
 	 * endp points the last position which is safe in the result buffer.
 	 */
 	const char *endp = result + size - 1;
 	char *rp;
+#ifdef COLOR_PATH
+	int escape_count = 0;
+	const char *first_escape = NULL;
+#endif
 
-	if (*path != '/') {
+	if (!isabspath(path)) {
 		if (strlen(path) >= size)
 			goto erange;
 		strcpy(result, path);
 		goto finish;
-	} else if (*base != '/' || !size) {
+	} else if (!isabspath(base) || !size) {
 		errno = EINVAL;
 		return (NULL);
 	} else if (size == 1)
@@ -332,9 +384,29 @@ abs2rel(const char *path, const char *base, char *result, const int size)
 	 * seek to branched point.
 	 */
 	branch = path;
-	for (pp = path, bp = base; *pp && *bp && *pp == *bp; pp++, bp++)
-		if (*pp == '/')
+	branch_b = base;
+	for (pp = path, bp = base; *pp && *bp; pp++, bp++) {
+#ifdef COLOR_PATH
+		/* skip escape sequence */
+		if (*pp == ESC) {
+			escape_count++;
+			if (first_escape == NULL)
+				first_escape = pp;
+			while (*pp && *pp != EOE)
+				pp++;
+			if (*pp == EOE)
+				pp++;
+			else
+				die("invalid escape sequence in the path. '%s'", path);
+		}
+#endif
+		if (PATHCHAR(*pp) != PATHCHAR(*bp))
+			break;
+		if (*pp == '/') {
 			branch = pp;
+			branch_b = bp;
+		}
+	}
 	if ((*pp == 0 || (*pp == '/' && *(pp + 1) == 0)) &&
 	    (*bp == 0 || (*bp == '/' && *(bp + 1) == 0))) {
 		rp = result;
@@ -346,13 +418,29 @@ abs2rel(const char *path, const char *base, char *result, const int size)
 		*rp = 0;
 		goto finish;
 	}
-	if ((*pp == 0 && *bp == '/') || (*pp == '/' && *bp == 0))
+#ifdef COLOR_PATH
+	/* skip escape sequence */
+	if (*pp == ESC) {
+		escape_count++;
+		if (first_escape == NULL)
+			first_escape = pp;
+		while (*pp && *pp != EOE)
+			pp++;
+		if (*pp == EOE)
+			pp++;
+		else
+			die("invalid escape sequence in the path. '%s'", path);
+	}
+#endif
+	if ((*pp == 0 && *bp == '/') || (*pp == '/' && *bp == 0)) {
 		branch = pp;
+		branch_b = bp;
+	}
 	/*
 	 * up to root.
 	 */
 	rp = result;
-	for (bp = base + (branch - path); *bp; bp++)
+	for (bp = branch_b; *bp; bp++)
 		if (*bp == '/' && *(bp + 1) != 0) {
 			if (rp + 3 > endp)
 				goto erange;
@@ -367,6 +455,21 @@ abs2rel(const char *path, const char *base, char *result, const int size)
 	 * down to leaf.
 	 */
 	if (*branch) {
+#ifdef COLOR_PATH
+		/*
+		 * Insert the first escape sequence here.
+		 * It is a case where a colored part is divided.
+		 */
+		if (escape_count == 1) {
+			const char *p = first_escape;
+			while (*p && *p != EOE) {
+				if (rp > endp)
+					goto erange;
+				*rp++ = *p++;
+			}
+			*rp++ = *p;
+		}
+#endif
 		if (rp + strlen(branch + 1) > endp)
 			goto erange;
 		strcpy(rp, branch + 1);
@@ -378,18 +481,18 @@ erange:
 	errno = ERANGE;
 	return (NULL);
 }
-/*
+/**
  * rel2abs: convert an relative path name into absolute.
  *
- *	i)	path	relative path
- *	i)	base	base directory (must be absolute path)
- *	o)	result	result buffer
- *	i)	size	size of result buffer
- *	r)		!= NULL: absolute path
- *			== NULL: error
+ *	@param[in]	path	relative path
+ *	@param[in]	base	base directory (must be absolute path)
+ *	@param[out]	result	result buffer
+ *	@param[in]	size	size of result buffer
+ *	@return		!= NULL: absolute path,
+ *			== NULL: error (ERANGE or EINVAL)
  */
 char *
-rel2abs(const char *path, const char *base, char *result, const int size)
+rel2abs(const char *path, const char *base, char *result, int size)
 {
 	const char *pp, *bp;
 	/*
@@ -399,12 +502,12 @@ rel2abs(const char *path, const char *base, char *result, const int size)
 	char *rp;
 	int length;
 
-	if (*path == '/') {
+	if (isabspath(path)) {
 		if (strlen(path) >= size)
 			goto erange;
 		strcpy(result, path);
 		goto finish;
-	} else if (*base != '/' || !size) {
+	} else if (!isabspath(base) || !size) {
 		errno = EINVAL;
 		return (NULL);
 	} else if (size == 1)

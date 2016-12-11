@@ -8,8 +8,8 @@ ___________________________________
 Copyright holder of GNU GLOBAL
 ==============================
 
-Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-	2006, 2007, 2008 Tama Communications Corporation. All rights reserved.
+Copyright (c) 1996-2016 Tama Communications Corporation.
+All rights reserved.
 
 Contributors of GNU GLOBAL
 ==========================
@@ -25,6 +25,11 @@ Port to Windows 32 (for Borland C++ Compiler) by Dan Fandrich.
 Port to DJGPP by Jason Hood.
 (libutil/is_unixy.[ch] and most of #ifdef __DJGPP__.)
 
+Improved peekc() in libutil/token.c by Chris Nogradi and Garmin Inc.
+
+Single 'GTAGS SELECT MODE' buffer of gtags.el by Yushi Oka.
+(defcustom gtags-select-buffer-single)
+
 The following improvements by Hideki IWAMOTO.
 * INCLUDED FROM index of htags.
 * CVS REPOSITORY link of htags.
@@ -39,6 +44,13 @@ The following improvements by Hideki IWAMOTO.
 * Essential part of internal sort filter (replacement of gnusort).
 * Performance improvement of idset module by using "unsigned long" instead of
   "unsigned int" for bitmask. This is necessary to use 64 bit processor effectively.
+* More accurate statistics mechanism for htags(1) and gtags(1)(--statistics).
+* Built-in parser in gtags(1). This work includes the following two optimizations:
+  - Giant Steps
+  - 1pass-parsing
+  These have shortened the processing time of gtags(1) to about 1/3.
+* Adding support of function layer plug-in parser for gtags(1). This work includes
+  exuberant-ctags.la, an exsample of plug-in parser (exuberant-ctags.c).
 Besides he has contributed many improvements to GLOBAL.
 
 There are also many others who have contributed patches and fixes.
@@ -115,5 +127,67 @@ o Icon files by GNOME Foundation.
 	icons/n_left.png	stock_left_arrow.png
 	icons/n_right.png	stock_right_arrow.png
 	icons/n_top.png		stock_top.png
+
+o jQuery, Suggest plugin and TreeView plugin
+  jQuery is due to John Resig and the Dojo Foundation.
+  Suggest plugin is due to Peter Vulgaris, Joern Zaefferer and Stefan Petre.
+  TreeView plugin is due to Joern Zaefferer.
+
+	jquery/jquery.js
+	jquery/jquery.suggest.js
+	jquery/jquery.suggest.css
+	jquery/jquery.treeview.js
+	jquery/jquery.treeview.css
+	jquery/images/*.gif
+
+o cscope-15.7a by Joe Steffen and others:
+  Hans-Bernhard Broeker, Petr Sorfa, Simon Cozens, garp, jens persson, Edgar Toernig,
+  Martin Kraemer, Joshua Uziel, Mike Hopkirk, Darrylo Okahata, Brent Verner,
+  Thomas Klausner, Andrew Sharpe, Carl Mascott, Rich Salz, Stephane Fritsch, Andy Newman,
+  Sascha Blank, Bruce Frost, Chuck Marco, Wilfredo Sanchez, Jason Duell, Tom Hull,
+  Donald Slutz, OGAWA Hirofumi, Garret Hade, Nick Dixon, Triet H. Lai, Steven Elliott,
+  Ragho Mahalingam, Dmitry Obukhov, David Cohrs, Valentin Podlovchenko, Neil Horman
+
+					[cscope-15.7]
+	m4/check_curses.m4		configure.in
+	gtags-cscope/manual.in		doc/cscope.1
+	gtags-cscope/alloc.c		src/alloc.c
+	gtags-cscope/alloc.h		src/alloc.h
+	gtags-cscope/basename.c		src/basename.c
+	gtags-cscope/build.c		src/build.c
+	gtags-cscope/build.h		src/build.h
+	gtags-cscope/command.c		src/command.c
+	gtags-cscope/constants.h	src/constants.h
+	gtags-cscope/display.c		src/display.c
+	gtags-cscope/edit.c		src/edit.c
+	gtags-cscope/exec.c		src/exec.c
+	gtags-cscope/global-cscope.h	src/global.h
+	gtags-cscope/gtags-cscope.c	src/main.c
+	gtags-cscope/help.c		src/help.c
+	gtags-cscope/history.c		src/history.c
+	gtags-cscope/input.c		src/input.c
+	gtags-cscope/library.h		src/library.h
+	gtags-cscope/logdir.c		src/logdir.c
+	gtags-cscope/mouse.c		src/mouse.c
+	gtags-cscope/mygetenv.c		src/mygetenv.c
+	gtags-cscope/mypopen.c		src/mypopen.c
+	gtags-cscope/version-cscope.h	src/version.h
+
+o fgrep.c by University of California, Berkeley.
+
+					[fgrep in 4.3BSD]
+	global/literal.c		/usr/src/usr.bin/fgrep.c
+
+o Pygments plug-in parser by Yoshitaro MAKISE. 
+  Derived from https://github.com/yoshizow/global-pygments-plugin.
+
+						[github]
+	plugin-factory/pygments-parser.c	plugin-factory/pygments-parser.c
+	plugin-factory/pygments_parser.py.in	pygments_parser.py.in
+
+o SQLite3 by D. Richard Hipp.
+
+	libglibc/sqlite3.c
+	libglibc/sqlite3.h
 
 they are considered a separate package, not part of GLOBAL proper.

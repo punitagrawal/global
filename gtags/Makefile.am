@@ -12,11 +12,12 @@
 #
 bin_PROGRAMS= gtags
 
-INCLUDES = @INCLUDES@
+AM_CPPFLAGS = @AM_CPPFLAGS@
 
 LDADD = @LDADD@
 
-gtags_DEPENDENCIES = $(LDADD)
+gtags_LDADD = $(LDADD) $(LIBLTDL)
+gtags_DEPENDENCIES = $(LDADD) $(LTDLDEPS)
 
 man_MANS = gtags.1
 

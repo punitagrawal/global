@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
- *		2006
+ *		2006, 2010
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -23,6 +23,7 @@
 #endif
 #include <ctype.h>
 #include <stdio.h>
+#include <errno.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif
@@ -45,10 +46,10 @@ static const char *getpath(void);
 static void ungetpath(void);
 static GFIND *gp;
 static int retry;
-/*
+/**
  * get a path from input stream.
  *
- * Each path name must start with "./".
+ * [Note] Each path name must start with "./".
  */
 static const char *
 getpath(void)
@@ -64,7 +65,7 @@ getpath(void)
 	retry = 0;
 	return buff;
 }
-/*
+/**
  * push back a path name.
  */
 static void
@@ -82,12 +83,12 @@ static const char *localpath(const char *, char *);
 static const char *appendslash(const char *);
 static const char *insert_comma(unsigned int);
 
-/*
+/**
  * extract_lastname: extract the last name of include line.
  *
- *	i)	image	source image of include
- *	i)	is_php	1: is PHP source
- *	r)		last name
+ *	@param[in]	image	source image of include
+ *	@param[in]	is_php	1: is PHP source
+ *	@return		last name or NULL on error.
  */
 static const char *
 extract_lastname(const char *image, int is_php)
@@ -169,12 +170,13 @@ extract_lastname(const char *image, int is_php)
 	}
 	return NULL;
 }
-/*
+/**
  * get the last part of the path.
  *
- *	i)	path	path name
- *	r)		last part
- * Ex.
+ *	@param[in]	path	path name
+ *	@return		last part
+ *
+ * Examples:
  * lastpart("a/b")	=> "b"
  * lastpart("a")	=> "a"
  */
@@ -185,13 +187,14 @@ lastpart(const char *path)
 
 	return p ? p + 1 : path;
 }
-/*
+/**
  * get the directory part of the path.
  *
- *	i)	path	path name
- *	o)	result	result buffer
- *	r)		directory part
- * Ex.
+ *	@param[in]	path	path name
+ *	@param[out]	result	result buffer
+ *	@return		directory part
+ *
+ * Examples:
  * dirpart("a/b/c")	=> "a/b"
  */
 static const char *
@@ -205,14 +208,14 @@ dirpart(const char *path, char *result)
 	*p = '\0';
 	return result;
 }
-/*
+/**
  * get the local path name if the path is under the dir.
  *
- *	i)	path	path name
- *	i)	dir	directory name
- *	r)		local path name
+ *	@param[in]	path	path name
+ *	@param[in]	dir	directory name
+ *	@return		local path name or NULL
  *
- * Ex.
+ * Examples:
  * localpath("a/b/c", "a/b")	=> "c"
  * localpath("a/b/c/d", "a/b")	=> "c/d"
  * localpath("a/b/c", "a/d")	=> NULL
@@ -226,13 +229,15 @@ localpath(const char *path, char *dir)
 		return path + length + 1;
 	return NULL;
 }
-/*
+/**
  * append '/' after the path name
  *
- *	i)	path	path name
- *	r)		appended path name
+ *	@param[in]	path	path name
+ *	@return		appended path name
  *
- * Ex.
+ *	[Note] Doesn't check if ends with a '/' already.
+ *
+ * Examples:
  * appendslash("a")	=> "a/"
  */
 static const char *
@@ -245,13 +250,13 @@ appendslash(const char *path)
 	strbuf_putc(sb, '/');
 	return strbuf_value(sb);
 }
-/*
- * remove './' at the head of the path name
+/**
+ * remove "./" at the head of the path name
  *
- *	i)	path	path name
- *	r)		removed path name
+ *	@param[in]	path	path name
+ *	@return		removed path name
  *
- * Ex.
+ * Examples:
  * removedotslash("./a") => "a"
  */
 static const char *
@@ -259,13 +264,13 @@ removedotslash(const char *path)
 {
 	return (*path == '.' && *(path + 1) == '/') ? path + 2 : path;
 }
-/*
+/**
  * insert_comma: insert comma to the number.
  *
- *	i)	n	number
- *	r)		edited string
+ *	@param[in]	n	number
+ *	@return		edited string
  *
- * Ex.
+ * Examples:
  * 10000 => 10,000
  */
 static const char *
@@ -313,23 +318,26 @@ const char *indexlink;
 regex_t is_include_file;
 int src_count;
 
-/*
+/**
+ * static int print_directory(int level, char *basedir)
+ *
  * print contents of one directory and the descendant. (recursively called)
  *
- *	i)	level	directory nest level
- *	io)	basedir	current directory
+ *	@param[in]	level	directory nest level
+ *	@param[in,out]	basedir	current directory
  *
  * This function read find style records, and print directory tree.
  */
-/*
+/**
  * File list of the top level directory (when level == 0) is not written
  * to a file directly. Instead, it is written to string buffer, because
  * it appears in some places.
  */
 #define PUT(s) do {						\
-		if (level == 0)					\
-			 strbuf_puts(files, s);			\
-		 else						\
+		if (level == 0)	{				\
+			if (tree_view == 0)			\
+				strbuf_puts(files, s);		\
+		} else						\
 			 fputs(s, op);				\
 } while (0)
 
@@ -343,12 +351,22 @@ print_directory(int level, char *basedir)
 	int count = 0;
 
 	if (level > 0) {
-		char name[MAXPATHLEN+1];
+		char name[MAXPATHLEN];
 
 		snprintf(name, sizeof(name), "%s/files/%s.%s", distpath, path2fid(basedir), HTML);
-		fileop = open_output_file(name, cflag);
+		fileop = open_output_file(name, 0);
 		op = get_descripter(fileop);
 		print_directory_header(op, level, basedir);
+		if (tree_view) {
+			char *target = (Fflag) ? "mains" : "_top";
+
+			strbuf_puts(files, dir_begin);
+			strbuf_puts(files, gen_href_begin_with_title_target("files", path2fid(basedir), HTML, NULL, NULL, target));
+			strbuf_puts(files, full_path ? removedotslash(basedir) : lastpart(basedir));
+			strbuf_puts(files, gen_href_end());
+			strbuf_puts_nl(files, dir_title_end);
+			strbuf_puts_nl(files, "<ul>");
+		}
 	}
 	while ((path = getpath()) != NULL) {
 		const char *p, *local = localpath(path, basedir);
@@ -405,7 +423,27 @@ print_directory(int level, char *basedir)
 			 * Print file.
 			 */
 			else {
-				PUT(print_file_name(level, path));
+				const char *file_name = print_file_name(level, path);
+
+				if (tree_view) {
+					int size = filesize(path);
+					char *target = (Fflag) ? "mains" : "_top";
+					char tips[80];
+
+					if (size > 1)
+						snprintf(tips, sizeof(tips), "%s bytes", insert_comma(size));
+					else
+						snprintf(tips, sizeof(tips), "%s byte", insert_comma(size));
+					strbuf_sprintf(files, "%s%s%s%s%s\n",
+						file_begin,
+						gen_href_begin_with_title_target(SRCS, path2fid(path), HTML, NULL, tips, target),
+						full_path ? removedotslash(path) : lastpart(path),
+						gen_href_end(),
+						file_end);
+				}
+				PUT(file_name);
+				if (filemap_file)
+					fprintf(FILEMAP, "%s\t%s/%s.%s\n", removedotslash(path), SRCS, path2fid(path), HTML);
 				count++;
 			}
 			if (table_flist && flist_items % flist_fields == 0)
@@ -417,21 +455,26 @@ print_directory(int level, char *basedir)
 	if (level > 0) {
 		print_directory_footer(op, level, basedir);
 		close_file(fileop);
+		if (tree_view) {
+			strbuf_puts_nl(files, "</ul>");
+			strbuf_puts_nl(files, dir_end);
+		}
 	}
 	html_count++;
 	return count;
 }
-/*
+/**
  * print directory header.
  *
- *	i)	op	file index
- *	i)	level	1,2...
- *	i)	dir	directory name
+ *	@param[in]	op	file index
+ *	@param[in]	level	1,2...
+ *	@param[in]	dir	directory name
  */
 static void
 print_directory_header(FILE *op, int level, const char *dir)
 {
 	STATIC_STRBUF(sb);
+	const char *top = (Fflag && !tree_view) ? "../files" : "../mains";
 
 	if (level == 0)
 		die("print_directory_header: internal error.");
@@ -442,10 +485,10 @@ print_directory_header(FILE *op, int level, const char *dir)
 	fputs_nl(body_begin, op);
 
 	strbuf_clear(sb);
- 	strbuf_sprintf(sb, "%s%sroot%s/", header_begin, gen_href_begin(NULL, indexlink, normal_suffix, NULL), gen_href_end());
+ 	strbuf_sprintf(sb, "%s%sroot%s/", header_begin, gen_href_begin(NULL, top, normal_suffix, NULL), gen_href_end());
 	fputs(strbuf_value(sb), op);
 	{
-		char path[MAXPATHLEN+1];
+		char path[MAXPATHLEN];
 		char *p, *q;
 
 		strlimcpy(path, dir, sizeof(path));
@@ -469,12 +512,12 @@ print_directory_header(FILE *op, int level, const char *dir)
 	}
 	fputs_nl(header_end, op);
 	{
-		char parentdir[MAXPATHLEN+1];
+		char parentdir[MAXPATHLEN];
 		const char *suffix, *parent;
 
 		(void)dirpart(dir, parentdir);
 		if (level == 1) {
-			parent = indexlink;
+			parent = top;
 			suffix = normal_suffix;
 		} else {
 			parent = path2fid(parentdir);
@@ -496,24 +539,25 @@ print_directory_header(FILE *op, int level, const char *dir)
 		fputs_nl(br, op);
 	}
 }
-/*
+/**
  * print directory footer.
  *
- *	i)	op	file index
- *	i)	level	1,2...
- *	i)	dir	directory name
+ *	@param[in]	op	file index
+ *	@param[in]	level	1,2...
+ *	@param[in]	dir	directory name
  */
 static void
 print_directory_footer(FILE *op, int level, const char *dir)
 {
 	const char *parent, *suffix;
-	char parentdir[MAXPATHLEN+1];
+	char parentdir[MAXPATHLEN];
+	const char *top = (Fflag && !tree_view) ? "../files" : "../mains";
 
 	if (level == 0)
 		die("print_directory_footer: internal error.");
 	(void)dirpart(dir, parentdir);
 	if (level == 1) {
-		parent = indexlink;
+		parent = top;
 		suffix = normal_suffix;
 	} else {
 		parent = path2fid(parentdir);
@@ -534,11 +578,11 @@ print_directory_footer(FILE *op, int level, const char *dir)
 	fputs_nl(body_end, op);
 	fputs_nl(gen_page_end(), op);
 }
-/*
+/**
  * print file name.
  *
- *	i)	level	0,1,2...
- *	i)	path	path of the file
+ *	@param[in]	level	0,1,2...
+ *	@param[in]	path	path of the file
  */
 static const char *
 print_file_name(int level, const char *path)
@@ -554,7 +598,7 @@ print_file_name(int level, const char *path)
 	 * as a candidate of include file.
 	 *
 	 * C: .h
-	 * C++: .hxx, .hpp, .H
+	 * C++: .hxx, .hpp, .H, .hh
 	 * PHP: .inc.php
 	 */
 	if (regexec(&is_include_file, path, 0, 0, 0) == 0)
@@ -592,16 +636,14 @@ print_file_name(int level, const char *path)
 	else
 		strbuf_puts(sb, br);
 	strbuf_putc(sb, '\n');
-	if (map_file)
-		fprintf(FILEMAP, "%s\t%s/%s.%s\n", removedotslash(path), SRCS, path2fid(path), HTML);
 	return (const char *)strbuf_value(sb);
 }
-/*
+/**
  * print directory name.
  *
- *	i)	level	0,1,2...
- *	i)	path	path of the directory
- *	i)	count	number of files in this directory
+ *	@param[in]	level	0,1,2...
+ *	@param[in]	path	path of the directory
+ *	@param[in]	count	number of files in this directory
  */
 static const char *
 print_directory_name(int level, const char *path, int count)
@@ -635,11 +677,11 @@ print_directory_name(int level, const char *path, int count)
 	strbuf_putc(sb, '\n');
 	return (const char *)strbuf_value(sb);
 }
-/*
+/**
  * makefileindex: make file index.
  *
- *	i)	file		output file name
- *	o)	files		top level file index
+ *	@param[in]	file		output file name
+ *	@param[out]	a_files		top level file index
  */
 int
 makefileindex(const char *file, STRBUF *a_files)
@@ -653,7 +695,7 @@ makefileindex(const char *file, STRBUF *a_files)
 	 * progress of processing. It isn't copied each every recursive call
 	 * not to waste the stack.
 	 */
-	char basedir[MAXPATHLEN+1];
+	char basedir[MAXPATHLEN];
 
 	/*
 	 * Initialize data.
@@ -661,7 +703,7 @@ makefileindex(const char *file, STRBUF *a_files)
 	indexlink = (Fflag) ? "../files" : "../mains";
 	src_count = 0;
 
-	gp = gfind_open(dbpath, NULL, other_files ? GPATH_BOTH : GPATH_SOURCE);
+	gp = gfind_open(dbpath, NULL, other_files ? GPATH_BOTH : GPATH_SOURCE, 0);
 	/*
 	 * for collecting include files.
 	 */
@@ -690,20 +732,28 @@ makefileindex(const char *file, STRBUF *a_files)
 	 */
 	if ((filesop = fopen(makepath(distpath, file, NULL), "w")) == NULL)
 		die("cannot open file '%s'.", file);
-	fputs_nl(gen_page_begin(title_file_index, TOPDIR), filesop);
+	fputs_nl(gen_page_index_begin(title_file_index, jscode), filesop);
 	fputs_nl(body_begin, filesop);
 	fputs(header_begin, filesop);
 	fputs(gen_href_begin(NULL, "files", normal_suffix, NULL), filesop);
 	fputs(title_file_index, filesop);
 	fputs(gen_href_end(), filesop);
 	fputs_nl(header_end, filesop);
-	if (table_flist) {
+	if (tree_view) {
+		fputs_nl(tree_control, filesop);
+		fputs_nl(tree_loading, filesop);
+		if (tree_view_type) {
+			fprintf(filesop, tree_begin_using, tree_view_type);
+			fputc('\n', filesop);
+		} else {
+			fputs_nl(tree_begin, filesop);
+		}
+	} else if (table_flist)
 		fputs_nl(flist_begin, filesop);
-	} else if (!no_order_list) {
+	else if (!no_order_list)
 		fputs_nl(list_begin, filesop);
-	}
 	FILEMAP = NULL;
-	if (map_file) {
+	if (filemap_file) {
 		if (!(FILEMAP = fopen(makepath(distpath, "FILEMAP", NULL), "w")))
                         die("cannot open '%s'.", makepath(distpath, "FILEMAP", NULL));
 	}
@@ -712,20 +762,23 @@ makefileindex(const char *file, STRBUF *a_files)
 	 */
 	files = a_files;
 	strcpy(basedir, ".");
-	(void)print_directory(0, basedir);
 
-	if (map_file)
+	(void)print_directory(0, basedir);
+	if (tree_view)
+		strbuf_puts(files, tree_end);
+
+	if (filemap_file)
 		fclose(FILEMAP);
 	gfind_close(gp);
 	regfree(&is_include_file);
 
 	fputs(strbuf_value(files), filesop);
-	if (table_flist)
+	if (tree_view)
+		fputs_nl(tree_end, filesop);
+	else if (table_flist)
 		fputs_nl(flist_end, filesop);
 	else if (!no_order_list)
 		fputs_nl(list_end, filesop);
-	else
-		fputs_nl(br, filesop);
 	fputs_nl(body_end, filesop);
 	fputs_nl(gen_page_end(), filesop);
 	fclose(filesop);
@@ -755,9 +808,9 @@ makeincludeindex(void)
 	 * Unlike Perl regular expression, POSIX regular expression doesn't support C-style escape sequence.
 	 * Therefore, we can not use "\\t" here.
 	 */
-	snprintf(command, sizeof(command), "%s -gnx \"^[ \t]*(#[ \t]*(import|include)|include[ \t]*\\()\"", global_path);
+	snprintf(command, sizeof(command), PQUOTE "%s -gnx --encode-path=\" \t\" \"^[ \t]*(#[ \t]*(import|include)|include[ \t]*\\()\"" PQUOTE, quote_shell(global_path));
 	if ((PIPE = popen(command, "r")) == NULL)
-		die("cannot fork.");
+		die("cannot execute '%s'.", command);
 	strbuf_reset(input);
 	while ((ctags_x = strbuf_fgets(input, PIPE, STRBUF_NOCRLF)) != NULL) {
 		SPLIT ptable;
@@ -795,7 +848,7 @@ makeincludeindex(void)
 		put_included(inc, buf);
 	}
 	if (pclose(PIPE) != 0)
-		die("terminated abnormally.");
+		die("terminated abnormally '%s' (errno = %d).", command, errno);
 
 	for (inc = first_inc(); inc; inc = next_inc()) {
 		const char *last = inc->name;
@@ -807,7 +860,7 @@ makeincludeindex(void)
 			char path[MAXPATHLEN];
 
 			snprintf(path, sizeof(path), "%s/%s/%d.%s", distpath, INCS, no, HTML);
-			fileop_INCLUDE = open_output_file(path, cflag);
+			fileop_INCLUDE = open_output_file(path, 0);
 			INCLUDE = get_descripter(fileop_INCLUDE);
 			fputs_nl(gen_page_begin(last, SUBDIR), INCLUDE);
 			fputs_nl(body_begin, INCLUDE);
@@ -844,7 +897,7 @@ makeincludeindex(void)
 				recover(&ptable);
 				die("too small number of parts in makefileindex().");
 			}
-			snprintf(buf, sizeof(buf), "%s %s", ptable.part[PART_LNO].start, ptable.part[PART_PATH].start);
+			snprintf(buf, sizeof(buf), "%s %s", ptable.part[PART_LNO].start, decode_path(ptable.part[PART_PATH].start));
 			recover(&ptable);
 			strbuf_reset(inc->ref_contents);
 			strbuf_puts(inc->ref_contents, buf);
@@ -852,7 +905,7 @@ makeincludeindex(void)
 			char path[MAXPATHLEN];
 
 			snprintf(path, sizeof(path), "%s/%s/%d.%s", distpath, INCREFS, no, HTML);
-			fileop_INCLUDE = open_output_file(path, cflag);
+			fileop_INCLUDE = open_output_file(path, 0);
 			INCLUDE = get_descripter(fileop_INCLUDE);
 			fputs_nl(gen_page_begin(last, SUBDIR), INCLUDE);
 			fputs_nl(body_begin, INCLUDE);
@@ -862,7 +915,7 @@ makeincludeindex(void)
 				int count = inc->ref_count;
 
 				for (; count; line += strlen(line) + 1, count--)
-					fputs_nl(gen_list_body(upperdir(SRCS), line), INCLUDE);
+					fputs_nl(gen_list_body(upperdir(SRCS), line, NULL), INCLUDE);
 			}
 			fputs_nl(gen_list_end(), INCLUDE);
 			fputs_nl(body_end, INCLUDE);

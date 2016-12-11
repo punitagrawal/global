@@ -13,7 +13,10 @@
 info_TEXINFOS = global.texi
 
 global_TEXINFOS = fdl.texi reference.texi define.texi faq.texi \
-	global.ref gtags.ref htags.ref gtags-parser.ref gozilla.ref \
-	gtags-cscope.ref
+	global.ref gtags.ref htags.ref htags-server.ref gozilla.ref \
+	gtags-cscope.ref globash.ref gtags.conf.ref
 
 EXTRA_DIST = texinfo.tex
+
+doxygen:
+	cd .. && GTAGSCONF=':htags_options=--insert-header=head.in:' doxygen doc/Doxyfile

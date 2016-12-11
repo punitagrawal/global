@@ -84,7 +84,6 @@
  *
  * For details on the use of these macros, see the queue(3) manual page.
  *
- *
  *			SLIST	LIST	STAILQ	TAILQ	CIRCLEQ
  * _HEAD		+	+	+	+	+
  * _ENTRY		+	+	+	+	+
@@ -102,7 +101,6 @@
  * _INSERT_TAIL		-	-	+	+	+
  * _REMOVE_HEAD		+	-	+	-	-
  * _REMOVE		+	+	+	+	+
- *
  */
 
 /*
@@ -110,7 +108,7 @@
  */
 #define SLIST_HEAD(name, type)						\
 struct name {								\
-	struct type *slh_first;	/* first element */			\
+	struct type *slh_first;	/**< first element */			\
 }
 
 #define SLIST_HEAD_INITIALIZER(head)					\
@@ -118,7 +116,7 @@ struct name {								\
  
 #define SLIST_ENTRY(type)						\
 struct {								\
-	struct type *sle_next;	/* next element */			\
+	struct type *sle_next;	/**< next element */			\
 }
  
 /*
@@ -169,8 +167,8 @@ struct {								\
  */
 #define STAILQ_HEAD(name, type)						\
 struct name {								\
-	struct type *stqh_first;/* first element */			\
-	struct type **stqh_last;/* addr of last next element */		\
+	struct type *stqh_first;/**< first element */			\
+	struct type **stqh_last;/**< addr of last next element */		\
 }
 
 #define STAILQ_HEAD_INITIALIZER(head)					\
@@ -178,7 +176,7 @@ struct name {								\
 
 #define STAILQ_ENTRY(type)						\
 struct {								\
-	struct type *stqe_next;	/* next element */			\
+	struct type *stqe_next;	/**< next element */			\
 }
 
 /*
@@ -252,7 +250,7 @@ struct {								\
  */
 #define LIST_HEAD(name, type)						\
 struct name {								\
-	struct type *lh_first;	/* first element */			\
+	struct type *lh_first;	/**< first element */			\
 }
 
 #define LIST_HEAD_INITIALIZER(head)					\
@@ -260,14 +258,13 @@ struct name {								\
 
 #define LIST_ENTRY(type)						\
 struct {								\
-	struct type *le_next;	/* next element */			\
-	struct type **le_prev;	/* address of previous next element */	\
+	struct type *le_next;	/**< next element */			\
+	struct type **le_prev;	/**< address of previous next element */	\
 }
 
 /*
  * List functions.
  */
-
 #define	LIST_EMPTY(head) ((head)->lh_first == NULL)
 
 #define LIST_FIRST(head)	((head)->lh_first)
@@ -315,8 +312,8 @@ struct {								\
  */
 #define TAILQ_HEAD(name, type)						\
 struct name {								\
-	struct type *tqh_first;	/* first element */			\
-	struct type **tqh_last;	/* addr of last next element */		\
+	struct type *tqh_first;	/**< first element */			\
+	struct type **tqh_last;	/**< addr of last next element */		\
 }
 
 #define TAILQ_HEAD_INITIALIZER(head)					\
@@ -324,8 +321,8 @@ struct name {								\
 
 #define TAILQ_ENTRY(type)						\
 struct {								\
-	struct type *tqe_next;	/* next element */			\
-	struct type **tqe_prev;	/* address of previous next element */	\
+	struct type *tqe_next;	/**< next element */			\
+	struct type **tqe_prev;	/**< address of previous next element */	\
 }
 
 /*
@@ -404,14 +401,14 @@ struct {								\
  */
 #define CIRCLEQ_HEAD(name, type)					\
 struct name {								\
-	struct type *cqh_first;		/* first element */		\
-	struct type *cqh_last;		/* last element */		\
+	struct type *cqh_first;		/**< first element */		\
+	struct type *cqh_last;		/**< last element */		\
 }
 
 #define CIRCLEQ_ENTRY(type)						\
 struct {								\
-	struct type *cqe_next;		/* next element */		\
-	struct type *cqe_prev;		/* previous element */		\
+	struct type *cqe_next;		/**< next element */		\
+	struct type *cqe_prev;		/**< previous element */		\
 }
 
 /*
@@ -498,7 +495,8 @@ struct {								\
 #ifdef _KERNEL
 
 /*
- * XXX insque() and remque() are an old way of handling certain queues.
+ * XXX
+ * insque() and remque() are an old way of handling certain queues.
  * They bogusly assumes that all queue heads look alike.
  */
 

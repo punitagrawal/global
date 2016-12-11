@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
- *		2006
+ *		2006, 2008, 2010, 2011
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -39,23 +39,25 @@
 /*----------------------------------------------------------------------*/
 /* Parser switch							*/
 /*----------------------------------------------------------------------*/
-/*
+/**
  * This is the linkage section of each parsers.
  * If you want to support new language, you must define two procedures:
- *	1. Initializing procedure.
+ *	1. Initializing procedure (init_proc).
  *		Called once first with an input file descripter.
- *	2. Executing procedure.
+ *	2. Executing procedure (exec_proc).
  *		Called repeatedly until returning EOF.
  *		It should read from above descripter and write HTML
  *		using output procedures in this module.
  */
 struct lang_entry {
 	const char *lang_name;
-	void (*init_proc)(FILE *);		/* initializing procedure */
-	int (*exec_proc)(void);			/* executing procedure */
+	void (*init_proc)(FILE *);		/**< initializing procedure */
+	int (*exec_proc)(void);			/**< executing procedure */
 };
 
-/* initializing procedures */
+/*
+ * initializing procedures
+ */
 void c_parser_init(FILE *);
 void yacc_parser_init(FILE *);
 void cpp_parser_init(FILE *);
@@ -63,14 +65,16 @@ void java_parser_init(FILE *);
 void php_parser_init(FILE *);
 void asm_parser_init(FILE *);
 
-/* executing procedures */
+/*
+ * executing procedures
+ */
 int c_lex(void);
 int cpp_lex(void);
 int java_lex(void);
 int php_lex(void);
 int asm_lex(void);
 
-/*
+/**
  * The first entry is default language.
  */
 struct lang_entry lang_switch[] = {
@@ -84,11 +88,14 @@ struct lang_entry lang_switch[] = {
 };
 #define DEFAULT_ENTRY &lang_switch[0]
 
-/*
+/**
  * get language entry.
  *
- *	i)	lang	language name (NULL means 'not specified'.)
- *	r)		language entry
+ * If the specified language (lang) is not found, it assumes the
+ * default language, which is C.
+ *
+ *	@param[in]	lang	language name (NULL means 'not specified'.)
+ *	@return		language entry
  */
 static struct lang_entry *
 get_lang_entry(const char *lang)
@@ -127,7 +134,11 @@ static int last_lineno;
 /*
  * Put a character to HTML as is.
  *
- * You should use this function to put a control character.
+ * [Note] You should use this function to put a control character.
+ *
+ * [Note] No escaping of '<', '>' and '&' is performed.
+ *
+ * See put_char()
  */
 void
 echoc(int c)
@@ -137,7 +148,11 @@ echoc(int c)
 /*
  * Put a string to HTML as is.
  *
- * You should use this function to put a control sequence.
+ * [Note] You should use this function to put a control sequence.
+ *
+ * [Note] No escaping of '<', '>' and '&' is performed.
+ *
+ * See put_string()
  */
 void
 echos(const char *s)
@@ -149,6 +164,8 @@ echos(const char *s)
 /*----------------------------------------------------------------------*/
 /*
  * Quote character with HTML's way.
+ *
+ * (Fixes '<', '>' and '&' for HTML).
  */
 static const char *
 HTML_quoting(int c)
@@ -164,9 +181,9 @@ HTML_quoting(int c)
 /*
  * fill_anchor: fill anchor into file name
  *
- *       i)      $root   root or index page
- *       i)      $path   path name
- *       r)              hypertext file name string
+ *       @param[in]      root   $root or index page
+ *       @param[in]      path   $path name
+ *       @return              hypertext file name string
  */
 const char *
 fill_anchor(const char *root, const char *path)
@@ -181,36 +198,33 @@ fill_anchor(const char *root, const char *path)
 			*p = '\0';
 	limit = p;
 
-	strbuf_sprintf(sb, "%sroot%s/", gen_href_begin_simple(root), gen_href_end());
-	{
-		const char *next;
+	if (root != NULL)
+		strbuf_sprintf(sb, "%sroot%s/", gen_href_begin_simple(root), gen_href_end());
+	for (p = buf; p < limit; p += strlen(p) + 1) {
+		const char *path = buf;
+		const char *unit = p;
+		const char *next = p + strlen(p) + 1;
 
-		for (p = buf; p < limit; p += strlen(p) + 1) {
-			const char *path = buf;
-			const char *unit = p;
-
-			next = p + strlen(p) + 1;
-			if (next > limit) {
-				strbuf_puts(sb, unit);
-				break;
-			}
-			if (p > buf)
-				*(p - 1) = sep;
-			strbuf_puts(sb, gen_href_begin("../files", path2fid(path), HTML, NULL));
+		if (next > limit) {
 			strbuf_puts(sb, unit);
-			strbuf_puts(sb, gen_href_end());
-			strbuf_putc(sb, '/');
+			break;
 		}
+		if (p > buf)
+			*(p - 1) = sep;
+		strbuf_puts(sb, gen_href_begin("../files", path2fid(path), HTML, NULL));
+		strbuf_puts(sb, unit);
+		strbuf_puts(sb, gen_href_end());
+		strbuf_putc(sb, '/');
 	}
         return strbuf_value(sb);
 }
 
-/*
+/**
  * link_format: make hypertext from anchor array.
  *
- *	i)	(previous, next, first, last, top, bottom)
+ *	@param[in]	ref	(previous, next, first, last, top, bottom)
  *		-1: top, -2: bottom, other: line number
- *	r)	HTML
+ *	@return	HTML
  */
 const char *
 link_format(int ref[A_SIZE])
@@ -249,11 +263,78 @@ link_format(int ref[A_SIZE])
 	}
         return strbuf_value(sb);
 }
-/*
+/**
+ * fixed_guide_link_format: make fixed guide
+ *
+ *	@param[in]	ref	(previous, next, first, last, top, bottom)
+ *		-1: top, -2: bottom, other: line number
+ *	@param[in]	anchors
+ *	@return	HTML
+ */
+const char *
+fixed_guide_link_format(int ref[A_LIMIT], const char *anchors)
+{
+	int i = 0;
+	STATIC_STRBUF(sb);
+
+	strbuf_clear(sb);
+	strbuf_puts(sb, "<!-- beginning of fixed guide -->\n");
+	strbuf_puts(sb, guide_begin);
+	strbuf_putc(sb, '\n');
+	for (i = 0; i < A_LIMIT; i++) {
+		if (i == A_PREV || i == A_NEXT)
+			continue;
+		strbuf_puts(sb, guide_unit_begin);
+		switch (i) {
+		case A_FIRST:
+		case A_LAST:
+			if (ref[i] == 0)
+				strbuf_puts(sb, gen_href_begin(NULL, NULL, NULL, (i == A_FIRST) ? "TOP" : "BOTTOM"));
+			else {
+				char lineno[32];
+				snprintf(lineno, sizeof(lineno), "%d", ref[i]);
+				strbuf_puts(sb, gen_href_begin(NULL, NULL, NULL, lineno));
+			}
+			break;
+		case A_TOP:
+			strbuf_puts(sb, gen_href_begin(NULL, NULL, NULL, "TOP"));
+			break;
+		case A_BOTTOM:
+			strbuf_puts(sb, gen_href_begin(NULL, NULL, NULL, "BOTTOM"));
+			break;
+		case A_INDEX:
+			strbuf_puts(sb, gen_href_begin("..", "mains", normal_suffix, NULL));
+			break;
+		case A_HELP:
+			strbuf_puts(sb, gen_href_begin("..", "help", normal_suffix, NULL));
+			break;
+		default:
+			die("fixed_guide_link_format: something is wrong.(%d)", i);
+			break;
+		}
+		if (Iflag)
+			strbuf_puts(sb, gen_image(PARENT, anchor_icons[i], anchor_label[i]));
+		else
+			strbuf_sprintf(sb, "[%s]", anchor_label[i]);
+		strbuf_puts(sb, gen_href_end());
+		strbuf_puts(sb, guide_unit_end);
+		strbuf_putc(sb, '\n');
+	}
+	strbuf_puts(sb, guide_path_begin);
+	strbuf_puts(sb, anchors);
+	strbuf_puts(sb, guide_path_end);
+	strbuf_putc(sb, '\n');
+	strbuf_puts(sb, guide_end);
+	strbuf_putc(sb, '\n');
+	strbuf_puts(sb, "<!-- end of fixed guide -->\n");
+
+	return strbuf_value(sb);
+}
+/**
  * generate_guide: generate guide string for definition line.
  *
- *	i)	lineno	line number
- *	r)		guide string
+ *	@param[in]	lineno	line number
+ *	@return		guide string
  */
 const char *
 generate_guide(int lineno)
@@ -278,13 +359,16 @@ generate_guide(int lineno)
 
 	return strbuf_value(sb);
 }
-/*
+/**
  * tooltip: generate tooltip string
  *
- *	i)	type	I,R,Y,D,M
- *	i)	lno	line number
- *	i)	opt	
- *	r)		tooltip string
+ *	@param[in]	type	'I': 'Included from',
+ *			'R': 'Defined at',
+ *			'Y': 'Used at',
+ *			'D', 'M': 'Referred from'
+ *	@param[in]	lno	line number
+ *	@param[in]	opt	
+ *	@return		tooltip string
  */
 const char *
 tooltip(int type, int lno, const char *opt)
@@ -300,7 +384,7 @@ tooltip(int type, int lno, const char *opt)
 		else if (type == 'Y')
 			strbuf_puts(sb, "Used at");
 		else
-			strbuf_puts(sb, "Refered from");
+			strbuf_puts(sb, "Referred from");
 		strbuf_putc(sb, ' ');
 		strbuf_putn(sb, lno);
 		if (opt) {
@@ -316,7 +400,7 @@ tooltip(int type, int lno, const char *opt)
 		else if (type == 'Y')
 			strbuf_puts(sb, "used in");
 		else
-			strbuf_puts(sb, "refered from");
+			strbuf_puts(sb, "referred from");
 		strbuf_putc(sb, ' ');
 		strbuf_puts(sb, opt);
 		strbuf_putc(sb, ' ');
@@ -325,12 +409,14 @@ tooltip(int type, int lno, const char *opt)
 	strbuf_putc(sb, '.');
 	return strbuf_value(sb);
 }
-/*
+/**
  * put_anchor: output HTML anchor.
  *
- *	i)	name	tag
- *	i)	type	tag type
- *	i)	lineno	current line no
+ *	@param[in]	name	tag
+ *	@param[in]	type	tag type. 'R': GTAGS,
+ *			'Y': GSYMS,
+ *			'D', 'M', 'T': GRTAGS
+ *	@param[in]	lineno	current line no
  */
 void
 put_anchor(char *name, int type, int lineno)
@@ -355,27 +441,31 @@ put_anchor(char *name, int type, int lineno)
 		strbuf_puts(outbuf, name);
 	} else {
 		/*
-		 * About cache record format, please see the comment in cache.c.
+		 * About the format of 'line', please see the head comment of cache.c.
 		 */
 		if (*line == ' ') {
-			char tmp[MAXPATHLEN];
-			const char *id = strmake(++line, " ");
-			const char *count = locatestring(line, " ", MATCH_FIRST) + 1;
+			const char *fid = line + 1;
+			const char *count = nextstring(fid);
 			const char *dir, *file, *suffix = NULL;
 
 			if (dynamic) {
-				const char *s;
+				STATIC_STRBUF(sb);
 
-				dir = (*action == '/') ? NULL : "..";
+				strbuf_clear(sb);
+				strbuf_puts(sb, action);
+				strbuf_putc(sb, '?');
+				strbuf_puts(sb, "pattern=");
+				strbuf_puts(sb, name);
+				strbuf_puts(sb, quote_amp);
+				strbuf_puts(sb, "type=");
 				if (db == GTAGS)
-					s = "definitions";
+					strbuf_puts(sb, "definitions");
 				else if (db == GRTAGS)
-					s = "reference";
+					strbuf_puts(sb, "reference");
 				else
-					s = "symbol";
-				snprintf(tmp, sizeof(tmp), "%s?pattern=%s%stype=%s",
-					action, name, quote_amp, s);
-				file = tmp;
+					strbuf_puts(sb, "symbol");
+				file = strbuf_value(sb);
+				dir = (*action == '/') ? NULL : "..";
 			} else {
 				if (type == 'R')
 					dir = upperdir(DEFS);
@@ -383,16 +473,18 @@ put_anchor(char *name, int type, int lineno)
 					dir = upperdir(SYMS);
 				else	/* 'D', 'M' or 'T' */
 					dir = upperdir(REFS);
-				file = id;
+				file = fid;
 				suffix = HTML;
 			}
 			strbuf_puts(outbuf, gen_href_begin_with_title(dir, file, suffix, NULL, tooltip(type, -1, count)));
 			strbuf_puts(outbuf, name);
 			strbuf_puts(outbuf, gen_href_end());
 		} else {
-			char lno[32];
-			const char *filename;
+			const char *lno = line;
+			const char *fid = nextstring(line);
+			const char *path = gpath_fid2path(fid, NULL);
 
+			path += 2;              /* remove './' */
 			/*
 			 * Don't make a link which refers to itself.
 			 * Being used only once means that it is a self link.
@@ -401,20 +493,38 @@ put_anchor(char *name, int type, int lineno)
 				strbuf_puts(outbuf, name);
 				return;
 			}
-			strlimcpy(lno, strmake(line, " "), sizeof(lno));
-			filename = strmake(locatestring(line, " ", MATCH_FIRST) + 1, " ")
-						+ 2;	/* remove './' */
-			strbuf_puts(outbuf, gen_href_begin_with_title(upperdir(SRCS), path2fid(filename), HTML, lno, tooltip(type, atoi(lno), filename)));
+			strbuf_puts(outbuf, gen_href_begin_with_title(upperdir(SRCS), fid, HTML, lno, tooltip(type, atoi(lno), path)));
 			strbuf_puts(outbuf, name);
 			strbuf_puts(outbuf, gen_href_end());
 		}
 	}
 }
-/*
+/**
+ * put_anchor_force: output HTML anchor without warning.
+ *
+ *	@param[in]	name	tag
+ *	@param[in]	length
+ *	@param[in]	lineno	current line no
+ *
+ * The tag type is fixed at 'R' (GTAGS)
+ */
+void
+put_anchor_force(char *name, int length, int lineno)
+{
+	STATIC_STRBUF(sb);
+	int saveflag = wflag;
+
+	strbuf_clear(sb);
+	strbuf_nputs(sb, name, length);
+	wflag = 0;
+	put_anchor(strbuf_value(sb), 'R', lineno);
+	wflag = saveflag;
+}
+/**
  * put_include_anchor: output HTML anchor.
  *
- *	i)	inc	inc structure
- *	i)	path	path name for display
+ *	@param[in]	inc	inc structure
+ *	@param[in]	path	path name for display
  */
 void
 put_include_anchor(struct data *inc, const char *path)
@@ -429,8 +539,21 @@ put_include_anchor(struct data *inc, const char *path)
 	strbuf_puts(outbuf, path);
 	strbuf_puts(outbuf, gen_href_end());
 }
-/*
- * Put a reserved word. (if, while, ...)
+/**
+ * put_include_anchor_direct: output HTML anchor.
+ *
+ *	@param[in]	file	normalized path
+ *	@param[in]	path	path name for display
+ */
+void
+put_include_anchor_direct(const char *file, const char *path)
+{
+	strbuf_puts(outbuf, gen_href_begin(NULL, path2fid(file), HTML, NULL));
+	strbuf_puts(outbuf, path);
+	strbuf_puts(outbuf, gen_href_end());
+}
+/**
+ * Put a reserved word (if, while, ...)
  */
 void
 put_reserved_word(const char *word)
@@ -440,7 +563,7 @@ put_reserved_word(const char *word)
 	strbuf_puts(outbuf, reserved_end);
 }
 /*
- * Put a macro (#define,#undef,...) 
+ * Put a macro (#define, #undef, ...) 
  */
 void
 put_macro(const char *word)
@@ -449,8 +572,8 @@ put_macro(const char *word)
 	strbuf_puts(outbuf, word);
 	strbuf_puts(outbuf, sharp_end);
 }
-/*
- * Print warning message when unkown preprocessing directive is found.
+/**
+ * Print warning message when unknown preprocessing directive is found.
  */
 void
 unknown_preprocessing_directive(const char *word, int lineno)
@@ -460,7 +583,7 @@ unknown_preprocessing_directive(const char *word, int lineno)
 	if (colorize_warned_line)
 		warned = 1;
 }
-/*
+/**
  * Print warning message when unexpected eof.
  */
 void
@@ -470,7 +593,7 @@ unexpected_eof(int lineno)
 	if (colorize_warned_line)
 		warned = 1;
 }
-/*
+/**
  * Print warning message when unknown yacc directive is found.
  */
 void
@@ -480,7 +603,7 @@ unknown_yacc_directive(const char *word, int lineno)
 	if (colorize_warned_line)
 		warned = 1;
 }
-/*
+/**
  * Print warning message when unmatched brace is found.
  */
 void
@@ -493,7 +616,9 @@ missing_left(const char *word, int lineno)
 /*
  * Put a character with HTML quoting.
  *
- * If you want to put '<', '>' and '&', you should echoc() instead.
+ * [Note] If you want to put '<', '>' or '&', you
+ * 		should echoc() instead, as this function escapes (fixes) those
+ *		characters for HTML.
  */
 void
 put_char(int c)
@@ -508,7 +633,9 @@ put_char(int c)
 /*
  * Put a string with HTML quoting.
  *
- * If you want to put HTML tag itself, you should echoc() instead.
+ * [Note] If you want to put HTML tag itself, you should echos() instead,
+ *		as this function escapes (fixes) the characters '<',
+ *		'>' and '&' for HTML.
  */
 void
 put_string(const char *s)
@@ -516,7 +643,7 @@ put_string(const char *s)
 	for (; *s; s++)
 		put_char(*s);
 }
-/*
+/**
  * Put brace ('{', '}')
  */
 void
@@ -533,7 +660,7 @@ put_brace(const char *text)
 static char lineno_format[32];
 static const char *guide = NULL;
 
-/*
+/**
  * Begin of line processing.
  */
 void
@@ -550,13 +677,14 @@ put_begin_of_line(int lineno)
                 guide = NULL;
         }
 }
-/*
+/**
  * End of line processing.
  *
- *	i)	lineno	current line number
- *	gi)	outbuf	HTML line image
+ *	@param[in]	lineno	current line number
+ *	Globals used (input):
+ *		outbuf, HTML line image
  *
- * The outbuf(string buffer) has HTML image of the line.
+ * The outbuf (string buffer) has HTML image of the line.
  * This function flush and clear it.
  */
 void
@@ -590,11 +718,11 @@ put_end_of_line(int lineno)
 	/* save for the other job in this module */
 	last_lineno = lineno;
 }
-/*
+/**
  * Encode URL.
  *
- *	o)	sb	encoded URL
- *	i)	url	URL
+ *	@param[out]	sb	encoded URL
+ *	@param[in]	url	URL
  */
 static void
 encode(STRBUF *sb, const char *url)
@@ -611,13 +739,13 @@ encode(STRBUF *sb, const char *url)
 		}
 	}
 }
-/*
+/**
  * get_cvs_module: return CVS module of source file.
  *
- *	i)	file		source path
- *	o)	basename	If basename is not NULL, store pointer to
+ *	@param[in]	file		source path
+ *	@param[out]	basename	If basename is not NULL, store pointer to
  *				the last component of source path.
- *	r)		!=NULL : relative path from repository top
+ *	@return		!=NULL : relative path from repository top,
  *			==NULL : CVS/Repository is not readable.
  */
 static const char *
@@ -625,7 +753,7 @@ get_cvs_module(const char *file, const char **basename)
 {
 	const char *p;
 	STATIC_STRBUF(dir);
-	static char prev_dir[MAXPATHLEN+1];
+	static char prev_dir[MAXPATHLEN];
 	STATIC_STRBUF(module);
 	FILE *ip;
 
@@ -654,13 +782,13 @@ get_cvs_module(const char *file, const char **basename)
 		return strbuf_value(module);
 	return NULL;
 }
-/*
+/**
  *
  * src2html: convert source code into HTML
  *
- *       i)      src   source file     - Read from
- *       i)      html  HTML file       - Write to
- *       i)      notsource 1: isn't source, 0: source.
+ *       @param[in]      src   source file     - Read from
+ *       @param[in]      html  HTML file       - Write to
+ *       @param[in]      notsource 1: isn't source, 0: source.
  */
 void
 src2html(const char *src, const char *html, int notsource)
@@ -677,16 +805,18 @@ src2html(const char *src, const char *html, int notsource)
         curpfile = src;
         warned = 0;
 
-	fileop_out = open_output_file(html, cflag);
+	fileop_out = open_output_file(html, 0);
 	out = get_descripter(fileop_out);
 	strbuf_clear(outbuf);
 
-	if (Fflag)
-		snprintf(indexlink, sizeof(indexlink), "../files.%s", normal_suffix);
-	else
-		snprintf(indexlink, sizeof(indexlink), "../mains.%s", normal_suffix);
+	snprintf(indexlink, sizeof(indexlink), "../mains.%s", normal_suffix);
 	fputs_nl(gen_page_begin(src, SUBDIR), out);
 	fputs_nl(body_begin, out);
+	/*
+         * print fixed guide
+         */
+	if (fixed_guide)
+		fputs(fixed_guide_link_format(anchor_getlinks(0), fill_anchor(NULL, src)), out);
 	/*
          * print the header
          */

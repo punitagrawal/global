@@ -54,23 +54,104 @@ if ($menu) {
 exit 0;
 #------------------------------------------------------------------
 #
+# Generate langmap statement.
+#
+#------------------------------------------------------------------
+#
+# Get a value from configure.ac file by name.
+#
+sub getvalue {
+	my($name) = @_;
+	my $value;
+	#
+	# A value should be defined as:
+	# NAME='VALUE'
+	#
+	my $line=`grep "$name=" configure.ac`;
+	($value) = $line =~ /^$name='(.*)'$/;
+	unless ($value) {
+		print STDERR "$name not found.\n";
+		exit(1);
+	}
+	$value;
+}
+#
+# Generate statements about the langmap variable.
+#
+sub langmapstatement {
+	my($maps) = getvalue('DEFAULTLANGMAP');
+	my(@statement);
+	my %name = (
+		'c'	=> 'C',
+		'yacc'	=> 'yacc',
+		'asm'	=> 'Assembly',
+		'java'	=> 'Java',
+		'cpp'	=> 'C++',
+		'php'	=> 'PHP',
+	);
+	my $line = '';
+	my @maps = split(/,/, $maps);
+	for ($i = 0; $i < @maps; $i++) {
+		$_ = $maps[$i];
+		my($lang, $suffixes) = /([^:]+):(.*)/;
+		if ($i > 0) {
+			if ($i + 1 == @maps) {		# last
+				$line .= ' and ';
+			} else {
+				$line .= ', ';
+			}
+		}
+		$line .= $name{$lang};
+	}
+	$line .= " source files are supported.\n";
+	unshift(@statement, $line);
+	foreach (@maps) {
+		my($lang, $suffixes) = /([^:]+):(.*)/;
+		unless ($name{$lang}) {
+			print STDERR "ERROR: $lang not defined.\n";
+			exit(1);
+		}
+		$suffixes =~ s/^\.//;
+		my(@suffixes) = split(/\./, $suffixes);
+		$line = 'Files whose names end in ';
+		for ($i = 0; $i < @suffixes; $i++) {
+			my $sx = $suffixes[$i];
+			$line .= ', ' if ($i > 0);
+			$line .= "\@file{.$sx}";
+		}
+		$line .= " are assumed to be $name{$lang} source files.\n";
+		unshift(@statement, $line);
+	}
+	@statement;
+}
+#------------------------------------------------------------------
+#
 # Read line.
 #
 #------------------------------------------------------------------
-$lastline = '';
+@lines = ();
 sub getline {
-	if ($lastline) {
-		$_ = $lastline;
-		$lastline = '';
+	if (@lines > 0) {
+		$_ = pop(@lines);
 	} else {
 		while (<INFILE>) {
+			if (/\@LANGMAPSTATEMENT\@/) {
+				@lines = &'langmapstatement();
+				$_ = pop(@lines);
+			} elsif (/\@DEFAULTLANGMAP\@/) {
+				my $value = &'getvalue('DEFAULTLANGMAP');
+				s/\@DEFAULTLANGMAP\@/$value/;
+			} elsif (/\@DEFAULTINCLUDEFILESUFFIXES\@/) {
+				my $value = &'getvalue('DEFAULTINCLUDEFILESUFFIXES');
+				s/\@DEFAULTINCLUDEFILESUFFIXES\@/$value/;
+			}
 			last unless (/^#/);
 		}
 	}
 	($_) ? 1 : 0;
 }
 sub ungetline {
-	$lastline = $_;
+	push(@lines, $_);
 }
 #------------------------------------------------------------------
 #
@@ -80,13 +161,16 @@ sub ungetline {
 package c;
 sub convert {
 	local($arg) = '[^},]+';
-	local($macros) = 'arg|code|var|file|name|option';
+	local($macros) = 'arg|code|var|file|name|option|val|samp|kbd';
 	chop;
 	s/^\s+//;
 	while (s/\@($macros)\{($arg)\}/$2/) {
 		;
 	}
 	while (s/\@xref\{($arg),($arg)\}/$1($2)/) {
+		;
+	}
+	while (s/\@(begin|end)_verbatim//) {
 		;
 	}
 }
@@ -155,56 +239,6 @@ sub gen {
 }
 #------------------------------------------------------------------
 #
-# Perl package.
-#
-#------------------------------------------------------------------
-package perl;
-sub convert {
-	local($arg) = '[^},]+';
-	while (s/\@file\{($arg)\}/'$1'/) {
-		;
-	}
-	&c'convert();
-}
-sub gen {
-	local($help_const) = 0;
-	print "# This part is generated automatically by $'com from $'infile.\n";
-	while (&'getline()) {
-		if (/^\@NAME\s+(.*)\s+-/) {
-			print "\$program = '$1';\n";
-		} elsif (/^\@SYNOPSIS$/) {
-			&'getline();
-			convert();
-			print "\$usage_const = \"Usage: $_\";\n";
-		} elsif (/^\@OPTIONS$/) {
-			print "\$help_const = \"\$usage_const\\\nOptions:\\\n";
-			while (&'getline()) {
-				if (/^\@/) {
-					&'ungetline();
-					last;
-				}
-				convert();
-				if (/^\@begin_itemize$/) {
-					$itemize = 1;
-				} elsif (/^\@end_itemize$/) {
-					$itemize = 0;
-				} elsif ($itemize) {
-					if (/^\@item\{(.*)\}$/) {
-						print $1;
-					} else {
-						print "       ";
-						print;
-					}
-					print "\\\n";
-				}
-			}
-		}
-	}
-	print "\";\n";
-	print "# end of generated part.\n";
-}
-#------------------------------------------------------------------
-#
 # Man package.
 #
 #------------------------------------------------------------------
@@ -220,6 +254,9 @@ sub convert {
 		$val =~ s/\./\\./g;
 		s/\@code\{$arg\}/$val/;
 	}
+	while (s/\@(val|samp|kbd)\{([^}]+)\}/\\'$2\\'/) {
+		;
+	}
 	while (s/\@file\{($arg)\}/\\'$1\\'/) {
 		;
 	}
@@ -229,9 +266,11 @@ sub convert {
 	while (s/\@xref\{($arg),($arg)\}/\\fB$1\\fP($2)/) {
 		;
 	}
-	s/\@{/{/g;
-	s/\@}/}/g;
+	s/\@\{/\{/g;
+	s/\@\}/\}/g;
 	s/\@br$/\n.br/;
+	s/\@\@/@/g;
+	s/^\./\\&./;
 }
 sub gen {
 	local($arg) = '[^,]+';
@@ -259,22 +298,26 @@ sub gen {
 			}
 		} elsif (/^\@(.*)$/) {
 			$type = $1;
-			local($varbatim) = ($type =~ /^(EXAMPLES|FORMAT)$/) ? 1 : 0;
 			if ($type =~ /\s+/) {
 				$type = "\"$type\"";
 			}
 			print ".SH $type\n";
-			print ".nf\n" if ($varbatim);
 			local($itemize) = 0;
+			local($verbatim) = 0;
 			while (&'getline()) {
-				if (/^\@/) {
+				if (/^\s*\@begin_verbatim\s*$/) {
+					$verbatim = 1;
+					print ".nf\n";
+					next;
+				} elsif (/^\s*\@end_verbatim\s*$/) {
+					$verbatim = 0;
+					print ".fi\n";
+					next;
+				} elsif (/^\@/) {
 					&'ungetline();
 					last;
 				} elsif (/^$/) {
 					print ".PP\n";
-					next;
-				} elsif ($varbatim) {
-					print;
 					next;
 				}
 				convert();
@@ -288,7 +331,6 @@ sub gen {
 					print;
 				}
 			}
-			print ".fi\n" if ($varbatim);
 		}
 	}
 }
@@ -306,6 +348,7 @@ sub convert {
 		;
 	}
 	s/\@option\{/\@samp\{/g;
+	s/\@val\{/\@samp\{/g;
 	while (s/\@(arg|name)\{($arg)\}/$2/) {
 		;
 	}
@@ -322,7 +365,6 @@ sub gen {
 			print "$name\n";
 		} elsif (/^\@(SYNOPSIS)$/) {
 			print "\@unnumberedsubsec $1\n";
-			print "\@noindent\n";
 			print "\@quotation\n";
 			while (&'getline()) {
 				if (/^\@/) {
@@ -339,20 +381,28 @@ sub gen {
 			print "\@end quotation\n";
 		} elsif (/^\@(.*)$/) {
 			$type = $1;
-			local($varbatim) = ($type =~ /^(EXAMPLES|FORMAT)$/) ? 1 : 0;
 			print "\@unnumberedsubsec $type\n";
-			print "\@example\n" if ($varbatim);
 			local($itemize) = 0;
+			local($verbatim) = 0;
 			while (&'getline()) {
-				if (/^\@/) {
+				if (/^\s*\@begin_verbatim\s*$/) {
+					$verbatim = 1;
+					print "\@example\n";
+					next;
+				} elsif (/^\s*\@end_verbatim\s*$/) {
+					$verbatim = 0;
+					print "\@end example\n";
+					next;
+				} elsif ($verbatim) {
+					s/\{/@\{/g;
+					s/\}/@\}/g;
+					s/^\s+//;
+					print;
+					next;
+				} elsif (/^\@/) {
 					&'ungetline();
 					last;
 				} elsif (/^$/) {
-					print;
-					next;
-				} elsif ($varbatim) {
-					s/\{/@\{/g;
-					s/\}/@\}/g;
 					print;
 					next;
 				}
@@ -369,7 +419,6 @@ sub gen {
 					print "$_\n";
 				}
 			}
-			print "\@end example\n" if ($varbatim);
 		}
 	}
 }

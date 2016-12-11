@@ -50,9 +50,11 @@ typedef unsigned short	u_short;
 #define	SIG_UNBLOCK	2
 #define	SIG_SETMASK	3
 
-static int __sigtemp;		/* For the use of sigprocmask */
+static int __sigtemp;		/**< For the use of sigprocmask */
 
-/* Repeated test of oset != NULL is to avoid "*0". */
+/*
+ *	Repeated test of oset != NULL is to avoid "*0".
+ */
 #define	sigprocmask(how, set, oset)					\
 	((__sigtemp =							\
 	(((how) == SIG_BLOCK) ?						\
@@ -66,6 +68,8 @@ static int __sigtemp;		/* For the use of sigprocmask */
 #endif
 
 /*
+ * BYTE_ORDER
+ *
  * If your system doesn't have an include file with the appropriate
  * byte order set, make sure you specify the correct one.
  */
@@ -79,6 +83,7 @@ static int __sigtemp;		/* For the use of sigprocmask */
 #endif
 #endif
 
+/* Compatibility macros */
 /*
  * Old definitions were rewritten using 'HAVE_XXX' macros.
  *
@@ -127,16 +132,18 @@ static int __sigtemp;		/* For the use of sigprocmask */
 #endif
 
 /*
- * 32-bit machine.  The db routines are theoretically independent of
+ * O_ACCMODE
+ *
+ * 32-bit machine.  The DB routines are theoretically independent of
  * the size of u_shorts and u_longs, but I don't know that anyone has
  * ever actually tried it.  At a minimum, change the following #define's
  * if you are trying to compile on a different type of system.
  */
-#ifndef O_ACCMODE			/* POSIX 1003.1 access mode mask. */
+#ifndef O_ACCMODE			/** POSIX 1003.1 access mode mask. */
 #define	O_ACCMODE	(O_RDONLY|O_WRONLY|O_RDWR)
 #endif
 
-#ifndef	_POSIX2_RE_DUP_MAX		/* POSIX 1003.2 RE limit. */
+#ifndef	_POSIX2_RE_DUP_MAX		/** POSIX 1003.2 RE limit. */
 #define	_POSIX2_RE_DUP_MAX	255
 #endif
 
@@ -144,53 +151,60 @@ static int __sigtemp;		/* For the use of sigprocmask */
  * If you can't provide lock values in the open(2) call.  Note, this
  * allows races to happen.
  */
-#ifndef O_EXLOCK			/* 4.4BSD extension. */
+#ifndef O_EXLOCK			/** 4.4BSD extension. */
 #define	O_EXLOCK	0
 #endif
 
-#ifndef O_SHLOCK			/* 4.4BSD extension. */
+#ifndef O_SHLOCK			/** 4.4BSD extension. */
 #define	O_SHLOCK	0
 #endif
 
-#ifndef O_BINARY	/* UNIX systems don't often have or need this */
+#ifndef O_BINARY	/** UNIX systems don't often have or need this */
 #define O_BINARY 0
 #endif
 
-#ifndef O_NONBLOCK	/* Win32 systems doesn't have or need this */
+#ifndef O_NONBLOCK	/** Win32 systems doesn't have or need this */
 #define	O_NONBLOCK	0
 #endif
 
-#ifndef EFTYPE
-#define	EFTYPE		EINVAL		/* POSIX 1003.1 format errno. */
+#ifndef EFTYPE		/** POSIX 1003.1 format errno. */
+#define	EFTYPE		EINVAL
 #endif
 
+/* POSIX 1003.1 seek values */
 #ifndef SEEK_END
-#define	SEEK_SET	0		/* POSIX 1003.1 seek values */
+#define	SEEK_SET	0
 #define	SEEK_CUR	1
 #define	SEEK_END	2
 #endif
 
-#ifndef _POSIX2_RE_DUP_MAX		/* POSIX 1003.2 values. */
+#ifndef _POSIX2_RE_DUP_MAX	/** POSIX 1003.2 values. */
 #define	_POSIX2_RE_DUP_MAX	255
 #endif
 
-#ifndef NULL				/* ANSI C #defines NULL everywhere. */
+#ifndef NULL		/* ANSI C #defines NULL everywhere. */
 #define	NULL		0
 #endif
 
-#ifndef	MAX				/* Usually found in <sys/param.h>. */
+#ifndef	MAX				/* Usually found in "<sys/param.h>". */
 #define	MAX(_a,_b)	((_a)<(_b)?(_b):(_a))
 #endif
-#ifndef	MIN				/* Usually found in <sys/param.h>. */
+#ifndef	MIN				/* Usually found in "<sys/param.h>". */
 #define	MIN(_a,_b)	((_a)<(_b)?(_a):(_b))
 #endif
 
-#ifndef S_ISDIR				/* POSIX 1003.1 file type tests. */
-#define	S_ISDIR(m)	((m & 0170000) == 0040000)	/* directory */
-#define	S_ISCHR(m)	((m & 0170000) == 0020000)	/* char special */
-#define	S_ISBLK(m)	((m & 0170000) == 0060000)	/* block special */
-#define	S_ISREG(m)	((m & 0170000) == 0100000)	/* regular file */
-#define	S_ISFIFO(m)	((m & 0170000) == 0010000)	/* fifo */
+/* POSIX 1003.1 file type tests. */
+#ifndef S_ISDIR
+		/** directory */
+#define	S_ISDIR(m)	((m & 0170000) == 0040000)
+		/** char special */
+#define	S_ISCHR(m)	((m & 0170000) == 0020000)
+		/** block special */
+#define	S_ISBLK(m)	((m & 0170000) == 0060000)
+		/** regular file */
+#define	S_ISREG(m)	((m & 0170000) == 0100000)
+		/** fifo */
+#define	S_ISFIFO(m)	((m & 0170000) == 0010000)
 #endif
 
 #ifndef HAVE_LSTAT

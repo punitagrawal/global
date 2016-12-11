@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2008
- *	Tama Communications Corporation
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2008,
+ *	2009, 2011, 2012, 2014, 2015, 2016
+ * Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -53,14 +54,35 @@
 #include "conf.h"
 #include "die.h"
 #include "find.h"
+#include "getdbpath.h"
+#include "gtagsop.h"
 #include "is_unixy.h"
+#include "langmap.h"
 #include "locatestring.h"
 #include "makepath.h"
 #include "path.h"
 #include "strbuf.h"
 #include "strlimcpy.h"
 #include "test.h"
+#include "varray.h"
 
+/*
+ * use an appropriate string comparison for the file system; define the position of the root slash.
+ */
+#if defined(_WIN32) || defined(__DJGPP__)
+#define STRCMP stricmp
+#define STRNCMP strnicmp
+#define ROOT 2
+#define S_ISSOCK(mode) (0)
+#else
+#define STRCMP strcmp
+#define STRNCMP strncmp
+#define ROOT 0
+#endif
+#ifndef PATH_MAX
+#error Since this platform does not have PATH_MAX, you should define it using an appropriate value for the platform.
+/* #define PATH_MAX     1024 */
+#endif
 /*
  * usage of find_xxx()
  *
@@ -71,30 +93,28 @@
  *	find_close();
  *
  */
-static regex_t skip_area;
-static regex_t *skip;			/* regex for skipping units */
-static regex_t suff_area;
-static regex_t *suff = &suff_area;	/* regex for suffixes */
-static STRBUF *list;
-static int list_count;
-static char **listarray;		/* list for skipping full path */
+static regex_t *skip;			/**< regex for skipping units */
+static regex_t *suff;			/**< regex for suffixes */
 static FILE *ip;
 static FILE *temp;
-static char rootdir[MAXPATHLEN+1];
-static char cwddir[MAXPATHLEN+1];
-static int status;
+static char rootdir[PATH_MAX];
+static char cwddir[MAXPATHLEN];
+static int find_mode;
+static int find_eof;
 #define FIND_OPEN	1
 #define FILELIST_OPEN	2
-#define END_OF_FIND	3
 
 static void trim(char *);
 static char *find_read_traverse(void);
 static char *find_read_filelist(void);
 
 extern int qflag;
-#ifdef DEBUG
 extern int debug;
-#endif
+static const int allow_blank = 1;
+static const int check_looplink = 1;
+static int accept_dotfiles = 0;
+static int skip_unreadable = 0;
+static int find_explain = 0;
 /*
  * trim: remove blanks and '\'.
  */
@@ -112,17 +132,55 @@ trim(char *s)
 	}
 	*p = 0;
 }
-/*
+/**
+ * get the reason for skipping
+ *
+ *	@param[in]	path	path name (must start with "./")
+ *	@return		<directory or not> | <reason for skipping>
+ *		directory or not: 1: directory, 0: file
+ *		reason: 1: dot file, 2: tag file, 0: others
+ */
+static int
+getreason(const char *path)
+{
+	int db, type = 0, is_directory = 0;
+	const char *p;
+
+	/* seek to the last character */
+	p = path + strlen(path) - 1;
+	if (*p == '/') {
+		is_directory = 1;
+		p--;
+	}
+	/* seek to the basename */
+	for (; path < p; p--)
+		if (*p == '/')
+			break;
+	if (*p == '/')
+		p++;
+	/* check for dot files */
+	if (*p == '.') {
+		type = 1;
+	} else {
+		/* check for tag files */
+		for (db = 0; db < GTAGLIM; db++)
+			if (!strcmp(dbname(db), p))
+				type = 2;
+	}
+	return is_directory << 8 | type;
+}
+/**
  * prepare_source: preparing regular expression.
  *
- *	i)	flags	flags for regcomp.
- *	go)	suff	regular expression for source files.
+ *	@return	compiled regular expression for source files.
  */
-static void
+static regex_t *
 prepare_source(void)
 {
+	static regex_t suff_area;
 	STRBUF *sb = strbuf_open(0);
 	char *sufflist = NULL;
+	char *langmap = NULL;
 	int flags = REG_EXTENDED;
 
 	/*
@@ -133,14 +191,19 @@ prepare_source(void)
 #if defined(_WIN32) || defined(__DJGPP__)
 	flags |= REG_ICASE;
 #endif
+	/*
+	 * make suffix list.
+	 */
 	strbuf_reset(sb);
-	if (!getconfs("suffixes", sb))
-		die("cannot get suffixes data.");
+	if (getconfs("langmap", sb)) {
+		langmap =  check_strdup(strbuf_value(sb));
+	}
+	strbuf_reset(sb);
+	make_suffixes(langmap ? langmap : DEFAULTLANGMAP, sb);
 	sufflist = check_strdup(strbuf_value(sb));
 	trim(sufflist);
 	{
 		const char *suffp;
-		int retval;
 
 		strbuf_reset(sb);
 		strbuf_puts(sb, "\\.(");       /* ) */
@@ -162,31 +225,31 @@ prepare_source(void)
 		/*
 		 * compile regular expression.
 		 */
-		retval = regcomp(suff, strbuf_value(sb), flags);
-#ifdef DEBUG
-		if (debug)
-			fprintf(stderr, "find regex: %s\n", strbuf_value(sb));
-#endif
-		if (retval != 0)
+		if (regcomp(&suff_area, strbuf_value(sb), flags) != 0)
 			die("cannot compile regular expression.");
 	}
 	strbuf_close(sb);
+	if (langmap)
+		free(langmap);
 	if (sufflist)
 		free(sufflist);
+	return &suff_area;
 }
-/*
+/**
  * prepare_skip: prepare skipping files.
  *
- *	go)	skip	regular expression for skip files.
- *	go)	listarry[] skip list.
- *	go)	list_count count of skip list.
+ *	Globals used (output):
+ *		listarray[]: 	skip list.
+ *		list_count:	 count of skip list.
+ *
+ *	@return	compiled regular expression for skip files.
  */
-static void
+static regex_t *
 prepare_skip(void)
 {
+	static regex_t skip_area;
 	char *skiplist;
 	STRBUF *reg = strbuf_open(0);
-	int reg_count = 0;
 	char *p, *q;
 	int flags = REG_EXTENDED|REG_NEWLINE;
 
@@ -199,153 +262,297 @@ prepare_skip(void)
 	flags |= REG_ICASE;
 #endif
 	/*
-	 * initinalize common data.
-	 */
-	if (!list)
-		list = strbuf_open(0);
-	else
-		strbuf_reset(list);
-	list_count = 0;
-	if (listarray)
-		(void)free(listarray);
-	listarray = (char **)0;
-	/*
 	 * load skip data.
 	 */
 	if (!getconfs("skip", reg)) {
 		strbuf_close(reg);
-		return;
+		return NULL;
 	}
 	skiplist = check_strdup(strbuf_value(reg));
-	trim(skiplist);
+	if (debug)
+		fprintf(stderr, "DBG: Original skip list:\n%s\n", skiplist);
+	/* trim(skiplist);*/
 	strbuf_reset(reg);
 	/*
 	 * construct regular expression.
 	 */
 	strbuf_putc(reg, '(');	/* ) */
-	for (p = skiplist; p; ) {
-		char *skipf = p;
-		if ((p = locatestring(p, ",", MATCH_FIRST)) != NULL)
-			*p++ = 0;
-		if (*skipf == '/') {
-			list_count++;
-			strbuf_puts0(list, skipf);
-		} else {
-			reg_count++;
-			strbuf_putc(reg, '/');
-			for (q = skipf; *q; q++) {
-				if (isregexchar(*q))
-					strbuf_putc(reg, '\\');
-				strbuf_putc(reg, *q);
-			}
-			if (*(q - 1) != '/')
-				strbuf_putc(reg, '$');
-			if (p)
-				strbuf_putc(reg, '|');
+	/*
+	 * Hard coded skip files:
+	 * (1) files which start with '.'
+	 * (2) tag files
+	 */
+	/* skip files which start with '.' e.g. .cvsignore */
+	if (!accept_dotfiles) {
+		strbuf_puts(reg, "/\\.[^/]+$|");
+		strbuf_puts(reg, "/\\.[^/]+/|");
+	}
+	/* skip tag files */
+	strbuf_puts(reg, "/GTAGS$|");
+	strbuf_puts(reg, "/GRTAGS$|");
+	strbuf_puts(reg, "/GSYMS$|");
+	strbuf_puts(reg, "/GPATH$|");
+	for (p = skiplist; *p; ) {
+		char *skipf;
+		STATIC_STRBUF(sb);
+		strbuf_clear(sb);
+
+		while (*p && *p == ',')
+			p++;
+		if (*p == '\0')
+			break;
+		for (; *p; p++) {
+			if (*p == ',')
+				break;
+			if (*p == '\\' && *(p + 1) == ',') 
+				p++;
+			strbuf_putc(sb, *p);
 		}
+		skipf = strbuf_value(sb);
+		/* '/' means project root directory */
+		if (*skipf == '/') {
+			strbuf_puts(reg, "^\\./");
+			skipf++;
+		} else {
+			strbuf_putc(reg, '/');
+		}
+		for (q = skipf; *q; q++) {
+			/*
+			 * replaces wild cards into regular expressions.
+			 *
+			 * '*' -> '[^/]*'
+			 * '?' -> '[^/]'
+			 * '[...]' -> '[...]'
+			 * '[!...]' -> '[^...]'
+			 */
+			if (*q == '[') {
+				char *c = q;
+				STATIC_STRBUF(class);
+				int isclass = 1;
+
+				strbuf_clear(class);
+				strbuf_putc(class, *c++);		/* '[' */
+				if (*c == '\0')
+					isclass = 0;
+				else if (*c == ']')
+					strbuf_putc(class, *c++);
+				else if (*c == '!') {
+					strbuf_putc(class, '^');
+					c++;
+				} else
+					strbuf_putc(class, *c++);
+				if (isclass) {
+					while (*c && *c != ']')
+						strbuf_putc(class, *c++);
+					if (*c == ']')
+						strbuf_putc(class, *c);	/* ']' */
+					else
+						isclass = 0;
+				}
+				if (isclass) {
+					strbuf_puts(reg, strbuf_value(class));
+					q = c;
+				} else {
+					/* 'class' is thrown away */
+					strbuf_putc(reg, '\\');
+					strbuf_putc(reg, *q);
+				}
+			} else if (*q == '*')
+				strbuf_puts(reg, "[^/]*");
+			else if (*q == '?')
+				strbuf_puts(reg, "[^/]");
+			else if (*q == '\\' && *(q + 1) == ',')
+				strbuf_putc(reg, *++q);
+			else if (isregexchar(*q)) {
+				strbuf_putc(reg, '\\');
+				strbuf_putc(reg, *q);
+			} else {
+				if (*q == '\\' && *(q + 1) != '\0') {
+					strbuf_putc(reg, *q++);
+					strbuf_putc(reg, *q);
+				} else
+					strbuf_putc(reg, *q);
+			}
+		}
+		if (*(q - 1) != '/')
+			strbuf_putc(reg, '$');
+		if (*p == ',')
+			strbuf_putc(reg, '|');
 	}
 	strbuf_unputc(reg, '|');
 	strbuf_putc(reg, ')');
-	if (reg_count > 0) {
-		int retval;
-
-		/*
-		 * compile regular expression.
-		 */
-		skip = &skip_area;
-		retval = regcomp(skip, strbuf_value(reg), flags);
-#ifdef DEBUG
-		if (debug)
-			fprintf(stderr, "skip regex: %s\n", strbuf_value(reg));
-#endif
-		if (retval != 0)
-			die("cannot compile regular expression.");
-	} else {
-		skip = (regex_t *)0;
-	}
-	if (list_count > 0) {
-		int i;
-		listarray = (char **)check_malloc(sizeof(char *) * list_count);
-		p = strbuf_value(list);
-#ifdef DEBUG
-		if (debug)
-			fprintf(stderr, "skip list: ");
-#endif
-		for (i = 0; i < list_count; i++) {
-#ifdef DEBUG
-			if (debug) {
-				fprintf(stderr, "%s", p);
-				if (i + 1 < list_count)
-					fputc(',', stderr);
-			}
-#endif
-			listarray[i] = p;
-			p += strlen(p) + 1;
-		}
-#ifdef DEBUG
-		if (debug)
-			fputc('\n', stderr);
-#endif
-	}
+	/*
+	 * compile regular expression.
+	 */
+	if (debug)
+		fprintf(stderr, "DBG: Regular expression of the skip list:\n%s\n", strbuf_value(reg));
+	if (regcomp(&skip_area, strbuf_value(reg), flags) != 0)
+		die("cannot compile regular expression.");
 	strbuf_close(reg);
 	free(skiplist);
+
+	return &skip_area;
 }
-/*
+/**
+ * issourcefile: check whether or not a source file.
+ *
+ *	@param[in]	path	path name (must start with "./")
+ *	@return		1: source file, 0: other file
+ */
+int
+issourcefile(const char *path)
+{
+	if (suff == NULL) {
+		suff = prepare_source();	/* XXX this cannot return NULL */
+		if (suff == NULL)
+			die("prepare_source failed.");
+	}
+	if (regexec(suff, path, 0, 0, 0) == 0)
+		return 1;
+	return 0;
+}
+/**
  * skipthisfile: check whether or not we accept this file.
  *
- *	i)	path	path name (must start with ./)
- *	r)		1: skip, 0: dont skip
+ *	@param[in]	path	path name (must start with "./")
+ *	@return		1: skip, 0: don't skip
+ *
+ * [Note]
+ * Specification of required path name:
+ * - Path must start with "./".
+ * - Directory path name must end with "/".
  */
-static int
+int
 skipthisfile(const char *path)
 {
-	const char *first, *last;
+	regmatch_t m;
 	int i;
 
 	/*
 	 * unit check.
 	 */
-	if (skip && regexec(skip, path, 0, 0, 0) == 0)
-		return 1;
-	/*
-	 * list check.
-	 */
-	if (list_count == 0)
-		return 0;
-	for (i = 0; i < list_count; i++) {
-		first = listarray[i];
-		last = first + strlen(first);
-		/*
-		 * the path must start with "./".
-		 */
-		if (*(last - 1) == '/') {	/* it's a directory */
-			if (!strncmp(path + 1, first, last - first))
-				return 1;
-		} else {
-			if (!strcmp(path + 1, first))
-				return 1;
+	if (skip == NULL) {
+		skip = prepare_skip();
+		if (skip == NULL)
+			die("prepare_skip failed.");
+	}
+	if (regexec(skip, path, 1, &m, 0) == 0) {
+		if (debug) {
+			int len = strlen(path);
+			fprintf(stderr, "DBG: ");
+			for (i = 0; i < len; i++) {
+				if (m.rm_so == i)
+					fputc('[', stderr);
+				if (m.rm_eo == i)
+					fputc(']', stderr);
+				fputc(path[i], stderr);
+			}
+			if (m.rm_eo == len)
+				fputc(']', stderr);
+			fprintf(stderr, " => SKIPPED\n");
 		}
+		if (find_explain) {
+			int type = getreason(path);
+			const char *kind = (type >> 8) ? "Directory" : "File";
+
+			fprintf(stderr, " - %s '%s' is skipped", kind, trimpath(path));
+			switch (type & 0xff) {
+			case 1:
+				fprintf(stderr, " because the name begins with a dot.\n");
+				break;
+			case 2:
+				fprintf(stderr, " because it is a tag file.\n");
+				break;
+			case 0:		
+				fprintf(stderr, " by the skip list.\n");
+				break;
+			}
+		}
+		return 1;
+	} else {
+		if (debug)
+			fprintf(stderr, "%s\n", path);
 	}
 	return 0;
 }
 
-#define STACKSIZE 50
-static  char dir[MAXPATHLEN+1];			/* directory path */
-static  struct {
-	STRBUF *sb;
-	char *dirp, *start, *end, *p;
-} stack[STACKSIZE], *topp, *curp;		/* stack */
-
 /*
+ * Directory Stack
+ */
+static char dir[MAXPATHLEN];			/**< directory path */
+static VARRAY *stack;				/**< dynamic allocated array */
+struct stack_entry {
+	STRBUF *sb;
+	char *real;
+	char *dirp, *start, *end, *p;
+};
+static int current_entry;			/**< current entry of the stack */
+
+/**
+ * getrealpath: return a real path of dir using allocated area.
+ */
+char *
+getrealpath(const char *dir)
+{
+	char real[PATH_MAX];
+
+	if (realpath(dir, real) == NULL)
+		die("cannot get real path of '%s'.", trimpath(dir));
+	return check_strdup(real);
+}
+/**
+ * has_symlinkloop: whether or not dir has a symbolic link loops.
+ *
+ *	@param[in]	dir	directory (should end by "/")
+ *	@return		1: has a loop, 0: don't have a loop
+ */
+int
+has_symlinkloop(const char *dir)
+{
+	struct stack_entry *sp;
+	char real[PATH_MAX], *p;
+	int i;
+
+	if (!strcmp(dir, "./"))
+		return 0;
+	if (realpath(dir, real) == NULL)
+		die("cannot get real path of '%s'.", trimpath(dir));
+#ifdef SLOOPDEBUG
+	fprintf(stderr, "======== has_symlinkloop ======\n");
+	fprintf(stderr, "dir = '%s', real path = '%s'\n", dir, real);
+	fprintf(stderr, "TEST-1\n");
+	fprintf(stderr, "\tcheck '%s' < '%s'\n", real, rootdir);
+#endif
+	p = locatestring(rootdir, real, MATCH_AT_FIRST);
+	if (p && (*p == '/' || *p == '\0' || !strcmp(real, "/")))
+		return 1;
+	sp = varray_assign(stack, 0, 0);
+#ifdef SLOOPDEBUG
+	fprintf(stderr, "TEST-2\n");
+#endif
+	for (i = current_entry; i >= 0; i--) {
+#ifdef SLOOPDEBUG
+		fprintf(stderr, "%d:\tcheck '%s' == '%s'\n", i, real, sp[i].real);
+#endif
+		if (!strcmp(sp[i].real, real))
+			return 1;
+	}
+#ifdef SLOOPDEBUG
+	fprintf(stderr, "===============================\n");
+#endif
+	return 0;
+}
+
+/**
  * getdirs: get directory list
  *
- *	i)	dir	directory
- *	o)	sb	string buffer
- *	r)		-1: error, 0: normal
+ *	@param[in]	dir	directory (should end by "/")
+ *	@param[out]	sb	string buffer
+ *	@return		-1: error, 0: normal
  *
  * format of directory list:
- * |ddir1\0ffile1\0llink\0|
- * means directory 'dir1', file 'file1' and symbolic link 'link'.
+ * |ddir1\0ffile1\0|
+ * means directory "dir1", file "file1".
  */
 static int
 getdirs(const char *dir, STRBUF *sb)
@@ -354,15 +561,31 @@ getdirs(const char *dir, STRBUF *sb)
 	struct dirent *dp;
 	struct stat st;
 
-	if ((dirp = opendir(dir)) == NULL)
+	if (check_looplink && has_symlinkloop(dir)) {
+		warning("symbolic link loop detected. '%s' is ignored.", trimpath(dir));
 		return -1;
+	}
+	if ((dirp = opendir(dir)) == NULL) {
+		warning("cannot open directory '%s'. ignored.", trimpath(dir));
+		return -1;
+	}
 	while ((dp = readdir(dirp)) != NULL) {
 		if (!strcmp(dp->d_name, "."))
 			continue;
 		if (!strcmp(dp->d_name, ".."))
 			continue;
 		if (stat(makepath(dir, dp->d_name, NULL), &st) < 0) {
-			warning("cannot stat '%s'. (Ignored)", dp->d_name);
+			warning("cannot stat '%s'. ignored.", trimpath(dp->d_name));
+			continue;
+		}
+		if (S_ISSOCK(st.st_mode) || S_ISFIFO(st.st_mode) || S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode)) {
+			warning("file is not regular file '%s'. ignored.", trimpath(dp->d_name));
+			continue;
+		}
+		if (access(makepath(dir, dp->d_name, NULL), R_OK) < 0) {
+			if (!skip_unreadable)
+				die("cannot read file '%s'.", trimpath(dp->d_name));
+			warning("cannot read '%s'. ignored.", trimpath(dp->d_name));
 			continue;
 		}
 		if (S_ISDIR(st.st_mode))
@@ -377,51 +600,71 @@ getdirs(const char *dir, STRBUF *sb)
 	(void)closedir(dirp);
 	return 0;
 }
-/*
- * find_open: start iterator without GPATH.
- *
- *	i)	start	start directory
- *			If NULL, assumed '.' directory.
+/**
+ * set_accept_dotfiles: make find to accept dot files and dot directries.
  */
 void
-find_open(const char *start)
+set_accept_dotfiles(void)
 {
-	assert(status == 0);
-	status = FIND_OPEN;
+	accept_dotfiles = 1;
+}
+/**
+ * set_skip_unreadable: make find to ignore unreadable files.
+ */
+void
+set_skip_unreadable(void)
+{
+	skip_unreadable = 1;
+}
+/**
+ * find_open: start iterator without GPATH.
+ *
+ *	@param[in]	start	start directory,
+ *			If NULL, assumed "." (current) directory.
+ *	@param[in]	explain	print verbose message
+ */
+void
+find_open(const char *start, int explain)
+{
+	struct stack_entry *curp;
+	assert(find_mode == 0);
+	find_mode = FIND_OPEN;
+	find_explain = explain;
 
 	if (!start)
-		start = ".";
+		start = "./";
+        if (realpath(start, rootdir) == NULL)
+                die("cannot get real path of '%s'.", trimpath(dir));
 	/*
 	 * setup stack.
 	 */
-	curp = &stack[0];
-	topp = curp + STACKSIZE; 
+	stack = varray_open(sizeof(struct stack_entry), 50);
+	current_entry = 0;
+	curp = varray_assign(stack, current_entry, 1);
 	strlimcpy(dir, start, sizeof(dir));
 	curp->dirp = dir + strlen(dir);
 	curp->sb = strbuf_open(0);
+	curp->real = getrealpath(dir);
 	if (getdirs(dir, curp->sb) < 0)
-		die("cannot open '.' directory.");
+		die("Work is given up.");
 	curp->start = curp->p = strbuf_value(curp->sb);
 	curp->end   = curp->start + strbuf_getlen(curp->sb);
-
-	/*
-	 * prepare regular expressions.
-	 */
-	prepare_source();
-	prepare_skip();
+	strlimcpy(cwddir, get_root(), sizeof(cwddir));
 }
-/*
+/**
  * find_open_filelist: find_open like interface for handling output of find(1).
  *
- *	i)	filename	file including list of file names.
+ *	@param[in]	filename	file including list of file names.
  *				When "-" is specified, read from standard input.
- *	i)	root		root directory of source tree
+ *	@param[in]	root		root directory of source tree
+ *	@param[in]	explain	print verbose message
  */
 void
-find_open_filelist(const char *filename, const char *root)
+find_open_filelist(const char *filename, const char *root, int explain)
 {
-	assert(status == 0);
-	status = FILELIST_OPEN;
+	assert(find_mode == 0);
+	find_mode = FILELIST_OPEN;
+	find_explain = explain;
 
 	if (!strcmp(filename, "-")) {
 		/*
@@ -429,7 +672,7 @@ find_open_filelist(const char *filename, const char *root)
 		 * temporary file to be able to read repeatedly.
 		 */
 		if (temp == NULL) {
-			char buf[MAXPATHLEN+1];
+			char buf[MAXPATHLEN];
 
 			temp = tmpfile();
 			while (fgets(buf, sizeof(buf), stdin) != NULL)
@@ -440,52 +683,49 @@ find_open_filelist(const char *filename, const char *root)
 	} else {
 		ip = fopen(filename, "r");
 		if (ip == NULL)
-			die("cannot open '%s'.", filename);
+			die("cannot open '%s'.", trimpath(filename));
 	}
 	/*
 	 * rootdir always ends with '/'.
 	 */
-	if (!strcmp(root, "/"))
+	if (!strcmp(root+ROOT, "/"))
 		strlimcpy(rootdir, root, sizeof(rootdir));
 	else
 		snprintf(rootdir, sizeof(rootdir), "%s/", root);
 	strlimcpy(cwddir, root, sizeof(cwddir));
-	/*
-	 * prepare regular expressions.
-	 */
-	prepare_skip();
-	prepare_source();
 }
-/*
+/**
  * find_read: read path without GPATH.
  *
- *	r)		path
+ *	@return		path
  */
 char *
 find_read(void)
 {
 	static char *path;
 
-	assert(status != 0);
-	if (status == END_OF_FIND)
+	assert(find_mode != 0);
+	if (find_eof)
 		path = NULL;
-	else if (status == FILELIST_OPEN)
+	else if (find_mode == FILELIST_OPEN)
 		path = find_read_filelist();
-	else if (status == FIND_OPEN)
+	else if (find_mode == FIND_OPEN)
 		path = find_read_traverse();
 	else
 		die("find_read: internal error.");
 	return path;
 }
-/*
+/**
  * find_read_traverse: read path without GPATH.
  *
- *	r)		path
+ *	@return		path
  */
 char *
 find_read_traverse(void)
 {
-	static char val[MAXPATHLEN+1];
+	static char val[MAXPATHLEN];
+	char path[MAXPATHLEN];
+	struct stack_entry *curp = varray_assign(stack, current_entry, 1);
 
 	for (;;) {
 		while (curp->p < curp->end) {
@@ -493,13 +733,17 @@ find_read_traverse(void)
 			const char *unit = curp->p + 1;
 
 			curp->p += strlen(curp->p) + 1;
-			if (type == 'f') {
-				char path[MAXPATHLEN];
 
+			/*
+			 * Skip files described in the skip list.
+			 */
 				/* makepath() returns unsafe module local area. */
-				strlimcpy(path, makepath(dir, unit, NULL), sizeof(path));
-				if (skipthisfile(path))
-					continue;
+			strlimcpy(path, makepath(dir, unit, NULL), sizeof(path));
+			if (type == 'd')
+				strcat(path, "/");
+			if (skipthisfile(path))
+				continue;
+			if (type == 'f') {
 				/*
 				 * Skip the following:
 				 * o directory
@@ -507,29 +751,25 @@ find_read_traverse(void)
 				 * o dead symbolic link
 				 */
 				if (!test("f", path)) {
-					if (!qflag) {
-						if (test("d", path))
-							warning("'%s' is a directory. (Ignored)", path);
-						else
-							warning("'%s' not found. (Ignored)", path);
-					}
+					if (test("d", path))
+						warning("'%s' is a directory. ignored.", trimpath(path));
+					else
+						warning("'%s' not found. ignored.", trimpath(path));
 					continue;
 				}
 				/*
-				 * GLOBAL cannot treat path which includes blanks.
-				 * It will be improved in the future.
+				 * Now GLOBAL can treat the path which includes blanks.
+				 * This message is obsoleted.
 				 */
-				if (locatestring(path, " ", MATCH_FIRST)) {
-					if (!qflag)
-						warning("'%s' ignored, because it includes blank.", &path[2]);
+				if (!allow_blank && locatestring(path, " ", MATCH_FIRST)) {
+					warning("'%s' ignored, because it includes blank.", trimpath(path));
 					continue;
 				}
 				/*
 				 * A blank at the head of path means
 				 * other than source file.
 				 */
-				if (regexec(suff, path, 0, 0, 0) == 0) {
-					/* source file */
+				if (issourcefile(path)) {
 					strlimcpy(val, path, sizeof(val));
 				} else {
 					/* other file like 'Makefile' */
@@ -542,11 +782,9 @@ find_read_traverse(void)
 			if (type == 'd') {
 				STRBUF *sb = strbuf_open(0);
 				char *dirp = curp->dirp;
-
-				strcat(dirp, "/");
 				strcat(dirp, unit);
+				strcat(dirp, "/");
 				if (getdirs(dir, sb) < 0) {
-					warning("cannot open directory '%s'. (Ignored)", dir);
 					strbuf_close(sb);
 					*(curp->dirp) = 0;
 					continue;
@@ -554,9 +792,9 @@ find_read_traverse(void)
 				/*
 				 * Push stack.
 				 */
-				if (++curp >= topp)
-					die("directory stack over flow.");
+				curp = varray_assign(stack, ++current_entry, 1);
 				curp->dirp = dirp + strlen(dirp);
+				curp->real = getrealpath(dir);
 				curp->sb = sb;
 				curp->start = curp->p = strbuf_value(sb);
 				curp->end   = curp->start + strbuf_getlen(sb);
@@ -564,21 +802,23 @@ find_read_traverse(void)
 		}
 		strbuf_close(curp->sb);
 		curp->sb = NULL;
-		if (curp == &stack[0])
+		free(curp->real);
+		curp->real = NULL;
+		if (current_entry == 0)
 			break;
 		/*
 		 * Pop stack.
 		 */
-		curp--;
+		curp = varray_assign(stack, --current_entry, 0);
 		*(curp->dirp) = 0;
 	}
-	status = END_OF_FIND;
+	find_eof = 1;
 	return NULL;
 }
-/*
+/**
  * find_read_filelist: read path from file
  *
- *	r)		path
+ *	@return		path
  */
 static char *
 find_read_filelist(void)
@@ -592,7 +832,7 @@ find_read_filelist(void)
 		path = strbuf_fgets(ib, ip, STRBUF_NOCRLF);
 		if (path == NULL) {
 			/* EOF */
-			status = END_OF_FIND;
+			find_eof = 1;
 			return NULL;
 		}
 		if (*path == '\0') {
@@ -600,18 +840,21 @@ find_read_filelist(void)
 			continue;
 		}
 		/*
+		 * Lines which start with ". " are considered to be comments.
+		 */
+		if (*path == '.' && *(path + 1) == ' ')
+			continue;
+		/*
 		 * Skip the following:
 		 * o directory
 		 * o file which does not exist
 		 * o dead symbolic link
 		 */
 		if (!test("f", path)) {
-			if (!qflag) {
-				if (test("d", path))
-					warning("'%s' is a directory. (Ignored)", path);
-				else
-					warning("'%s' not found. (Ignored)", path);
-			}
+			if (test("d", path))
+				warning("'%s' is a directory. ignored.", trimpath(path));
+			else
+				warning("'%s' not found. ignored.", trimpath(path));
 			continue;
 		}
 		/*
@@ -620,14 +863,17 @@ find_read_filelist(void)
 		 *	rootdir  /a/b/
 		 *	buf      /a/b/c/d.c -> c/d.c -> ./c/d.c
 		 */
-		path = normalize(path, rootdir, cwddir, buf, sizeof(buf));
+		if (normalize(path, rootdir, cwddir, buf, sizeof(buf)) == NULL) {
+			warning("'%s' is out of source tree. ignored.", trimpath(path));
+			continue;
+		}
+		path = buf;
 		/*
-		 * GLOBAL cannot treat path which includes blanks.
-		 * It will be improved in the future.
+		 * Now GLOBAL can treat the path which includes blanks.
+		 * This message is obsoleted.
 		 */
-		if (locatestring(path, " ", MATCH_LAST)) {
-			if (!qflag)
-				warning("'%s' ignored, because it includes blank.", path + 2);
+		if (!allow_blank && locatestring(path, " ", MATCH_LAST)) {
+			warning("'%s' ignored, because it includes blank.", trimpath(path));
 			continue;
 		}
 		if (skipthisfile(path))
@@ -636,34 +882,34 @@ find_read_filelist(void)
 		 * A blank at the head of path means
 		 * other than source file.
 		 */
-		if (regexec(suff, path, 0, 0, 0) != 0)
+		if (!issourcefile(path))
 			*--path = ' ';
 		return path;
 	}
 }
-/*
+/**
  * find_close: close iterator.
  */
 void
 find_close(void)
 {
-	assert(status != 0);
-	if (status == FIND_OPEN) {
-		for (curp = &stack[0]; curp < topp; curp++)
-			if (curp->sb != NULL)
-				strbuf_close(curp->sb);
-	} else if (status == FILELIST_OPEN) {
+	assert(find_mode != 0);
+	if (find_mode == FIND_OPEN) {
+		if (stack)
+			varray_close(stack);
+	} else if (find_mode == FILELIST_OPEN) {
 		/*
 		 * The --file=- option is specified, we don't close file
 		 * to read it repeatedly.
 		 */
 		if (ip != temp)
 			fclose(ip);
-	} else if (status != END_OF_FIND) {
-		die("illegal find_close");
+	} else {
+		die("find_close: internal error.");
 	}
-	regfree(suff);
+	if (suff)
+		regfree(suff);
 	if (skip)
 		regfree(skip);
-	status = 0;
+	find_eof = find_mode = 0;
 }

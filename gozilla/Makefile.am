@@ -12,7 +12,7 @@
 #
 bin_PROGRAMS= gozilla
 
-INCLUDES = @INCLUDES@
+AM_CPPFLAGS = @AM_CPPFLAGS@
 
 LDADD = @LDADD@
 
@@ -21,3 +21,11 @@ gozilla_DEPENDENCIES = $(LDADD)
 man_MANS = gozilla.1
 
 EXTRA_DIST = $(man_MANS) const.h manual.in
+
+# for osx-default
+gtagsdir = $(DESTDIR)${localstatedir}/gtags
+install-data-hook:
+	if [ ! -d $(gtagsdir) ]; then \
+		$(MKDIR_P) $(gtagsdir); \
+		chmod 777 $(gtagsdir); \
+	fi

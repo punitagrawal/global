@@ -32,7 +32,8 @@
 #define CHAR_BIT 8
 #endif
 #undef LONG_BIT
-#define LONG_BIT	(sizeof(long) * CHAR_BIT)	/* maybe 32 or 64 */
+					/** maybe 32 or 64 */
+#define LONG_BIT	(sizeof(long) * CHAR_BIT)
 
 /*
  * idset->min is initialized to END_OF_ID.
@@ -76,13 +77,13 @@ You should define index as an unsigned integer, and use END_OF_ID like follows:
 	for (id = idset_first(set); id != END_OF_ID; id = idset_next(set))
 		-- processing about an id --
  */
-/*
+/**
  * bit mask table
  * Prepare all bit mask for performance.
  */
 static unsigned long *bit;
 
-/*
+/**
  * Allocate memory for new idset.
  */
 IDSET *
@@ -105,22 +106,22 @@ idset_open(unsigned int size)
 	idset->min = idset->max = idset->lastid = END_OF_ID;
 	return idset;
 }
-/*
+/**
  * Return true if idset is empty.
  *
- *	i)	idset	idset structure
- *	r)		1: empty, 0: not empty
+ *	@param[in]	idset	idset structure
+ *	@return		1: empty, 0: not empty
  */
 int
 idset_empty(IDSET *idset)
 {
 	return IS_EMPTY(idset);
 }
-/*
+/**
  * Add id to the idset.
  *
- *	i)	idset	idset structure
- *	i)	id	id number
+ *	@param[in]	idset	idset structure
+ *	@param[in]	id	id number
  */
 void
 idset_add(IDSET *idset, unsigned int id)
@@ -137,12 +138,12 @@ idset_add(IDSET *idset, unsigned int id)
 	else if (id < idset->min)
 		idset->min = id;
 }
-/*
+/**
  * Whether or not idset includes specified id.
  *
- *	i)	idset	idset structure
- *	i)	id	id number
- *	r)		true: contains, false: doesn't contain
+ *	@param[in]	idset	idset structure
+ *	@param[in]	id	id number
+ *	@return		true: contains, false: doesn't contain
  */
 int
 idset_contains(IDSET *idset, unsigned int id)
@@ -153,11 +154,11 @@ idset_contains(IDSET *idset, unsigned int id)
 		return 0;
 	return (idset->set[id / LONG_BIT] & bit[id % LONG_BIT]) != 0;
 }
-/*
+/**
  * Get first id.
  *
- *      i)      idset   idset structure
- *      r)              id (END_OF_ID: end of id)
+ *      @param[in]      idset   idset structure
+ *      @return              id (END_OF_ID: end of id)
  *
  */
 unsigned int
@@ -167,11 +168,11 @@ idset_first(IDSET *idset)
 	   because idset->min is initialized with END_OF_ID. */
 	return idset->lastid = idset->min;
 }
-/*
+/**
  * Get next id.
  *
- *      i)      idset   idset structure
- *      r)              id (END_OF_ID: end of id)
+ *      @param[in]      idset   idset structure
+ *      @return              id (END_OF_ID: end of id)
  *
  */
 unsigned int
@@ -201,11 +202,11 @@ idset_next(IDSET *idset)
 			return idset->lastid = index0 * LONG_BIT + i;
 	die("idset_next: internal error.");
 }
-/*
+/**
  * Return the number of bits.
  *
- *	i)	idset	idset structure
- *	r)		number of bits
+ *	@param[in]	idset	idset structure
+ *	@return		number of bits
  */
 unsigned int
 idset_count(IDSET *idset)
@@ -216,7 +217,7 @@ idset_count(IDSET *idset)
 		count++;
 	return count;
 }
-/*
+/**
  * Free memory for the idset.
  */
 void

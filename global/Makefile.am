@@ -12,13 +12,16 @@
 #
 bin_PROGRAMS= global
 
-global_SOURCES = global.c
+global_SOURCES = global.c literal.c output.c convert.c
 
-INCLUDES = @INCLUDES@
+noinst_HEADERS = literal.h convert.h output.h
+
+AM_CPPFLAGS = @AM_CPPFLAGS@
 
 LDADD = @LDADD@
 
-global_DEPENDENCIES = $(LDADD)
+global_LDADD = $(LDADD) $(LIBLTDL)
+global_DEPENDENCIES = $(LDADD) $(LTDLDEPS)
 
 man_MANS = global.1
 

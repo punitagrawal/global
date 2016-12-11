@@ -27,10 +27,14 @@
 #include "die.h"
 /*
  * Functions which allocate memory with check.
-*/
+ */
 
-/*
+/**
  * check_malloc: memory allocator
+ *
+ * Uses malloc().
+ *
+ * [Note] Does not return if memory is not available, calls die() instead.
  */
 void *
 check_malloc(size_t size)
@@ -41,8 +45,12 @@ check_malloc(size_t size)
 	return p;
 }
 
-/*
+/**
  * check_calloc: memory allocator
+ *
+ * Uses calloc().
+ *
+ * [Note] Does not return if memory is not available, calls die() instead.
  */
 void *
 check_calloc(size_t number, size_t size)
@@ -52,8 +60,12 @@ check_calloc(size_t number, size_t size)
 		die("short of memory.");
 	return p;
 }
-/*
+/**
  * check_realloc: memory allocator
+ *
+ * Uses realloc().
+ *
+ * [Note] Does not return if memory is not available, calls die() instead.
  */
 void *
 check_realloc(void *area, size_t size)
@@ -63,11 +75,13 @@ check_realloc(void *area, size_t size)
 		die("short of memory.");
 	return p;
 }
-/*
+/**
  * check_strdup: allocate memory and copy string to it.
  *
- *	i)	string	original string
- *	r)		allocated memory
+ *	@param[in]	string	original string
+ *	@return		allocated memory
+ *
+ * Uses check_malloc().
  */
 char *
 check_strdup(const char *string)

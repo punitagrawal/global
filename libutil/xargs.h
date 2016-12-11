@@ -31,6 +31,7 @@
 #define XARGS_ARGV	2
 #define XARGS_STRBUF	3
 #define XARGS_FIND	4
+
 /*
  * Options
  */
@@ -48,8 +49,8 @@ typedef struct {
 	STRBUF *result;
 	int end_of_arg;
 	int unread;
-	int seqno;		/* sequencial number */
-	int type;		/* XARGS_XXX Types */
+	int seqno;		/**< sequencial number */
+	int type;		/**< XARGS_XXX Types */
 	/*
 	 * options
 	 *
@@ -57,34 +58,38 @@ typedef struct {
 	 * This might have to be reviewed.
 	 */
 	int ignore_error;
-	int max_args;		/* 0: no limit, >0: limit */
+	int max_args;		/**< 0: no limit, >0: limit */
 	int put_gpath;
 	int trim_line;
 	int skip_assembly;
 	void (*verbose)(char *, int, int);
+
 	/*
 	 * XARGS_FILE
 	 */
 	FILE *ip;
 	long fptr;
 	STRBUF *path;
+
 	/*
 	 * XARGS_ARGV
 	 */
 	int argc;
-	char **argv;
+	char *const *argv;
+
 	/*
 	 * XARGS_STRBUF
 	 */
 	char *curp;
 	char *endp;
+
 	/*
 	 * XARGS_FIND
  	 */
 } XARGS;
 
 XARGS *xargs_open_with_file(const char *, int, FILE *);
-XARGS *xargs_open_with_argv(const char *, int, int, char **);
+XARGS *xargs_open_with_argv(const char *, int, int, char *const *);
 XARGS *xargs_open_with_strbuf(const char *, int, STRBUF *);
 XARGS *xargs_open_with_find(const char *, int);
 char *xargs_read(XARGS *);

@@ -41,16 +41,13 @@ static char sccsid[] = "@(#)bt_page.c	8.3 (Berkeley) 7/14/94";
 #include "db.h"
 #include "btree.h"
 
-/*
+/**
  * __bt_free --
  *	Put a page on the freelist.
  *
- * Parameters:
- *	t:	tree
- *	h:	page to free
- *
- * Returns:
- *	RET_ERROR, RET_SUCCESS
+ *	@param t	tree
+ *	@param h	page to free
+ *	@return RET_ERROR, RET_SUCCESS
  *
  * Side-effect:
  *	mpool_put's the page.
@@ -70,16 +67,14 @@ __bt_free(t, h)
 	return (mpool_put(t->bt_mp, h, MPOOL_DIRTY));
 }
 
-/*
+/**
  * __bt_new --
  *	Get a new page, preferably from the freelist.
  *
- * Parameters:
- *	t:	tree
- *	npg:	storage for page number.
+ *	@param t	tree
+ *	@param npg	storage for page number.
  *
- * Returns:
- *	Pointer to a page, NULL on error.
+ * @return Pointer to a page, NULL on error.
  */
 PAGE *
 __bt_new(t, npg)

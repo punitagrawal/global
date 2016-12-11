@@ -43,39 +43,57 @@
 
 #include "compat.h"
 
-#define	RET_ERROR	-1		/* Return values. */
+/* Return values. */
+#define	RET_ERROR	-1
 #define	RET_SUCCESS	 0
 #define	RET_SPECIAL	 1
 
-#define	MAX_PAGE_NUMBER	0xffffffff	/* >= # of pages in a file */
+				/** >= # of pages in a file */
+#define	MAX_PAGE_NUMBER	0xffffffff
+				/** pgno_t */
 #define pgno_t		u_int32_t
-#define	MAX_PAGE_OFFSET	65535		/* >= # of bytes in a page */
+				/** >= # of bytes in a page */
+#define	MAX_PAGE_OFFSET	65535
+				/** indx_t */
 #define indx_t		u_int16_t
-#define	MAX_REC_NUMBER	0xffffffff	/* >= # of records in a tree */
+				/** >= # of records in a tree */
+#define	MAX_REC_NUMBER	0xffffffff
+				/** recno_t */
 #define recno_t		u_int32_t
 
-/* Key/data structure -- a Data-Base Thang. */
+/** Key/data structure -- a Data-Base Thang. */
 typedef struct {
-	void	*data;			/* data */
-	size_t	 size;			/* data length */
+	void	*data;			/**< data */
+	size_t	 size;			/**< data length */
 } DBT;
 
 /* Routine flags. */
-#define	R_CURSOR	1		/* del, put, seq */
-#define	__R_UNUSED	2		/* UNUSED */
-#define	R_FIRST		3		/* seq */
-#define	R_IAFTER	4		/* put (RECNO) */
-#define	R_IBEFORE	5		/* put (RECNO) */
-#define	R_LAST		6		/* seq (BTREE, RECNO) */
-#define	R_NEXT		7		/* seq */
-#define	R_NOOVERWRITE	8		/* put */
-#define	R_PREV		9		/* seq (BTREE, RECNO) */
-#define	R_SETCURSOR	10		/* put (RECNO) */
-#define	R_RECNOSYNC	11		/* sync (RECNO) */
+		/** del, put, seq */
+#define	R_CURSOR	1
+		/** UNUSED */
+#define	__R_UNUSED	2
+		/** seq */
+#define	R_FIRST		3
+		/** put (RECNO) */
+#define	R_IAFTER	4
+		/** put (RECNO) */
+#define	R_IBEFORE	5
+		/** seq (BTREE, RECNO) */
+#define	R_LAST		6
+		/** seq */
+#define	R_NEXT		7
+		/** put */
+#define	R_NOOVERWRITE	8
+		/** seq (BTREE, RECNO) */
+#define	R_PREV		9
+		/** put (RECNO) */
+#define	R_SETCURSOR	10
+		/** sync (RECNO) */
+#define	R_RECNOSYNC	11
 
 typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 
-/*
+/**
  * !!!
  * The following flags are included in the dbopen(3) call as part of the
  * open(2) flags.  In order to avoid conflicts with the open flags, start
@@ -89,19 +107,25 @@ typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
  * the DB_LOCK flag isn't set.
  */
 #if UINT_MAX > 65535
-#define	DB_LOCK		0x20000000	/* Do locking. */
-#define	DB_SHMEM	0x40000000	/* Use shared memory. */
-#define	DB_TXN		0x80000000	/* Do transactions. */
+				/** Do locking. */
+#define	DB_LOCK		0x20000000
+				/** Use shared memory. */
+#define	DB_SHMEM	0x40000000
+				/** Do transactions. */
+#define	DB_TXN		0x80000000
 #else
-#define	DB_LOCK		    0x2000	/* Do locking. */
-#define	DB_SHMEM	    0x4000	/* Use shared memory. */
-#define	DB_TXN		    0x8000	/* Do transactions. */
+				/** Do locking. */
+#define	DB_LOCK		    0x2000
+				/** Use shared memory. */
+#define	DB_SHMEM	    0x4000
+				/** Do transactions. */
+#define	DB_TXN		    0x8000
 #endif
 
-/* Access method description structure. */
+/** Access method description structure. */
 typedef struct __db {
-	DBTYPE type;			/* Underlying db type. */
-	/* The 2nd argument was added in order to
+	DBTYPE type;			/**< Underlying db type. */
+	/** The 2nd argument was added in order to
 	   avoid useless writing just before unlink. */
 	int (*close)	(struct __db *, int);
 	int (*del)	(const struct __db *, const DBT *, u_int);
@@ -109,55 +133,59 @@ typedef struct __db {
 	int (*put)	(const struct __db *, DBT *, const DBT *, u_int);
 	int (*seq)	(const struct __db *, DBT *, DBT *, u_int);
 	int (*sync)	(const struct __db *, u_int);
-	void *internal;			/* Access method private. */
+	void *internal;			/**< Access method private. */
 	int (*fd)	(const struct __db *);
 } DB;
 
 #define	BTREEMAGIC	0x053162
 #define	BTREEVERSION	3
-#define	R_DUP		0x01	/* duplicate keys */
+		/** duplicate keys */
+#define	R_DUP		0x01
 
-/* Structure used to pass parameters to the btree routines. */
+/** Structure used to pass parameters to the btree routines. */
 typedef struct {
 	u_long	flags;
-	u_int	cachesize;	/* bytes to cache */
-	int	maxkeypage;	/* maximum keys per page */
-	int	minkeypage;	/* minimum keys per page */
-	u_int	psize;		/* page size */
-	int	(*compare)	/* comparison function */
+	u_int	cachesize;	/**< bytes to cache */
+	int	maxkeypage;	/**< maximum keys per page */
+	int	minkeypage;	/**< minimum keys per page */
+	u_int	psize;		/**< page size */
+	int	(*compare)	/**< comparison function */
 	   (const DBT *, const DBT *);
-	size_t	(*prefix)	/* prefix function */
+	size_t	(*prefix)	/**< prefix function */
 	   (const DBT *, const DBT *);
-	int	lorder;		/* byte order */
+	int	lorder;		/**< byte order */
 } BTREEINFO;
 
 #define	HASHMAGIC	0x061561
 #define	HASHVERSION	2
 
-/* Structure used to pass parameters to the hashing routines. */
+/** Structure used to pass parameters to the hashing routines. */
 typedef struct {
-	u_int	bsize;		/* bucket size */
-	u_int	ffactor;	/* fill factor */
-	u_int	nelem;		/* number of elements */
-	u_int	cachesize;	/* bytes to cache */
-	u_int32_t		/* hash function */
+	u_int	bsize;		/**< bucket size */
+	u_int	ffactor;	/**< fill factor */
+	u_int	nelem;		/**< number of elements */
+	u_int	cachesize;	/**< bytes to cache */
+	u_int32_t		/** hash function */
 		(*hash)(const void *, size_t);
-	int	lorder;		/* byte order */
+	int	lorder;		/**< byte order */
 } HASHINFO;
 
-#define	R_FIXEDLEN	0x01	/* fixed-length records */
-#define	R_NOKEY		0x02	/* key not required */
-#define	R_SNAPSHOT	0x04	/* snapshot the input */
+		/** fixed-length records */
+#define	R_FIXEDLEN	0x01
+		/** key not required */
+#define	R_NOKEY		0x02
+		/** snapshot the input */
+#define	R_SNAPSHOT	0x04
 
-/* Structure used to pass parameters to the record routines. */
+/** Structure used to pass parameters to the record routines. */
 typedef struct {
 	u_long	flags;
-	u_int	cachesize;	/* bytes to cache */
-	u_int	psize;		/* page size */
-	int	lorder;		/* byte order */
-	size_t	reclen;		/* record length (fixed-length records) */
-	u_char	bval;		/* delimiting byte (variable-length records */
-	char	*bfname;	/* btree file name */ 
+	u_int	cachesize;	/**< bytes to cache */
+	u_int	psize;		/**< page size */
+	int	lorder;		/**< byte order */
+	size_t	reclen;		/**< record length (fixed-length records) */
+	u_char	bval;		/**< delimiting byte (variable-length records */
+	char	*bfname;	/**< btree file name */ 
 } RECNOINFO;
 
 /*

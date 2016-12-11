@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2002, 2005, 2006
+ * Copyright (c) 1997, 1998, 1999, 2000, 2002, 2005, 2006, 2010, 2014
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -45,9 +45,15 @@
 #define INITIALSIZE 80
 #define EXPANDSIZE 80
 
-/* for strbuf_fgets() */
-#define STRBUF_APPEND	1
-#define STRBUF_NOCRLF	2
+/*
+ * Defines for strbuf_fgets()
+ */
+			/** append next record to existing data. */
+#define STRBUF_APPEND		1
+			/* remove last '\n' and/or '\r', if exists. */
+#define STRBUF_NOCRLF		2
+			/* skip lines which start with '#' */
+#define STRBUF_SHARPSKIP	4
 
 typedef struct _strbuf {
 	char *name;
@@ -55,17 +61,17 @@ typedef struct _strbuf {
 	char *endp;
 	char *curp;
 	int sbufsize;
-	int alloc_failed;
 } STRBUF;
 
-/*
+/**
  * STATIC_STRBUF(sb):
  *
  * This macro is used for static string buffer which is suitable for
  * work area and(or) return value of function. The area allocated once
  * is repeatedly used though the area is never released.
- * You must call strbuf_clear(sb) every time before using.
- * You must not call strbuf_close(sb) for it.
+ *
+ * You must call strbuf_clear() every time before using.
+ * You must not call strbuf_close() for it.
  *
  * Usage:
  *      function(...) {
@@ -83,11 +89,9 @@ typedef struct _strbuf {
 #define strbuf_empty(sb) (sb->sbufsize == 0)
 
 #define strbuf_putc(sb, c)	do {\
-	if (!sb->alloc_failed) {\
-		if (sb->curp >= sb->endp)\
-			__strbuf_expandbuf(sb, 0);\
-		*sb->curp++ = c;\
-	}\
+	if (sb->curp >= sb->endp)\
+		__strbuf_expandbuf(sb, 0);\
+	*sb->curp++ = c;\
 } while (0)
 
 #define strbuf_puts0(sb, s) do {\
@@ -98,12 +102,10 @@ typedef struct _strbuf {
 #define strbuf_getlen(sb) (sb->curp - sb->sbuf)
 #define strbuf_setlen(sb, len) do {\
 	unsigned int _length = len;\
-	if (!sb->alloc_failed) {\
-		if (_length < strbuf_getlen(sb))\
-			sb->curp = sb->sbuf + _length;\
-		else if (_length > strbuf_getlen(sb))\
-			__strbuf_expandbuf(sb, _length - strbuf_getlen(sb));\
-	}\
+	if (_length < strbuf_getlen(sb))\
+		sb->curp = sb->sbuf + _length;\
+	else if (_length > strbuf_getlen(sb))\
+		__strbuf_expandbuf(sb, _length - strbuf_getlen(sb));\
 } while (0)
 #define strbuf_lastchar(sb) (*(sb->curp - 1))
 
@@ -117,15 +119,19 @@ void strbuf_clear(STRBUF *);
 void strbuf_nputs(STRBUF *, const char *, int);
 void strbuf_nputc(STRBUF *, int, int);
 void strbuf_puts(STRBUF *, const char *);
+void strbuf_puts_withterm(STRBUF *, const char *, int);
 void strbuf_puts_nl(STRBUF *, const char *);
 void strbuf_putn(STRBUF *, int);
+void strbuf_putn64(STRBUF *, long long);
 int strbuf_unputc(STRBUF *, int);
 char *strbuf_value(STRBUF *);
 void strbuf_trim(STRBUF *);
 void strbuf_close(STRBUF *);
 char *strbuf_fgets(STRBUF *, FILE *, int);
-void strbuf_sprintf(STRBUF *sb, const char *s, ...)
+void strbuf_sprintf(STRBUF *, const char *, ...)
 	__attribute__ ((__format__ (__printf__, 2, 3)));
+void strbuf_vsprintf(STRBUF *, const char *, va_list)
+	__attribute__ ((__format__ (__printf__, 2, 0)));
 STRBUF *strbuf_open_tempbuf(void);
 void strbuf_release_tempbuf(STRBUF *);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, 2005 Tama Communications Corporation
+ * Copyright (c) 2004, 2005, 2010 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -41,50 +41,50 @@ static ASSOC *assoc[GTAGLIM];
  * It can be distinguished the first character of the cache record.
  * If it is a blank then it is the former else the latter.
  *
- * (1) The frequency and the id of duplicate object entry file (=fid).
- *	+----------------------+
- *	|' '<fid>' '<frequency>|
- *	+----------------------+
- *    The duplicate object entry file can be referred to as 'D/<fid>.html'.
+ * (1) Duplicate tag file
+ *	+-----------------------+
+ *	|' '<fid>\0<frequency>\0|
+ *	+-----------------------+
+ *    Duplicate tag file can be referred to as "D/<fid>.html".
  *	
- * (2) The tag definition.
- *	+---------------------------+
- *	|<line number>' '<file name>|
- *	+---------------------------+
- *    The tag entry is referred to as 'S/<fid>.html#<line number>'.
- *    The <fid> can be calculated by path2fid(<file name>).
+ * (2) Tag definition
+ *	+----------------------+
+ *	|<line number>\0<fid>\0|
+ *	+----------------------+
+ *    Tag is referred to as "S/<fid>.html#<line number>".
  */
 
-/*
+/**
  * cache_open: open cache file.
  */
 void
 cache_open(void)
 {
-	assoc[GTAGS]  = assoc_open('d');
-	assoc[GRTAGS] = assoc_open('r');
-	assoc[GSYMS] = symbol ? assoc_open('y') : NULL;
+	assoc[GTAGS]  = assoc_open();
+	assoc[GRTAGS] = assoc_open();
+	assoc[GSYMS] = symbol ? assoc_open() : NULL;
 }
-/*
+/**
  * cache_put: put tag line.
  *
- *	i)	db	db type
- *	i)	tag	tag name
- *	i)	line	tag line
+ *	@param[in]	db	db type
+ *	@param[in]	tag	tag name
+ *	@param[in]	line	tag line
+ *	@param[in]	len
  */
 void
-cache_put(int db, const char *tag, const char *line)
+cache_put(int db, const char *tag, const char *line, int len)
 {
 	if (db >= GTAGLIM)
 		die("I don't know such tag file.");
-	assoc_put(assoc[db], tag, line);
+	assoc_put_withlen(assoc[db], tag, line, len);
 }
-/*
+/**
  * cache_get: get tag line.
  *
- *	i)	db	db type
- *	i)	tag	tag name
- *	r)		tag line
+ *	@param[in]	db	db type
+ *	@param[in]	tag	tag name
+ *	@return		tag line
  */
 const char *
 cache_get(int db, const char *tag)
@@ -93,7 +93,7 @@ cache_get(int db, const char *tag)
 		die("I don't know such tag file.");
 	return assoc_get(assoc[db], tag);
 }
-/*
+/**
  * cache_close: close cache file.
  */
 void
