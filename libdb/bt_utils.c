@@ -50,20 +50,19 @@ static char sccsid[] = "@(#)bt_utils.c	8.8 (Berkeley) 7/20/94";
 #include "db.h"
 #include "btree.h"
 
-/*
+/**
  * __bt_ret --
  *	Build return key/data pair.
  *
- * Parameters:
- *	t:	tree
- *	e:	key/data pair to be returned
- *	key:	user's key structure (NULL if not to be filled in)
- *	rkey:	memory area to hold key
- *	data:	user's data structure (NULL if not to be filled in)
- *	rdata:	memory area to hold data
- *       copy:	always copy the key/data item
+ *	@param t	tree
+ *	@param e	key/data pair to be returned
+ *	@param key	user's key structure (NULL if not to be filled in)
+ *	@param rkey	memory area to hold key
+ *	@param data	user's data structure (NULL if not to be filled in)
+ *	@param rdata	memory area to hold data
+ *	@param copy	always copy the key/data item
  *
- * Returns:
+ * @return
  *	RET_SUCCESS, RET_ERROR.
  */
 int
@@ -142,12 +141,11 @@ dataonly:
 /*
  * __BT_CMP -- Compare a key to a given record.
  *
- * Parameters:
- *	t:	tree
- *	k1:	DBT pointer of first arg to comparison
- *	e:	pointer to EPG for comparison
+ *	@param t	tree
+ *	@param k1	DBT pointer of first arg to comparison
+ *	@param e	pointer to EPG for comparison
  *
- * Returns:
+ * @return
  *	< 0 if k1 is < record
  *	= 0 if k1 is = record
  *	> 0 if k1 is > record
@@ -206,11 +204,10 @@ __bt_cmp(t, k1, e)
 /*
  * __BT_DEFCMP -- Default comparison routine.
  *
- * Parameters:
- *	a:	DBT #1
- *	b: 	DBT #2
+ *	@param a	DBT #1
+ *	@param b 	DBT #2
  *
- * Returns:
+ * @return
  *	< 0 if a is < b
  *	= 0 if a is = b
  *	> 0 if a is > b
@@ -235,14 +232,13 @@ __bt_defcmp(a, b)
 	return ((int)a->size - (int)b->size);
 }
 
-/*
+/**
  * __BT_DEFPFX -- Default prefix routine.
  *
- * Parameters:
- *	a:	DBT #1
- *	b: 	DBT #2
+ *	@param a	DBT #1
+ *	@param b 	DBT #2
  *
- * Returns:
+ * @return
  *	Number of bytes needed to distinguish b from a.
  */
 size_t

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, 2004, 2005, 2008
+ * Copyright (c) 2002, 2004, 2005, 2008, 2015, 2016
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -30,19 +30,33 @@
 #include <strings.h>
 #endif
 
+#include "checkalloc.h"
 #include "die.h"
 #include "locatestring.h"
 #include "strbuf.h"
+#include "strmake.h"
+#include "strhash.h"
 #include "langmap.h"
+#include "varray.h"
 
+static void trim_suffix_list(STRBUF *, STRHASH *);
 static int match_suffix_list(const char *, const char *);
 
 static STRBUF *active_map;
+static int wflag;
 
-/*
+/**
+ * set warning flag on.
+ */
+void
+set_langmap_wflag()
+{
+	wflag = 1;
+}
+/**
  * construct language map.
  *
- * copy string langmap and convert it to language map like this:
+ * copy string langmap (map) and convert it to language map like this:
  *
  * langmap (string)	"c:.c.h,java:.java,cpp:.C.H"
  *	|
@@ -72,9 +86,128 @@ setup_langmap(const char *map)
 		die_with_code(2, "syntax error in langmap '%s'.", map);
 	/* strbuf_close(active_map); */
 }
+/**
+ * trim suffix list
+ *
+ * Remove duplicated suffixs from the suffix list.
+ */
+static void
+trim_suffix_list(STRBUF *list, STRHASH *hash) {
+	STATIC_STRBUF(sb);
+	const char *p, *suffix;;
 
+	strbuf_clear(sb);
+	strbuf_puts(sb, strbuf_value(list));
+	strbuf_reset(list);
+	for (p = strbuf_value(sb); *p; p += strlen(suffix)) {
+		struct sh_entry *sh;
+
+		suffix = strmake(++p, ".");
+		if ((sh = strhash_assign(hash, suffix, 0)) != NULL) {
+			if (!sh->value && wflag)
+				warning("langmap: suffix '%s' is duplicated. all except for the head is ignored.", suffix);
+			sh->value = (void *)1;
+		} else {
+			strbuf_putc(list, '.');
+			strbuf_puts(list, suffix);
+			(void)strhash_assign(hash, suffix, 1);
+		}
+	}
+}
 /*
- * decide the language of the suffix.
+ * merge and trim a langmap
+ *
+ * (1) duplicated suffixes except for the first one are ignored.
+ * (2) one more entries which belong to a language are gathered by one.
+ *
+ * Example:
+ * C++:.cpp.c++,Java:.java.cpp,C++:.inl
+ *      |                 ----(1)  ----(2)
+ *	v
+ * C++:.cpp.c++.inl,Java:.java
+ */
+const char *
+trim_langmap(const char *map)
+{
+	typedef struct {
+		char *name;	/* language: C++ */
+		char *list;	/* suffixes: .cpp.c++ */
+	} SUFFIX;
+	STATIC_STRBUF(sb);
+	const char *p = map;
+	STRBUF *name = strbuf_open(0);
+	STRBUF *list = strbuf_open(0);
+	STRHASH *hash = strhash_open(10);
+	VARRAY *vb = varray_open(sizeof(SUFFIX), 32);
+	SUFFIX *ent = NULL;
+	int i;
+
+	strbuf_clear(sb);
+	while (*p) {
+		strbuf_reset(name);
+		strbuf_reset(list);
+		strbuf_puts(name, strmake(p, ":"));
+		p += strbuf_getlen(name) + 1;
+		strbuf_puts(list, strmake(p, ","));
+		p += strbuf_getlen(list);
+		if (*p)
+			p++;
+		if (strbuf_getlen(name) == 0)
+			die_with_code(2, "syntax error in langmap '%s'.", map);
+		if (strchr(strbuf_value(name), ','))
+			die_with_code(2, "syntax error in langmap '%s'.", map);
+		/*
+		 * ignores duplicated suffixes.
+		 */
+		trim_suffix_list(list, hash);
+		if (strbuf_getlen(list) == 0)
+			continue;
+		/*
+		 * examine whether it appeared already.
+		 */
+		ent = NULL;
+		for (i = 0; i < vb->length; i++) {
+			SUFFIX *ent0 = varray_assign(vb, i, 0);
+			if (!strcmp(ent0->name, strbuf_value(name))) {
+				ent = ent0;
+				break;
+			}
+		}
+		if (ent == NULL) {
+			/* set initial values to a new entry */
+			ent = varray_append(vb);
+			ent->name = check_strdup(strbuf_value(name));
+			ent->list = check_strdup(strbuf_value(list));
+		} else {
+			/* append values to the entry */
+			ent->list = check_realloc(ent->list,
+				strlen(ent->list) + strbuf_getlen(list) + 1);
+			strcat(ent->list, strbuf_value(list));
+		}
+	}
+	for (i = 0; i < vb->length; i++) {
+		ent = varray_assign(vb, i, 0);
+		if (i > 0)
+			strbuf_putc(sb, ',');
+		strbuf_puts(sb, ent->name);
+		strbuf_putc(sb, ':');
+		strbuf_puts(sb, ent->list);
+		free(ent->name);
+		free(ent->list);
+	}
+	strbuf_close(name);
+	strbuf_close(list);
+	strhash_close(hash);
+	varray_close(vb);
+	return strbuf_value(sb);
+}
+
+/**
+ * decide language of the suffix.
+ *
+ * 		Though '*.h' files are shared by C and C++, GLOBAL treats them
+ * 		as C source files by default. If you set an environment variable
+ *		'GTAGSFORCECPP' then C++ parser will be invoked.
  */
 const char *
 decide_lang(const char *suffix)
@@ -98,12 +231,11 @@ decide_lang(const char *suffix)
 			return lang;
 		lang = list + strlen(list) + 1;
 	}
-
 	return NULL;
 }
 
-/*
- * return true if the suffix matches with one in the list.
+/**
+ * return true if the suffix exists in the list.
  */
 static int
 match_suffix_list(const char *suffix, const char *list)
@@ -123,8 +255,13 @@ match_suffix_list(const char *suffix, const char *list)
 	return 0;
 }
 
-/*
- * make suffix value from langmap value.
+/**
+ * make a suffix list from the langmap.
+ *
+ * "c:.c.h,java:.java,cpp:.C.H"
+ *	|
+ *	v
+ * ".c.h.java.C.H"
  */
 void
 make_suffixes(const char *langmap, STRBUF *sb)

@@ -33,7 +33,7 @@
 #include "incop.h"
 #include "common.h"
 #include "htags.h"
-#include "../gtags-parser/asm_res.h"
+#include "../libparser/asm_res.h"
 
 #define lex_symbol_generation_rule(x) asm_ ## x
 #include "lexcommon.h"
@@ -94,12 +94,14 @@ WORD		{ALPHA}{ALPHANUM}*
 		 * #include|   <aaa/bbb.h>|
 		 *         ~~~~~~~~~~~~~~~~
 		 */
-		while ((c = input()) && c != '\n' && isspace(c))
+		while ((c = input()) && c != EOF && c != '\n' && isspace(c))
 			echoc(c);
+		if (c == EOF)
+			c = '\n';
 		if (c == '\n') {
 			unput(c);
 		} else if (c) {
-			char path[MAXPATHLEN+1], *p = path;
+			char path[MAXPATHLEN], *p = path, *lim = p + MAXPATHLEN - 1;
 			int sep = 0;
 
 			if (c == '"')
@@ -109,9 +111,12 @@ WORD		{ALPHA}{ALPHANUM}*
 			put_char(c);
 
 			/* pick up path name */
-			while ((c = input()) && c != '\n' && c != sep)
-				*p++ = c;
+			while ((c = input()) && c != EOF && c != '\n' && c != sep)
+				if (p < lim)
+					*p++ = c;
 			*p = '\0';
+			if (c == EOF)
+				c = '\n';
 			if (c == sep) {
 				struct data *inc;
 				const char *basename = locatestring(path, "/", MATCH_LAST);
@@ -161,6 +166,8 @@ WORD		{ALPHA}{ALPHANUM}*
 			if (a) {
 				put_anchor(gettag(a), a->type, LINENO);
 				a->done = 1;
+			} else if (grtags_is_empty) {
+				put_anchor_force(LEXTEXT, LEXLENG, LINENO);
 			} else {
 				ECHO;
 			}

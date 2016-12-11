@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 1999, 2000, 2002, 2003
+ * Copyright (c) 1998, 1999, 2000, 2002, 2003, 2008
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -29,6 +29,7 @@
 #include <strings.h>
 #endif
 
+#include "die.h"
 #include "gparam.h"
 #include "strlimcpy.h"
 #include "token.h"
@@ -44,7 +45,7 @@ int cppmode;			/* allow '::' as a token */
 int ymode;			/* allow token which start with '%' */
 char token[MAXTOKEN];
 char curfile[MAXPATHLEN];
-int continued_line;		/* previous line ends with '\\' */
+int continued_line;		/* previous line ends with '\' */
 
 static char ptok[MAXTOKEN];
 static int lasttok;
@@ -54,8 +55,10 @@ static STRBUF *ib;
 #define tlen	(p - &token[0])
 static void pushbackchar(void);
 
-/*
+/**
  * opentoken:
+ *
+ *	@param[in]	file
  */
 int
 opentoken(const char *file)
@@ -72,7 +75,7 @@ opentoken(const char *file)
 	continued_line = 0;
 	return 1;
 }
-/*
+/**
  * closetoken:
  */
 void
@@ -85,22 +88,21 @@ closetoken(void)
 /*
  * nexttoken: get next token
  *
- *	i)	interested	interested special character
+ *	@param[in]	interested	interested special character
  *				if NULL then all character.
- *	i)	reserved	converter from token to token number
+ *	@param[in]	reserved	converter from token to token number
  *				if this is specified, nexttoken() return
  *				word number, else return symbol.
- *	r)	EOF(-1)	end of file
- *		c ==0		symbol ('tok' has the value.)
- *		c < 256		interested special character
+ *	@return	EOF(-1)	end of file,
+ *		c ==0		symbol (SYMBOL; token has the value.),
+ *		c < 256		interested special character,
  *		c > 1000	reserved word
  *
- * nexttoken() doesn't return followings.
- *
- * o comment
- * o space (' ', '\t', '\f', '\v', '\r')
- * o quoted string ("...", '.')
- * o number
+ * [Note] nexttoken() doesn't return followings:
+ * - comment
+ * - space (' ', '\t', '\f', '\v', '\r')
+ * - quoted string ("...", '.')
+ * - number
  */
 
 int
@@ -177,15 +179,13 @@ nexttoken(const char *interested, int (*reserved)(const char *, int))
 				sharp = 1;
 				continue;
 			}
-		} else if (c == ':' && cppmode) {
-			if (peekc(1) == ':') {
-				p = token;
-				*p++ = c;
-				*p++ = nextchar();
-				*p   = 0;
-				if (reserved && (c = (*reserved)(token, tlen)) == 0)
-					break;
-			}
+		} else if (c == ':' && cppmode && peekc(1) == ':') {
+			p = token;
+			*p++ = c;
+			*p++ = nextchar();
+			*p   = 0;
+			if (reserved && (c = (*reserved)(token, tlen)) == 0)
+				break;
 		} else if (c == '%' && ymode) {
 			/* recognize '%%' as a token if it is reserved word. */
 			if (atfirst) {
@@ -215,8 +215,14 @@ nexttoken(const char *interested, int (*reserved)(const char *, int))
 				if (tmp == '\"' || tmp == '\'')
 					continue;
 			}
-			for (*p++ = c; (c = nextchar()) != EOF && (c & 0x80 || isalnum(c) || c == '_'); *p++ = c)
-				;
+			for (*p++ = c; (c = nextchar()) != EOF && (c & 0x80 || isalnum(c) || c == '_');) {
+				if (tlen < sizeof(token))
+					*p++ = c;
+			}
+			if (tlen == sizeof(token)) {
+				warning("symbol name is too long. (Ignored) [+%d %s]", lineno, curfile);
+				continue;
+			}
 			*p = 0;
 	
 			if (c != EOF)
@@ -235,7 +241,7 @@ nexttoken(const char *interested, int (*reserved)(const char *, int))
 	}
 	return lasttok = c;
 }
-/*
+/**
  * pushbacktoken: push back token
  *
  *	following nexttoken() return same token again.
@@ -245,25 +251,54 @@ pushbacktoken(void)
 {
 	strlimcpy(ptok, token, sizeof(ptok));
 }
-/*
+/**
  * peekc: peek next char
  *
- *	i)	immediate	0: ignore blank, 1: include blank
+ *	@param[in]	immediate	0: ignore blank, 1: include blank
  *
- * Peekc() read ahead following blanks but doesn't change line.
+ * peekc() read ahead following blanks but doesn't change line.
  */
 int
 peekc(int immediate)
 {
 	int c;
 	long pos;
+    int comment = 0;
 
 	if (cp != NULL) {
 		if (immediate)
 			c = nextchar();
 		else
-			while ((c = nextchar()) != EOF && c != '\n' && isspace(c))
-				;
+            while ((c = nextchar()) != EOF && c != '\n') {
+                if (c == '/') {			/* comment */
+                    if ((c = nextchar()) == '/') {
+                        while ((c = nextchar()) != EOF)
+                            if (c == '\n') {
+                                pushbackchar();
+                                break;
+                            }
+                    } else if (c == '*') {
+                        comment = 1;
+                        while ((c = nextchar()) != EOF) {
+                            if (c == '*') {
+                                if ((c = nextchar()) == '/')
+                                {
+                                    comment = 0;
+                                    break;
+                                }
+                            }
+                            else if (c == '\n')
+                            {
+                                pushbackchar();
+                                break;
+                            }
+                        }
+                    } else
+                        pushbackchar();
+                }
+                else if (!isspace(c))
+                    break;
+            }
 		if (c != EOF)
 			pushbackchar();
 		if (c != '\n' || immediate)
@@ -273,13 +308,51 @@ peekc(int immediate)
 	if (immediate)
 		c = getc(ip);
 	else
-		while ((c = getc(ip)) != EOF && isspace(c))
-			;
+        while ((c = getc(ip)) != EOF) {
+            if (comment) {
+                while ((c = getc(ip)) != EOF) {
+                    if (c == '*') {
+                        if ((c = getc(ip)) == '/')
+                        {
+                            comment = 0;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (c == '/') {			/* comment */
+                if ((c = getc(ip)) == '/') {
+                    while ((c = getc(ip)) != EOF)
+                        if (c == '\n') {
+                            break;
+                        }
+                } else if (c == '*') {
+                    while ((c = getc(ip)) != EOF) {
+                        if (c == '*') {
+                            if ((c = getc(ip)) == '/')
+                                break;
+                        }
+                    }
+                } else
+                    break;
+            }
+            else if (!isspace(c))
+                break;
+        }
+
 	(void)fseek(ip, pos, SEEK_SET);
 
 	return c;
 }
-/*
+/**
+ * throwaway_nextchar: throw away next character
+ */
+void
+throwaway_nextchar(void)
+{
+	nextchar();
+}
+/**
  * atfirst_exceptspace: return if current position is the first column
  *			except for space.
  *	|      1 0
@@ -296,7 +369,7 @@ atfirst_exceptspace(void)
 		start++;
 	return (start == end) ? 1 : 0;
 }
-/*
+/**
  * pushbackchar: push back character.
  *
  *	following nextchar() return same character again.

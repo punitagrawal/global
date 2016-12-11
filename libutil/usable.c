@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 1999, 2000, 2002
+ * Copyright (c) 1998, 1999, 2000, 2002, 2014
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -22,6 +22,7 @@
 #include <config.h>
 #endif
 #include <assert.h>
+#include <ctype.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif
@@ -44,11 +45,11 @@
 static const char *suffix[] = {".exe", ".com", ".bat",};
 #endif
 
-/*
+/**
  * usable: check if command is executable or not.
  *
- *	i)	command
- *	r)		==NULL: not found.
+ *	@param[in]	command
+ *	@return		==NULL: not found.
  *			!=NULL: absolute path of command.
  */
 char *
@@ -57,7 +58,7 @@ usable(const char *command)
 	STRBUF *sb;
 	char *p;
 	const char *dir;
-	static char path[MAXPATHLEN+1];
+	static char path[MAXPATHLEN];
 
 #if defined(_WIN32) || defined(__DJGPP__)
 	int i, lim = sizeof(suffix)/sizeof(char *);
@@ -106,4 +107,42 @@ usable(const char *command)
 finish:
 	strbuf_close(sb);
 	return *path ? path : NULL;
+}
+/**
+ * version_check: check if the version meets condition
+ *
+ *      @param[in]      target_version
+ *      @param[in]      required_version
+ *      @return         -1: error
+ *                      0: does not meet the requirement
+ *                      1: meets the requirement
+ */
+int
+check_version(const char *target_version, const char *required_version)
+{
+	int result = 0;
+	const char *tp = target_version;
+	const char *rp = required_version;
+
+	while (tp && rp) {
+		if (!isdigit(*tp) || !isdigit(*rp))
+			return -1;
+		result = atoi(tp) - atoi(rp);
+		if (result < 0)
+			return 0;
+		else if (result > 0)
+			return 1;
+		else {
+			if ((tp = strchr(tp, '.')) != 0)
+				tp++;
+			if ((rp = strchr(rp, '.')) != 0)
+				rp++;
+		}
+	}
+	if (tp == 0 && rp == 0)
+		return 1;
+	else if (rp == 0)
+		return 1;
+	else
+		return 0;
 }

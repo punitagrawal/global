@@ -47,16 +47,15 @@ static char sccsid[] = "@(#)bt_search.c	8.8 (Berkeley) 7/31/94";
 static int __bt_snext(BTREE *, PAGE *, const DBT *, int *);
 static int __bt_sprev(BTREE *, PAGE *, const DBT *, int *);
 
-/*
+/**
  * __bt_search --
  *	Search a btree for a key.
  *
- * Parameters:
- *	t:	tree to search
- *	key:	key to find
- *	exactp:	pointer to exact match flag
+ *	@param[in] t	tree to search
+ *	@param[in] key	key to find
+ *	@param[out] exactp	pointer to exact match flag
  *
- * Returns:
+ * @return
  *	The EPG for matching record, if any, or the EPG for the location
  *	of the key, if it were inserted into the tree, is entered into
  *	the bt_cur field of the tree.  A pointer to the field is returned.
@@ -133,18 +132,17 @@ next:		BT_PUSH(t, h->pgno, index);
 	}
 }
 
-/*
+/**
  * __bt_snext --
  *	Check for an exact match after the key.
  *
- * Parameters:
- *	t:	tree
- *	h:	current page
- *	key:	key
- *	exactp:	pointer to exact match flag
+ *	@param[in] t	tree
+ *	@param[in] h	current page
+ *	@param[in] key	key
+ *	@param[out] exactp	pointer to exact match flag
  *
- * Returns:
- *	If an exact match found.
+ * @return
+ *	TRUE (1) if an exact match found, else FALSE (0).
  */
 static int
 __bt_snext(t, h, key, exactp)
@@ -172,18 +170,17 @@ __bt_snext(t, h, key, exactp)
 	return (0);
 }
 
-/*
+/**
  * __bt_sprev --
  *	Check for an exact match before the key.
  *
- * Parameters:
- *	t:	tree
- *	h:	current page
- *	key:	key
- *	exactp:	pointer to exact match flag
+ *	@param[in] t	tree
+ *	@param[in] h	current page
+ *	@param[in] key	key
+ *	@param[out] exactp	pointer to exact match flag
  *
- * Returns:
- *	If an exact match found.
+ * @return
+ *	TRUE (1) if an exact match found, else FALSE (0).
  */
 static int
 __bt_sprev(t, h, key, exactp)

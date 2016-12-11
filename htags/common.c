@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, 2005 Tama Communications Corporation
+ * Copyright (c) 2004, 2005, 2008, 2010, 2011 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -40,83 +40,105 @@
 #endif
 
 #include "global.h"
+#include "anchor.h"
 #include "common.h"
 #include "htags.h"
 #include "path2url.h"
 
 /*
  * Tag definitions
- *
- * Htags generates HTML tag by default.
  */
-const char *html_begin		= "<html>";
+const char *html_begin		= "<html xmlns='http://www.w3.org/1999/xhtml'>";
 const char *html_end		= "</html>";
 const char *html_head_begin	= "<head>";
 const char *html_head_end	= "</head>";
 const char *html_title_begin	= "<title>";
 const char *html_title_end	= "</title>";
-const char *body_begin		= "<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>";
+const char *body_begin		= "<body>";
 const char *body_end		= "</body>";
-const char *title_begin		= "<h1><font color='#cc0000'>";
-const char *title_end		= "</font></h1>";
-const char *header_begin	= "<h2>";
+const char *title_begin		= "<h1 class='title'>";
+const char *title_end		= "</h1>";
+const char *header_begin	= "<h2 class='header'>";
 const char *header_end		= "</h2>";
-const char *cvslink_begin	= "<font size='-1'>";
-const char *cvslink_end		= "</font>";
-const char *caution_begin	= "<center>\n<blockquote>";
-const char *caution_end		= "</blockquote>\n</center>";
+const char *poweredby_begin	= "<div class='poweredby'>";
+const char *poweredby_end	= "</div>";
+const char *cvslink_begin	= "<span class='cvs'>";
+const char *cvslink_end		= "</span>";
+const char *caution_begin	= "<div class='caution'>";
+const char *caution_end		= "</div>";
 const char *list_begin		= "<ol>";
 const char *list_end		= "</ol>";
 const char *item_begin		= "<li>";
-const char *item_end		= "";
-const char *flist_begin		= "<table cellpadding='2' width='100%'>";
+const char *item_end		= "</li>";
+const char *flist_begin		= "<table class='flist'>";
 const char *flist_end		= "</table>";
-const char *fline_begin		= "<tr>";
+const char *fline_begin		= "<tr class='flist'>";
 const char *fline_end		= "</tr>";
-const char *fitem_begin		= "<td nowrap>";
+const char *fitem_begin		= "<td class='flist'>";
 const char *fitem_end		= "</td>";
 const char *define_list_begin	= "<dl>";
 const char *define_list_end	= "</dl>";
 const char *define_term_begin	= "<dt>";
-const char *define_term_end	= "";
+const char *define_term_end	= "</dt>";
 const char *define_desc_begin	= "<dd>";
-const char *define_desc_end	= "";
+const char *define_desc_end	= "</dd>";
 const char *table_begin		= "<table>";
 const char *table_end		= "</table>";
-const char *comment_begin	= "<i><font color='green'>";
-const char *comment_end		= "</font></i>";
-const char *sharp_begin		= "<font color='darkred'>";
-const char *sharp_end		= "</font>";
-const char *brace_begin		= "<font color='red'>";
-const char *brace_end		= "</font>";
+const char *comment_begin	= "<em class='comment'>";
+const char *comment_end		= "</em>";
+const char *sharp_begin		= "<em class='sharp'>";
+const char *sharp_end		= "</em>";
+const char *brace_begin		= "<em class='brace'>";
+const char *brace_end		= "</em>";
 const char *verbatim_begin	= "<pre>";
 const char *verbatim_end	= "</pre>";
-const char *reserved_begin	= "<b>";
-const char *reserved_end	= "</b>";
-const char *position_begin	= "<font color='gray'>";
-const char *position_end	= "</font>";
-const char *warned_line_begin	= "<span style='background-color:yellow'>";
-const char *warned_line_end	= "</span>";
-const char *error_begin		= "<h1><font color='#cc0000'>";
-const char *error_end		= "</font></h1>";
-const char *message_begin	= "<h3>";
+const char *reserved_begin	= "<strong class='reserved'>";
+const char *reserved_end	= "</strong>";
+const char *position_begin	= "<em class='position'>";
+const char *position_end	= "</em>";
+const char *warned_line_begin	= "<em class='warned'>";
+const char *warned_line_end	= "</em>";
+const char *current_line_begin	= "<span class='curline'>";
+const char *current_line_end	= "</span>";
+const char *current_row_begin	= "<tr class='curline'>";
+const char *current_row_end	= "</tr>";
+const char *error_begin		= "<h2 class='error'>";
+const char *error_end		= "</h2>";
+const char *message_begin	= "<h3 class='message'>";
 const char *message_end		= "</h3>";
-const char *string_begin	= "<u>";
-const char *string_end		= "</u>";
+const char *string_begin	= "<em class='string'>";
+const char *string_end		= "</em>";
 const char *quote_great		= "&gt;";
 const char *quote_little	= "&lt;";
 const char *quote_amp		= "&amp;";
 const char *quote_space		= "&nbsp;";
-const char *hr			= "<hr>";
-const char *br			= "<br>";
-const char *empty_element	= "";
+const char *hr			= "<hr />";
+const char *br			= "<br />";
+const char *empty_element	= " /";
 const char *noframes_begin	= "<noframes>";
 const char *noframes_end	= "</noframes>";
 
-/*
- * 1: Enforce XHTML1.0 strict or XHTML1.1.
- */
-static int strict_xhtml = 0;
+/* tree view tag (--tree-view) */
+const char *tree_control	= "<div id='control'>All <a href='#'>close</a> | <a href='#'>open</a></div>";
+const char *tree_loading	= "<span id='init' class='loading'>Under construction...</span>";
+const char *tree_begin		= "<ul id='tree'>";
+const char *tree_begin_using	= "<ul id='tree' class='%s'>";
+const char *tree_end		= "</ul>";
+const char *dir_begin		= "<li><span class='folder'>";
+const char *dir_title_end	= "</span>";
+const char *dir_end		= "</li>";
+const char *file_begin		= "<li><span class='file'>";
+const char *file_end		= "</span></li>";
+
+/* fixed guide tag (--fixed-guide) */
+const char *guide_begin		= "<div id='guide'><ul>";
+const char *guide_end		= "</ul></div>";
+const char *guide_unit_begin	= "<li>";
+const char *guide_unit_end	= "</li>";
+const char *guide_path_begin	= "<li class='standout'><span>";
+const char *guide_path_end	= "</span></li>";
+
+static const char *fix_attr_value(const char *);
 
 /*
  * print string and new line.
@@ -131,82 +153,50 @@ fputs_nl(const char *s, FILE *op)
 	return 0;
 }
 /*
- * XHTML support.
- *
- * If the --xhtml option is specified, htags(1) generates XHTML output.
- * We define each style for the tags in 'style.css' in this directory.
+ * These methods are used to tell lex() the current path information.
+ */
+static char current_path[MAXPATHLEN];
+static char current_dir[MAXPATHLEN];
+static char current_file[MAXPATHLEN];
+
+/**
+ * save path infomation
  */
 void
-setup_xhtml(void)
+save_current_path(const char *path)
 {
-	if (!strcmp(xhtml_version, "1.1") && !Fflag)
-		strict_xhtml = 1;
-	html_begin		= "<html xmlns='http://www.w3.org/1999/xhtml'>";
-	html_end		= "</html>";
-	html_head_begin		= "<head>";
-	html_head_end		= "</head>";
-	html_title_begin	= "<title>";
-	html_title_end		= "</title>";
-	body_begin		= "<body>";
-	body_end		= "</body>";
-	title_begin		= "<h1 class='title'>";
-	title_end		= "</h1>";
-	header_begin		= "<h2 class='header'>";
-	header_end		= "</h2>";
-	cvslink_begin		= "<span class='cvs'>";
-	cvslink_end		= "</span>";
-	caution_begin		= "<div class='caution'>";
-	caution_end		= "</div>";
-	list_begin		= "<ol>";
-	list_end		= "</ol>";
-	item_begin		= "<li>";
-	item_end		= "</li>";
-	flist_begin		= "<table class='flist'>";
-	flist_end		= "</table>";
-	fline_begin		= "<tr class='flist'>";
-	fline_end		= "</tr>";
-	fitem_begin		= "<td class='flist'>";
-	fitem_end		= "</td>";
-	define_list_begin	= "<dl>";
-	define_list_end		= "</dl>";
-	define_term_begin	= "<dt>";
-	define_term_end		= "</dt>";
-	define_desc_begin	= "<dd>";
-	define_desc_end		= "</dd>";
-	table_begin		= "<table>";
-	table_end		= "</table>";
-	comment_begin		= "<em class='comment'>";
-	comment_end		= "</em>";
-	sharp_begin		= "<em class='sharp'>";
-	sharp_end		= "</em>";
-	brace_begin		= "<em class='brace'>";
-	brace_end		= "</em>";
-	verbatim_begin		= "<pre>";
-	verbatim_end		= "</pre>";
-	reserved_begin		= "<strong class='reserved'>";
-	reserved_end		= "</strong>";
-	position_begin		= "<em class='position'>";
-	position_end		= "</em>";
-	warned_line_begin	= "<em class='warned'>";
-	warned_line_end		= "</em>";
-	error_begin		= "<h2 class='error'>";
-	error_end		= "</h2>";
-	message_begin		= "<h3 class='message'>";
-	message_end		= "</h3>";
-	string_begin		= "<em class='string'>";
-	string_end		= "</em>";
-	quote_great		= "&gt;";
-	quote_little		= "&lt;";
-	quote_amp		= "&amp;";
-	quote_space		= "&nbsp;";
-	hr			= "<hr />";
-	br			= "<br />";
-	empty_element		= " /";
-	noframes_begin		= "<noframes>";
-	noframes_end		= "</noframes>";
+	char *startp, *p;
+
+	strlimcpy(current_path, path, sizeof(current_path));
+	/* Extract directory name and file name from path */
+	strlimcpy(current_dir, path, sizeof(current_path));
+	startp = current_dir;
+	p = startp + strlen(current_dir);
+	while (p > startp) {
+		if (*--p == '/') {
+			*p = '\0';
+			strlimcpy(current_file, p + 1, sizeof(current_file));
+			return;
+		}
+	}
+	/* It seems that the path doesn't include '/' */
+	strlimcpy(current_file, path, sizeof(current_file));
 }
-/*
+char *
+get_current_dir(void)
+{
+	return current_dir;
+}
+char *
+get_current_file(void)
+{
+	return current_file;
+}
+
+/**
  * Generate upper directory.
+ *
+ * Just returns the parent path of dir. (Adds "../" to it).
  */
 const char *
 upperdir(const char *dir)
@@ -220,7 +210,7 @@ upperdir(const char *dir)
 /*
  * Load text from file with replacing @PARENT_DIR@ macro.
  * Macro @PARENT_DIR@ is replaced with the parent directory
- * of the 'HTML' directory.
+ * of the "HTML" directory.
  */
 static const char *
 sed(FILE *ip, int place)
@@ -255,7 +245,7 @@ sed(FILE *ip, int place)
 	}
 	return strbuf_value(sb);
 }
-/*
+/**
  * Generate custom header.
  */
 const char *
@@ -272,7 +262,7 @@ gen_insert_header(int place)
 	}
 	return sed(ip, place);
 }
-/*
+/**
  * Generate custom footer.
  */
 const char *
@@ -289,43 +279,43 @@ gen_insert_footer(int place)
 	}
 	return sed(ip, place);
 }
-/*
+/**
  * Generate beginning of generic page
  *
- *	i)	title	title of this page
- *	i)	place	SUBDIR: this page is in sub directory
+ *	@param[in]	title	title of this page
+ *	@param[in]	place	SUBDIR: this page is in sub directory,
  *			TOPDIR: this page is in the top directory
- *	i)	use_frameset
+ *	@param[in]	use_frameset
  *			use frameset document type or not
+ *	@param[in]	header_item
+ *			item which should be inserted into the header
  */
 static const char *
-gen_page_generic_begin(const char *title, int place, int use_frameset)
+gen_page_generic_begin(const char *title, int place, int use_frameset, const char *header_item)
 {
 	STATIC_STRBUF(sb);
-	const char *dir = (place == SUBDIR) ? "../" : "";
+	const char *dir = NULL;
 
+	switch (place) {
+	case TOPDIR:
+		dir = "";
+		break;
+	case SUBDIR:
+		 dir = "../";
+		break;
+	case CGIDIR:
+		 dir = "$basedir/";	/* decided by the CGI script */
+		break;
+	}
 	strbuf_clear(sb);
 	if (enable_xhtml) {
 		/*
-		 * Since some browser cannot treat "<?xml...>", we don't
-		 * write the declaration as long as XHTML1.1 is not required.
-		 */
-		if (strict_xhtml) {
-			strbuf_puts_nl(sb, "<?xml version='1.0' encoding='ISO-8859-1'?>");
-			strbuf_sprintf(sb, "<?xml-stylesheet type='text/css' href='%sstyle.css'?>\n", dir);
-		}
-		/*
 		 * If the --frame option are specified then we take
 		 * 'XHTML 1.0 Frameset' for index.html
-		 * and 'XHTML 1.0 Transitional' for other files,
-		 * else if the config variable 'xhtml_version' is
-		 * set to '1.1' then we take 'XHTML 1.1',
-		 * else 'XHTML 1.0 Transitional'.
+		 * and 'XHTML 1.0 Transitional' for other files.
 		 */
 		if (use_frameset)
 			strbuf_puts_nl(sb, "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Frameset//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd'>");
-		else if (!Fflag && strict_xhtml)
-			strbuf_puts_nl(sb, "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'>");
 		else
 			strbuf_puts_nl(sb, "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>");
 	}
@@ -340,33 +330,48 @@ gen_page_generic_begin(const char *title, int place, int use_frameset)
 		strbuf_sprintf(sb, "<meta http-equiv='Content-Style-Type' content='text/css'%s>\n", empty_element);
 		strbuf_sprintf(sb, "<link rel='stylesheet' type='text/css' href='%sstyle.css'%s>\n", dir, empty_element);
 	}
+	if (header_item)
+		strbuf_puts(sb, header_item);		/* internal use */
+	if (html_header)
+		strbuf_puts(sb, html_header);		/* --html-header=file */
 	strbuf_puts(sb, html_head_end);
 	return strbuf_value(sb);
 }
-/*
+/**
  * Generate beginning of normal page
  *
- *	i)	title	title of this page
- *	i)	place	SUBDIR: this page is in sub directory
+ *	@param[in]	title	title of this page
+ *	@param[in]	place	SUBDIR: this page is in sub directory,
  *			TOPDIR: this page is in the top directory
  */
 const char *
 gen_page_begin(const char *title, int place)
 {
-	return gen_page_generic_begin(title, place, 0);
+	return gen_page_generic_begin(title, place, 0, NULL);
+}
+/**
+ * beginning of normal page for index page
+ *
+ *	@param[in]	title	title of this page
+ *	@param[in]	header_item	an item which should be inserted into the header
+ */
+const char *
+gen_page_index_begin(const char *title, const char *header_item)
+{
+	return gen_page_generic_begin(title, TOPDIR, 0, header_item);
 }
 /*
- * Generate beginning of frameset page
+ * Generate beginning of frameset page (<frameset>)
  *
- *	i)	title	title of this page
+ *	@param[in]	title	title of this page
  */
 const char *
 gen_page_frameset_begin(const char *title)
 {
-	return gen_page_generic_begin(title, TOPDIR, 1);
+	return gen_page_generic_begin(title, TOPDIR, 1, NULL);
 }
 /*
- * Generate end of page
+ * Generate end of page (</html>)
  */
 const char *
 gen_page_end(void)
@@ -375,13 +380,15 @@ gen_page_end(void)
 }
 
 /*
- * Generate image tag.
+ * Generate image tag (<img>)
  *
- *	i)	where	Where is the icon directory?
- *			CURRENT: current directory
+ *	@param[in]	where	Where is the icon directory?
+ *			CURRENT: current directory,
  *			PARENT: parent directory
- *	i)	file	icon file without suffix.
- *	i)	alt	alt string
+ *	@param[in]	file	icon file without suffix.
+ *	@param[in]	alt	alt string (the 'alt' attribute is always added)
+ *
+ *	[Note] Images are assumed to be in the "icons" or "../icons" directory, only.
  */
 const char *
 gen_image(int where, const char *file, const char *alt)
@@ -392,13 +399,13 @@ gen_image(int where, const char *file, const char *alt)
 	strbuf_clear(sb);
 	if (enable_xhtml)
 		strbuf_sprintf(sb, "<img class='icon' src='%s/%s.%s' alt='[%s]'%s>",
-			dir, file, icon_suffix, alt, empty_element);
+			dir, file, icon_suffix, fix_attr_value(alt), empty_element);
 	else
 		strbuf_sprintf(sb, "<img src='%s/%s.%s' alt='[%s]' %s%s>",
-			dir, file, icon_suffix, alt, icon_spec, empty_element);
+			dir, file, icon_suffix, fix_attr_value(alt), icon_spec, empty_element);
 	return strbuf_value(sb);
 }
-/*
+/**
  * Generate name tag.
  */
 const char *
@@ -410,7 +417,9 @@ gen_name_number(int number)
 	return gen_name_string(buf);
 }
 /*
- * Generate name tag.
+ * Generate name tag (<a name='xxx'>).
+ *
+ * Uses attribute 'id', if is XHTML.
  */
 const char *
 gen_name_string(const char *name)
@@ -421,29 +430,28 @@ gen_name_string(const char *name)
 	if (enable_xhtml) {
 		/*
 		 * Since some browser cannot understand "<a id='xxx' />",
-		 * we put both of 'id=' and 'name=' as long as XHTML1.1
-		 * is not required. XHTML1.1 prohibit 'name='.
+		 * we put both of 'id=' and 'name='.
 		 */
-		if (strict_xhtml)
-			strbuf_sprintf(sb, "<a id='%s' />", name);
-		else
-			strbuf_sprintf(sb, "<a id='%s' name='%s' />", name, name);
+		strbuf_sprintf(sb, "<a id='%s' name='%s'></a>", name, name);
 	} else {
-		strbuf_sprintf(sb, "<a name='%s'>", name);
+		strbuf_sprintf(sb, "<a name='%s'></a>", name);
 	}
 	return strbuf_value(sb);
 }
 /*
- * Generate anchor begin tag.
+ * Generate anchor begin tag (<a href='dir/file.suffix#key'>).
  * (complete format)
  *
- *	i)	dir	directory
- *	i)	file	file
- *	i)	suffix	suffix
- *	i)	key	key
- *	i)	title	title='xxx'
- *	i)	target	target='xxx'
- *	r)		generated anchor tag
+ *	@param[in]	dir	directory
+ *	@param[in]	file	file
+ *	@param[in]	suffix	suffix (file extension e.g. '.txt'). A '.' (dot) will be added.
+ *	@param[in]	key	key
+ *	@param[in]	title	title='xxx' attribute; if NULL, doesn't add it.
+ *	@param[in]	target	target='xxx' attribute; if NULL, doesn't add it.
+ *	@return		generated anchor tag
+ *
+ *	[Note] dir, file, suffix, key, target and title may be NULL.
+ *	[Note] Single quote (') characters are used to delimit the attribute values.
  */
 const char *
 gen_href_begin_with_title_target(const char *dir, const char *file, const char *suffix, const char *key, const char *title, const char *target)
@@ -478,31 +486,37 @@ gen_href_begin_with_title_target(const char *dir, const char *file, const char *
 		strbuf_puts(sb, key);
 	}
 	strbuf_putc(sb, '\'');
-	if (target)
-		strbuf_sprintf(sb, " target='%s'", target);
+	if (Fflag && target)
+		strbuf_sprintf(sb, " target='%s'", fix_attr_value(target));
 	if (title)
-		strbuf_sprintf(sb, " title='%s'", title);
+		strbuf_sprintf(sb, " title='%s'", fix_attr_value(title));
 	strbuf_putc(sb, '>');
 	return strbuf_value(sb);
 }
-/*
+/**
  * Generate simple anchor begin tag.
+ *
+ * Uses: gen_href_begin_with_title_target()
  */
 const char *
 gen_href_begin_simple(const char *file)
 {
 	return gen_href_begin_with_title_target(NULL, file, NULL, NULL, NULL, NULL);
 }
-/*
+/**
  * Generate anchor begin tag without title and target.
+ *
+ * Uses: gen_href_begin_with_title_target()
  */
 const char *
 gen_href_begin(const char *dir, const char *file, const char *suffix, const char *key)
 {
 	return gen_href_begin_with_title_target(dir, file, suffix, key, NULL, NULL);
 }
-/*
+/**
  * Generate anchor begin tag without target.
+ *
+ * Uses: gen_href_begin_with_title_target()
  */
 const char *
 gen_href_begin_with_title(const char *dir, const char *file, const char *suffix, const char *key, const char *title)
@@ -510,14 +524,14 @@ gen_href_begin_with_title(const char *dir, const char *file, const char *suffix,
 	return gen_href_begin_with_title_target(dir, file, suffix, key, title, NULL);
 }
 /*
- * Generate anchor end tag.
+ * Generate anchor end tag (</a>).
  */
 const char *
 gen_href_end(void)
 {
 	return "</a>";
 }
-/*
+/**
  * Generate list begin tag.
  */
 const char *
@@ -538,10 +552,10 @@ gen_list_begin(void)
 			} else {
 				strbuf_sprintf(sb, "%s\n%s%s%s%s",
 					table_begin, 
-					"<tr><th nowrap align='left'>tag</th>",
-					"<th nowrap align='right'>line</th>",
-					"<th nowrap align='center'>file</th>",
-					"<th nowrap align='left'>source code</th></tr>");
+					"<tr><th nowrap='nowrap' align='left'>tag</th>",
+					"<th nowrap='nowrap' align='right'>line</th>",
+					"<th nowrap='nowrap' align='center'>file</th>",
+					"<th nowrap='nowrap' align='left'>source code</th></tr>");
 			}
 		} else {
 			strbuf_puts(sb, verbatim_begin);
@@ -549,16 +563,17 @@ gen_list_begin(void)
 	}
 	return strbuf_value(sb);
 }
-/*
+/**
  * Generate list body.
  *
- * s must be choped.
+ * ctags_x with the --encode-path=" \t"
  */
 const char *
-gen_list_body(const char *srcdir, const char *ctags_x)		/* virtually const */
+gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtually const */
 {
 	STATIC_STRBUF(sb);
-	const char *p, *filename, *fid;
+	char path[MAXPATHLEN];
+	const char *p;
 	SPLIT ptable;
 
 	strbuf_clear(sb);
@@ -566,25 +581,27 @@ gen_list_body(const char *srcdir, const char *ctags_x)		/* virtually const */
 		recover(&ptable);
 		die("too small number of parts in list_body().\n'%s'", ctags_x);
 	}
-	filename = ptable.part[PART_PATH].start + 2;	/* remove './' */
-	fid = path2fid(filename);
+	strlimcpy(path, decode_path(ptable.part[PART_PATH].start + 2), sizeof(path));
+	if (fid == NULL)
+		fid = path2fid(path);
 	if (table_list) {
+		strbuf_puts(sb, current_row_begin);
 		if (enable_xhtml) {
-			strbuf_puts(sb, "<tr><td class='tag'>");
+			strbuf_puts(sb, "<td class='tag'>");
 			strbuf_puts(sb, gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
 			strbuf_puts(sb, ptable.part[PART_TAG].start);
 			strbuf_puts(sb, gen_href_end());
 			strbuf_sprintf(sb, "</td><td class='line'>%s</td><td class='file'>%s</td><td class='code'>",
-				ptable.part[PART_LNO].start, filename);
+				ptable.part[PART_LNO].start, path);
 		} else {
-			strbuf_puts(sb, "<tr><td nowrap>");
+			strbuf_puts(sb, "<td nowrap='nowrap'>");
 			strbuf_puts(sb, gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
 			strbuf_puts(sb, ptable.part[PART_TAG].start);
 			strbuf_puts(sb, gen_href_end());
-			strbuf_sprintf(sb, "</td><td nowrap align='right'>%s</td><td nowrap align='left'>%s</td><td nowrap>",
-				ptable.part[PART_LNO].start, filename);
+			strbuf_sprintf(sb, "</td><td nowrap='nowrap' align='right'>%s</td>"
+				       "<td nowrap='nowrap' align='left'>%s</td><td nowrap='nowrap'>",
+				ptable.part[PART_LNO].start, path);
 		}
-
 		for (p = ptable.part[PART_LINE].start; *p; p++) {
 			unsigned char c = *p;
 
@@ -602,25 +619,27 @@ gen_list_body(const char *srcdir, const char *ctags_x)		/* virtually const */
 			} else
 				strbuf_putc(sb, c);
 		}
-		strbuf_puts(sb, "</td></tr>");
+		strbuf_puts(sb, "</td>");
+		strbuf_puts(sb, current_row_end);
 		recover(&ptable);
 	} else {
-		int done = 0;
-
+		/* print tag name with anchor */
+		strbuf_puts(sb, current_line_begin);
 		strbuf_puts(sb, gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
 		strbuf_puts(sb, ptable.part[PART_TAG].start);
 		strbuf_puts(sb, gen_href_end());
-		p = ctags_x + strlen(ptable.part[PART_TAG].start);
 		recover(&ptable);
 
-		for (; *p; p++) {
+		/* print line number */
+		for (p = ptable.part[PART_TAG].end; p < ptable.part[PART_PATH].start; p++)
+			strbuf_putc(sb, *p);
+		/* print file name */
+		strbuf_puts(sb, path);
+		/* print the rest */
+		for (p = ptable.part[PART_PATH].end; *p; p++) {
 			unsigned char c = *p;
 
-			/* ignore "./" in path name */
-			if (!done && c == '.' && *(p + 1) == '/') {
-				p++;
-				done = 1;
-			} else if (c == '&')
+			if (c == '&')
 				strbuf_puts(sb, quote_amp);
 			else if (c == '<')
 				strbuf_puts(sb, quote_little);
@@ -629,10 +648,11 @@ gen_list_body(const char *srcdir, const char *ctags_x)		/* virtually const */
 			else
 				strbuf_putc(sb, c);
 		}
+		strbuf_puts(sb, current_line_end);
 	}
 	return strbuf_value(sb);
 }
-/*
+/**
  * Generate list end tag.
  */
 const char *
@@ -641,43 +661,9 @@ gen_list_end(void)
 	return table_list ? table_end : verbatim_end;
 }
 /*
- * Generate div begin tag.
+ * Generate beginning of form (<form>)
  *
- *	i)	align	right,left,center
- */
-const char *
-gen_div_begin(const char *align)
-{
-	STATIC_STRBUF(sb);
-
-	if (strbuf_empty(sb)) {
-		strbuf_clear(sb);
-		if (align) {
-			/*
-			 * In XHTML, alignment is defined in the file 'style.css'.
-			 */
-			if (enable_xhtml)
-				strbuf_sprintf(sb, "<div class='%s'>", align);
-			else
-				strbuf_sprintf(sb, "<div align='%s'>", align);
-		} else {
-			strbuf_puts(sb, "<div>");
-		}
-	}
-	return strbuf_value(sb);
-}
-/*
- * Generate div end tag.
- */
-const char *
-gen_div_end(void)
-{
-	return "</div>";
-}
-/*
- * Generate beginning of form
- *
- *	i)	target	target
+ *	@param[in]	target	target attribute or NULL for no target.
  */
 const char *
 gen_form_begin(const char *target)
@@ -685,14 +671,14 @@ gen_form_begin(const char *target)
 	STATIC_STRBUF(sb);
 
 	strbuf_clear(sb);
-	strbuf_sprintf(sb, "<form method='get' action='%s'", action);
-	if (target)
-		strbuf_sprintf(sb, " target='%s'", target);
+	strbuf_sprintf(sb, "<form method='get' action='%s'", fix_attr_value(action));
+	if (Fflag && target)
+		strbuf_sprintf(sb, " target='%s'", fix_attr_value(target));
 	strbuf_puts(sb, ">");
 	return strbuf_value(sb);
 }
 /*
- * Generate end of form
+ * Generate end of form (</form>)
  */
 const char *
 gen_form_end(void)
@@ -700,7 +686,9 @@ gen_form_end(void)
 	return "</form>";
 }
 /*
- * Generate input tag
+ * Generate input tag (<input>)
+ *
+ * Uses: gen_input_with_title_checked()
  */
 const char *
 gen_input(const char *name, const char *value, const char *type)
@@ -708,7 +696,9 @@ gen_input(const char *name, const char *value, const char *type)
 	return gen_input_with_title_checked(name, value, type, 0, NULL);
 }
 /*
- * Generate input radiobox tag
+ * Generate input radiobox tag (<input type='radio'>)
+ *
+ * Uses: gen_input_with_title_checked()
  */
 const char *
 gen_input_radio(const char *name, const char *value, int checked, const char *title)
@@ -716,7 +706,9 @@ gen_input_radio(const char *name, const char *value, int checked, const char *ti
 	return gen_input_with_title_checked(name, value, "radio", checked, title);
 }
 /*
- * Generate input checkbox tag
+ * Generate input checkbox tag (<input type='checkbox'>)
+ *
+ * Uses: gen_input_with_title_checked()
  */
 const char *
 gen_input_checkbox(const char *name, const char *value, const char *title)
@@ -724,7 +716,12 @@ gen_input_checkbox(const char *name, const char *value, const char *title)
 	return gen_input_with_title_checked(name, value, "checkbox", 0, title);
 }
 /*
- * Generate input radio tag
+ * Generate input radio tag (<input>)
+ *
+ *	[Note] name, value, type and title may be NULL, thus only those
+ *		with a non-NULL value will have there attribute added.
+ *		The argument names are the same as the corresponding HTML attribute names.
+ *	[Note] Single quote (') characters are used to delimit the attribute values.
  */
 const char *
 gen_input_with_title_checked(const char *name, const char *value, const char *type, int checked, const char *title)
@@ -736,9 +733,9 @@ gen_input_with_title_checked(const char *name, const char *value, const char *ty
 	if (type)
 		strbuf_sprintf(sb, " type='%s'", type);
 	if (name)
-		strbuf_sprintf(sb, " name='%s'", name);
+		strbuf_sprintf(sb, " name='%s' id='%s'", name, name);
 	if (value)
-		strbuf_sprintf(sb, " value='%s'", value);
+		strbuf_sprintf(sb, " value='%s'", fix_attr_value(value));
 	if (checked) {
 		if (enable_xhtml)
 			strbuf_puts(sb, " checked='checked'");
@@ -746,14 +743,14 @@ gen_input_with_title_checked(const char *name, const char *value, const char *ty
 			strbuf_puts(sb, " checked");
 	}
 	if (title)
-		strbuf_sprintf(sb, " title='%s'", title);
+		strbuf_sprintf(sb, " title='%s'", fix_attr_value(title));
 	strbuf_sprintf(sb, "%s>", empty_element);
 	return strbuf_value(sb);
 }
 /*
- * Generate beginning of frameset
+ * Generate beginning of frameset (<frameset>)
  *
- *	i)	target	target
+ *	@param[in]	contents	target
  */
 const char *
 gen_frameset_begin(const char *contents)
@@ -765,7 +762,7 @@ gen_frameset_begin(const char *contents)
 	return strbuf_value(sb);
 }
 /*
- * Generate end of frameset
+ * Generate end of frameset (</frameset>)
  */
 const char *
 gen_frameset_end(void)
@@ -773,9 +770,10 @@ gen_frameset_end(void)
 	return "</frameset>";
 }
 /*
- * Generate beginning of frame
+ * Generate beginning of frame (<frame>)
  *
- *	i)	target	target
+ *	@param[in]	name	target (value for name and id attributes)
+ *	@param[in]	src	value for src attribute
  */
 const char *
 gen_frame(const char *name, const char *src)
@@ -784,5 +782,33 @@ gen_frame(const char *name, const char *src)
 
 	strbuf_clear(sb);
 	strbuf_sprintf(sb, "<frame name='%s' id='%s' src='%s'%s>", name, name, src, empty_element);
+	return strbuf_value(sb);
+}
+
+
+/** HTML attribute delimiter character ( ' or " only) */
+#define ATTR_DELIM '\''
+
+/*
+ * Check and fix an attribute's value; convert all ' (single quote) characters
+ * into &#39; within it.
+ */
+static const char *
+fix_attr_value(const char *value)
+{
+	STATIC_STRBUF(sb);
+	char c;
+	const char *cptr;
+
+	strbuf_clear(sb);
+	cptr = value;
+
+	while((c = *cptr) != '\0') {
+		if(c == ATTR_DELIM)
+			strbuf_puts(sb, "&#39;");
+		else
+			strbuf_putc(sb, c);
+		++cptr;
+	}
 	return strbuf_value(sb);
 }

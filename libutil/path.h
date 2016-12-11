@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2001
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2008, 2011, 2014
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -25,13 +25,15 @@
 #include <unistd.h>
 #endif
 
-/*
- * PATHSEP - Define OS-specific directory and path seperators
+/**
+ * PATHSEP - Define OS-specific directory and path separators
  */
 #if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 #define PATHSEP ";"
+#define NULL_DEVICE "NUL"
 #else
 #define PATHSEP ":"
+#define NULL_DEVICE "/dev/null"
 #endif
 
 #define isdrivechar(x) (((x) >= 'A' && (x) <= 'Z') || ((x) >= 'a' && (x) <= 'z'))
@@ -41,5 +43,8 @@ char *canonpath(char *);
 #if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 char *realpath(const char *, char *);
 #endif
+int makedirectories(const char *, const char *, int);
+const char *trimpath(const char *);
+char *vgetcwd(char *, size_t);
 
 #endif /* ! _PATH_H_ */

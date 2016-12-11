@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2006
+ * Copyright (c) 1997, 1998, 1999, 2000, 2006, 2010
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -37,22 +37,24 @@
 #include <sys/file.h>
 #endif
 
-#include "locatestring.h"
+#include "char.h"
 #include "die.h"
+#include "locatestring.h"
+#include "strbuf.h"
 #include "test.h"
 
-/*
+/**
  * Decide whether or not the path is binary file.
  *
- *	i)	path
- *	r)	0: is not binary, 1: is binary
+ *	@param[in]	path
+ *	@return 0: is not binary, 1: is binary
  */
 static int
 is_binary(const char *path)
 {
 	int ip;
-	char buf[32];
-	int i, c, size;
+	char buf[512];
+	int i, size;
 
 	ip = open(path, O_RDONLY);
 	if (ip < 0)
@@ -61,31 +63,31 @@ is_binary(const char *path)
 	close(ip);
 	if (size < 0)
 		return 1;
-	if (size >= 7 && locatestring(buf, "!<arch>", MATCH_AT_FIRST))
+	if (size >= 7 && locatestring(buf, "!<arch>", MATCH_AT_FIRST))	/* ar */
+		return 1;
+	if (size >= 4 && locatestring(buf, "%PDF", MATCH_AT_FIRST))	/* PDF */
 		return 1;
 	for (i = 0; i < size; i++) {
-		c = (unsigned char)buf[i];
-		if (c == 0 || c > 127)
+		if (isbinarychar(buf[i]))
 			return 1;
 	}
 	return 0;
 }
-/*
+/**
  * test: 
  *
- *	i)	flags	file flags
+ *	@param[in]	flags	file flags
+ *			"f"	[ -f path ] is path a regular file (not a dir, link or pipe etc.)?
+ *			"d"	[ -d path ] is path a dir?
+ *			"r"	[ -r path ] can we read from path?
+ *			"s"	[ -s path ] has path got a non-zero size?
+ *			"w"	[ -w path ] can we write to path?
+ *			"x"	[ -x path ] is path an executable file/program?
+ *			"b"	[ -b path ] is path a binary file?
  *
- *			"f"	[ -f path ]
- *			"d"	[ -d path ]
- *			"r"	[ -r path ]
- *			"s"	[ -s path ]
- *			"w"	[ -w path ]
- *			"x"	[ -x path ]
- *			"b"	[ -b path ]
- *
- *	i)	path	path
- *			if NULL then previous path.
- *	r)		0: no, 1: ok
+ *	@param[in]	path	path to test,
+ *			if NULL then use the saved previous path, calls die() if is none.
+ *	@return		0: no, 1: ok
  *
  * You can specify more than one character. It assumed 'AND' test.
  */
@@ -93,11 +95,19 @@ int
 test(const char *flags, const char *path)
 {
 	static struct stat sb;
+	STATIC_STRBUF(saved_path);
 	int c;
 
-	if (path != NULL)
+	if (path != NULL) {
 		if (stat(path, &sb) < 0)
 			return 0;
+		strbuf_clear(saved_path);
+		strbuf_puts(saved_path, path);
+	} else {
+		if (strbuf_empty(saved_path))
+			die("no saved previous path [test()]");
+		path = (const char *) strbuf_value(saved_path);
+	}
 	while ((c = *flags++) != 0) {
 		switch (c) {
 		case 'b':
@@ -146,11 +156,11 @@ test(const char *flags, const char *path)
 	}
 	return 1;
 }
-/*
+/**
  * filesize: get file size in bytes.
  *
- *	i)	path	path of file
- *	r)		!= -1: file size
+ *	@param[in]	path	path of file
+ *	@return		!= -1: file size
  *			== -1: file not found
  */
 int

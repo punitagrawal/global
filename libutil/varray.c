@@ -71,17 +71,18 @@ int i, *a = varray_assign(vb, 0, 0);
 
 for (i = 0; i < vb->length; i++)
 	printf("%d: %d\n", i, a[i]); // a[1], a[2], a[4] is uncertainty.
+
 */
 
 #define DEFAULT_EXPAND	100
 static int debug = 0;
-/*
+/**
  * varray_open: open virtual array.
  *
- *	i)	size	size of entry
- *	i)	expand	expand array size
- *			if 0 is specified then use DEFAULT_EXPAND.
- *	r)	vb	VARRAY structure
+ *	@param[in]	size	size of entry
+ *	@param[in]	expand	expand array size
+ *			if 0 (zero) is specified then use DEFAULT_EXPAND.
+ *	@return	vb	VARRAY structure
  */
 VARRAY *
 varray_open(int size, int expand)
@@ -98,13 +99,13 @@ varray_open(int size, int expand)
 	vb->vbuf = NULL;
 	return vb;
 }
-/*
+/**
  * varray_assign: assign varray entry.
  *
- *	i)	vb	VARRAY structure
- *	i)	index	index
- *	i)	force	if entry not found, create it.
- *	r)		pointer of the entry
+ *	@param[in]	vb	VARRAY structure
+ *	@param[in]	index	index
+ *	@param[in]	force	if entry not found, create it.
+ *	@return		pointer of the entry
  *
  * If specified entry is found then it is returned, else it is allocated
  * and returned.
@@ -114,7 +115,7 @@ void *
 varray_assign(VARRAY *vb, int index, int force)
 {
 	if (index < 0)
-		die("varray_assign: illegal index value.");
+		die("varray_assign: invalid index value.");
 	if (index >= vb->length) {
 		if (force)
 			vb->length = index + 1;
@@ -146,11 +147,11 @@ varray_assign(VARRAY *vb, int index, int force)
 	return (void *)(vb->vbuf + vb->size * index);
 }
 
-/*
+/**
  * varray_append: append varray entry.
  *
- *	i)	vb	VARRAY structure
- *	r)		pointer of the entry
+ *	@param[in]	vb	VARRAY structure
+ *	@return		pointer of the entry
  *
  * This procedure doesn't operate the contents of the array.
  */
@@ -159,20 +160,20 @@ varray_append(VARRAY *vb)
 {
 	return varray_assign(vb, vb->length, 1);
 }
-/*
+/**
  * varray_reset: reset varray array.
  *
- *	i)	vb	VARRAY structure
+ *	@param[in]	vb	VARRAY structure
  */
 void
 varray_reset(VARRAY *vb)
 {
 	vb->length = 0;
 }
-/*
+/**
  * varray_close: close varray array.
  *
- *	i)	vb	VARRAY structure
+ *	@param[in]	vb	VARRAY structure
  */
 void
 varray_close(VARRAY *vb)

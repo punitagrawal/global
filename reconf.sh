@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2001, 2003 Tama Communications Corporation
+# Copyright (c) 2001, 2003, 2012 Tama Communications Corporation
 #
 # This file is part of GNU GLOBAL.
 #
@@ -21,12 +21,13 @@
 #
 #	% sh reconf.sh [--configure|--make|--install]
 #
+CDPATH=
 case $1 in
 --help)	echo "Usage: sh reconf.sh [--configure|--make|--install]"
 	exit 0;;
 esac
-prog='autoreconf flex gperf perl bison'	# required programs
-file='convert.pl configure.ac Makefile.am gtags-parser/reserved.pl'	# required files
+prog='autoconf automake bison flex gperf libtool m4 perl'	# required programs
+file='convert.pl configure.ac Makefile.am libparser/reserved.pl'	# required files
 
 echo "- File existent checking..."
 for f in `echo $file`; do
@@ -38,6 +39,13 @@ for f in `echo $file`; do
 	echo "+ $f"
 done
 
+#
+# Software tools which was used for making this package is written to 'BUILD_TOOLS' file.
+#
+cat <<! >BUILD_TOOLS
+This software was made using the following build tools:
+
+!
 echo "- Program existent checking..."
 for p in `echo $prog`; do
 	found=0
@@ -55,6 +63,10 @@ for p in `echo $prog`; do
 		echo "Please install `echo $p | sed 's/autoreconf/automake and autoconf/'`."
 		exit 1;;
 	esac
+	case $p in
+	perl|libtool)	;;
+	*)	$p --version | head -n 1 >>BUILD_TOOLS;;
+	esac
 done
 
 #
@@ -62,7 +74,7 @@ done
 # flex, bison and gperf.
 #
 echo "- Preparing parser source ..."
-(cd gtags-parser; set -x
+(cd libparser; set -x
 for lang in c cpp java php asm; do
 	name=${lang}_res
 	perl ./reserved.pl --prefix=$lang ${lang}_res.in > ${name}.gpf
@@ -86,8 +98,8 @@ done
 )
 
 echo "- Collecting reference manuals ..."
-commands="global gtags htags gtags-parser gozilla gtags-cscope";
-perl ./convert.pl --menu $commands > doc/reference.texi
+commands="global gtags htags htags-server gozilla gtags-cscope globash";
+perl ./convert.pl --menu $commands libutil > doc/reference.texi
 for d in `echo $commands`; do
 	perl ./convert.pl --info $d/manual.in > doc/$d.ref
 	echo "+ doc/$d.ref"
@@ -96,12 +108,14 @@ for d in `echo $commands`; do
 	perl ./convert.pl --c $d/manual.in > $d/const.h
 	echo "+ $d/const.h"
 done
+perl ./convert.pl --info libutil/manual.in > doc/gtags.conf.ref
+perl ./convert.pl --man  libutil/manual.in > libutil/gtags.conf.5
 
 echo "- Clean up config.cache..."
 rm -f config.cache
 
 echo "- Generating configure items..."
-(set -x; autoreconf --symlink --verbose --install) &&
+(set -x; autoreconf --symlink --verbose --install --force) &&
 case $1 in
 '')	echo "You are ready to execute ./configure"
 	;;

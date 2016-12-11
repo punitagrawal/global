@@ -23,24 +23,24 @@
 
 #include "strbuf.h"
 /*
- * Access library for gtags.conf (.globalrc).
+ * Access library for "gtags.conf" (".globalrc").
  * File format is a subset of XXXcap (termcap, printcap) file.
  */
 #define GTAGSCONF       "/etc/gtags.conf"
-#define OLD_GTAGSCONF   "/etc/global.conf"	/* for compatibility */
 #define DEBIANCONF      "/etc/gtags/gtags.conf"
-#define OLD_DEBIANCONF  "/etc/gtags/global.conf"/* for compatibility */
 #define GTAGSRC 	".globalrc"
 #ifdef __DJGPP__
 #define DOS_GTAGSRC	"_globalrc"
 #endif
 #define DEFAULTLABEL    "default"
 
-void openconf(void);
+void openconf(const char *);
 int getconfn(const char *, int *);
 int getconfs(const char *, STRBUF *);
 int getconfb(const char *);
 const char *getconfline(void);
+const char *getconfigpath(void);
+const char *getconfiglabel(void);
 void closeconf(void);
 
 #endif /* ! _CONF_H_ */

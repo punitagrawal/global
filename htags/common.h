@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Tama Communications Corporation
+ * Copyright (c) 2004, 2008, 2011 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -22,13 +22,18 @@
 /*
  * Parameter values.
  */
-/* gen_image() */
+/*
+ * Defines for gen_image()
+ */
 #define CURRENT	0
 #define PARENT 1
 
-/* gen_page_begin() */
-#define SUBDIR 1
+/*
+ * Defines for gen_page_begin()
+ */
 #define TOPDIR 0
+#define SUBDIR 1
+#define CGIDIR 2
 
 /*
  * tag
@@ -45,6 +50,8 @@ extern const char *title_begin;
 extern const char *title_end;
 extern const char *header_begin;
 extern const char *header_end;
+extern const char *poweredby_begin;
+extern const char *poweredby_end;
 extern const char *cvslink_begin;
 extern const char *cvslink_end;
 extern const char *caution_begin;
@@ -97,12 +104,34 @@ extern const char *empty_element;
 extern const char *noframes_begin;
 extern const char *noframes_end;
 
+extern const char *tree_control;
+extern const char *tree_loading;
+extern const char *tree_begin;
+extern const char *tree_begin_using;
+extern const char *tree_end;
+extern const char *dir_begin;
+extern const char *dir_title_end;
+extern const char *dir_end;
+extern const char *file_begin;
+extern const char *file_end;
+
+extern const char *guide_begin;
+extern const char *guide_end;
+extern const char *guide_unit_begin;
+extern const char *guide_unit_end;
+extern const char *guide_path_begin;
+extern const char *guide_path_end;
+
 int fputs_nl(const char *, FILE *);
 void setup_xhtml(void);
+void save_current_path(const char *);
+char *get_current_dir(void);
+char *get_current_file(void);
 const char *upperdir(const char *);
 const char *gen_insert_header(int);
 const char *gen_insert_footer(int);
 const char *gen_page_begin(const char *, int);
+const char *gen_page_index_begin(const char *, const char *);
 const char *gen_page_frameset_begin(const char *);
 const char *gen_page_end(void);
 const char *gen_image(int, const char *, const char *);
@@ -114,10 +143,8 @@ const char *gen_href_begin(const char *, const char *, const char *, const char 
 const char *gen_href_begin_simple(const char *);
 const char *gen_href_end(void);
 const char *gen_list_begin(void);
-const char *gen_list_body(const char *, const char *);
+const char *gen_list_body(const char *, const char *, const char *);
 const char *gen_list_end(void);
-const char *gen_div_begin(const char *);
-const char *gen_div_end(void);
 const char *gen_form_begin(const char *);
 const char *gen_form_end(void);
 const char *gen_input(const char *, const char *, const char *);
@@ -127,5 +154,6 @@ const char *gen_input_with_title_checked(const char *, const char *, const char 
 const char *gen_frameset_begin(const char *);
 const char *gen_frameset_end(void);
 const char *gen_frame(const char *, const char *);
+/* const char *fix_attr_value(const char *); */
 
 #endif /* ! _COMMON_H_ */

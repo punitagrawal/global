@@ -34,9 +34,11 @@
 #include "checkalloc.h"
 #include "die.h"
 #include "dbop.h"
+#include "getdbpath.h"
 #include "gtagsop.h"
-#include "makepath.h"
 #include "gpathop.h"
+#include "makepath.h"
+#include "nearsort.h"
 #include "strbuf.h"
 #include "strlimcpy.h"
 
@@ -46,11 +48,29 @@ static int _mode;
 static int opened;
 static int created;
 
+int openflags;
+void
+set_gpath_flags(int flags) {
+	openflags = flags;
+}
+/**
+ * compare_nearpath: compare function for 'nearness sort'.
+ */
+static const char *nearbase;
+int
+compare_nearpath(const void *s1, const void *s2)
+{
+	int ret;
+
+	if ((ret = COMPARE_NEARNESS(*(char **)s1, *(char **)s2, nearbase)) != 0)
+		return ret;
+	return strcmp(*(char **)s1, *(char **)s2);
+}
 /*
  * GPATH format version
  *
- * 1. Gtags(1) bury version number in GPATH.
- * 2. Global(1) pick up the version number from GPATH. If the number
+ * 1. gtags(1) bury version number in GPATH.
+ * 2. global(1) pick up the version number from GPATH. If the number
  *    is not acceptable version number then global give up work any more
  *    and display error message.
  * 3. If version number is not found then it assumes version 1.
@@ -72,25 +92,25 @@ static int created;
  *
  * - Format version 2
  *
- * GPATH has not only source files but also other files like README.
+ * GPATH has not only source files but also other files like "README".
  * You can distinguish them by the flag following data value.
- * At present, the flag value is only 'o'(other files).
+ * At present, the flag value is only 'o' (other files).
  *
  *      key             data
  *      --------------------
  *      ./aaa.c\0       11\0
  *      ./README\0      12\0o\0         <=== 'o' means other files.
  */
-static int support_version = 2;	/* acceptable format version   */
-static int create_version = 2;	/* format version of newly created tag file */
-/*
+static int support_version = 2;	/**< acceptable format version   */
+static int create_version = 2;	/**< format version of newly created tag file */
+/**
  * gpath_open: open gpath tag file
  *
- *	i)	dbpath	GTAGSDBPATH
- *	i)	mode	0: read only
- *			1: create
+ *	@param[in]	dbpath	GTAGSDBPATH
+ *	@param[in]	mode	0: read only,
+ *			1: create,
  *			2: modify
- *	r)		0: normal
+ *	@return		0: normal,
  *			-1: error
  */
 int
@@ -108,13 +128,12 @@ gpath_open(const char *dbpath, int mode)
 	_mode = mode;
 	if (mode == 1 && created)
 		mode = 0;
-	dbop = dbop_open(makepath(dbpath, dbname(GPATH), NULL), mode, 0644, 0);
+	dbop = dbop_open(makepath(dbpath, dbname(GPATH), NULL), mode, 0644, openflags);
 	if (dbop == NULL)
 		return -1;
 	if (mode == 1) {
 		dbop_putversion(dbop, create_version);
 		_nextkey = 1;
-		
 	} else {
 		int format_version;
 		const char *path = dbop_get(dbop, NEXTKEY);
@@ -131,18 +150,18 @@ gpath_open(const char *dbpath, int mode)
 	opened++;
 	return 0;
 }
-/*
+/**
  * gpath_put: put path name
  *
- *	i)	path	path name
- *	i)	type	path type
- *			GPATH_SOURCE: source file
+ *	@param[in]	path	path name
+ *	@param[in]	type	path type
+ *			GPATH_SOURCE: source file,
  *			GPATH_OTHER: other file
  */
 void
 gpath_put(const char *path, int type)
 {
-	char fid[32];
+	char fid[MAXFIDLEN];
 	STATIC_STRBUF(sb);
 
 	assert(opened > 0);
@@ -158,27 +177,23 @@ gpath_put(const char *path, int type)
 	 * path => fid mapping.
 	 */
 	strbuf_clear(sb);
-	strbuf_puts0(sb, fid);
-	if (type == GPATH_OTHER)
-		strbuf_puts0(sb, "o");
-	dbop_put_withlen(dbop, path, strbuf_value(sb), strbuf_getlen(sb));
+	strbuf_puts(sb, fid);
+	dbop_put_path(dbop, path, strbuf_value(sb), type == GPATH_OTHER ? "o" : NULL);
 	/*
 	 * fid => path mapping.
 	 */
 	strbuf_clear(sb);
-	strbuf_puts0(sb, path);
-	if (type == GPATH_OTHER)
-		strbuf_puts0(sb, "o");
-	dbop_put_withlen(dbop, fid, strbuf_value(sb), strbuf_getlen(sb));
+	strbuf_puts(sb, path);
+	dbop_put_path(dbop, fid, strbuf_value(sb), type == GPATH_OTHER ? "o" : NULL);
 }
-/*
+/**
  * gpath_path2fid: convert path into id
  *
- *	i)	path	path name
- *	o)	type	path type
- *			GPATH_SOURCE: source file
+ *	@param[in]	path	path name
+ *	@param[out]	type	path type
+ *			GPATH_SOURCE: source file,
  *			GPATH_OTHER: other file
- *	r)		file id
+ *	@return		file id
  */
 const char *
 gpath_path2fid(const char *path, int *type)
@@ -192,14 +207,14 @@ gpath_path2fid(const char *path, int *type)
 	}
 	return fid;
 }
-/*
+/**
  * gpath_fid2path: convert id into path
  *
- *	i)	fid	file id
- *	o)	type	path type
- *			GPATH_SOURCE: source file
+ *	@param[in]	fid	file id
+ *	@param[out]	type	path type
+ *			GPATH_SOURCE: source file,
  *			GPATH_OTHER: other file
- *	r)		path name
+ *	@return		path name
  */
 const char *
 gpath_fid2path(const char *fid, int *type)
@@ -212,10 +227,10 @@ gpath_fid2path(const char *fid, int *type)
 	}
 	return path;
 }
-/*
+/**
  * gpath_delete: delete specified path record
  *
- *	i)	path	path name
+ *	@param[in]	path	path name
  */
 void
 gpath_delete(const char *path)
@@ -231,10 +246,10 @@ gpath_delete(const char *path)
 	dbop_delete(dbop, fid);
 	dbop_delete(dbop, path);
 }
-/*
+/**
  * gpath_nextkey: return next key
  *
- *	r)		next id
+ *	@return		next id
  */
 int
 gpath_nextkey(void)
@@ -242,13 +257,13 @@ gpath_nextkey(void)
 	assert(_mode != 1);
 	return _nextkey;
 }
-/*
+/**
  * gpath_close: close gpath tag file
  */
 void
 gpath_close(void)
 {
-	char fid[32];
+	char fid[MAXFIDLEN];
 
 	assert(opened > 0);
 	if (--opened > 0)
@@ -266,7 +281,9 @@ gpath_close(void)
 		created = 1;
 }
 
-/*
+/**
+ * GFIND *gfind_open(const char *dbpath, const char *local, int target, int flags)
+ *
  * gfind iterator using GPATH.
  *
  * gfind_xxx() does almost same with find_xxx() but much faster,
@@ -274,19 +291,20 @@ gpath_close(void)
  * If GPATH exist then you should use this.
  */
 
-/*
+/**
  * gfind_open: start iterator using GPATH.
  *
- *	i)	dbpath	dbpath
- *	i)	local	local prefix
+ *	@param[in]	dbpath  dbpath
+ *	@param[in]	local   local prefix,
  *			if NULL specified, it assumes "./";
- *	i)	target	GPATH_SOURCE: only source file
- *			GPATH_OTHER: only other file
+ *	@param[in]      target  GPATH_SOURCE: only source file,
+ *			GPATH_OTHER: only other file,
  *			GPATH_BOTH: source file + other file
- *	r)		GFIND structure
+ *	@param[in]	flags	GPATH_NEARSORT
+ *	@return		GFIND structure
  */
 GFIND *
-gfind_open(const char *dbpath, const char *local, int target)
+gfind_open(const char *dbpath, const char *local, int target, int flags)
 {
 	GFIND *gfind = (GFIND *)check_calloc(sizeof(GFIND), 1);
 
@@ -299,24 +317,53 @@ gfind_open(const char *dbpath, const char *local, int target)
 	gfind->eod = 0;
 	gfind->target = target;
 	gfind->type = GPATH_SOURCE;
+	gfind->flags = flags;
+	gfind->path_array = NULL;
 	gfind->version = dbop_getversion(gfind->dbop);
 	if (gfind->version > support_version)
 		die("GPATH seems new format. Please install the latest GLOBAL.");
 	else if (gfind->version < support_version)
 		die("GPATH seems older format. Please remake tag files."); 
+	/*
+	 * Nearness sort.
+	 * In fact, this timing of sort is not good for performance.
+	 * Reconsideration is needed later.
+	 */
+	if (gfind->flags & GPATH_NEARSORT) {
+		const char *path = NULL;
+		VARRAY *varray = varray_open(sizeof(char *), 100);
+		POOL *pool = pool_open();
+		while ((path = gfind_read(gfind)) != NULL) {
+			char **a = varray_append(varray);
+			*a = pool_strdup(pool, path, 0);
+		}
+		if ((nearbase = get_nearbase_path()) == NULL)
+			die("cannot get nearbase path.");
+		qsort(varray_assign(varray, 0, 0), varray->length, sizeof(char *), compare_nearpath);
+		gfind->path_array = varray;
+		gfind->pool = pool;
+		gfind->index = 0;
+	}
 	return gfind;
 }
-/*
+/**
  * gfind_read: read path using GPATH.
  *
- *	i)	gfind	GFIND structure
- *	r)		path
+ *	@param[in]	gfind	GFIND structure
+ *	@return		path
  */
 const char *
 gfind_read(GFIND *gfind)
 {
 	const char *flag;
 
+	if (gfind->path_array) {
+		char **a = NULL;
+		if (gfind->index >= gfind->path_array->length)
+			return NULL;
+		a = varray_assign(gfind->path_array, gfind->index++, 0);
+		return *a;
+	}
 	gfind->type = GPATH_SOURCE;
 	if (gfind->eod)
 		return NULL;
@@ -336,19 +383,25 @@ gfind_read(GFIND *gfind)
 		 * *flag == 'o' means 'other files' like README.
 		 */
 		flag = dbop_getflag(gfind->dbop);
+		if (flag == NULL)
+			flag = "";
 		gfind->type = (*flag == 'o') ? GPATH_OTHER : GPATH_SOURCE;
 		if (gfind->type & gfind->target)
 			break;
 	}
 	return gfind->path;
 }
-/*
+/**
  * gfind_close: close iterator.
  */
 void
 gfind_close(GFIND *gfind)
 {
 	dbop_close(gfind->dbop);
+	if (gfind->flags & GPATH_NEARSORT) {
+		pool_close(gfind->pool);
+		varray_close(gfind->path_array);
+	}
 	free((void *)gfind->prefix);
 	free(gfind);
 }

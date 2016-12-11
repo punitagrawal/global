@@ -67,7 +67,8 @@ static char sccsid[] = "@(#)bt_open.c	8.10 (Berkeley) 8/17/94";
 #endif
 
 #if (defined(_WIN32) && !defined(__CYGWIN__))
-#define mkstemp(p) open(_mktemp(p), _O_CREAT | _O_SHORT_LIVED | _O_EXCL)
+#include <share.h>
+#define mkstemp(p) open(_mktemp(p), _O_CREAT | _O_RDWR | _O_BINARY | _O_TEMPORARY, _S_IWRITE | _SH_DENYRW)
 #endif
 
 #include "db.h"
@@ -82,20 +83,19 @@ static int byteorder(void);
 static int nroot(BTREE *);
 static int tmp(void);
 
-/*
+/**
  * __BT_OPEN -- Open a btree.
  *
  * Creates and fills a DB struct, and calls the routine that actually
  * opens the btree.
  *
- * Parameters:
- *	fname:	filename (NULL for in-memory trees)
- *	flags:	open flag bits
- *	mode:	open permission bits
- *	b:	BTREEINFO pointer
+ *	@param fname	filename (NULL for in-memory trees)
+ *	@param flags	open flag bits
+ *	@param mode	open permission bits
+ *	@param openinfo	BTREEINFO pointer
+ *	@param dflags
  *
- * Returns:
- *	NULL on failure, pointer to DB on success.
+ * @return NULL on failure, pointer to DB on success.
  *
  */
 DB *
@@ -358,14 +358,12 @@ err:	if (t) {
 	return (NULL);
 }
 
-/*
+/**
  * NROOT -- Create the root of a new tree.
  *
- * Parameters:
- *	t:	tree
+ *	@param t	tree
  *
- * Returns:
- *	RET_ERROR, RET_SUCCESS
+ * @return RET_ERROR, RET_SUCCESS
  */
 static int
 nroot(t)
@@ -402,7 +400,7 @@ nroot(t)
 }
 
 static int
-tmp()
+tmp(void)
 {
 	sigset_t set, oset;
 	int fd;
@@ -432,7 +430,7 @@ tmp()
 }
 
 static int
-byteorder()
+byteorder(void)
 {
 	u_int32_t x;
 	u_char *p;

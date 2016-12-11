@@ -1,0 +1,145 @@
+.\" This file is generated automatically by convert.pl from libutil/manual.in.
+.TH GTAGS.CONF 5 "Nov 2015" "GNU Project"
+.SH NAME
+gtags.conf \- configuration data for GNU GLOBAL
+.SH SYNOPSIS
+\'gtags.conf\'
+.br
+\'~/.globalrc\'
+.br
+.SH DESCRIPTION
+\'gtags.conf\' has configuration data for \fBglobal\fP(1), \fBgozilla\fP(1),
+\fBgtags\fP(1) and \fBhtags\fP(1). They look for the following files in this order,
+and read from the first one that exists and is readable.
+.TP
+(1) --gtagsconf \fIfile\fP
+.TP
+(2) $GTAGSCONF
+.TP
+(3) [project root]/gtags.conf
+.TP
+(4) $HOME/.globalrc
+.TP
+(5) /etc/gtags.conf
+.TP
+(6) [sysconfdir]/gtags.conf
+.PP
+[sysconfdir] is \'/usr/local/etc\' by default; you can change it by the --sysconfdir
+option of configure script.
+.PP
+The format is similar to \fBtermcap\fP(5) except for some extensions described
+later.
+The file includes one or more records. You should select a record using a label.
+Default label is 'default'. If \fBGTAGSLABEL\fP is set, its value is used. Please be
+aware the meaning of 'default' is different to that of \fBtermcap\fP(5).
+.PP
+Lines starting with '#' are ignored.
+A record consists of one or more fields separated by ':' and ends with a newline.
+The first field must have a label name. Each field of the rest has a variable definition.
+There are three types in those variables.
+.TP
+Boolean: This type has no value; existence of variable means true else false.
+.TP
+Number: This type has a number value after '#'.
+.TP
+String: This type has a string value after '='.
+Most variables are relevant to string type.
+.PP
+If data includes ':' or newline, you need to quote it by '\\'.
+An empty field is permitted, but it doesn't make sense.
+.PP
+When there is more than one definition, the previous one is adopted. 
+Exceptionally, all values of \fBskip\fP, \fBlangmap\fP and \fBgtags_parser\fP are
+adopted and connected respectively.
+.SH "Variable substitution"
+Variable substitution similar to \fBsh\fP(1) is available.
+You can refer to any string variable using '$' prefix. For example, the following
+\fBb\fP has a value 'XYZ'.
+.nf
+:a=Y:b=X${a}Z:
+.fi
+.SH "Including another record"
+\fBTc\fP is a special variable; it reads in definitions in another record.
+It is similar to the \fBtc\fP of \fBtermcap\fP(5).
+Syntax is as follows:
+.br
+\fBtc\fP=\fIlabel\fP[@\fIfile\fP]
+.br
+If only a \fIlabel\fP is given, \fBtc\fP is read from a record specified by the \fIlabel\fP
+in the same file. If @\fIfile\fP is also given, \fBtc\fP is read from a record
+specified by the \fIlabel\fP in the specified \fIfile\fP.
+\fIFile\fP should be an absolute path, and should not include variables.
+Different from \fBtermcap\fP(5), you can use \fBtc\fP anytime anywhere.
+.SH CONFIGURATION
+About variables for each command, please see each manual.
+.PP
+You can use the following environment variables as a string variable.
+If these variables are set then environment variables of the same name are set before
+command execution.
+.br
+\fBGREP_COLOR\fP
+.br
+\fBGREP_COLORS\fP
+.br
+\fBGTAGSBLANKENCODE\fP
+.br
+\fBGTAGSCACHE\fP
+.br
+\fBGTAGSFORCECPP\fP
+.br
+\fBGTAGSGLOBAL\fP
+.br
+\fBGTAGSGTAGS\fP
+.br
+\fBGTAGSLIBPATH\fP
+.br
+\fBGTAGSLOGGING\fP
+.br
+\fBGTAGSTHROUGH\fP
+.br
+\fBGTAGS_OPTIONS\fP
+.br
+\fBHTAGS_OPTIONS\fP
+.br
+\fBMAKEOBJDIR\fP
+.br
+\fBMAKEOBJDIRPREFIX\fP
+.br
+\fBTMPDIR\fP
+.br
+.PP
+The following variables are also available as a string variable.
+By default, each of them has a directory path given by the configure
+script.
+.br
+\fBbindir\fP
+.br
+\fBdatadir\fP
+.br
+\fBlibdir\fP
+.br
+\fBlocalstatedir\fP
+.br
+\fBsysconfdir\fP
+.br
+.SH ENVIRONMENT
+The following environment variables affect the execution of the commands.
+.PP
+.TP
+\fBGTAGSCONF\fP
+If this variable is set, the value is used as a configuration file.
+.TP
+\fBGTAGSLABEL\fP
+If this variable is set, the value is used as a label of the configuration file.
+The default is \fIdefault\fP.
+.SH "SEE ALSO"
+\fBglobal\fP(1),
+\fBgozilla\fP(1),
+\fBgtags\fP(1),
+\fBhtags\fP(1).
+.PP
+GNU GLOBAL source code tag system
+.br
+(http://www.gnu.org/software/global/).
+.SH HISTORY
+The \fBgtags.conf\fP file appeared in GLOBAL-3.0 (1998).
