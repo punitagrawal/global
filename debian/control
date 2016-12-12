@@ -5,7 +5,8 @@ Build-Depends: debhelper (>=9), autotools-dev,
  texinfo,
  libncurses5-dev, libltdl-dev,
  emacsen-common
-Maintainer: Debian QA Group <packages@qa.debian.org>
+Maintainer: Wookey <wookey@debian.org>
+Uploaders: Punit Agrawal <punitagrawal@gmail.com>
 Homepage: http://www.gnu.org/software/global/global.html
 Vcs-Git: https://github.com/punitagrawal/global.git
 Vcs-Browser: https://github.com/punitagrawal/global
