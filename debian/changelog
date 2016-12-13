@@ -1,3 +1,32 @@
+global (6.5.5-1) unstable; urgency=medium
+
+  [ Punit Agrawal ]
+  * Refresh patches to git format
+  * Drop htmake and htconfig
+  * Package htags-server man page
+  * Update postrm script to drop gsearch reference
+  * Update lintian overrides
+
+  [ Wookey ]
+  * Fix README.debian typo
+
+  [ Punit Agrawal ]
+  * Package missing icons, javascript and images. Closes: #587489
+
+  [ Wookey ]
+  * Provide configure with ctags path
+
+  [ Punit Agrawal ]
+  * Update package repository location
+  * Un-orphan the package - Wookey has agreed to be the maintainer
+  * Enable autoreconf - this allows the package to pick system
+    libraries instead of using shipped versions.
+  * Install upstream NEWS file
+  * Update README.debian documentation
+  * Add a NEWS file about upgrade to 6.5.5
+
+ -- Wookey <wookey@debian.org>  Tue, 13 Dec 2016 12:09:00 +0000
+
 global (6.5.5-0.1) experimental; urgency=medium
 
   [ Punit Agrawal ]
