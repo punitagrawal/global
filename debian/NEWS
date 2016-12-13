@@ -1,0 +1,16 @@
+global (6.5.5-1) unstable; urgency=medium
+
+  This is a significant upgrade of GNU Global - it uses an upstream
+  release ~8.5 years ahead of the previous packaged version. It brings
+  with it many bug fixes, improvements and features added to upstream
+  over that period.
+
+  As from any major upgrade, features have been evolving over upstream
+  releases - in particular htags functionality to support generation
+  of system cgi-bin scripts has been removed. As a result, debian
+  specific tools - htmake and htconfig - built on (but also providing
+  alternative to) the above are no longer available. If you use these
+  tools or rely on htags' system cgi-bin functionality, please look at
+  README.debian for alternatives.
+
+ -- Punit Agrawal <punitagrawal@gmail.com>  Sun, 11 Dec 2016 20:06:15 +0000
