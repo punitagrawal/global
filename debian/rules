@@ -4,6 +4,8 @@
 SHELL = /bin/bash
 package = global
 
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
 
 clean:
 	dh_testdir
