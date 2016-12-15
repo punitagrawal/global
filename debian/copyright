@@ -100,7 +100,7 @@ License: MIT, BSD, and GPL
 Files: jquery/jquery.suggest.js, htags/jquery.suggest.css
 Copyright: 2007-08-06, Peter Vulgaris
 License: Dual licensed MIT or GPL
-    jquery.suggest 1.1 - 2007-08-06 by by Peter Vulgaris
+    jquery.suggest 1.1 - 2007-08-06 by Peter Vulgaris
     Based on autocomplete,js by Joern Zaefferer and
     iautocompleter.js by Stefan Petre.
     Dual licensed under the MIT and GPL licenses.
