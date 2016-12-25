@@ -1,3 +1,9 @@
+global (6.5.5-2) unstable; urgency=medium
+
+  * Apply hardening flags
+
+ -- Wookey <wookey@debian.org>  Sun, 25 Dec 2016 17:32:37 +0000
+
 global (6.5.5-1) unstable; urgency=medium
 
   [ Punit Agrawal ]
