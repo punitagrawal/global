@@ -1,9 +1,9 @@
 .\" This file is generated automatically by convert.pl from htags-server/manual.in.
-.TH HTAGS-SERVER 1 "April 2014" "GNU Project"
+.TH HTAGS-SERVER 1 "November 2016" "GNU Project"
 .SH NAME
-htags\-server - start a private Web/CGI server for hyper-text
+htags\-server - a private Web/CGI server for htags
 .SH SYNOPSIS
-\fBhtags-server\fP [-b ip-address][-u language][\fIport\fP]
+\fBhtags-server\fP [-b ip-address][-u language][--retry[=n]][\fIport\fP]
 .br
 .SH DESCRIPTION
 \fBHtags-server\fP is a private Web/CGI server for the hyper-text
@@ -27,6 +27,9 @@ The default value is 127.0.0.1.
 \fB-u\fP, \fB--use\fP \fIlanguage\fP
 Specifies language to use, which may be one of: \'python\' and \'ruby\'.
 .TP
+\fB--retry\fP[=\fIn\fP]
+If the port is already in use, retry \fIn\fP times with incrementing the \fIport\fP number. The default of \fIn\fP is 20.
+.TP
 \fIport\fP
 Specifies the port on which \fBhtags-server\fP listen.
 If you want to use multiple sessions, you must use unique number
@@ -41,6 +44,14 @@ Serving HTTP on 127.0.0.1 port 8000 ...
 .PP
 (another terminal)
 $ firefox http://localhost:8000/
+.PP
+$ htags-server
+Error: port 8000 already in use.
+$ htags-server --retry
+Warning: port 8000 already in use (skipped)
+Please access at http://127.0.0.1:8001
+Python2 http/cgi server
+Serving HTTP on 127.0.0.1 port 8001 ...
 .fi
 .SH DIAGNOSTICS
 \fBHtags-server\fP exits with a non-0 value if an error occurred, 0 otherwise.

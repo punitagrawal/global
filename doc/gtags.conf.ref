@@ -20,13 +20,12 @@ and read from the first one that exists and is readable.
 @end table
 
 [sysconfdir] is @file{/usr/local/etc} by default; you can change it by the --sysconfdir
-option of configure script.
+option of the configure script.
 
-The format is similar to termcap(5) except for some extensions described
-later.
-The file includes one or more records. You should select a record using a label.
-Default label is 'default'. If @var{GTAGSLABEL} is set, its value is used. Please be
-aware the meaning of 'default' is different to that of termcap(5).
+Syntax is similar to termcap(5) except for some extensions described later.
+A file includes one or more records. You should select a record using a label.
+Default label is 'default'. If @var{GTAGSLABEL} is set, its value is used.
+Please be aware the meaning of 'default' is different from that of termcap(5).
 
 Lines starting with '#' are ignored.
 A record consists of one or more fields separated by ':' and ends with a newline.

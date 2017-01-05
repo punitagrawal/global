@@ -19,6 +19,33 @@ ___________________________________
 
 ChangeLog about GNU GLOBAL
 
+December 16 2016, Shigio YAMAGUCHI
+
+	Rewrote the following CGI scripts using perl5 syntax:
+	global.cgi.in
+	completion.cgi.in
+
+	There were many perl5.* incompatible with each other in the past.
+	Even then perl4 syntax always worked correctly. But this problem
+	was a thing of the past. Perl4 syntax is now meaningless.
+
+October 22 2016, Shigio YAMAGUCHI
+
+	Removed the following files:
+	BOKIN_MODEL
+	BOKIN_MODEL_FAQ
+
+	BOKIN model was finished. Now GLOBAL is not a BOKINware.
+
+October 8 2016, Shigio YAMAGUCHI
+
+	Added the following library source code. Though it's a GNU version,
+	I derived them from the latest Universal Ctags archive not to make
+	differences.
+
+        libglibc/fnmatch.c
+        libglibc/fnmatch.h
+
 March 9 2016, Shigio YAMAGUCHI
 
 	Now, the following files in datadir are static.
@@ -71,7 +98,7 @@ Oct 14 2015, Shigio YAMAGUCHI
 		if (ld_dlopenext('foo') == FAILED)
 			error_and_exit();
 
-	From now on, extension of DDL is needless.
+	From now on, extension of DLL is needless.
 
 June 22 2015, Shigio YAMAGUCHI
 
@@ -275,7 +302,7 @@ May 20 2010, Shigo YAMAGUCHI
 
 	* Changed the architecture of gtags(1) from 2 pass to 1 pass.
 
-	[Current]
+	[Old]
 
         Pass 1:                      +-------+ 
           source files =============>| gtags |============> GTAGS

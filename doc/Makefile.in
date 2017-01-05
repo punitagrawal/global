@@ -360,7 +360,7 @@ top_srcdir = @top_srcdir@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 info_TEXINFOS = global.texi
-global_TEXINFOS = fdl.texi reference.texi define.texi faq.texi \
+global_TEXINFOS = fdl.texi reference.texi \
 	global.ref gtags.ref htags.ref htags-server.ref gozilla.ref \
 	gtags-cscope.ref globash.ref gtags.conf.ref
 

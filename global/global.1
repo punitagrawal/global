@@ -193,6 +193,13 @@ This option is valid only with the \fB-g\fP or \fB-P\fP command.
 \fB--path-style\fP \fIformat\fP
 Print path names using \fIformat\fP, which may be one of:
 \'relative\', \'absolute\', \'shorter\', \'abslib\' or \'through\'.
+\'relative\' means relative path. \'absolute\' means absolute path.
+\'shorter\' means the shorter one of relative and absolute path.
+\'abslib\' means absolute path for libraries (GTAGSLIBPATH) and relative path
+for the rest.
+\'through\' means the relative path from the project root directory
+(internal format of GPATH).
+The default is \'relative\'.
 The \fB--path-style\fP option is given more priority than the \fB-a\fP option.
 .TP
 \fB--print0\fP

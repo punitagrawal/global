@@ -15,12 +15,14 @@ Then you can execute \fBhtags\fP in the same place.
 \fBHtags\fP makes a directory named \'HTML\', and puts a hypertext in it.
 You can start browsing at \'HTML/index.html\'.
 .PP
-Since \fBhtags\fP generates a static hypertext as long as the \fB-D\fP or \fB-f\fP
-option is not specified, you can move it anywhere and browse it by any browser without
-any HTTP server.
+Since \fBhtags\fP generates a static hypertext as long as neither \fB-D\fP
+nor \fB-f\fP option is not specified, you can move it anywhere and browse it
+by any browser without any HTTP server. If you use \fB-D\fP or \fB-f\fP
+option, you need to use HTTP server. Though any HTTP server is available,
+\fBhtags-server\fP(1) is recommended.
 .PP
 This command has so many options.
-If you are new to \fBhtags\fP, it is recommended to use the \fB--suggest\fP option.
+If you are new to \fBhtags\fP, it is recommended to use \fB--suggest\fP option.
 With that option, \fBhtags\fP chooses popular options on your behalf.
 .SH OPTIONS
 The following options are available:
@@ -209,7 +211,9 @@ $ gtags -v
 $ htags -sanohITvt 'Welcome to XXX source tour!'
 $ firefox HTML/index.html
 .PP
-$ htags --suggest
+$ htags --suggest2
+$ htags-server >& log &
+$ firefox http://127.0.0.1:8000
 .fi
 .SH FILES
 .TP
@@ -295,6 +299,7 @@ Default mapping is:
 .SH DIAGNOSTICS
 \fBHtags\fP exits with a non-0 value if an error occurred, 0 otherwise.
 .SH "SEE ALSO"
+\fBhtags-server\fP(1),
 \fBglobal\fP(1),
 \fBgtags\fP(1),
 \fBgtags.conf\fP(5).

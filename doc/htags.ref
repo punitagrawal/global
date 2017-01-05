@@ -15,12 +15,14 @@ Then you can execute htags in the same place.
 Htags makes a directory named @file{HTML}, and puts a hypertext in it.
 You can start browsing at @file{HTML/index.html}.
 
-Since htags generates a static hypertext as long as the @samp{-D} or @samp{-f}
-option is not specified, you can move it anywhere and browse it by any browser without
-any HTTP server.
+Since htags generates a static hypertext as long as neither @samp{-D}
+nor @samp{-f} option is not specified, you can move it anywhere and browse it
+by any browser without any HTTP server. If you use @samp{-D} or @samp{-f}
+option, you need to use HTTP server. Though any HTTP server is available,
+htags-server(1) is recommended.
 
 This command has so many options.
-If you are new to htags, it is recommended to use the @samp{--suggest} option.
+If you are new to htags, it is recommended to use @samp{--suggest} option.
 With that option, htags chooses popular options on your behalf.
 @unnumberedsubsec OPTIONS
 The following options are available:
@@ -166,7 +168,9 @@ The default is the current directory.
 $ gtags -v
 $ htags -sanohITvt 'Welcome to XXX source tour!'
 $ firefox HTML/index.html
-$ htags --suggest
+$ htags --suggest2
+$ htags-server >& log &
+$ firefox http://127.0.0.1:8000
 @end example
 @unnumberedsubsec FILES
 @table @asis
@@ -236,6 +240,7 @@ Default mapping is:@*
 @unnumberedsubsec DIAGNOSTICS
 Htags exits with a non-0 value if an error occurred, 0 otherwise.
 @unnumberedsubsec SEE ALSO
+htags-server(1),
 global(1),
 gtags(1),
 gtags.conf(5).
