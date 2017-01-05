@@ -2,10 +2,10 @@ This is global.info, produced by makeinfo version 6.1 from global.texi.
 
 INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
-* GLOBAL: (global).             GNU GLOBAL source code tag system.
+* GLOBAL: (global).             GNU GLOBAL source code tagging system.
 END-INFO-DIR-ENTRY
 
-This file documents the GNU GLOBAL source code tag system.
+This file documents the GNU GLOBAL source code tagging system.
 
    Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2010,
 2011, 2012, 2013 Tama Communications Corporation
@@ -20,11 +20,11 @@ Free Documentation License".
 
 File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
-GNU GLOBAL source code tag system
-*********************************
+GNU GLOBAL source code tagging system
+*************************************
 
-This manual documents version 6.5.5 of the GNU GLOBAL source code tag
-system.
+This manual documents version 6.5.6 of the GNU GLOBAL source code
+tagging system.
 
 * Menu:
 
@@ -45,14 +45,14 @@ File: global.info,  Node: Introduction,  Next: Command line,  Prev: Top,  Up: To
 1.1 What is GNU GLOBAL?
 =======================
 
-GNU GLOBAL is a source code tag system that works the same way across
-diverse environments, such as Emacs editor, Vi editor, Less viewer, Bash
-shell, various web browsers, etc.  You can locate specified symbols,
-such as functions, macros, structs and classes in your source files and
-move there easily.  It is useful for hacking large projects which
-contain many sub-directories, many '#ifdef' and many 'main()' functions.
-It is similar to ctags or etags, but is different from them at the point
-of independence of any editor.
+GNU GLOBAL is a source code tagging system that works the same way
+across diverse environments, such as Emacs editor, Vi editor, Less
+viewer, Bash shell, various web browsers, etc.  You can locate specified
+symbols, such as functions, macros, structs and classes in your source
+files and move there easily.  It is useful for hacking large projects
+which contain many sub-directories, many '#ifdef' and many 'main()'
+functions.  It is similar to ctags or etags, but is different from them
+at the point of independence of any editor.
 
 1.2 Concept of project
 ======================
@@ -131,7 +131,7 @@ File: global.info,  Node: Command line,  Next: Applications,  Prev: Introduction
 **************
 
 You can use tag facilities from the shell command line.  It is a big
-merit of GLOBAL compared with any other tag system.
+merit of GLOBAL compared with any other tagging system.
 
 * Menu:
 
@@ -682,7 +682,8 @@ File: global.info,  Node: Less viewer,  Next: Nvi-1.81.5 editor,  Prev: GloBash,
 3.2 Less using GLOBAL
 =====================
 
-You can use GLOBAL as a tag system of less(1) viewer instead of ctags.
+You can use GLOBAL as a tagging system of less(1) viewer instead of
+ctags.
 
 * Menu:
 
@@ -805,7 +806,7 @@ File: global.info,  Node: Nvi-1.81.5 editor,  Next: Elvis editor,  Prev: Less vi
 3.3 Nvi-1.81.5 using GLOBAL
 ===========================
 
-You can use GLOBAL as the tag system of Nvi editor instead of ctags.
+You can use GLOBAL as a tagging system of Nvi editor instead of ctags.
 
 * Menu:
 
@@ -1232,7 +1233,7 @@ File: global.info,  Node: Emacs editor,  Next: Gtags-cscope,  Prev: Vim editor, 
 3.6 Extended Emacs using GLOBAL
 ===============================
 
-You can use GLOBAL as the tag system of Emacs editor instead of etags.
+You can use GLOBAL as a tagging system of Emacs editor instead of etags.
 
 * Menu:
 
@@ -1510,11 +1511,11 @@ File: global.info,  Node: Doxygen documentation system,  Prev: Web browser,  Up:
 3.9 Doxygen using GLOBAL
 ========================
 
-You can use GLOBAL as the source browser of Doxygen.
+You can use GLOBAL as a source browser of Doxygen.
 
    Doxygen Release 1.4.3 or later has config option 'USE_HTAGS'.  When
-enabled in combination with 'SOURCE_BROWSER=YES', htags(1) is used as
-the source browser instead of Doxygen's own.
+enabled in combination with 'SOURCE_BROWSER=YES', htags(1) is used as a
+source browser instead of Doxygen's own.
 
    Here is an example.
 
@@ -1576,13 +1577,12 @@ You can write a new parser for gtags(1).
 layer plug-in parser instead.  See 'plugin-factory/' to discover the
 function layer plug-in parser.
 
-   You can use Exuberant ctags as a plug-in parser too.  This requires
-Exuberant ctags version 5.5 or later.
+   You can use Universal Ctags as a plug-in parser too.
 
          # Installation of GLOBAL
          # It assumed that ctags command is installed in '/usr/local/bin'.
 
-         $ ./configure --with-exuberant-ctags=/usr/local/bin/ctags
+         $ ./configure --with-universal-ctags=/usr/local/bin/ctags
          $ make
          $ sudo make install
 
@@ -1590,8 +1590,8 @@ Exuberant ctags version 5.5 or later.
          # It assumed that GLOBAL is installed in '/usr/local'.
 
          $ export GTAGSCONF=/usr/local/share/gtags/gtags.conf
-         $ export GTAGSLABEL=ctags
-         $ gtags                         # gtags invokes Exuberant Ctags internally
+         $ export GTAGSLABEL=new-ctags
+         $ gtags                         # gtags invokes Universal Ctags internally
 
 
 File: global.info,  Node: Incremental updating,  Prev: Plug-in,  Up: Other topics
@@ -1635,7 +1635,7 @@ File: global.info,  Node: Reference,  Next: Copying This Manual,  Prev: Other to
 * global::         global - print locations of given symbols
 * gtags::          gtags - create tag files for global
 * htags::          htags - generate a hypertext from a set of source files
-* htags-server::   htags-server - start a private Web/CGI server for hyper-text
+* htags-server::   htags-server - a private Web/CGI server for htags
 * gozilla::        gozilla - force mozilla to display specified part of a source file
 * gtags-cscope::   gtags-cscope - interactively examine a C program
 * globash::        globash - a special shell for GLOBAL using GNU bash
@@ -1805,8 +1805,14 @@ The following options are available:
      '-P' command.
 '--path-style' format
      Print path names using format, which may be one of: 'relative',
-     'absolute', 'shorter', 'abslib' or 'through'.  The '--path-style'
-     option is given more priority than the '-a' option.
+     'absolute', 'shorter', 'abslib' or 'through'.  'relative' means
+     relative path.  'absolute' means absolute path.  'shorter' means
+     the shorter one of relative and absolute path.  'abslib' means
+     absolute path for libraries (GTAGSLIBPATH) and relative path for
+     the rest.  'through' means the relative path from the project root
+     directory (internal format of GPATH). The default is 'relative'.
+     The '--path-style' option is given more priority than the '-a'
+     option.
 '--print0'
      Print each record followed by a null character instead of a
      newline.
@@ -2121,6 +2127,12 @@ GTAGSLABEL
 GTAGSLOGGING
      If this variable is set, '$GTAGSLOGGING' is used as the path name
      of a log file.  There is no default value.
+GTAGS_COMMANDLINE
+     This variable can only be referenced from the hook (See
+     gtags_hook).  Gtags set its own effective command line to this
+     variable before calling the hook.  Each argument is sepalated by
+     whitespace, and real whitespace is represented as '%20'.  This is
+     read only.
 GTAGS_OPTIONS
      The value of this variable is inserted in the head of arguments.
 MAKEOBJDIR
@@ -2147,6 +2159,11 @@ option.
      name.  If the function name is not specified, 'parser' is assumed.
      As a special exception, gtags collects values from multiple
      'gtags_parser' variables.
+'gtags_hook' (command line)
+     Specify a command line which should be executed at the beginning of
+     gtags after loading configuration file.  You can use this hook to
+     update 'gtags.files' dynamically..  "./" in it always means the
+     project root directory, since gtags is always invoked there.
 'icase_path' (boolean)
      Ignore case distinctions in the path.  Suffixes check is affected
      by this capability.
@@ -2170,6 +2187,7 @@ option.
      files, you can do everything.  Additionally, this technique can
      also be applied to any other tagging systems like ctags(1),
      cscope(1), and etc.
+     Skip list is also effective when you use the '-f' or 'gtags.files'.
 
 DIAGNOSTICS
 -----------
@@ -2236,13 +2254,15 @@ root directory of a source project.  Then you can execute htags in the
 same place.  Htags makes a directory named 'HTML', and puts a hypertext
 in it.  You can start browsing at 'HTML/index.html'.
 
-   Since htags generates a static hypertext as long as the '-D' or '-f'
-option is not specified, you can move it anywhere and browse it by any
-browser without any HTTP server.
+   Since htags generates a static hypertext as long as neither '-D' nor
+'-f' option is not specified, you can move it anywhere and browse it by
+any browser without any HTTP server.  If you use '-D' or '-f' option,
+you need to use HTTP server.  Though any HTTP server is available,
+htags-server(1) is recommended.
 
    This command has so many options.  If you are new to htags, it is
-recommended to use the '--suggest' option.  With that option, htags
-chooses popular options on your behalf.
+recommended to use '--suggest' option.  With that option, htags chooses
+popular options on your behalf.
 
 OPTIONS
 -------
@@ -2383,7 +2403,9 @@ EXAMPLES
      $ gtags -v
      $ htags -sanohITvt 'Welcome to XXX source tour!'
      $ firefox HTML/index.html
-     $ htags --suggest
+     $ htags --suggest2
+     $ htags-server >& log &
+     $ firefox http://127.0.0.1:8000
 
 FILES
 -----
@@ -2460,7 +2482,7 @@ Htags exits with a non-0 value if an error occurred, 0 otherwise.
 SEE ALSO
 --------
 
-global(1), gtags(1), gtags.conf(5).
+htags-server(1), global(1), gtags(1), gtags.conf(5).
 
    GNU GLOBAL source code tag system
 (http://www.gnu.org/software/global/).
@@ -2491,18 +2513,18 @@ The htags command appeared in FreeBSD 2.2.2.
 
 File: global.info,  Node: htags-server,  Next: gozilla,  Prev: htags,  Up: Reference
 
-5.4 htags-server - start a private Web/CGI server for hyper-text
-================================================================
+5.4 htags-server - a private Web/CGI server for htags
+=====================================================
 
 NAME
 ----
 
-htags-server - start a private Web/CGI server for hyper-text
+htags-server - a private Web/CGI server for htags
 
 SYNOPSIS
 --------
 
-     htags-server [-b ip-address][-u language][port]
+     htags-server [-b ip-address][-u language][-retry[=n]][port]
 
 DESCRIPTION
 -----------
@@ -2528,6 +2550,9 @@ The following options are available:
 '-u', '--use' language
      Specifies language to use, which may be one of: 'python' and
      'ruby'.
+'--retry'[=n]
+     If the port is already in use, retry n times with incrementing the
+     port number.  The default of n is 20.
 port
      Specifies the port on which htags-server listen.  If you want to
      use multiple sessions, you must use unique number for each
@@ -2543,6 +2568,13 @@ EXAMPLES
      Serving HTTP on 127.0.0.1 port 8000 ...
      (another terminal)
      $ firefox http://localhost:8000/
+     $ htags-server
+     Error: port 8000 already in use.
+     $ htags-server --retry
+     Warning: port 8000 already in use (skipped)
+     Please access at http://127.0.0.1:8001
+     Python2 http/cgi server
+     Serving HTTP on 127.0.0.1 port 8001 ...
 
 DIAGNOSTICS
 -----------
@@ -3040,7 +3072,7 @@ BUG
 The function field of the display is almost <unknown> since GLOBAL
 doesn't recognize it.
 
-   'Find functions called by this function' is not implemented.
+   \'Find functions called by this function' is not implemented.
 
 AUTHOR
 ------
@@ -3152,13 +3184,13 @@ from the first one that exists and is readable.
 (6) [sysconfdir]/gtags.conf
 
    [sysconfdir] is '/usr/local/etc' by default; you can change it by the
--sysconfdir option of configure script.
+-sysconfdir option of the configure script.
 
-   The format is similar to termcap(5) except for some extensions
-described later.  The file includes one or more records.  You should
-select a record using a label.  Default label is 'default'.  If
-GTAGSLABEL is set, its value is used.  Please be aware the meaning of
-'default' is different to that of termcap(5).
+   Syntax is similar to termcap(5) except for some extensions described
+later.  A file includes one or more records.  You should select a record
+using a label.  Default label is 'default'.  If GTAGSLABEL is set, its
+value is used.  Please be aware the meaning of 'default' is different
+from that of termcap(5).
 
    Lines starting with '#' are ignored.  A record consists of one or
 more fields separated by ':' and ends with a newline.  The first field
@@ -3739,58 +3771,58 @@ Option Index
 
 
 Tag Table:
-Node: Top774
-Node: Introduction1406
-Node: Command line4036
-Node: Preparation4454
-Node: Basic usage5764
-Node: Applied usage10689
-Node: Applications15618
-Node: GloBash16323
-Node: Features(globash)16658
-Node: Preparation(globash)16996
-Node: Usage(globash)18051
-Node: Less viewer23996
-Node: Features(Less)24378
-Node: Preparation(Less)24606
-Node: Usage(Less)24959
-Node: Nvi-1.81.5 editor27447
-Node: Features(Nvi-1.81.5)27841
-Node: Preparation(Nvi-1.81.5)28098
-Node: Usage(Nvi-1.81.5)28846
-Node: Elvis editor30687
-Node: Features(Elvis)31140
-Node: Preparation(Elvis)31345
-Node: Usage(Elvis)31749
-Node: Vim editor34718
-Node: Features(Vim)35080
-Node: Preparation(Vim)35531
-Node: Usage(Vim)35883
-Node: Emacs editor39737
-Node: Features(Emacs)40135
-Node: Preparation(Emacs)40467
-Node: Usage(Emacs)41705
-Node: Gtags-cscope45000
-Node: Web browser45785
-Node: Features(browser)46164
-Node: Preparation(browser)46652
-Node: Usage(browser)47835
-Node: Doxygen documentation system48660
-Node: Other topics49380
-Node: Configuration49695
-Node: Plug-in50399
-Node: Incremental updating51368
-Node: Reference52552
-Node: global53265
-Node: gtags65586
-Node: htags73658
-Node: htags-server83233
-Node: gozilla85114
-Node: gtags-cscope88110
-Node: globash99590
-Node: gtags.conf100805
-Node: Copying This Manual104567
-Node: GNU Free Documentation License104804
-Node: Index127195
+Node: Top782
+Node: Introduction1426
+Node: Command line4061
+Node: Preparation4483
+Node: Basic usage5793
+Node: Applied usage10718
+Node: Applications15647
+Node: GloBash16352
+Node: Features(globash)16687
+Node: Preparation(globash)17025
+Node: Usage(globash)18080
+Node: Less viewer24025
+Node: Features(Less)24411
+Node: Preparation(Less)24639
+Node: Usage(Less)24992
+Node: Nvi-1.81.5 editor27480
+Node: Features(Nvi-1.81.5)27876
+Node: Preparation(Nvi-1.81.5)28133
+Node: Usage(Nvi-1.81.5)28881
+Node: Elvis editor30722
+Node: Features(Elvis)31175
+Node: Preparation(Elvis)31380
+Node: Usage(Elvis)31784
+Node: Vim editor34753
+Node: Features(Vim)35115
+Node: Preparation(Vim)35566
+Node: Usage(Vim)35918
+Node: Emacs editor39772
+Node: Features(Emacs)40172
+Node: Preparation(Emacs)40504
+Node: Usage(Emacs)41742
+Node: Gtags-cscope45037
+Node: Web browser45822
+Node: Features(browser)46201
+Node: Preparation(browser)46689
+Node: Usage(browser)47872
+Node: Doxygen documentation system48697
+Node: Other topics49413
+Node: Configuration49728
+Node: Plug-in50432
+Node: Incremental updating51352
+Node: Reference52536
+Node: global53238
+Node: gtags65931
+Node: htags74687
+Node: htags-server84479
+Node: gozilla86721
+Node: gtags-cscope89717
+Node: globash101198
+Node: gtags.conf102413
+Node: Copying This Manual106175
+Node: GNU Free Documentation License106412
+Node: Index128803
 
 End Tag Table

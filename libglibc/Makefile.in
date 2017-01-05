@@ -111,9 +111,10 @@ am__v_AR_1 =
 libgloglibc_a_AR = $(AR) $(ARFLAGS)
 libgloglibc_a_LIBADD =
 am__libgloglibc_a_SOURCES_DIST = regex.c getopt.c getopt1.c snprintf.c \
-	obstack.c hash-string.c sqlite3.c
+	obstack.c hash-string.c fnmatch.c sqlite3.c
 am__objects_1 = regex.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
-	snprintf.$(OBJEXT) obstack.$(OBJEXT) hash-string.$(OBJEXT)
+	snprintf.$(OBJEXT) obstack.$(OBJEXT) hash-string.$(OBJEXT) \
+	fnmatch.$(OBJEXT)
 @USE_SQLITE3_FALSE@am_libgloglibc_a_OBJECTS = $(am__objects_1)
 @USE_SQLITE3_TRUE@am_libgloglibc_a_OBJECTS = $(am__objects_1) \
 @USE_SQLITE3_TRUE@	sqlite3.$(OBJEXT)
@@ -164,7 +165,7 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 am__noinst_HEADERS_DIST = regex.h getopt.h obstack.h hash-string.h \
-	getopt_int.h sqlite3.h
+	getopt_int.h fnmatch.h sqlite3.h
 HEADERS = $(noinst_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
@@ -356,8 +357,8 @@ top_srcdir = @top_srcdir@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 noinst_LIBRARIES = libgloglibc.a
-INCS = regex.h getopt.h obstack.h hash-string.h getopt_int.h
-SRCS = regex.c getopt.c getopt1.c snprintf.c obstack.c hash-string.c
+INCS = regex.h getopt.h obstack.h hash-string.h getopt_int.h fnmatch.h
+SRCS = regex.c getopt.c getopt1.c snprintf.c obstack.c hash-string.c fnmatch.c
 @USE_SQLITE3_FALSE@noinst_HEADERS = $(INCS)
 @USE_SQLITE3_TRUE@noinst_HEADERS = $(INCS) sqlite3.h
 @USE_SQLITE3_FALSE@libgloglibc_a_SOURCES = $(SRCS)
@@ -411,6 +412,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fnmatch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash-string.Po@am__quote@

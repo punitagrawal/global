@@ -127,6 +127,13 @@ Options:\n\
 --path-style format\n\
        Print path names using format, which may be one of:\n\
        relative, absolute, shorter, abslib or through.\n\
+       relative means relative path. absolute means absolute path.\n\
+       shorter means the shorter one of relative and absolute path.\n\
+       abslib means absolute path for libraries (GTAGSLIBPATH) and relative path\n\
+       for the rest.\n\
+       through means the relative path from the project root directory\n\
+       (internal format of GPATH).\n\
+       The default is relative.\n\
        The --path-style option is given more priority than the -a option.\n\
 --print0\n\
        Print each record followed by a null character instead of a newline.\n\

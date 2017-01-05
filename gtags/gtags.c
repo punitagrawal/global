@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2008,
- *	2009, 2010, 2012, 2014, 2015
+ *	2009, 2010, 2012, 2014, 2015, 2016
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -220,6 +220,16 @@ main(int argc, char **argv)
 		char *env = getenv("GTAGS_OPTIONS");
 		if (env && *env)
 			argv = prepend_options(&argc, argv, env);
+	}
+	/*
+	 * Execute gtags_hook before the jogs.
+	 */
+	if (getconfs("gtags_hook", sb)) {
+		char *p = serialize_options(argc, argv);
+		set_env("GTAGS_COMMANDLINE", p);
+		free(p);
+		if (system(strbuf_value(sb)))
+			fprintf(stderr, "gtags-hook failed: %s\n", strbuf_value(sb));
 	}
 	logging_arguments(argc, argv);
 	while ((optchar = getopt_long(argc, argv, "cd:f:iIn:oOqvwse", long_options, &option_index)) != EOF) {

@@ -157,6 +157,13 @@ This option is valid only with the @samp{-g} or @samp{-P} command.
 @item @samp{--path-style} format
 Print path names using format, which may be one of:
 @samp{relative}, @samp{absolute}, @samp{shorter}, @samp{abslib} or @samp{through}.
+@samp{relative} means relative path. @samp{absolute} means absolute path.
+@samp{shorter} means the shorter one of relative and absolute path.
+@samp{abslib} means absolute path for libraries (GTAGSLIBPATH) and relative path
+for the rest.
+@samp{through} means the relative path from the project root directory
+(internal format of GPATH).
+The default is @samp{relative}.
 The @samp{--path-style} option is given more priority than the @samp{-a} option.
 @item @samp{--print0}
 Print each record followed by a null character instead of a newline.

@@ -332,7 +332,7 @@ GNU GLOBAL source code tag system@*
 The function field of the display is almost <unknown> since
 GLOBAL doesn't recognize it.
 
-'Find functions called by this function' is not implemented.
+\'Find functions called by this function' is not implemented.
 @unnumberedsubsec AUTHOR
 Joe Steffen (original author) and others.
 @unnumberedsubsec HISTORY

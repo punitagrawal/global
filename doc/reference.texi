@@ -3,7 +3,7 @@
 * global::         global - print locations of given symbols
 * gtags::          gtags - create tag files for global
 * htags::          htags - generate a hypertext from a set of source files
-* htags-server::   htags-server - start a private Web/CGI server for hyper-text
+* htags-server::   htags-server - a private Web/CGI server for htags
 * gozilla::        gozilla - force mozilla to display specified part of a source file
 * gtags-cscope::   gtags-cscope - interactively examine a C program
 * globash::        globash - a special shell for GLOBAL using GNU bash
@@ -20,7 +20,7 @@
 @section htags - generate a hypertext from a set of source files
 @include htags.ref
 @node htags-server
-@section htags-server - start a private Web/CGI server for hyper-text
+@section htags-server - a private Web/CGI server for htags
 @include htags-server.ref
 @node gozilla
 @section gozilla - force mozilla to display specified part of a source file
