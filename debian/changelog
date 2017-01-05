@@ -1,3 +1,10 @@
+global (6.5.6-1) unstable; urgency=medium
+
+  * New upstream version 6.5.6
+  * Drop patches merged upstream
+
+ -- Punit Agrawal <punitagrawal@gmail.com>  Thu, 05 Jan 2017 22:44:38 +0000
+
 global (6.5.5-2) unstable; urgency=medium
 
   * Apply hardening flags
