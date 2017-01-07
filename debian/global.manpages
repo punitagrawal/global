@@ -5,3 +5,4 @@ gtags-cscope/gtags-cscope.1
 htags/htags.1
 htags-server/htags-server.1
 globash/globash.1
+libutil/gtags.conf.5
