@@ -1,3 +1,11 @@
+global (6.5.6-2) unstable; urgency=medium
+
+  * Include gtags.conf manpage in the package
+  * Fix lintian warning with gtags manpage
+  * Drop static plugin libraries from the package
+
+ -- Punit Agrawal <punitagrawal@gmail.com>  Sat, 07 Jan 2017 14:22:40 +0000
+
 global (6.5.6-1) unstable; urgency=medium
 
   * New upstream version 6.5.6
