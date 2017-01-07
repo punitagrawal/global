@@ -58,6 +58,8 @@ install-arch: build-arch
 	$(MAKE) install-exec prefix=`pwd`/debian/$(package)/usr
 	$(MAKE) -C htags install-gtagsDATA prefix=$(CURDIR)/debian/$(package)/usr
 	$(MAKE) -C plugin-factory install-data prefix=$(CURDIR)/debian/$(package)/usr
+	rm $(CURDIR)/debian/$(package)/usr/lib/gtags/*.a
+	rm $(CURDIR)/debian/$(package)/usr/lib/gtags/*.la
 	$(MAKE) -C icons install-iconsDATA prefix=$(CURDIR)/debian/$(package)/usr
 	$(MAKE) -C jquery install-jqueryDATA prefix=$(CURDIR)/debian/$(package)/usr
 	$(MAKE) -C jquery/images install-imagesDATA prefix=$(CURDIR)/debian/$(package)/usr
