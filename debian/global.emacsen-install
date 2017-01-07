@@ -4,7 +4,7 @@ FLAVOR=$1
 PACKAGE=global
 el_files=gtags.el
 
-byte_compile_options="-batch -f batch-byte-compile"
+byte_compile_options="-batch --no-init-file --no-site-file -f batch-byte-compile"
 el_dir="/usr/share/emacs/site-lisp/${PACKAGE}/"
 elc_dir="/usr/share/${FLAVOR}/site-lisp/${PACKAGE}/"
 el_path_list=`echo ${el_files} | perl -pe "s|^|${el_dir}|o"`
