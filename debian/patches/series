@@ -1,1 +1,7 @@
 0001-gtags-Fix-lintian-warning-with-gtags-manpage.patch
+0003-libutil-Drop-extraneous-function-declarations.patch
+0004-libutil-Staticize-locally-used-functions.patch
+0005-libutil-Remove-usage-of-PATH_MAX-from-getrealpath.patch
+0006-libutil-Remove-usage-of-PATH_MAX-from-has_symlinkloo.patch
+0007-libutil-Convert-rootdir-to-a-dynamically-allocated-a.patch
+0008-libutil-Drop-the-requirement-for-PATH_MAX-macro.patch

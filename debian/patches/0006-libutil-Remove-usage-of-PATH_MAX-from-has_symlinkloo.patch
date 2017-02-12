@@ -1,0 +1,68 @@
+From: Punit Agrawal <punitagrawal@gmail.com>
+Date: Sat, 21 Jan 2017 17:04:24 +0000
+Subject: libutil: Remove usage of PATH_MAX from has_symlinkloop
+
+Update has_symlinkloop to no longer use PATH_MAX. The change relies on
+the behaviour of realpath to return an allocated buffer when passed a
+NULL second argument.
+
+Ensure that the buffer is freed(not leaked) before returning from the
+function.
+---
+ libutil/find.c | 22 ++++++++++++++--------
+ 1 file changed, 14 insertions(+), 8 deletions(-)
+
+diff --git a/libutil/find.c b/libutil/find.c
+index a009538..1863df4 100644
+--- a/libutil/find.c
++++ b/libutil/find.c
+@@ -506,12 +506,12 @@ static int
+ has_symlinkloop(const char *dir)
+ {
+ 	struct stack_entry *sp;
+-	char real[PATH_MAX], *p;
+-	int i;
++	char *real, *p;
++	int i, ret = 0;
+ 
+ 	if (!strcmp(dir, "./"))
+ 		return 0;
+-	if (realpath(dir, real) == NULL)
++	if ((real = realpath(dir, NULL)) == NULL)
+ 		die("cannot get real path of '%s'.", trimpath(dir));
+ #ifdef SLOOPDEBUG
+ 	fprintf(stderr, "======== has_symlinkloop ======\n");
+@@ -520,8 +520,10 @@ has_symlinkloop(const char *dir)
+ 	fprintf(stderr, "\tcheck '%s' < '%s'\n", real, rootdir);
+ #endif
+ 	p = locatestring(rootdir, real, MATCH_AT_FIRST);
+-	if (p && (*p == '/' || *p == '\0' || !strcmp(real, "/")))
+-		return 1;
++	if (p && (*p == '/' || *p == '\0' || !strcmp(real, "/"))) {
++		ret = 1;
++		goto out;
++	}
+ 	sp = varray_assign(stack, 0, 0);
+ #ifdef SLOOPDEBUG
+ 	fprintf(stderr, "TEST-2\n");
+@@ -530,13 +532,17 @@ has_symlinkloop(const char *dir)
+ #ifdef SLOOPDEBUG
+ 		fprintf(stderr, "%d:\tcheck '%s' == '%s'\n", i, real, sp[i].real);
+ #endif
+-		if (!strcmp(sp[i].real, real))
+-			return 1;
++		if (!strcmp(sp[i].real, real)) {
++			ret = 1;
++			goto out;
++		}
+ 	}
+ #ifdef SLOOPDEBUG
+ 	fprintf(stderr, "===============================\n");
+ #endif
+-	return 0;
++out:
++	free(real);
++	return ret;
+ }
+ 
+ /**

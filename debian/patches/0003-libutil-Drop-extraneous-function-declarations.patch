@@ -1,0 +1,213 @@
+From: Punit Agrawal <punitagrawal@gmail.com>
+Date: Sat, 21 Jan 2017 17:31:35 +0000
+Subject: libutil: Drop extraneous function declarations
+
+Get rid of unnecessary function declarations by rearranging the
+definition of certain functions in the file.
+---
+ libutil/find.c | 160 ++++++++++++++++++++++++++++-----------------------------
+ 1 file changed, 78 insertions(+), 82 deletions(-)
+
+diff --git a/libutil/find.c b/libutil/find.c
+index e53e8ce..d3c921a 100644
+--- a/libutil/find.c
++++ b/libutil/find.c
+@@ -104,10 +104,6 @@ static int find_eof;
+ #define FIND_OPEN	1
+ #define FILELIST_OPEN	2
+ 
+-static void trim(char *);
+-static char *find_read_traverse(void);
+-static char *find_read_filelist(void);
+-
+ extern int qflag;
+ extern int debug;
+ static const int allow_blank = 1;
+@@ -695,32 +691,83 @@ find_open_filelist(const char *filename, const char *root, int explain)
+ 	strlimcpy(cwddir, root, sizeof(cwddir));
+ }
+ /**
+- * find_read: read path without GPATH.
++ * find_read_filelist: read path from file
+  *
+  *	@return		path
+  */
+-char *
+-find_read(void)
++static char *
++find_read_filelist(void)
+ {
++	STATIC_STRBUF(ib);
++	static char buf[MAXPATHLEN + 1];
+ 	static char *path;
+ 
+-	assert(find_mode != 0);
+-	if (find_eof)
+-		path = NULL;
+-	else if (find_mode == FILELIST_OPEN)
+-		path = find_read_filelist();
+-	else if (find_mode == FIND_OPEN)
+-		path = find_read_traverse();
+-	else
+-		die("find_read: internal error.");
+-	return path;
++	strbuf_clear(ib);
++	for (;;) {
++		path = strbuf_fgets(ib, ip, STRBUF_NOCRLF);
++		if (path == NULL) {
++			/* EOF */
++			find_eof = 1;
++			return NULL;
++		}
++		if (*path == '\0') {
++			/* skip empty line.  */
++			continue;
++		}
++		/*
++		 * Lines which start with ". " are considered to be comments.
++		 */
++		if (*path == '.' && *(path + 1) == ' ')
++			continue;
++		/*
++		 * Skip the following:
++		 * o directory
++		 * o file which does not exist
++		 * o dead symbolic link
++		 */
++		if (!test("f", path)) {
++			if (test("d", path))
++				warning("'%s' is a directory. ignored.", trimpath(path));
++			else
++				warning("'%s' not found. ignored.", trimpath(path));
++			continue;
++		}
++		/*
++		 * normalize path name.
++		 *
++		 *	rootdir  /a/b/
++		 *	buf      /a/b/c/d.c -> c/d.c -> ./c/d.c
++		 */
++		if (normalize(path, rootdir, cwddir, buf, sizeof(buf)) == NULL) {
++			warning("'%s' is out of source tree. ignored.", trimpath(path));
++			continue;
++		}
++		path = buf;
++		/*
++		 * Now GLOBAL can treat the path which includes blanks.
++		 * This message is obsoleted.
++		 */
++		if (!allow_blank && locatestring(path, " ", MATCH_LAST)) {
++			warning("'%s' ignored, because it includes blank.", trimpath(path));
++			continue;
++		}
++		if (skipthisfile(path))
++			continue;
++		/*
++		 * A blank at the head of path means
++		 * other than source file.
++		 */
++		if (!issourcefile(path))
++			*--path = ' ';
++		return path;
++	}
+ }
+ /**
+  * find_read_traverse: read path without GPATH.
+  *
+  *	@return		path
+  */
+-char *
++static char *
+ find_read_traverse(void)
+ {
+ 	static char val[MAXPATHLEN];
+@@ -816,76 +863,25 @@ find_read_traverse(void)
+ 	return NULL;
+ }
+ /**
+- * find_read_filelist: read path from file
++ * find_read: read path without GPATH.
+  *
+  *	@return		path
+  */
+-static char *
+-find_read_filelist(void)
++char *
++find_read(void)
+ {
+-	STATIC_STRBUF(ib);
+-	static char buf[MAXPATHLEN + 1];
+ 	static char *path;
+ 
+-	strbuf_clear(ib);
+-	for (;;) {
+-		path = strbuf_fgets(ib, ip, STRBUF_NOCRLF);
+-		if (path == NULL) {
+-			/* EOF */
+-			find_eof = 1;
+-			return NULL;
+-		}
+-		if (*path == '\0') {
+-			/* skip empty line.  */
+-			continue;
+-		}
+-		/*
+-		 * Lines which start with ". " are considered to be comments.
+-		 */
+-		if (*path == '.' && *(path + 1) == ' ')
+-			continue;
+-		/*
+-		 * Skip the following:
+-		 * o directory
+-		 * o file which does not exist
+-		 * o dead symbolic link
+-		 */
+-		if (!test("f", path)) {
+-			if (test("d", path))
+-				warning("'%s' is a directory. ignored.", trimpath(path));
+-			else
+-				warning("'%s' not found. ignored.", trimpath(path));
+-			continue;
+-		}
+-		/*
+-		 * normalize path name.
+-		 *
+-		 *	rootdir  /a/b/
+-		 *	buf      /a/b/c/d.c -> c/d.c -> ./c/d.c
+-		 */
+-		if (normalize(path, rootdir, cwddir, buf, sizeof(buf)) == NULL) {
+-			warning("'%s' is out of source tree. ignored.", trimpath(path));
+-			continue;
+-		}
+-		path = buf;
+-		/*
+-		 * Now GLOBAL can treat the path which includes blanks.
+-		 * This message is obsoleted.
+-		 */
+-		if (!allow_blank && locatestring(path, " ", MATCH_LAST)) {
+-			warning("'%s' ignored, because it includes blank.", trimpath(path));
+-			continue;
+-		}
+-		if (skipthisfile(path))
+-			continue;
+-		/*
+-		 * A blank at the head of path means
+-		 * other than source file.
+-		 */
+-		if (!issourcefile(path))
+-			*--path = ' ';
+-		return path;
+-	}
++	assert(find_mode != 0);
++	if (find_eof)
++		path = NULL;
++	else if (find_mode == FILELIST_OPEN)
++		path = find_read_filelist();
++	else if (find_mode == FIND_OPEN)
++		path = find_read_traverse();
++	else
++		die("find_read: internal error.");
++	return path;
+ }
+ /**
+  * find_close: close iterator.

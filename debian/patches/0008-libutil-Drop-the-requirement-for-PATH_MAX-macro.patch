@@ -1,0 +1,25 @@
+From: Punit Agrawal <punitagrawal@gmail.com>
+Date: Sat, 21 Jan 2017 19:52:54 +0000
+Subject: libutil: Drop the requirement for PATH_MAX macro
+
+PATH_MAX is no longer used in this file. Drop the requirement for it
+to be defined.
+---
+ libutil/find.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/libutil/find.c b/libutil/find.c
+index 14d59d5..a515898 100644
+--- a/libutil/find.c
++++ b/libutil/find.c
+@@ -79,10 +79,6 @@
+ #define STRNCMP strncmp
+ #define ROOT 0
+ #endif
+-#ifndef PATH_MAX
+-#error Since this platform does not have PATH_MAX, you should define it using an appropriate value for the platform.
+-/* #define PATH_MAX     1024 */
+-#endif
+ /*
+  * usage of find_xxx()
+  *
