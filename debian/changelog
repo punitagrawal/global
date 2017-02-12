@@ -1,3 +1,11 @@
+global (6.5.6-3) experimental; urgency=medium
+
+  * Don't load init and site file while installing gtags.el. Closes: #218111
+  * Drop the usage of PATH_MAX from libutil/find.c to enable building on Hurd.
+    Closes: #848302
+
+ -- Punit Agrawal <punitagrawal@gmail.com>  Sun, 12 Feb 2017 23:36:54 +0000
+
 global (6.5.6-2) unstable; urgency=medium
 
   * Include gtags.conf manpage in the package
