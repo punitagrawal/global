@@ -60,6 +60,11 @@ Print path names which match to pattern.
 If no pattern is given, print all paths in the project.
 @item @samp{-p}, @samp{--print-dbpath}
 Print location of @file{GTAGS}.
+@item @samp{--print} name
+Print location of name, which may be one of:
+@samp{root}, @samp{dbpath} or @samp{conf}.
+@samp{root} means project's root directory. @samp{dbpath} means a directory
+where tag databases exist. @samp{conf} means configuration file.
 @item @samp{-u}, @samp{--update}
 Update tag files incrementally.
 This command internally invokes gtags(1).
@@ -98,7 +103,11 @@ End the search without going through all the tag files listed in
 @var{GTAGSLIBPATH} when tags are found in a tag file. This is the default.
 @item @samp{--from-here} context
 Decide tag type by context. Its syntax should be @samp{lineno:path}.
-If this option is specified then @samp{-s} and @samp{-r} are ignored.
+If the context is a definition of the pattern then use @samp{-r}, else if
+there is at least one definition of the pattern then use @samp{-d},
+else use @samp{-s}.
+If this option is specified then @samp{-d}, @samp{-r} and @samp{-s}
+on the command line are ignored.
 Regular expression is not allowed for pattern.
 This option assumes use in conversational environments such as
 editors and IDEs.
@@ -130,20 +139,21 @@ This option is valid only with the @samp{-c} command in conjunction with @samp{-
 @item @samp{-n}, @samp{--nofilter}
 Suppress sort filter and path conversion filter.
 @item @samp{-N}, @samp{--nearness}[=start]
-Use Nearness sort method for the output. By default, alphabetical sort
-method is used.
+Use Nearness sort method (sorting by closest from start) for the output.
+By default, alphabetical sort method is used.
 This option is effective for the tag search command, @samp{-P} command
 and @samp{-g} command. As an exception, @samp{-g} command ignores this
 option when files are specified by arguments.
 The nearness is defined by how many parent directories to go up to reach
 the target. The result of nearness sort is concatenation of the following
-([1]-[n]) in this order. The default of start is the current directory.
+([0]-[n]) in this order. The default of start is the current directory.
 @example
-[1] Output of local search in the start directory.
-[2] Output of local search in the parent directory except for [1].
-[3] Output of local search in the grandparent directory except for [1]-[2].
+[0] If the start is a file, output of local search in the file.
+[1] Output of local search in the start directory except for [0].
+[2] Output of local search in the parent directory except for [0]-[1].
+[3] Output of local search in the grandparent directory except for [0]-[2].
 ... (repeat until the project root directory)
-[n] Output of local search in the project root directory except for [1]-[n-1].
+[n] Output of local search in the project root directory except for [0]-[n-1].
 @end example
 In each directory, they are sorted by alphabetical order.
 @item @samp{-O}, @samp{--only-other}
@@ -293,12 +303,12 @@ Usually, it is recognized by existence of @file{GTAGS}.
 Use of this variable is not recommended.
 @item @var{GTAGSTHROUGH}
 If this variable is set, the @samp{-T} option is specified.
-@item @var{MAKEOBJDIR}
-If this variable is set, @file{$MAKEOBJDIR} is used as the name
-of BSD-style objdir. The default is @file{obj}.
-@item @var{MAKEOBJDIRPREFIX}
-If this variable is set, @file{$MAKEOBJDIRPREFIX} is used as the prefix
-of BSD-style objdir. The default is @file{/usr/obj}.
+@item @var{GTAGSOBJDIR}, @var{MAKEOBJDIR}
+If eigher of the two variable is set, it is used as the name of BSD-style objdir.
+The former is given priority. The default is @file{obj}.
+@item @var{GTAGSOBJDIRPREFIX}, @var{MAKEOBJDIRPREFIX}
+If eigher of the two variable is set, it is used as the prefix of BSD-style objdir.
+The former is given priority. The default is @file{/usr/obj}.
 @end table
 @unnumberedsubsec CONFIGURATION
 The following configuration variables affect the execution of global:

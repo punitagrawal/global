@@ -26,7 +26,7 @@ const char *help_const = "Options:\n\
        The argument file can be set to - to accept a list of\n\
        files from the standard input.\n\
        File names must be separated by newline.\n\
-       To make the list, you may use find(1) which has rich options\n\
+       To make the list you may use find(1), which has rich options\n\
        for selecting files.\n\
 --gtagsconf file\n\
        Set environment variable GTAGSCONF to file.\n\

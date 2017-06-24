@@ -1,6 +1,6 @@
 /* ANSI-C code produced by gperf version 3.0.4 */
 /* Command-line: gperf --language=ANSI-C --struct-type --slot-name=name --hash-fn-name=php_hash --lookup-fn-name=php_lookup  */
-/* Computed positions: -k'1-2,4-6,9' */
+/* Computed positions: -k'1-2,4-5,8-9' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
       && ('%' == 37) && ('&' == 38) && ('\'' == 39) && ('(' == 40) \
@@ -40,67 +40,86 @@
 #define IS_RESERVED_SHARP(a)	((a) >= START_SHARP && (a) < START_YACC)
 #define IS_RESERVED_YACC(a)	((a) >= START_YACC)
 
-#define PHP___FILE__	2001
-#define PHP___LINE__	2002
-#define PHP___FUNCTION__	2003
-#define PHP___CLASS__	2004
-#define PHP_AND	2005
-#define PHP_ARRAY	2006
-#define PHP_AS	2007
-#define PHP_BREAK	2008
-#define PHP_CASE	2009
-#define PHP_CFUNCTION	2010
-#define PHP_CLASS	2011
-#define PHP_CONST	2012
-#define PHP_CONTINUE	2013
-#define PHP_DECLARE	2014
-#define PHP_DEFAULT	2015
-#define PHP_DEFINE	2016
-#define PHP_DO	2017
-#define PHP_DIE	2018
-#define PHP_EACH	2019
-#define PHP_ECHO	2020
-#define PHP_ELSE	2021
-#define PHP_ELSEIF	2022
-#define PHP_EMPTY	2023
-#define PHP_ENDDECLARE	2024
-#define PHP_ENDFOR	2025
-#define PHP_ENDFOREACH	2026
-#define PHP_ENDIF	2027
-#define PHP_ENDWHILE	2028
-#define PHP_ENDSWITCH	2029
-#define PHP_EVAL	2030
-#define PHP_EXIT	2031
-#define PHP_FAILURE	2032
-#define PHP_FALSE	2033
-#define PHP_FOR	2034
-#define PHP_FOREACH	2035
-#define PHP_FUNCTION	2036
-#define PHP_GLOBAL	2037
-#define PHP_HEADER	2038
-#define PHP_LIST	2039
-#define PHP_IF	2040
-#define PHP_INCLUDE	2041
-#define PHP_INCLUDE_ONCE	2042
-#define PHP_IS_ARRAY	2043
-#define PHP_IS_SET	2044
-#define PHP_NEW	2045
-#define PHP_OLD_FUNCTION	2046
-#define PHP_OR	2047
-#define PHP_PRINT	2048
-#define PHP_PRINTF	2049
-#define PHP_RETURN	2050
-#define PHP_REQUIRE	2051
-#define PHP_REQUIRE_ONCE	2052
-#define PHP_SETCOOKIE	2053
-#define PHP_SUCCESS	2054
-#define PHP_STATIC	2055
-#define PHP_SWITCH	2056
-#define PHP_TRUE	2057
-#define PHP_VAR	2058
-#define PHP_WHILE	2059
-#define PHP_UNSET	2060
-#define PHP_XOR	2061
+#define PHP___CLASS__	2001
+#define PHP___DIR__	2002
+#define PHP___FILE__	2003
+#define PHP___FUNCTION__	2004
+#define PHP___LINE__	2005
+#define PHP___METHOD__	2006
+#define PHP___NAMESPACE__	2007
+#define PHP___TRAIT__	2008
+#define PHP_ABSTRACT	2009
+#define PHP_AND	2010
+#define PHP_ARRAY	2011
+#define PHP_AS	2012
+#define PHP_BREAK	2013
+#define PHP_CALLABLE	2014
+#define PHP_CASE	2015
+#define PHP_CATCH	2016
+#define PHP_CFUNCTION	2017
+#define PHP_CLASS	2018
+#define PHP_CLONE	2019
+#define PHP_CONST	2020
+#define PHP_CONTINUE	2021
+#define PHP_DECLARE	2022
+#define PHP_DEFAULT	2023
+#define PHP_DEFINE	2024
+#define PHP_DIE	2025
+#define PHP_DO	2026
+#define PHP_EACH	2027
+#define PHP_ECHO	2028
+#define PHP_ELSE	2029
+#define PHP_ELSEIF	2030
+#define PHP_EMPTY	2031
+#define PHP_ENDDECLARE	2032
+#define PHP_ENDFOR	2033
+#define PHP_ENDFOREACH	2034
+#define PHP_ENDIF	2035
+#define PHP_ENDSWITCH	2036
+#define PHP_ENDWHILE	2037
+#define PHP_EVAL	2038
+#define PHP_EXIT	2039
+#define PHP_EXTENDS	2040
+#define PHP_FALSE	2041
+#define PHP_FINAL	2042
+#define PHP_FINALLY	2043
+#define PHP_FOR	2044
+#define PHP_FOREACH	2045
+#define PHP_FUNCTION	2046
+#define PHP_GLOBAL	2047
+#define PHP_GOTO	2048
+#define PHP_IF	2049
+#define PHP_IMPLEMENTS	2050
+#define PHP_INCLUDE	2051
+#define PHP_INCLUDE_ONCE	2052
+#define PHP_INSTANCEOF	2053
+#define PHP_INSTEADOF	2054
+#define PHP_INTERFACE	2055
+#define PHP_ISSET	2056
+#define PHP_LIST	2057
+#define PHP_NAMESPACE	2058
+#define PHP_NEW	2059
+#define PHP_OLD_FUNCTION	2060
+#define PHP_OR	2061
+#define PHP_PRINT	2062
+#define PHP_PRIVATE	2063
+#define PHP_PROTECTED	2064
+#define PHP_PUBLIC	2065
+#define PHP_REQUIRE	2066
+#define PHP_REQUIRE_ONCE	2067
+#define PHP_RETURN	2068
+#define PHP_STATIC	2069
+#define PHP_SWITCH	2070
+#define PHP_THROW	2071
+#define PHP_TRAIT	2072
+#define PHP_TRY	2073
+#define PHP_TRUE	2074
+#define PHP_UNSET	2075
+#define PHP_USE	2076
+#define PHP_VAR	2077
+#define PHP_WHILE	2078
+#define PHP_XOR	2079
+#define PHP_YIELD	2080
 #define PHP_GLOBALS	1001
 #define PHP_HTTP_COOKIE_VARS	1002
 #define PHP_HTTP_ENV_VARS	1003
@@ -119,12 +138,12 @@
 #define PHP__SESSION	1016
 struct keyword { char *name; int token; };
 
-#define TOTAL_KEYWORDS 206
+#define TOTAL_KEYWORDS 254
 #define MIN_WORD_LENGTH 2
 #define MAX_WORD_LENGTH 17
-#define MIN_HASH_VALUE 2
-#define MAX_HASH_VALUE 602
-/* maximum key range = 601, duplicates = 0 */
+#define MIN_HASH_VALUE 3
+#define MAX_HASH_VALUE 649
+/* maximum key range = 647, duplicates = 0 */
 
 #if (defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || defined(__cplusplus) || defined(__GNUC_STDC_INLINE__)
 inline
@@ -136,32 +155,32 @@ php_hash (register const char *str, register unsigned int len)
 {
   static unsigned short asso_values[] =
     {
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603,  70,  30,  40,  90,  50,
-       65,  15,  30, 115, 603,   5,  40,   0,  30,  40,
-       70,   0, 165,  50,  10,  55,  65,  35, 150,   0,
-      603, 603, 603, 603, 603,  55, 603,  30,  35,   0,
-       15,   5,   0,   5,  35,   0, 603,  40,  30,  95,
-        0,   0,  65, 603,  10,   0,  15,  25, 110, 140,
-      115,  10, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603, 603, 603, 603, 603,
-      603, 603, 603, 603, 603, 603
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650,  45,  20, 105, 220,  55,
+       10,  65,  25,  55, 650,  15,  70,  10,  40,  55,
+       90,  10, 120, 120, 100, 110,  70, 240, 110,  80,
+      650, 650, 650, 650, 650,  35, 650,   5,  60,   0,
+      140,   0,   0,   0,  10,   5, 650,  95,   0, 125,
+        0,  20,  75, 650,  55,  40,   5,  70, 165, 230,
+      230,  90, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
+      650, 650, 650, 650, 650, 650
     };
   register int hval = len;
 
@@ -171,10 +190,10 @@ php_hash (register const char *str, register unsigned int len)
         hval += asso_values[(unsigned char)str[8]];
       /*FALLTHROUGH*/
       case 8:
+        hval += asso_values[(unsigned char)str[7]];
+      /*FALLTHROUGH*/
       case 7:
       case 6:
-        hval += asso_values[(unsigned char)str[5]];
-      /*FALLTHROUGH*/
       case 5:
         hval += asso_values[(unsigned char)str[4]];
       /*FALLTHROUGH*/
@@ -203,322 +222,391 @@ php_lookup (register const char *str, register unsigned int len)
 {
   static struct keyword wordlist[] =
     {
-      {""}, {""},
-      {"if", PHP_IF},
-      {"for", PHP_FOR},
-      {""}, {""}, {""}, {""},
+      {""}, {""}, {""},
       {"new", PHP_NEW},
-      {"echo", PHP_ECHO},
-      {"endif", PHP_ENDIF},
-      {""},
-      {"or", PHP_OR},
-      {""}, {""}, {""}, {""},
-      {"do", PHP_DO},
-      {"die", PHP_DIE},
-      {"setcookie", PHP_SETCOOKIE},
-      {"const", PHP_CONST},
-      {"endfor", PHP_ENDFOR},
-      {""},
-      {"continue", PHP_CONTINUE},
-      {"cfunction", PHP_CFUNCTION},
-      {"endforeach", PHP_ENDFOREACH},
-      {"is_set", PHP_IS_SET},
-      {""}, {""},
-      {"True", PHP_TRUE},
-      {""},
-      {"define", PHP_DEFINE},
-      {"as", PHP_AS},
-      {"and", PHP_AND},
-      {"true", PHP_TRUE},
-      {"class", PHP_CLASS},
-      {"static", PHP_STATIC},
-      {"success", PHP_SUCCESS},
-      {"New", PHP_NEW},
-      {"case", PHP_CASE},
-      {"false", PHP_FALSE},
-      {""},
-      {"foreach", PHP_FOREACH},
-      {""},
       {"else", PHP_ELSE},
-      {"enddeclare", PHP_ENDDECLARE},
+      {"clone", PHP_CLONE},
+      {""},
+      {"if", PHP_IF},
+      {"and", PHP_AND},
+      {"case", PHP_CASE},
+      {"endif", PHP_ENDIF},
       {"elseif", PHP_ELSEIF},
-      {""},
-      {"function", PHP_FUNCTION},
+      {""}, {""},
       {"list", PHP_LIST},
-      {"unset", PHP_UNSET},
+      {"final", PHP_FINAL},
       {""},
-      {"Or", PHP_OR},
-      {""},
-      {"Echo", PHP_ECHO},
-      {"Endif", PHP_ENDIF},
-      {"return", PHP_RETURN},
-      {"require", PHP_REQUIRE},
-      {"is_array", PHP_IS_ARRAY},
-      {"List", PHP_LIST},
-      {"Const", PHP_CONST},
-      {""},
-      {"require_once", PHP_REQUIRE_ONCE},
-      {"Continue", PHP_CONTINUE},
-      {"Cfunction", PHP_CFUNCTION},
-      {"EMPTY", PHP_EMPTY},
-      {"Endfor", PHP_ENDFOR},
-      {""},
-      {"For", PHP_FOR},
-      {"Setcookie", PHP_SETCOOKIE},
-      {"Endforeach", PHP_ENDFOREACH},
-      {"Header", PHP_HEADER},
-      {"As", PHP_AS},
-      {"And", PHP_AND},
+      {"finally", PHP_FINALLY},
+      {"callable", PHP_CALLABLE},
       {"each", PHP_EACH},
-      {"Class", PHP_CLASS},
-      {"header", PHP_HEADER},
-      {"include", PHP_INCLUDE},
+      {"catch", PHP_CATCH},
+      {""}, {""},
+      {"for", PHP_FOR},
+      {"echo", PHP_ECHO},
+      {"Final", PHP_FINAL},
+      {"endfor", PHP_ENDFOR},
+      {"Finally", PHP_FINALLY},
       {""},
-      {"Case", PHP_CASE},
-      {"Unset", PHP_UNSET},
+      {"cfunction", PHP_CFUNCTION},
+      {""}, {""},
+      {"foreach", PHP_FOREACH},
+      {"For", PHP_FOR},
       {""},
-      {"include_once", PHP_INCLUDE_ONCE},
-      {"NEW", PHP_NEW},
-      {"_GET", PHP__GET},
-      {"array", PHP_ARRAY},
-      {"Static", PHP_STATIC},
-      {"Success", PHP_SUCCESS},
-      {""},
-      {"Else", PHP_ELSE},
-      {"Enddeclare", PHP_ENDDECLARE},
-      {"Elseif", PHP_ELSEIF},
-      {"Do", PHP_DO},
-      {"Die", PHP_DIE},
-      {""},
-      {"print", PHP_PRINT},
-      {"printf", PHP_PRINTF},
-      {"declare", PHP_DECLARE},
-      {"Var", PHP_VAR},
-      {""},
-      {"Print", PHP_PRINT},
-      {"Printf", PHP_PRINTF},
-      {"failure", PHP_FAILURE},
-      {"AND", PHP_AND},
-      {""},
-      {"False", PHP_FALSE},
-      {"Define", PHP_DEFINE},
+      {"endforeach", PHP_ENDFOREACH},
+      {""}, {""},
+      {"continue", PHP_CONTINUE},
+      {"insteadof", PHP_INSTEADOF},
+      {""}, {""},
       {"Foreach", PHP_FOREACH},
-      {"FOR", PHP_FOR},
-      {"SetCookie", PHP_SETCOOKIE},
-      {"While", PHP_WHILE},
+      {"New", PHP_NEW},
+      {"goto", PHP_GOTO},
+      {"instanceof", PHP_INSTANCEOF},
       {""},
-      {"default", PHP_DEFAULT},
-      {"Function", PHP_FUNCTION},
+      {"as", PHP_AS},
+      {"And", PHP_AND},
       {""},
-      {"Break", PHP_BREAK},
+      {"false", PHP_FALSE},
+      {""}, {""}, {""},
+      {"namespace", PHP_NAMESPACE},
+      {"isset", PHP_ISSET},
       {""},
       {"If", PHP_IF},
-      {"xor", PHP_XOR},
-      {"Each", PHP_EACH},
-      {"break", PHP_BREAK},
       {""},
-      {"AS", PHP_AS},
-      {""}, {""},
-      {"Array", PHP_ARRAY},
-      {""}, {""},
-      {"EndWhile", PHP_ENDWHILE},
-      {"CFunction", PHP_CFUNCTION},
-      {"empty", PHP_EMPTY},
-      {"EndFor", PHP_ENDFOR},
-      {"DO", PHP_DO},
+      {"Else", PHP_ELSE},
+      {"False", PHP_FALSE},
+      {"static", PHP_STATIC},
       {""},
-      {"ECHO", PHP_ECHO},
-      {"EndForeach", PHP_ENDFOREACH},
+      {"try", PHP_TRY},
+      {"true", PHP_TRUE},
+      {"Endif", PHP_ENDIF},
+      {"Elseif", PHP_ELSEIF},
+      {"IF", PHP_IF},
+      {"FOR", PHP_FOR},
+      {"interface", PHP_INTERFACE},
+      {"const", PHP_CONST},
       {"global", PHP_GLOBAL},
       {"old_function", PHP_OLD_FUNCTION},
-      {"VAR", PHP_VAR},
-      {"exit", PHP_EXIT},
       {""},
-      {"Is_set", PHP_IS_SET},
+      {"Each", PHP_EACH},
+      {"trait", PHP_TRAIT},
       {""},
-      {"var", PHP_VAR},
-      {"ELSE", PHP_ELSE},
-      {"CONST", PHP_CONST},
-      {"Global", PHP_GLOBAL},
-      {""}, {""},
-      {"eval", PHP_EVAL},
-      {"UNSET", PHP_UNSET},
+      {"or", PHP_OR},
+      {"Var", PHP_VAR},
+      {"Echo", PHP_ECHO},
+      {"unset", PHP_UNSET},
+      {"Endfor", PHP_ENDFOR},
+      {"include", PHP_INCLUDE},
+      {"function", PHP_FUNCTION},
+      {"List", PHP_LIST},
+      {"class", PHP_CLASS},
+      {""},
+      {"As", PHP_AS},
+      {"AND", PHP_AND},
+      {"Insteadof", PHP_INSTEADOF},
+      {"Endforeach", PHP_ENDFOREACH},
+      {"EndFor", PHP_ENDFOR},
+      {""},
+      {"Function", PHP_FUNCTION},
+      {"Namespace", PHP_NAMESPACE},
+      {"Instanceof", PHP_INSTANCEOF},
       {""},
       {"ForEach", PHP_FOREACH},
-      {"Xor", PHP_XOR},
-      {"EACH", PHP_EACH},
+      {"NEW", PHP_NEW},
+      {""},
+      {"EndForeach", PHP_ENDFOREACH},
       {""}, {""}, {""}, {""},
-      {"EVAL", PHP_EVAL},
-      {"WHILE", PHP_WHILE},
-      {""}, {""}, {""},
-      {"CASE", PHP_CASE},
-      {"EndDeclare", PHP_ENDDECLARE},
-      {""},
-      {"Failure", PHP_FAILURE},
-      {""},
-      {"LIST", PHP_LIST},
-      {"EndIf", PHP_ENDIF},
-      {"SWITCH", PHP_SWITCH},
-      {"Declare", PHP_DECLARE},
-      {"Is_array", PHP_IS_ARRAY},
-      {"_ENV", PHP__ENV},
-      {"Empty", PHP_EMPTY},
+      {"Isset", PHP_ISSET},
       {""},
       {"Old_function", PHP_OLD_FUNCTION},
-      {""}, {""}, {""}, {""},
-      {"IF", PHP_IF},
       {""},
-      {"Exit", PHP_EXIT},
-      {"CLASS", PHP_CLASS},
+      {"Goto", PHP_GOTO},
+      {"Clone", PHP_CLONE},
       {""},
-      {"Default", PHP_DEFAULT},
-      {"endwhile", PHP_ENDWHILE},
-      {"endswitch", PHP_ENDSWITCH},
-      {"_POST", PHP__POST},
-      {"Is_Set", PHP_IS_SET},
-      {"Include", PHP_INCLUDE},
-      {"XOR", PHP_XOR},
-      {"Eval", PHP_EVAL},
-      {""},
-      {"switch", PHP_SWITCH},
-      {"Include_once", PHP_INCLUDE_ONCE},
+      {"Or", PHP_OR},
+      {"use", PHP_USE},
+      {"Case", PHP_CASE},
+      {"EndIf", PHP_ENDIF},
+      {"ElseIf", PHP_ELSEIF},
+      {"Old_Function", PHP_OLD_FUNCTION},
+      {"VAR", PHP_VAR},
+      {"Interface", PHP_INTERFACE},
+      {"Unset", PHP_UNSET},
+      {""}, {""},
+      {"Callable", PHP_CALLABLE},
+      {"InsteadOf", PHP_INSTEADOF},
+      {"Catch", PHP_CATCH},
       {""}, {""}, {""},
+      {"EACH", PHP_EACH},
+      {"InstanceOf", PHP_INSTANCEOF},
+      {""},
+      {"Include", PHP_INCLUDE},
+      {"Xor", PHP_XOR},
+      {"Cfunction", PHP_CFUNCTION},
+      {""},
+      {"Global", PHP_GLOBAL},
+      {"require", PHP_REQUIRE},
+      {"abstract", PHP_ABSTRACT},
+      {""},
+      {"print", PHP_PRINT},
+      {"Static", PHP_STATIC},
+      {"include_once", PHP_INCLUDE_ONCE},
+      {"Continue", PHP_CONTINUE},
+      {"CFunction", PHP_CFUNCTION},
+      {"implements", PHP_IMPLEMENTS},
+      {""}, {""},
+      {"die", PHP_DIE},
+      {""}, {""},
+      {"define", PHP_DEFINE},
+      {"declare", PHP_DECLARE},
+      {"Use", PHP_USE},
+      {""},
+      {"Print", PHP_PRINT},
+      {"public", PHP_PUBLIC},
+      {""},
+      {"Try", PHP_TRY},
+      {"True", PHP_TRUE},
+      {"array", PHP_ARRAY},
+      {""},
+      {"do", PHP_DO},
+      {""},
+      {"_ENV", PHP__ENV},
+      {"ENDIF", PHP_ENDIF},
+      {"ENDFOR", PHP_ENDFOR},
+      {"AS", PHP_AS},
+      {"XOR", PHP_XOR},
+      {"eval", PHP_EVAL},
+      {"Trait", PHP_TRAIT},
+      {"Public", PHP_PUBLIC},
+      {"FOREACH", PHP_FOREACH},
+      {"var", PHP_VAR},
+      {""},
+      {"Const", PHP_CONST},
+      {"_FILES", PHP__FILES},
+      {"OR", PHP_OR},
+      {"Abstract", PHP_ABSTRACT},
+      {"GOTO", PHP_GOTO},
+      {"Break", PHP_BREAK},
+      {""}, {""}, {""},
+      {"ELSE", PHP_ELSE},
+      {"FINAL", PHP_FINAL},
+      {"return", PHP_RETURN},
+      {"FINALLY", PHP_FINALLY},
+      {""}, {""},
+      {"Class", PHP_CLASS},
+      {""},
+      {"Include_once", PHP_INCLUDE_ONCE},
+      {""}, {""},
+      {"Implements", PHP_IMPLEMENTS},
+      {""},
+      {"require_once", PHP_REQUIRE_ONCE},
+      {""},
+      {"EVAL", PHP_EVAL},
+      {"Array", PHP_ARRAY},
+      {""},
+      {"Require", PHP_REQUIRE},
+      {""},
+      {"_GET", PHP__GET},
+      {"BREAK", PHP_BREAK},
       {"GLOBAL", PHP_GLOBAL},
       {"GLOBALS", PHP_GLOBALS},
-      {""}, {""}, {""},
-      {"ElseIf", PHP_ELSEIF},
-      {"OR", PHP_OR},
-      {"DIE", PHP_DIE},
-      {""}, {""},
-      {"Return", PHP_RETURN},
-      {"Require", PHP_REQUIRE},
-      {"Is_Array", PHP_IS_ARRAY},
-      {"EXIT", PHP_EXIT},
-      {"while", PHP_WHILE},
-      {""},
-      {"Require_once", PHP_REQUIRE_ONCE},
+      {"__LINE__", PHP___LINE__},
+      {"CASE", PHP_CASE},
+      {"enddeclare", PHP_ENDDECLARE},
       {""}, {""}, {""}, {""}, {""}, {""},
-      {"CFUNCTION", PHP_CFUNCTION},
+      {"_COOKIE", PHP__COOKIE},
       {""},
-      {"HTTP_COOKIE_VARS", PHP_HTTP_COOKIE_VARS},
-      {""}, {""},
-      {"TRUE", PHP_TRUE},
+      {"ECHO", PHP_ECHO},
+      {"break", PHP_BREAK},
       {""},
-      {"STATIC", PHP_STATIC},
+      {"default", PHP_DEFAULT},
+      {"TRY", PHP_TRY},
+      {"Eval", PHP_EVAL},
+      {"empty", PHP_EMPTY},
       {""},
-      {"Endwhile", PHP_ENDWHILE},
-      {"Endswitch", PHP_ENDSWITCH},
-      {""}, {""},
       {"Include_Once", PHP_INCLUDE_ONCE},
-      {""}, {""},
+      {"Die", PHP_DIE},
+      {"LIST", PHP_LIST},
+      {"Yield", PHP_YIELD},
+      {"Define", PHP_DEFINE},
+      {"Declare", PHP_DECLARE},
+      {"USE", PHP_USE},
+      {""},
       {"FALSE", PHP_FALSE},
       {""},
-      {"Old_Function", PHP_OLD_FUNCTION},
-      {"CONTINUE", PHP_CONTINUE},
+      {"extends", PHP_EXTENDS},
+      {"__FILE__", PHP___FILE__},
+      {"exit", PHP_EXIT},
+      {"yield", PHP_YIELD},
+      {"ELSEIF", PHP_ELSEIF},
+      {"Do", PHP_DO},
       {""}, {""},
-      {"Switch", PHP_SWITCH},
+      {"while", PHP_WHILE},
+      {""}, {""},
+      {"endwhile", PHP_ENDWHILE},
       {""},
-      {"HTTP_GET_VARS", PHP_HTTP_GET_VARS},
+      {"EMPTY", PHP_EMPTY},
+      {"Return", PHP_RETURN},
+      {"__DIR__", PHP___DIR__},
+      {"xor", PHP_XOR},
+      {""},
+      {"While", PHP_WHILE},
+      {""}, {""}, {""}, {""}, {""}, {""},
+      {"Require_once", PHP_REQUIRE_ONCE},
+      {""},
+      {"__CLASS__", PHP___CLASS__},
+      {"Enddeclare", PHP_ENDDECLARE},
+      {""},
+      {"EXTENDS", PHP_EXTENDS},
+      {""},
+      {"EXIT", PHP_EXIT},
+      {"throw", PHP_THROW},
+      {""}, {""},
+      {"__NAMESPACE__", PHP___NAMESPACE__},
+      {""},
+      {"CLONE", PHP_CLONE},
+      {""},
+      {"DO", PHP_DO},
+      {"DIE", PHP_DIE},
+      {"TRUE", PHP_TRUE},
+      {"Empty", PHP_EMPTY},
+      {"switch", PHP_SWITCH},
+      {"INCLUDE", PHP_INCLUDE},
+      {""},
+      {"protected", PHP_PROTECTED},
+      {"CATCH", PHP_CATCH},
       {""}, {""}, {""},
-      {"SUCCESS", PHP_SUCCESS},
-      {""}, {""}, {""}, {""},
-      {"Require_Once", PHP_REQUIRE_ONCE},
-      {""},
-      {"HTTP_POST_VARS", PHP_HTTP_POST_VARS},
-      {"HTTP_POST_FILES", PHP_HTTP_POST_FILES},
-      {""},
-      {"_COOKIE", PHP__COOKIE},
+      {"endswitch", PHP_ENDSWITCH},
       {""}, {""},
-      {"ENDIF", PHP_ENDIF},
-      {"_FILES", PHP__FILES},
+      {"Extends", PHP_EXTENDS},
       {""},
-      {"ENDWHILE", PHP_ENDWHILE},
-      {""}, {""}, {""},
-      {"FOREACH", PHP_FOREACH},
-      {""}, {""},
-      {"BREAK", PHP_BREAK},
-      {""},
-      {"OLD_FUNCTION", PHP_OLD_FUNCTION},
-      {""},
-      {"SETCOOKIE", PHP_SETCOOKIE},
-      {"PRINT", PHP_PRINT},
-      {"IS_SET", PHP_IS_SET},
-      {"HTTP_SESSION_VARS", PHP_HTTP_SESSION_VARS},
-      {"HTTP_ENV_VARS", PHP_HTTP_ENV_VARS},
-      {"EndSwitch", PHP_ENDSWITCH},
-      {""}, {""},
-      {"__FUNCTION__", PHP___FUNCTION__},
-      {""}, {""}, {""}, {""}, {""},
-      {"FUNCTION", PHP_FUNCTION},
-      {""}, {""},
-      {"HTTP_SERVER_VARS", PHP_HTTP_SERVER_VARS},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""},
+      {"Exit", PHP_EXIT},
       {"ARRAY", PHP_ARRAY},
       {""},
-      {"DEFAULT", PHP_DEFAULT},
-      {"__LINE__", PHP___LINE__},
-      {""}, {""}, {""}, {""}, {""},
-      {"ENDSWITCH", PHP_ENDSWITCH},
-      {""}, {""}, {""},
-      {"__FILE__", PHP___FILE__},
-      {""}, {""},
-      {"ELSEIF", PHP_ELSEIF},
+      {"Require_Once", PHP_REQUIRE_ONCE},
       {""},
-      {"_SESSION", PHP__SESSION},
-      {""}, {""}, {""}, {""},
-      {"_REQUEST", PHP__REQUEST},
-      {"__CLASS__", PHP___CLASS__},
+      {"Protected", PHP_PROTECTED},
       {""}, {""},
-      {"INCLUDE", PHP_INCLUDE},
+      {"Default", PHP_DEFAULT},
+      {"Endwhile", PHP_ENDWHILE},
       {""}, {""}, {""},
-      {"DEFINE", PHP_DEFINE},
-      {""}, {""}, {""}, {""},
-      {"PRINTF", PHP_PRINTF},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {"ENDFOR", PHP_ENDFOR},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {"INCLUDE_ONCE", PHP_INCLUDE_ONCE},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {"HEADER", PHP_HEADER},
-      {"_SERVER", PHP__SERVER},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {"private", PHP_PRIVATE},
+      {""}, {""},
+      {"UNSET", PHP_UNSET},
+      {""}, {""},
+      {"EndWhile", PHP_ENDWHILE},
+      {"__TRAIT__", PHP___TRAIT__},
+      {""}, {""}, {""}, {""}, {""},
       {"ENDFOREACH", PHP_ENDFOREACH},
       {""},
-      {"FAILURE", PHP_FAILURE},
+      {"Private", PHP_PRIVATE},
+      {""},
+      {"INSTEADOF", PHP_INSTEADOF},
+      {""}, {""}, {""},
+      {"CALLABLE", PHP_CALLABLE},
+      {""}, {""},
+      {"PUBLIC", PHP_PUBLIC},
+      {"PRIVATE", PHP_PRIVATE},
+      {""}, {""},
+      {"ISSET", PHP_ISSET},
+      {"HTTP_COOKIE_VARS", PHP_HTTP_COOKIE_VARS},
+      {""}, {""}, {""},
+      {"IMPLEMENTS", PHP_IMPLEMENTS},
+      {""},
+      {"__FUNCTION__", PHP___FUNCTION__},
+      {""},
+      {"Endswitch", PHP_ENDSWITCH},
+      {"EndDeclare", PHP_ENDDECLARE},
+      {""},
+      {"REQUIRE", PHP_REQUIRE},
+      {""}, {""},
+      {"_POST", PHP__POST},
+      {""},
+      {"_SERVER", PHP__SERVER},
+      {""}, {""},
+      {"PRINT", PHP_PRINT},
+      {""}, {""}, {""}, {""},
+      {"INSTANCEOF", PHP_INSTANCEOF},
+      {"Switch", PHP_SWITCH},
+      {""}, {""},
+      {"CFUNCTION", PHP_CFUNCTION},
+      {"Throw", PHP_THROW},
+      {""}, {""},
+      {"HTTP_ENV_VARS", PHP_HTTP_ENV_VARS},
+      {""}, {""}, {""}, {""},
+      {"FUNCTION", PHP_FUNCTION},
+      {""}, {""},
+      {"DEFINE", PHP_DEFINE},
+      {"INCLUDE_ONCE", PHP_INCLUDE_ONCE},
+      {"CONTINUE", PHP_CONTINUE},
+      {""},
+      {"TRAIT", PHP_TRAIT},
+      {"STATIC", PHP_STATIC},
+      {""},
+      {"_REQUEST", PHP__REQUEST},
+      {""},
+      {"CONST", PHP_CONST},
+      {""},
+      {"OLD_FUNCTION", PHP_OLD_FUNCTION},
+      {""}, {""}, {""}, {""}, {""},
+      {"ABSTRACT", PHP_ABSTRACT},
+      {""},
+      {"WHILE", PHP_WHILE},
+      {""},
+      {"DECLARE", PHP_DECLARE},
+      {"HTTP_GET_VARS", PHP_HTTP_GET_VARS},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""},
+      {"RETURN", PHP_RETURN},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {"CLASS", PHP_CLASS},
+      {""}, {""},
+      {"ENDWHILE", PHP_ENDWHILE},
+      {"EndSwitch", PHP_ENDSWITCH},
+      {"THROW", PHP_THROW},
+      {""}, {""}, {""},
+      {"NAMESPACE", PHP_NAMESPACE},
+      {"YIELD", PHP_YIELD},
+      {""}, {""}, {""}, {""}, {""}, {""},
+      {"DEFAULT", PHP_DEFAULT},
+      {""},
+      {"INTERFACE", PHP_INTERFACE},
+      {""}, {""},
+      {"REQUIRE_ONCE", PHP_REQUIRE_ONCE},
+      {"_SESSION", PHP__SESSION},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""},
+      {"HTTP_SERVER_VARS", PHP_HTTP_SERVER_VARS},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {"HTTP_POST_VARS", PHP_HTTP_POST_VARS},
+      {"HTTP_POST_FILES", PHP_HTTP_POST_FILES},
+      {""}, {""}, {""}, {""},
+      {"__METHOD__", PHP___METHOD__},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {"HTTP_SESSION_VARS", PHP_HTTP_SESSION_VARS},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""},
-      {"DECLARE", PHP_DECLARE},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""},
       {"ENDDECLARE", PHP_ENDDECLARE},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {"RETURN", PHP_RETURN},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {"SWITCH", PHP_SWITCH},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""},
-      {"REQUIRE", PHP_REQUIRE},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""},
-      {"IS_ARRAY", PHP_IS_ARRAY},
+      {"ENDSWITCH", PHP_ENDSWITCH},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""},
-      {"REQUIRE_ONCE", PHP_REQUIRE_ONCE}
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {"PROTECTED", PHP_PROTECTED}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

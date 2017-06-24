@@ -75,6 +75,12 @@ If no pattern is given, print all paths in the project.
 \fB-p\fP, \fB--print-dbpath\fP
 Print location of \'GTAGS\'.
 .TP
+\fB--print\fP \fIname\fP
+Print location of \fIname\fP, which may be one of:
+\'root\', \'dbpath\' or \'conf\'.
+\'root\' means project's root directory. \'dbpath\' means a directory
+where tag databases exist. \'conf\' means configuration file.
+.TP
 \fB-u\fP, \fB--update\fP
 Update tag files incrementally.
 This command internally invokes \fBgtags\fP(1).
@@ -120,7 +126,11 @@ End the search without going through all the tag files listed in
 .TP
 \fB--from-here\fP \fIcontext\fP
 Decide tag type by \fIcontext\fP. Its syntax should be \'lineno:path\'.
-If this option is specified then \fB-s\fP and \fB-r\fP are ignored.
+If the context is a definition of the pattern then use \fB-r\fP, else if
+there is at least one definition of the pattern then use \fB-d\fP,
+else use \fB-s\fP.
+If this option is specified then \fB-d\fP, \fB-r\fP and \fB-s\fP
+on the command line are ignored.
 Regular expression is not allowed for \fIpattern\fP.
 This option assumes use in conversational environments such as
 editors and IDEs.
@@ -163,20 +173,21 @@ This option is valid only with the \fB-c\fP command in conjunction with \fB-P\fP
 Suppress sort filter and path conversion filter.
 .TP
 \fB-N\fP, \fB--nearness\fP[=\fIstart\fP]
-Use Nearness sort method for the output. By default, alphabetical sort
-method is used.
+Use Nearness sort method (sorting by closest from \fIstart\fP) for the output.
+By default, alphabetical sort method is used.
 This option is effective for the tag search command, \fB-P\fP command
 and \fB-g\fP command. As an exception, \fB-g\fP command ignores this
 option when files are specified by arguments.
 The nearness is defined by how many parent directories to go up to reach
 the target. The result of nearness sort is concatenation of the following
-([1]-[n]) in this order. The default of \fIstart\fP is the current directory.
+([0]-[n]) in this order. The default of \fIstart\fP is the current directory.
 .nf
-[1] Output of local search in the start directory.
-[2] Output of local search in the parent directory except for [1].
-[3] Output of local search in the grandparent directory except for [1]-[2].
+[0] If the start is a file, output of local search in the file.
+[1] Output of local search in the start directory except for [0].
+[2] Output of local search in the parent directory except for [0]-[1].
+[3] Output of local search in the grandparent directory except for [0]-[2].
 \&... (repeat until the project root directory)
-[n] Output of local search in the project root directory except for [1]-[n-1].
+[n] Output of local search in the project root directory except for [0]-[n-1].
 .fi
 In each directory, they are sorted by alphabetical order.
 .TP
@@ -355,13 +366,13 @@ Use of this variable is not recommended.
 \fBGTAGSTHROUGH\fP
 If this variable is set, the \fB-T\fP option is specified.
 .TP
-\fBMAKEOBJDIR\fP
-If this variable is set, \'$MAKEOBJDIR\' is used as the name
-of BSD-style objdir. The default is \'obj\'.
+\fBGTAGSOBJDIR\fP, \fBMAKEOBJDIR\fP
+If eigher of the two variable is set, it is used as the name of BSD-style objdir.
+The former is given priority. The default is \'obj\'.
 .TP
-\fBMAKEOBJDIRPREFIX\fP
-If this variable is set, \'$MAKEOBJDIRPREFIX\' is used as the prefix
-of BSD-style objdir. The default is \'/usr/obj\'.
+\fBGTAGSOBJDIRPREFIX\fP, \fBMAKEOBJDIRPREFIX\fP
+If eigher of the two variable is set, it is used as the prefix of BSD-style objdir.
+The former is given priority. The default is \'/usr/obj\'.
 .SH CONFIGURATION
 The following configuration variables affect the execution of \fBglobal\fP:
 .PP
