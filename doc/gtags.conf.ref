@@ -14,31 +14,33 @@ and read from the first one that exists and is readable.
 @item (1) --gtagsconf file
 @item (2) $GTAGSCONF
 @item (3) [project root]/gtags.conf
-@item (4) $HOME/.globalrc
-@item (5) /etc/gtags.conf
-@item (6) [sysconfdir]/gtags.conf
+@item (4) [project root]/[objdir]/gtags.conf
+@item (5) $HOME/.globalrc
+@item (6) /etc/gtags.conf
+@item (7) [sysconfdir]/gtags.conf
 @end table
 
 [sysconfdir] is @file{/usr/local/etc} by default; you can change it by the --sysconfdir
-option of the configure script.
+option of the configure script. [objdir] is @file{obj} by default; you can change it
+by @var{GTAGSOBJDIR} or @var{MAKEOBJDIR}.
 
 Syntax is similar to termcap(5) except for some extensions described later.
 A file includes one or more records. You should select a record using a label.
-Default label is 'default'. If @var{GTAGSLABEL} is set, its value is used.
-Please be aware the meaning of 'default' is different from that of termcap(5).
+Default label is @samp{default}. If @var{GTAGSLABEL} is set, its value is used.
+Please be aware the meaning of @samp{default} is different from that of termcap(5).
 
-Lines starting with '#' are ignored.
-A record consists of one or more fields separated by ':' and ends with a newline.
+Lines starting with @samp{#} are ignored.
+A record consists of one or more fields separated by @samp{:} and ends with a newline.
 The first field must have a label name. Each field of the rest has a variable definition.
 There are three types in those variables.
 @table @asis
 @item Boolean: This type has no value; existence of variable means true else false.
-@item Number: This type has a number value after '#'.
-@item String: This type has a string value after '='.
+@item Number: This type has a number value after @samp{#}.
+@item String: This type has a string value after @samp{=}.
 @end table
 Most variables are relevant to string type.
 
-If data includes ':' or newline, you need to quote it by '\\'.
+If data includes @samp{:} or newline, you need to quote it by @samp{\}.
 An empty field is permitted, but it doesn't make sense.
 
 When there is more than one definition, the previous one is adopted. 
@@ -46,8 +48,8 @@ Exceptionally, all values of skip, langmap and gtags_parser are
 adopted and connected respectively.
 @unnumberedsubsec Variable substitution
 Variable substitution similar to sh(1) is available.
-You can refer to any string variable using '$' prefix. For example, the following
-b has a value 'XYZ'.
+You can refer to any string variable using @samp{$} prefix. For example, the following
+b has a value @samp{XYZ}.
 @example
 :a=Y:b=X$@{a@}Z:
 @end example

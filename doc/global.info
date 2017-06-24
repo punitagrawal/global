@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU GLOBAL source code tagging system
 *************************************
 
-This manual documents version 6.5.6 of the GNU GLOBAL source code
+This manual documents version 6.5.7 of the GNU GLOBAL source code
 tagging system.
 
 * Menu:
@@ -1711,6 +1711,11 @@ The following commands are available:
      print all paths in the project.
 '-p', '--print-dbpath'
      Print location of 'GTAGS'.
+'--print' name
+     Print location of name, which may be one of: 'root', 'dbpath' or
+     'conf'.  'root' means project's root directory.  'dbpath' means a
+     directory where tag databases exist.  'conf' means configuration
+     file.
 '-u', '--update'
      Update tag files incrementally.  This command internally invokes
      gtags(1).  You can execute this command anywhere in the project,
@@ -1750,9 +1755,12 @@ The following options are available:
      default.
 '--from-here' context
      Decide tag type by context.  Its syntax should be 'lineno:path'.
-     If this option is specified then '-s' and '-r' are ignored.
-     Regular expression is not allowed for pattern.  This option assumes
-     use in conversational environments such as editors and IDEs.
+     If the context is a definition of the pattern then use '-r', else
+     if there is at least one definition of the pattern then use '-d',
+     else use '-s'.  If this option is specified then '-d', '-r' and
+     '-s' on the command line are ignored.  Regular expression is not
+     allowed for pattern.  This option assumes use in conversational
+     environments such as editors and IDEs.
 '-G', '--basic-regexp'
      Interpret pattern as a basic regular expression.  The default is an
      extended regular expression.
@@ -1781,19 +1789,20 @@ The following options are available:
 '-n', '--nofilter'
      Suppress sort filter and path conversion filter.
 '-N', '--nearness'[=start]
-     Use Nearness sort method for the output.  By default, alphabetical
-     sort method is used.  This option is effective for the tag search
-     command, '-P' command and '-g' command.  As an exception, '-g'
-     command ignores this option when files are specified by arguments.
-     The nearness is defined by how many parent directories to go up to
-     reach the target.  The result of nearness sort is concatenation of
-     the following ([1]-[n]) in this order.  The default of start is the
-     current directory.
-          [1] Output of local search in the start directory.
-          [2] Output of local search in the parent directory except for [1].
-          [3] Output of local search in the grandparent directory except for [1]-[2].
+     Use Nearness sort method (sorting by closest from start) for the
+     output.  By default, alphabetical sort method is used.  This option
+     is effective for the tag search command, '-P' command and '-g'
+     command.  As an exception, '-g' command ignores this option when
+     files are specified by arguments.  The nearness is defined by how
+     many parent directories to go up to reach the target.  The result
+     of nearness sort is concatenation of the following ([0]-[n]) in
+     this order.  The default of start is the current directory.
+          [0] If the start is a file, output of local search in the file.
+          [1] Output of local search in the start directory except for [0].
+          [2] Output of local search in the parent directory except for [0]-[1].
+          [3] Output of local search in the grandparent directory except for [0]-[2].
           ... (repeat until the project root directory)
-          [n] Output of local search in the project root directory except for [1]-[n-1].
+          [n] Output of local search in the project root directory except for [0]-[n-1].
      In each directory, they are sorted by alphabetical order.
 '-O', '--only-other'
      Treat only text files other than source code, like 'README'.  This
@@ -1942,12 +1951,14 @@ GTAGSROOT
      existence of 'GTAGS'.  Use of this variable is not recommended.
 GTAGSTHROUGH
      If this variable is set, the '-T' option is specified.
-MAKEOBJDIR
-     If this variable is set, '$MAKEOBJDIR' is used as the name of
-     BSD-style objdir.  The default is 'obj'.
-MAKEOBJDIRPREFIX
-     If this variable is set, '$MAKEOBJDIRPREFIX' is used as the prefix
-     of BSD-style objdir.  The default is '/usr/obj'.
+GTAGSOBJDIR, MAKEOBJDIR
+     If eigher of the two variable is set, it is used as the name of
+     BSD-style objdir.  The former is given priority.  The default is
+     'obj'.
+GTAGSOBJDIRPREFIX, MAKEOBJDIRPREFIX
+     If eigher of the two variable is set, it is used as the prefix of
+     BSD-style objdir.  The former is given priority.  The default is
+     '/usr/obj'.
 
 CONFIGURATION
 -------------
@@ -2046,7 +2057,7 @@ The following options are available:
      Give a list of candidates of target files.  Files which are not on
      the list are ignored.  The argument file can be set to '-' to
      accept a list of files from the standard input.  File names must be
-     separated by newline.  To make the list, you may use find(1) which
+     separated by newline.  To make the list you may use find(1), which
      has rich options for selecting files.
 '--gtagsconf' file
      Set environment variable GTAGSCONF to file.
@@ -2128,9 +2139,9 @@ GTAGSLOGGING
      If this variable is set, '$GTAGSLOGGING' is used as the path name
      of a log file.  There is no default value.
 GTAGS_COMMANDLINE
-     This variable can only be referenced from the hook (See
-     gtags_hook).  Gtags set its own effective command line to this
-     variable before calling the hook.  Each argument is sepalated by
+     This variable can only be referenced from the hook (see
+     gtags_hook).  Gtags sets its own effective command line to this
+     variable before calling the hook.  Each argument is separated by
      whitespace, and real whitespace is represented as '%20'.  This is
      read only.
 GTAGS_OPTIONS
@@ -2158,11 +2169,12 @@ option.
      the shared object path, an optional colon followed by a function
      name.  If the function name is not specified, 'parser' is assumed.
      As a special exception, gtags collects values from multiple
-     'gtags_parser' variables.
+     'gtags_parser' variables.  For these mappings, the first match is
+     adopted.
 'gtags_hook' (command line)
      Specify a command line which should be executed at the beginning of
      gtags after loading configuration file.  You can use this hook to
-     update 'gtags.files' dynamically..  "./" in it always means the
+     update 'gtags.files' dynamically.  "./" in it always means the
      project root directory, since gtags is always invoked there.
 'icase_path' (boolean)
      Ignore case distinctions in the path.  Suffixes check is affected
@@ -2171,7 +2183,8 @@ option.
      Language mapping.  Each comma-separated map consists of the
      language name, a colon, and a list of file extensions.  As a
      special exception, gtags collects values from multiple 'langmap'
-     variables.  Default mapping is:
+     variables.  For these mappings, the first match is adopted.
+     Default mapping is:
      'c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml'.
 'skip' (comma separated list)
      Gtags skips files and directories which are given in this list.  As
@@ -2181,12 +2194,12 @@ option.
      include glob patterns (*, ?, [...], [!...], [^...]).
      If the value starts with '/', it is assumed a relative path name
      from the root directory of the project.  You cannot use glob
-     patterns for a path name.  However, this directions is out-of-date,
+     patterns for a path name.  However, this direction is out-of-date,
      and is not recommended.  Instead, you can use '-f' option which can
      be combined with find(1).  Since find(1) has rich options to select
      files, you can do everything.  Additionally, this technique can
      also be applied to any other tagging systems like ctags(1),
-     cscope(1), and etc.
+     cscope(1), etc.
      Skip list is also effective when you use the '-f' or 'gtags.files'.
 
 DIAGNOSTICS
@@ -3072,7 +3085,7 @@ BUG
 The function field of the display is almost <unknown> since GLOBAL
 doesn't recognize it.
 
-   \'Find functions called by this function' is not implemented.
+   'Find functions called by this function' is not implemented.
 
 AUTHOR
 ------
@@ -3179,12 +3192,14 @@ from the first one that exists and is readable.
 (1) -gtagsconf file
 (2) $GTAGSCONF
 (3) [project root]/gtags.conf
-(4) $HOME/.globalrc
-(5) /etc/gtags.conf
-(6) [sysconfdir]/gtags.conf
+(4) [project root]/[objdir]/gtags.conf
+(5) $HOME/.globalrc
+(6) /etc/gtags.conf
+(7) [sysconfdir]/gtags.conf
 
    [sysconfdir] is '/usr/local/etc' by default; you can change it by the
--sysconfdir option of the configure script.
+-sysconfdir option of the configure script.  [objdir] is 'obj' by
+default; you can change it by GTAGSOBJDIR or MAKEOBJDIR.
 
    Syntax is similar to termcap(5) except for some extensions described
 later.  A file includes one or more records.  You should select a record
@@ -3201,7 +3216,7 @@ Number: This type has a number value after '#'.
 String: This type has a string value after '='.
    Most variables are relevant to string type.
 
-   If data includes ':' or newline, you need to quote it by '\\'.  An
+   If data includes ':' or newline, you need to quote it by '\'.  An
 empty field is permitted, but it doesn't make sense.
 
    When there is more than one definition, the previous one is adopted.
@@ -3814,15 +3829,15 @@ Node: Plug-in50432
 Node: Incremental updating51352
 Node: Reference52536
 Node: global53238
-Node: gtags65931
-Node: htags74687
-Node: htags-server84479
-Node: gozilla86721
-Node: gtags-cscope89717
-Node: globash101198
-Node: gtags.conf102413
-Node: Copying This Manual106175
-Node: GNU Free Documentation License106412
-Node: Index128803
+Node: gtags66586
+Node: htags75444
+Node: htags-server85236
+Node: gozilla87478
+Node: gtags-cscope90474
+Node: globash101954
+Node: gtags.conf103169
+Node: Copying This Manual107048
+Node: GNU Free Documentation License107285
+Node: Index129676
 
 End Tag Table

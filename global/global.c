@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006,
- *	2007, 2008, 2010, 2011, 2012, 2013, 2014, 2015
+ *	2007, 2008, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -146,6 +146,7 @@ char *scope;
 char *encode_chars;
 char *single_update;
 char *path_style;
+char *print_target;
 
 /*
  * Path filter
@@ -178,6 +179,7 @@ help(void)
 #define OPT_USE_COLOR		135
 #define OPT_GTAGSCONF		136
 #define OPT_GTAGSLABEL		137
+#define OPT_PRINT		138
 #define SORT_FILTER     1
 #define PATH_FILTER     2
 #define BOTH_FILTER     (SORT_FILTER|PATH_FILTER)
@@ -229,6 +231,7 @@ static struct option const long_options[] = {
 	{"match-part", required_argument, NULL, OPT_MATCH_PART},
 	{"path-style", required_argument, NULL, OPT_PATH_STYLE},
 	{"path-convert", required_argument, NULL, OPT_PATH_CONVERT},
+	{"print", required_argument, NULL, OPT_PRINT},
 	{"print0", no_argument, &print0, 1},
 	{"version", no_argument, &show_version, 1},
 	{"help", no_argument, &show_help, 1},
@@ -268,11 +271,14 @@ decide_tag_by_context(const char *tag, const char *file, int lineno)
 } while (0)
 	STRBUF *sb = NULL;
 	char path[MAXPATHLEN], s_fid[MAXFIDLEN];
-	const char *tagline, *p;
-	DBOP *dbop;
+	const char *p;
+	GTOP *gtop;
+	GTP *gtp;
 	int db = GSYMS;
-	int iscompline = 0;
+	int flags = GTOP_NOREGEX;
 
+	if (iflag)
+		flags |= GTOP_IGNORECASE;
 	if (normalize(file, get_root_with_slash(), cwd, path, sizeof(path)) == NULL)
 		die("'%s' is out of the source project.", file);
 	/*
@@ -284,22 +290,23 @@ decide_tag_by_context(const char *tag, const char *file, int lineno)
 		die("path name in the context is not found.");
 	strlimcpy(s_fid, p, sizeof(s_fid));
 	gpath_close();
+
 	/*
-	 * read btree records directly to avoid the overhead.
+	 * Algorithm:
+	 *
+	 * (1) If context <file, lineno> is a definition of <tag> then use GRTAGS
+	 * (2) else if there is at least one definition of <tag> then use GTAGS
+	 * (3) else use GSYMS.
 	 */
-	dbop = dbop_open(makepath(dbpath, dbname(GTAGS), NULL), 0, 0, 0);
-	if (dbop == NULL)
-		die("cannot open GTAGS.");
-	if (dbop_getoption(dbop, COMPLINEKEY))
-		iscompline = 1;
-	tagline = dbop_first(dbop, tag, NULL, 0);
-	if (tagline) {
+	gtop = gtags_open(dbpath, root, GTAGS, GTAGS_READ, 0);
+	gtp = gtags_first(gtop, tag, flags);
+	if (gtp) {
 		db = GTAGS;
-		for (; tagline; tagline = dbop_next(dbop)) {
+		for (; gtp; gtp = gtags_next(gtop)) {
 			/*
-			 * examine whether the definition record include the context.
+			 * Examine whether each definition record includes the context.
 			 */
-			p = locatestring(tagline, s_fid, MATCH_AT_FIRST);
+			p = locatestring(gtp->tagline, s_fid, MATCH_AT_FIRST);
 			if (p != NULL && *p == ' ') {
 				for (p++; *p && *p != ' '; p++)
 					;
@@ -309,7 +316,7 @@ decide_tag_by_context(const char *tag, const char *file, int lineno)
 				 * Standard format	n <blank> <image>$
 				 * Compact format	d,d,d,d$
 				 */
-				if (!iscompline) {			/* Standard format */
+				if (!(gtop->format & GTAGS_COMPACT)) {	/* Standard format */
 					if (atoi(p) == lineno) {
 						db = GRTAGS;
 						goto finish;
@@ -350,7 +357,7 @@ decide_tag_by_context(const char *tag, const char *file, int lineno)
 		}
 	}
 finish:
-	dbop_close(dbop);
+	gtags_close(gtop);
 	if (db == GSYMS && getenv("GTAGSLIBPATH")) {
 		char libdbpath[MAXPATHLEN];
 		char *libdir = NULL, *nextp = NULL;
@@ -358,22 +365,17 @@ finish:
 		sb = strbuf_open(0);
 		strbuf_puts(sb, getenv("GTAGSLIBPATH"));
 		back2slash(sb);
-		for (libdir = strbuf_value(sb); libdir; libdir = nextp) {
-			 if ((nextp = locatestring(libdir, PATHSEP, MATCH_FIRST)) != NULL)
-                                *nextp++ = 0;
+		for (libdir = strbuf_value(sb); db != GTAGS && libdir; libdir = nextp) {
+			if ((nextp = locatestring(libdir, PATHSEP, MATCH_FIRST)) != NULL)
+				*nextp++ = 0;
 			if (!gtagsexist(libdir, libdbpath, sizeof(libdbpath), 0))
 				continue;
 			if (!STRCMP(dbpath, libdbpath))
 				continue;
-			dbop = dbop_open(makepath(libdbpath, dbname(GTAGS), NULL), 0, 0, 0);
-			if (dbop == NULL)
-				continue;
-			tagline = dbop_first(dbop, tag, NULL, 0);
-			dbop_close(dbop);
-			if (tagline != NULL) {
+			gtop = gtags_open(libdbpath, root, GTAGS, GTAGS_READ, 0);
+			if ((gtp = gtags_first(gtop, tag, flags)) != NULL)
 				db = GTAGS;
-				break;
-			}
+			gtags_close(gtop);
 		}
 		strbuf_close(sb);
 	}
@@ -591,6 +593,9 @@ main(int argc, char **argv)
 		case OPT_PATH_STYLE:
 			path_style = optarg;
 			break;
+		case OPT_PRINT:
+			print_target = optarg;
+			break;
 		case OPT_RESULT:
 			if (!strcmp(optarg, "ctags-x"))
 				format = FORMAT_CTAGS_X;
@@ -625,20 +630,27 @@ main(int argc, char **argv)
 		help();
 	if (dbpath == NULL)
 		die_with_code(-status, "%s", gtags_dbpath_error);
-	
+	if (print_target) {
+		const char *target;
+		if (!strcmp("dbpath", print_target))
+			target = dbpath;
+		else if (!strcmp("root", print_target))
+			target = root;
+		else if (!strcmp("conf", print_target))
+			target = getconfigpath();
+		if (target != NULL)
+			fprintf(stdout, "%s\n", target);
+		exit(0);
+	}
 	if (Nflag) {
-		if (nearbase) {
-			if (!test("d", nearbase)) 
-				die("'%s' not found or not a directory.", nearbase);
-		} else {
+		if (!nearbase)
 			nearbase = get_cwd();
-		}
 		/*
 		 * Nearbase is saved with regular form. You can get it
 		 * by get_nearbase_path() later.
 		 */
 		if (set_nearbase_path(nearbase) == NULL)
-			die("invalid nearness directory (--nearness=%s).", nearbase);
+			die("invalid nearness file or directory (--nearness=%s).", nearbase);
 	}
 	/*
 	 * decide format.
@@ -1062,17 +1074,30 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 {
 	FILE *ip;
 	STRBUF *sb = strbuf_open(0);
-	const char *lid = usable("lid");
+	char *lid = usable("lid");
 	char *line, *p;
+	char *argv[10];
+	int i = 0;
 
 	if (prefix && *prefix == 0)	/* In the case global -c '' */
 		prefix = NULL;
 	/*
 	 * make lid command line.
 	 * Invoke lid with the --result=grep option to generate grep format.
+	 *
+	 * When lid(1) not found in the PATH, use LID macro if it exists.
+	 * This is needed because lid is called indirectly from CGI scripts. 
+	 * In the CGI scripts, PATH is limited to '/bin:/usr/bin:/usr/local/bin'.
 	 */
-	if (!lid)
-		die("lid(idutils) not found.");
+	if (!lid) {
+		if (strcmp(LID, "no") != 0 && test("fx", LID))
+			lid = LID;
+		else
+			die("lid(idutils) not found.");
+	}
+	if (chdir(root) < 0)
+		die("cannot move to '%s' directory.", root);
+#if defined(_WIN32) && !defined(__CYGWIN__)
 	strbuf_puts(sb, lid);
 	strbuf_sprintf(sb, " --file=%s/ID", quote_shell(dbpath));
 	strbuf_puts(sb, " --key=token");
@@ -1087,10 +1112,36 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 	}
 	if (debug)
 		fprintf(stderr, "completion_idutils: %s\n", strbuf_value(sb));
-	if (chdir(root) < 0)
-		die("cannot move to '%s' directory.", root);
 	if (!(ip = popen(strbuf_value(sb), "r")))
 		die("cannot execute '%s'.", strbuf_value(sb));
+#else
+	/*
+	 * This function is called from the CGI scripts of htags(1).
+	 * In order not to cause unnecessary anxiety, popen(3) is not used in Unix.
+	 */
+	strbuf_puts0(sb, makepath(dbpath, "ID", NULL));
+	if (prefix) {
+		strbuf_putc(sb, '^');
+		strbuf_puts0(sb, prefix);
+	}
+	p = strbuf_value(sb);
+	argv[i++] = lid;
+	argv[i++] = "--file";
+	argv[i++] = p;					/* dbpath/ID */
+	argv[i++] = "--key=token";
+	if (iflag)
+		argv[i++] = "--ignore-case";
+	if (prefix)
+		argv[i++] = next_string(p);		/* ^prefix */
+	argv[i] = NULL;
+	if (debug) {
+		fprintf(stderr, "completion_idutils: \n");
+		for (i = 0; argv[i] != NULL; i++) 
+			fprintf(stderr, "argv[%d] = |%s|\n", i, argv[i]);
+	}
+	if (!(ip = secure_popen(lid, "r", argv)))
+		die("cannot execute '%s'.", lid);
+#endif
 	while ((line = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
 		for (p = line; *p && *p != ' '; p++)
 			;
@@ -1101,8 +1152,13 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 		*p = '\0';
 		puts(line);
 	}
+#if defined(_WIN32) && !defined(__CYGWIN__)
 	if (pclose(ip) != 0)
 		die("terminated abnormally (errno = %d).", errno);
+#else
+	if (secure_pclose(ip) != 0)
+		die("terminated abnormally (errno = %d).", errno);
+#endif
 	strbuf_close(sb);
 }
 /**
@@ -1226,15 +1282,29 @@ idutils(const char *pattern, const char *dbpath)
 	STRBUF *ib = strbuf_open(0);
 	char encoded_pattern[IDENTLEN];
 	char path[MAXPATHLEN];
-	const char *lid;
+	char *lid = usable("lid");
 	int linenum, count;
 	char *p, *q, *grep;
+	char *argv[20];
+	int i = 0;
 
-	lid = usable("lid");
-	if (!lid)
-		die("lid(idutils) not found.");
+	/*
+	 * When lid(1) not found in the PATH, use LID macro if it exists.
+	 * This is needed because lid is called indirectly from CGI scripts. 
+	 * In the CGI scripts, PATH is limited to '/bin:/usr/bin:/usr/local/bin'.
+	 */
+	if (!lid) {
+		if (strcmp(LID, "no") != 0 && test("fx", LID))
+			lid = LID;
+		else
+			die("lid(idutils) not found.");
+	}
 	if (!test("f", makepath(dbpath, "ID", NULL)))
 		die("ID file not found.");
+	/*
+	 * PWD is needed for lid.
+	 */
+	set_env("PWD", root);
 	/*
 	 * convert spaces into %FF format.
 	 */
@@ -1243,11 +1313,8 @@ idutils(const char *pattern, const char *dbpath)
 	 * make lid command line.
 	 * Invoke lid with the --result=grep option to generate grep format.
 	 */
-#if _WIN32 || __DJGPP__
+#if defined(_WIN32) && !defined(__CYGWIN__)
 	strbuf_puts(ib, lid);
-#else
-	strbuf_sprintf(ib, "PWD=%s %s", quote_shell(root), lid);
-#endif
 	strbuf_sprintf(ib, " --file=%s/ID", quote_shell(dbpath));
 	strbuf_puts(ib, " --separator=newline");
 	if (format == FORMAT_PATH)
@@ -1266,6 +1333,40 @@ idutils(const char *pattern, const char *dbpath)
 		fprintf(stderr, "idutils: %s\n", strbuf_value(ib));
 	if (!(ip = popen(strbuf_value(ib), "r")))
 		die("cannot execute '%s'.", strbuf_value(ib));
+#else
+	/*
+	 * This function is called from the CGI scripts of htags(1).
+	 * In order not to cause unnecessary anxiety, popen(3) is not used in Unix.
+	 */
+	strbuf_puts0(ib, makepath(dbpath, "ID", NULL));
+	strbuf_puts0(ib, pattern);
+	p = strbuf_value(ib);
+	argv[i++] = lid;
+	argv[i++] = "--file";
+	argv[i++] = p;					/* dbpath/ID */
+	argv[i++] = "--separator=newline";
+	if (format == FORMAT_PATH) {
+		argv[i++] = "--result=filenames";
+		argv[i++] = "--key=none";
+	} else {
+		argv[i++] = "--result=grep";
+	}
+	if (iflag)
+		argv[i++] = "--ignore-case";
+	if (literal)
+		argv[i++] = "--literal";
+	else if (isregex(pattern))
+		argv[i++] = "--regexp";
+	argv[i++] = next_string(p);			/* pattern */
+	argv[i] = NULL;
+	if (debug) {
+		fprintf(stderr, "idutils: \n");
+		for (i = 0; argv[i] != NULL; i++) 
+			fprintf(stderr, "argv[%d] = |%s|\n", i, argv[i]);
+	}
+	if (!(ip = secure_popen(lid, "r", argv)))
+		die("cannot execute '%s'.", strbuf_value(ib));
+#endif
 	cv = convert_open(type, format, root, cwd, dbpath, stdout, NOTAGS);
 	cv->tag_for_display = encoded_pattern;
 	count = 0;
@@ -1310,8 +1411,13 @@ idutils(const char *pattern, const char *dbpath)
 			break;
 		}
 	}
+#if defined(_WIN32) && !defined(__CYGWIN__)
 	if (pclose(ip) != 0)
 		die("terminated abnormally (errno = %d).", errno);
+#else
+	if (secure_pclose(ip) != 0)
+		die("terminated abnormally (errno = %d).", errno);
+#endif
 	convert_close(cv);
 	strbuf_close(ib);
 	if (vflag) {

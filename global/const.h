@@ -34,6 +34,11 @@ const char *help_const = "Commands:\n\
        If no pattern is given, print all paths in the project.\n\
 -p, --print-dbpath\n\
        Print location of GTAGS.\n\
+--print name\n\
+       Print location of name, which may be one of:\n\
+       root, dbpath or conf.\n\
+       root means project's root directory. dbpath means a directory\n\
+       where tag databases exist. conf means configuration file.\n\
 -u, --update\n\
        Update tag files incrementally.\n\
        This command internally invokes gtags(1).\n\
@@ -68,7 +73,11 @@ Options:\n\
        GTAGSLIBPATH when tags are found in a tag file. This is the default.\n\
 --from-here context\n\
        Decide tag type by context. Its syntax should be lineno:path.\n\
-       If this option is specified then -s and -r are ignored.\n\
+       If the context is a definition of the pattern then use -r, else if\n\
+       there is at least one definition of the pattern then use -d,\n\
+       else use -s.\n\
+       If this option is specified then -d, -r and -s\n\
+       on the command line are ignored.\n\
        Regular expression is not allowed for pattern.\n\
        This option assumes use in conversational environments such as\n\
        editors and IDEs.\n\
@@ -100,20 +109,21 @@ Options:\n\
 -n, --nofilter\n\
        Suppress sort filter and path conversion filter.\n\
 -N, --nearness[=start]\n\
-       Use Nearness sort method for the output. By default, alphabetical sort\n\
-       method is used.\n\
+       Use Nearness sort method (sorting by closest from start) for the output.\n\
+       By default, alphabetical sort method is used.\n\
        This option is effective for the tag search command, -P command\n\
        and -g command. As an exception, -g command ignores this\n\
        option when files are specified by arguments.\n\
        The nearness is defined by how many parent directories to go up to reach\n\
        the target. The result of nearness sort is concatenation of the following\n\
-       ([1]-[n]) in this order. The default of start is the current directory.\n\
+       ([0]-[n]) in this order. The default of start is the current directory.\n\
        \n\
-       [1] Output of local search in the start directory.\n\
-       [2] Output of local search in the parent directory except for [1].\n\
-       [3] Output of local search in the grandparent directory except for [1]-[2].\n\
+       [0] If the start is a file, output of local search in the file.\n\
+       [1] Output of local search in the start directory except for [0].\n\
+       [2] Output of local search in the parent directory except for [0]-[1].\n\
+       [3] Output of local search in the grandparent directory except for [0]-[2].\n\
        ... (repeat until the project root directory)\n\
-       [n] Output of local search in the project root directory except for [1]-[n-1].\n\
+       [n] Output of local search in the project root directory except for [0]-[n-1].\n\
        \n\
        In each directory, they are sorted by alphabetical order.\n\
 -O, --only-other\n\

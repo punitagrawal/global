@@ -267,6 +267,7 @@ LIBLTDL = @LIBLTDL@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LID = @LID@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTDLDEPS = @LTDLDEPS@
@@ -386,7 +387,7 @@ EXTRA_DIST = $(man_MANS) manual.in global.cgi.in completion.cgi.in dot_htaccess 
 
 CLEANFILES = global.cgi completion.cgi
 # CGI scripts
-convert = sed -e 's!@PERLPATH@!$(PERL)!g' -e 's!@GLOBALPATH@!$(bindir)/global!g'
+convert = sed -e 's!@PERLPATH@!$(PERL)!g' -e 's!@GLOBALPATH@!$(bindir)/global!g' -e 's!@GENERATOR@!$(PACKAGE_STRING)!g'
 all: all-am
 
 .SUFFIXES:

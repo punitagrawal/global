@@ -123,7 +123,7 @@ am_libgloutil_a_OBJECTS = assoc.$(OBJEXT) conf.$(OBJEXT) \
 	xargs.$(OBJEXT) encodepath.$(OBJEXT) rewrite.$(OBJEXT) \
 	compress.$(OBJEXT) checkalloc.$(OBJEXT) pool.$(OBJEXT) \
 	fileop.$(OBJEXT) statistics.$(OBJEXT) args.$(OBJEXT) \
-	logging.$(OBJEXT) nearsort.$(OBJEXT)
+	logging.$(OBJEXT) nearsort.$(OBJEXT) secure_popen.$(OBJEXT)
 libgloutil_a_OBJECTS = $(am_libgloutil_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -284,6 +284,7 @@ LIBLTDL = @LIBLTDL@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LID = @LID@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTDLDEPS = @LTDLDEPS@
@@ -405,14 +406,16 @@ gtagsop.h locatestring.h makepath.h path.h gpathop.h strbuf.h \
 strmake.h tab.h test.h token.h usable.h version.h is_unixy.h abs2rel.h \
 split.h strlimcpy.h linetable.h env.h char.h date.h langmap.h \
 varray.h idset.h strhash.h xargs.h format.h encodepath.h rewrite.h \
-compress.h checkalloc.h pool.h fileop.h statistics.h args.h logging.h nearsort.h
+compress.h checkalloc.h pool.h fileop.h statistics.h args.h logging.h nearsort.h \
+secure_popen.h
 
 libgloutil_a_SOURCES = \
 assoc.c conf.c dbop.c defined.c die.c find.c getdbpath.c gtagsop.c locatestring.c \
 makepath.c path.c gpathop.c strbuf.c strmake.c tab.c test.c \
 token.c usable.c version.c is_unixy.c abs2rel.c split.c strlimcpy.c linetable.c \
 env.c char.c date.c langmap.c varray.c idset.c strhash.c xargs.c encodepath.c rewrite.c \
-compress.c checkalloc.c pool.c fileop.c statistics.c args.c logging.c nearsort.c
+compress.c checkalloc.c pool.c fileop.c statistics.c args.c logging.c nearsort.c \
+secure_popen.c
 
 libgloutil_a_DEPENDENCIES = $(libgloutil_a_LIBADD)
 man_MANS = gtags.conf.5
@@ -496,6 +499,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/path.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rewrite.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/secure_popen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/split.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/statistics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strbuf.Po@am__quote@
