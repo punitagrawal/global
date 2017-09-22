@@ -6,8 +6,7 @@ Build-Depends: debhelper (>=10),
  libncurses5-dev, libltdl-dev,
  emacsen-common, flex, bison, gperf,
  libtool-bin
-Maintainer: Wookey <wookey@debian.org>
-Uploaders: Punit Agrawal <punitagrawal@gmail.com>
+Maintainer: Punit Agrawal <punit@debian.org>
 Homepage: http://www.gnu.org/software/global/global.html
 Vcs-Git: https://github.com/punitagrawal/global.git
 Vcs-Browser: https://github.com/punitagrawal/global
