@@ -1,0 +1,53 @@
+From: Punit Agrawal <punit@debian.org>
+Date: Fri, 22 Sep 2017 18:55:14 +0100
+Subject: libparser: Correct typos
+
+---
+ libparser/C.c   | 4 ++--
+ libparser/Cpp.c | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/libparser/C.c b/libparser/C.c
+index 9216e73..2fdc73b 100644
+--- a/libparser/C.c
++++ b/libparser/C.c
+@@ -193,7 +193,7 @@ C_family(const struct parser_param *param, int type)
+ 		case '\n':
+ 			if (startmacro && level != savelevel) {
+ 				if (param->flags & PARSER_WARNING)
+-					warning("different level before and after #define macro. reseted. [+%d %s].", lineno, curfile);
++					warning("different level before and after #define macro. reset level. [+%d %s].", lineno, curfile);
+ 				level = savelevel;
+ 			}
+ 			startmacro = startsharp = 0;
+@@ -637,7 +637,7 @@ condition_macro(const struct parser_param *param, int cc)
+ 		DBG_PRINT(piflevel, "#endif");
+ 		if (minus) {
+ 			if (param->flags & PARSER_WARNING)
+-				warning("unmatched #if block. reseted. [+%d %s]", lineno, curfile);
++				warning("unmatched #if block. reset level. [+%d %s]", lineno, curfile);
+ 		} else {
+ 			if (cur->if0only)
+ 				level = cur->start;
+diff --git a/libparser/Cpp.c b/libparser/Cpp.c
+index 8a43a13..0d3d507 100644
+--- a/libparser/Cpp.c
++++ b/libparser/Cpp.c
+@@ -312,7 +312,7 @@ Cpp(const struct parser_param *param)
+ 		case '\n':
+ 			if (startmacro && level != savelevel) {
+ 				if (param->flags & PARSER_WARNING)
+-					warning("different level before and after #define macro. reseted. [+%d %s].", lineno, curfile);
++					warning("different level before and after #define macro. reset level. [+%d %s].", lineno, curfile);
+ 				level = savelevel;
+ 			}
+ 			startmacro = startsharp = 0;
+@@ -743,7 +743,7 @@ condition_macro(const struct parser_param *param, int cc)
+ 		DBG_PRINT(piflevel, "#endif");
+ 		if (minus) {
+ 			if (param->flags & PARSER_WARNING)
+-				warning("unmatched #if block. reseted. [+%d %s]", lineno, curfile);
++				warning("unmatched #if block. reset level. [+%d %s]", lineno, curfile);
+ 		} else {
+ 			if (cur->if0only)
+ 				level = cur->start;
