@@ -1,2 +1,4 @@
-global: script-not-executable usr/share/gtags/completion.cgi
-global: script-not-executable usr/share/gtags/global.cgi
+# cgi scripts that will be executed in the context of the
+# web-server. There is no need for them to be marked executable.
+global: script-not-executable usr/share/global/gtags/completion.cgi
+global: script-not-executable usr/share/global/gtags/global.cgi

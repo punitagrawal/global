@@ -1,101 +1,35 @@
 #!/usr/bin/make -f
-# Copyright 1999 - 2016 Ron Lee.
 
-SHELL = /bin/bash
-package = global
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 DPKG_EXPORT_BUILDFLAGS = 1
 include /usr/share/dpkg/buildflags.mk
+include /usr/share/dpkg/pkg-info.mk
 
-clean:
-	dh_testdir
-	dh_testroot
-	-rm -f build-stamp
-	-rm -f htags/*.cgi
+%:
+	dh $@
 
-	# Ensure the auto-update stuff does not trigger if the
-	# timestamps are skewed (by cvs etc.)
-	touch Makefile.am       \
-              Makefile.in       \
-              acinclude.m4      \
-              aclocal.m4        \
-              configure.ac      \
-              config-h.in       \
-              configure
+override_dh_autoreconf:
+	dh_autoreconf sh reconf.sh
 
-	# Don't touch this unconditionally, the mips and mipsel
-	# buildd at least seem to crap out trying to chmod it later.
-	if test -e config.status; then touch config.status; fi
+override_dh_auto_configure:
+	dh_auto_configure -- --with-exuberant-ctags=/usr/bin/ctags --disable-static \
+		--datadir=/usr/share/$(DEB_SOURCE)
 
-	[ ! -f Makefile ] || $(MAKE) distclean
-	dh_autotools-dev_restoreconfig
-	dh_clean
+override_dh_auto_install:
+	dh_auto_install
+	mv $(CURDIR)/debian/$(DEB_SOURCE)/usr/share/$(DEB_SOURCE)/gtags/gtags.el \
+		$(CURDIR)/debian/$(DEB_SOURCE)/usr/share/emacs/site-lisp/$(DEB_SOURCE)
 
-
-
-build-stamp:
-	dh_testdir
-	dh_autotools-dev_updateconfig
-	sh reconf.sh
-	./configure --prefix=/usr --with-exuberant-ctags=/usr/bin/ctags \
-		&& $(MAKE)
-	touch $@
-
-
-build-indep: build-stamp
-build-arch: build-stamp
-build: build-arch build-indep
-
-install-indep:
-
-install-arch: build-arch
-	dh_testdir
-	dh_testroot
-	dh_prep
-	dh_installdirs
-
-	$(MAKE) install-exec prefix=`pwd`/debian/$(package)/usr
-	$(MAKE) -C htags install-gtagsDATA prefix=$(CURDIR)/debian/$(package)/usr
-	$(MAKE) -C plugin-factory install-data prefix=$(CURDIR)/debian/$(package)/usr
-	rm $(CURDIR)/debian/$(package)/usr/lib/gtags/*.a
-	rm $(CURDIR)/debian/$(package)/usr/lib/gtags/*.la
-	$(MAKE) -C icons install-iconsDATA prefix=$(CURDIR)/debian/$(package)/usr
-	$(MAKE) -C jquery install-jqueryDATA prefix=$(CURDIR)/debian/$(package)/usr
-	$(MAKE) -C jquery/images install-imagesDATA prefix=$(CURDIR)/debian/$(package)/usr
-	cp -p gtags.el `pwd`/debian/$(package)/usr/share/emacs/site-lisp/$(package)
-
-	dh_install globash/globash.rc	etc
-	dh_install globash/globash	usr/bin
-	dh_lintian
-
-install: install-arch
-
-binary-indep:
-# no architecture-independent files generates by this package.
-
-binary-arch: install-arch
-	dh_testdir
-	dh_testroot
-	dh_installdocs
-	dh_installexamples
-	dh_installman
-	dh_installinfo
-	dh_installchangelogs ChangeLog
-	dh_installemacsen
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-
-
-.PHONY: clean build build-arch build-indep \
-	install install-arch install-indep \
-	binary binary-arch binary-indep
-
+	rm debian/$(DEB_SOURCE)/usr/lib/$(DEB_HOST_MULTIARCH)/gtags/*.la
+	for x in AUTHORS BUILD_TOOLS ChangeLog COPYING COPYING.LIB DONORS		\
+		 elvis-2.2_0.patch elvis.rc FAQ geco.rc globash.rc gtags.conf		\
+		 gtags-cscope.vim gtags.pl gtags.vim INSTALL LICENSE NEWS		\
+		 PLUGIN_HOWTO* README* SERVERSIDE_HOWTO THANKS				\
+		 vim74-gtags-cscope.patch; do						\
+		rm -f debian/$(DEB_SOURCE)/usr/share/$(DEB_SOURCE)/gtags/$$x;		\
+	done
+	rm -fr debian/$(DEB_SOURCE)/usr/share/$(DEB_SOURCE)/gtags/script
+	rm -fr debian/$(DEB_SOURCE)/var
