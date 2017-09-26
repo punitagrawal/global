@@ -1,3 +1,9 @@
+global (6.5.7-3) unstable; urgency=medium
+
+  * Correct distribution in changelog. No other functional change
+
+ -- Punit Agrawal <punit@debian.org>  Tue, 26 Sep 2017 07:17:32 +0100
+
 global (6.5.7-2) unstable; urgency=medium
 
   * Update debhelper compat version to 10
