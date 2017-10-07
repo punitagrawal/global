@@ -10,7 +10,7 @@ Maintainer: Punit Agrawal <punit@debian.org>
 Homepage: http://www.gnu.org/software/global/global.html
 Vcs-Git: https://github.com/punitagrawal/global.git
 Vcs-Browser: https://github.com/punitagrawal/global
-Standards-Version: 4.0.0
+Standards-Version: 4.1.1
 
 Package: global
 Architecture: any
