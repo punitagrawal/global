@@ -2,13 +2,13 @@ global (6.5.7-2) unstable; urgency=medium
 
   Starting from 6.5.7-2, global data files that were previously placed
   in /usr/share/gtags have moved to /usr/share/global/gtags. The new
-  location is chosen to follow debian convention of files being placed
-  in folders named after the package "global". The moved files mainly
+  location is chosen to align with debian convention of files being
+  placed in folders named after the package "global". The moved files
   relate to assets required for browsing cross-referenced source code
   tags generated with htags.
 
   Users of htags should regnerate the tags to update the html to pick
-  assests from the new location.
+  assets from the new location.
 
  -- Punit Agrawal <punit@debian.org>  Sat, 23 Sep 2017 13:57:15 +0000
 
