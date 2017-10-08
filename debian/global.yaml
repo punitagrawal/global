@@ -1,0 +1,9 @@
+addon: gtags
+description: "The gtags.vim plugin script integrates the GNU GLOBAL source code tagging system with Vim. About the details, see http://www.gnu.org/software/global/."
+files:
+  - plugin/gtags.vim
+---
+addon: gtags-cscope
+description: "The gtags-cscope.vim plugin script integrates the GNU GLOBAL source code tagging system with Vim using cscope interface."
+files:
+  - plugin/gtags-cscope.vim

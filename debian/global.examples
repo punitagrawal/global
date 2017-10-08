@@ -2,7 +2,4 @@ elvis.rc
 geco.rc
 globash/globash.rc
 gtags.conf
-gtags-cscope.vim
 gtags.pl
-gtags.vim
-

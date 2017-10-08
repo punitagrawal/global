@@ -1,0 +1,2 @@
+debian/global.yaml usr/share/vim/registry
+*.vim usr/share/vim/addons/plugin
