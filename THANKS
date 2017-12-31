@@ -5,7 +5,7 @@ ___________________________________
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  Copyright (c) 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2012
-	2013, 2014, 2015, 2016
+	2013, 2014, 2015, 2016, 2017
 	Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
@@ -39,6 +39,7 @@ Brian Carlstrom		bug fix patch for gtags.
 Bvk chaitanya		bug report about global (it cannot find gtags).
 Chris Nogradi		patch for libutil/token.c to skip comments correctly.
 Christoph Conrad	bug report and advice about S.u.S.E Linux 5.1.
+Motoki NODA		bug fix patch for 'global -xsi xxx'.
 Daisuke Kawahara	bug report about redefinition in gtags.el.
 Dan Fandrich		port to Windows 32 environment.
 Darryl Okahata		benchmark report about global(1).
@@ -84,6 +85,7 @@ Jean-Marc Saffroy	idea to skip all files whoes first character of name is '.'.
 Jeff Trawick		idea about -l option of htags(1).
 Jeroen Roovers		bug report about htags/Makefile.am.
 Jianbin Kang		bug report about segmentation fault of gtags(1).
+Jonathan Jacobs		bug report about --from-here option of global(1).
 Jordan K. Hubbard	idea about supporting BSD's obj directory.
 Jos Backus		bug report about global.cgi.
 Julien Gilles		idea about -T option of global(1).
@@ -136,6 +138,7 @@ Rohit Grover		bug report about GLOBAL's packaging.
 Ron Lee			Debian package, htmake(1) and many bug reports.
 Rongsong Shen		bug report about gtags(1).
 Rui Lopes		report about build error in *BSD and revision of term.
+Punit Agrawal		bug report about gozilla(1).
 Ruppert Koch		bug report about htags(1).
 S Kaicho		bug report about htags(1).
 Sadaichi Hayashida	idea about generating relative path.
@@ -146,6 +149,7 @@ Seigo Ishigane		patch for pygments_parser.py.in needed in python3 + Windows.
 Sergio Talens-Oliag	writing on-line manual for systags(1).
 Shankar Chakkere	useful method to use vim editor with GLOBAL.
 Shigeyuki Yamano	idea about -h option of htags(1).
+Shuichi KITAGUCHI	bug report in the built-in parser of gtags.
 Silas S. Brown		proofreading about manuals.
 Simon Dommett		many bug reports and fix patches.
 			He also rewrote GLOBAL's comments in the Doxygen style.
@@ -173,6 +177,7 @@ Tomi Ollila		proposal of adding (provide 'gtags) to gtags.el.
 Toshiyasu Kojima	advice about deciding emacs version.
 Tu Do			bug reports about the C++ parser of gtags.
 Van Trinh		bug report about db(3) and patch information.
+Wang, Lei AO.		bug report about 4G limitation of libdb.
 Wes Wojtas		bug report about htags's segmentation fault.
 Whity Pig		bug fix patch for global(1) on Cygwin environment.
 William Xu		bug report about the --color option (abs2rel's bug).

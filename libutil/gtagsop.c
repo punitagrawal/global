@@ -878,14 +878,20 @@ again1:
 		else
 			strhash_reset(gtop->path_hash);
 again2:
-		tagline = dbop_first(gtop->dbop, gtop->key, gtop->preg, gtop->dbflags);
+		for (tagline = dbop_first(gtop->dbop, gtop->key, gtop->preg, gtop->dbflags);
+			tagline != NULL;
+			tagline = dbop_next(gtop->dbop))
+		{
+			VIRTUAL_GRTAGS_GSYMS_PROCESSING(gtop);
+			break;
+		}
 		if (tagline == NULL) {
 			if (gtop->prefix && gtags_restart(gtop))
 				goto again2;
 			return NULL;
 		}
 		/*
-		 * Dbop_next() wil read the same record again.
+		 * Dbop_next() will read the same record again.
 		 */
 		dbop_unread(gtop->dbop);
 		/*
@@ -1168,7 +1174,7 @@ segment_read(GTOP *gtop)
 		fid = (const char *)strmake(tagline, " ");
 		path = gpath_fid2path(fid, NULL);
 		if (path == NULL)
-			die("gtags_first: path not found. (fid=%s)", fid);
+			die("GPATH is corrupted.(file id '%s' not found)", fid);
 		sh = strhash_assign(gtop->path_hash, path, 1);
 		gtp->path = sh->name;
 		lineno = seekto(gtp->tagline, SEEKTO_LINENO);

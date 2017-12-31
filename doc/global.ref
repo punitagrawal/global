@@ -262,6 +262,7 @@ If environment variable @var{GTAGSROOT} is not set
 and file @file{GTAGSROOT} exists in the same directory as @file{GTAGS}
 then global sets @var{GTAGSROOT} to the contents of the file.
 @item @file{gtags.conf}, @file{$HOME/.globalrc}
+Configuration data for GNU GLOBAL.
 See gtags.conf(5).
 @end table
 @unnumberedsubsec ENVIRONMENT

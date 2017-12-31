@@ -501,16 +501,20 @@ Cpp(const struct parser_param *param)
 								break;
 							}
 							if (c == ';' && level == typedef_savelevel) {
-								if (savetok[0])
+								if (savetok[0]) {
 									PUT(PARSER_DEF, savetok, savelineno, sp);
+									savetok[0] = 0;
+								}
 								break;
 							} else if (c == '{')
 								level++;
 							else if (c == '}') {
+								savetok[0] = 0;
 								if (--level == typedef_savelevel)
 									break;
 							} else if (c == SYMBOL) {
-								PUT(PARSER_REF_SYM, token, lineno, sp);
+								if (level > typedef_savelevel)
+									PUT(PARSER_REF_SYM, token, lineno, sp);
 								/* save lastest token */
 								strlimcpy(savetok, token, sizeof(savetok));
 								savelineno = lineno;

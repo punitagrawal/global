@@ -1,4 +1,4 @@
-This is global.info, produced by makeinfo version 6.1 from global.texi.
+This is global.info, produced by makeinfo version 6.5 from global.texi.
 
 INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU GLOBAL source code tagging system
 *************************************
 
-This manual documents version 6.5.7 of the GNU GLOBAL source code
+This manual documents version 6.6.1 of the GNU GLOBAL source code
 tagging system.
 
 * Menu:
@@ -1910,7 +1910,7 @@ FILES
      exists in the same directory as 'GTAGS' then global sets GTAGSROOT
      to the contents of the file.
 'gtags.conf', '$HOME/.globalrc'
-     See gtags.conf(5).
+     Configuration data for GNU GLOBAL. See gtags.conf(5).
 
 ENVIRONMENT
 -----------
@@ -2114,9 +2114,13 @@ FILES
 'GPATH'
      Tag file for source files.
 'gtags.conf', '$HOME/.globalrc'
-     See gtags.conf(5).
+     Configuration data for GNU GLOBAL. See gtags.conf(5).
 'gtags.files'
      The list of candidates of target files.
+'.notfunction'
+     The list of symbols which is not a definition.  If this file exists
+     in the project root directory, gtags does not regard the symbols
+     listed in this file as definitions.
 
 ENVIRONMENT
 -----------
@@ -2165,7 +2169,7 @@ option.
 
 'gtags_parser' (comma separated list)
      Specify the mapping of language names and plug-in parsers.  Each
-     part delimited by the comma consists of the language name, a colon,
+     part delimited by the comma consists of a language name, a colon,
      the shared object path, an optional colon followed by a function
      name.  If the function name is not specified, 'parser' is assumed.
      As a special exception, gtags collects values from multiple
@@ -2180,9 +2184,11 @@ option.
      Ignore case distinctions in the path.  Suffixes check is affected
      by this capability.
 'langmap' (comma separated list)
-     Language mapping.  Each comma-separated map consists of the
-     language name, a colon, and a list of file extensions.  As a
-     special exception, gtags collects values from multiple 'langmap'
+     Language mapping.  Each comma-separated map consists of a language
+     name, a colon, and a list of file extensions.  You can specify a
+     glob pattern surrounded by parentheses instead of an extension for
+     the files without extensions (e.g.  Make:([Mm]akefile).mak.mk).  As
+     a special exception, gtags collects values from multiple 'langmap'
      variables.  For these mappings, the first match is adopted.
      Default mapping is:
      'c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml'.
@@ -2430,7 +2436,7 @@ FILES
 'GPATH'
      Tag file for source files.
 'gtags.conf', '$HOME/.globalrc'
-     See gtags.conf(5).
+     Configuration data for GNU GLOBAL. See gtags.conf(5).
 'HTML/FILEMAP'
      Mapping file for converting file name into the path of the file.
 'HTML/GTAGSROOT'
@@ -2685,7 +2691,7 @@ FILES
 '$HOME/.gozillarc'
      Alias file.  Please read the source code for details.
 'gtags.conf', '$HOME/.globalrc'
-     See gtags.conf(5).
+     Configuration data for GNU GLOBAL. See gtags.conf(5).
 
 ENVIRONMENT
 -----------
@@ -3069,7 +3075,7 @@ FILES
      exists in the same directory as 'GTAGS' then global sets GTAGSROOT
      to the contents of the file.
 'gtags.conf', '$HOME/.globalrc'
-     See gtags.conf(5).
+     Configuration data for GNU GLOBAL. See gtags.conf(5).
 
 SEE ALSO
 --------
@@ -3829,15 +3835,15 @@ Node: Plug-in50432
 Node: Incremental updating51352
 Node: Reference52536
 Node: global53238
-Node: gtags66586
-Node: htags75444
-Node: htags-server85236
-Node: gozilla87478
-Node: gtags-cscope90474
-Node: globash101954
-Node: gtags.conf103169
-Node: Copying This Manual107048
-Node: GNU Free Documentation License107285
-Node: Index129676
+Node: gtags66621
+Node: htags75869
+Node: htags-server85696
+Node: gozilla87938
+Node: gtags-cscope90969
+Node: globash102484
+Node: gtags.conf103699
+Node: Copying This Manual107578
+Node: GNU Free Documentation License107815
+Node: Index130206
 
 End Tag Table

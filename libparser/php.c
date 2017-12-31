@@ -1,6 +1,6 @@
-#line 2 "php.c"
+#line 1 "php.c"
 
-#line 4 "php.c"
+#line 3 "php.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -8,11 +8,17 @@
 
 #define yy_create_buffer php__create_buffer
 #define yy_delete_buffer php__delete_buffer
-#define yy_flex_debug php__flex_debug
+#define yy_scan_buffer php__scan_buffer
+#define yy_scan_string php__scan_string
+#define yy_scan_bytes php__scan_bytes
 #define yy_init_buffer php__init_buffer
 #define yy_flush_buffer php__flush_buffer
 #define yy_load_buffer_state php__load_buffer_state
 #define yy_switch_to_buffer php__switch_to_buffer
+#define yypush_buffer_state php_push_buffer_state
+#define yypop_buffer_state php_pop_buffer_state
+#define yyensure_buffer_stack php_ensure_buffer_stack
+#define yy_flex_debug php__flex_debug
 #define yyin php_in
 #define yyleng php_leng
 #define yylex php_lex
@@ -28,9 +34,243 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 0
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
+#endif
+
+#ifdef yy_create_buffer
+#define php__create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer php__create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define php__delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer php__delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define php__scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer php__scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define php__scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string php__scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define php__scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes php__scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define php__init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer php__init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define php__flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer php__flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define php__load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state php__load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define php__switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer php__switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define php_push_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state php_push_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define php_pop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state php_pop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define php_ensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack php_ensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define php_lex_ALREADY_DEFINED
+#else
+#define yylex php_lex
+#endif
+
+#ifdef yyrestart
+#define php_restart_ALREADY_DEFINED
+#else
+#define yyrestart php_restart
+#endif
+
+#ifdef yylex_init
+#define php_lex_init_ALREADY_DEFINED
+#else
+#define yylex_init php_lex_init
+#endif
+
+#ifdef yylex_init_extra
+#define php_lex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra php_lex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define php_lex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy php_lex_destroy
+#endif
+
+#ifdef yyget_debug
+#define php_get_debug_ALREADY_DEFINED
+#else
+#define yyget_debug php_get_debug
+#endif
+
+#ifdef yyset_debug
+#define php_set_debug_ALREADY_DEFINED
+#else
+#define yyset_debug php_set_debug
+#endif
+
+#ifdef yyget_extra
+#define php_get_extra_ALREADY_DEFINED
+#else
+#define yyget_extra php_get_extra
+#endif
+
+#ifdef yyset_extra
+#define php_set_extra_ALREADY_DEFINED
+#else
+#define yyset_extra php_set_extra
+#endif
+
+#ifdef yyget_in
+#define php_get_in_ALREADY_DEFINED
+#else
+#define yyget_in php_get_in
+#endif
+
+#ifdef yyset_in
+#define php_set_in_ALREADY_DEFINED
+#else
+#define yyset_in php_set_in
+#endif
+
+#ifdef yyget_out
+#define php_get_out_ALREADY_DEFINED
+#else
+#define yyget_out php_get_out
+#endif
+
+#ifdef yyset_out
+#define php_set_out_ALREADY_DEFINED
+#else
+#define yyset_out php_set_out
+#endif
+
+#ifdef yyget_leng
+#define php_get_leng_ALREADY_DEFINED
+#else
+#define yyget_leng php_get_leng
+#endif
+
+#ifdef yyget_text
+#define php_get_text_ALREADY_DEFINED
+#else
+#define yyget_text php_get_text
+#endif
+
+#ifdef yyget_lineno
+#define php_get_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno php_get_lineno
+#endif
+
+#ifdef yyset_lineno
+#define php_set_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno php_set_lineno
+#endif
+
+#ifdef yywrap
+#define php_wrap_ALREADY_DEFINED
+#else
+#define yywrap php_wrap
+#endif
+
+#ifdef yyalloc
+#define php_alloc_ALREADY_DEFINED
+#else
+#define yyalloc php_alloc
+#endif
+
+#ifdef yyrealloc
+#define php_realloc_ALREADY_DEFINED
+#else
+#define yyrealloc php_realloc
+#endif
+
+#ifdef yyfree
+#define php_free_ALREADY_DEFINED
+#else
+#define yyfree php_free
+#endif
+
+#ifdef yytext
+#define php_text_ALREADY_DEFINED
+#else
+#define yytext php_text
+#endif
+
+#ifdef yyleng
+#define php_leng_ALREADY_DEFINED
+#else
+#define yyleng php_leng
+#endif
+
+#ifdef yyin
+#define php_in_ALREADY_DEFINED
+#else
+#define yyin php_in
+#endif
+
+#ifdef yyout
+#define php_out_ALREADY_DEFINED
+#else
+#define yyout php_out
+#endif
+
+#ifdef yy_flex_debug
+#define php__flex_debug_ALREADY_DEFINED
+#else
+#define yy_flex_debug php__flex_debug
+#endif
+
+#ifdef yylineno
+#define php_lineno_ALREADY_DEFINED
+#else
+#define yylineno php_lineno
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -103,60 +343,48 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
-#ifdef __cplusplus
+/* begin standard C++ headers. */
 
-/* The "const" storage-class-modifier is valid. */
-#define YY_USE_CONST
-
-#else	/* ! __cplusplus */
-
-/* C99 requires __STDC__ to be defined as 1. */
-#if defined (__STDC__)
-
-#define YY_USE_CONST
-
-#endif	/* defined (__STDC__) */
-#endif	/* ! __cplusplus */
-
-#ifdef YY_USE_CONST
+/* TODO: this is always defined, so inline it */
 #define yyconst const
+
+#if defined(__GNUC__) && __GNUC__ >= 3
+#define yynoreturn __attribute__((__noreturn__))
 #else
-#define yyconst
+#define yynoreturn
 #endif
 
 /* Returned upon end-of-file. */
 #define YY_NULL 0
 
-/* Promotes a possibly negative, possibly signed char to an unsigned
- * integer for use as an array index.  If the signed char is negative,
- * we want to instead treat it as an 8-bit unsigned char, hence the
- * double cast.
+/* Promotes a possibly negative, possibly signed char to an
+ *   integer in range [0..255] for use as an array index.
  */
-#define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
+#define YY_SC_TO_UI(c) ((YY_CHAR) (c))
 
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
  * definition of BEGIN.
  */
 #define BEGIN (yy_start) = 1 + 2 *
-
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
 #define YY_START (((yy_start) - 1) / 2)
 #define YYSTATE YY_START
-
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
-
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE php_restart(php_in  )
-
+#define YY_NEW_FILE yyrestart( yyin  )
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
@@ -186,50 +414,49 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 typedef size_t yy_size_t;
 #endif
 
-extern yy_size_t php_leng;
+extern int yyleng;
 
-extern FILE *php_in, *php_out;
+extern FILE *yyin, *yyout;
 
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
-
+    
     /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
      *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE php_lex. 
+     *       existing scanners that call yyless() from OUTSIDE yylex.
      *       One obvious solution it to make yy_act a global. I tried that, and saw
-     *       a 5% performance hit in a non-php_lineno scanner, because yy_act is
+     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
      *       normally declared as a register variable-- so it is not worth it.
      */
     #define  YY_LESS_LINENO(n) \
             do { \
                 int yyl;\
-                for ( yyl = n; yyl < php_leng; ++yyl )\
-                    if ( php_text[yyl] == '\n' )\
-                        --php_lineno;\
+                for ( yyl = n; yyl < yyleng; ++yyl )\
+                    if ( yytext[yyl] == '\n' )\
+                        --yylineno;\
             }while(0)
     #define YY_LINENO_REWIND_TO(dst) \
             do {\
                 const char *p;\
                 for ( p = yy_cp-1; p >= (dst); --p)\
                     if ( *p == '\n' )\
-                        --php_lineno;\
+                        --yylineno;\
             }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up php_text. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
 		*yy_cp = (yy_hold_char); \
 		YY_RESTORE_YY_MORE_OFFSET \
 		(yy_c_buf_p) = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
-		YY_DO_BEFORE_ACTION; /* set up php_text again */ \
+		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
-
 #define unput(c) yyunput( c, (yytext_ptr)  )
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -244,12 +471,12 @@ struct yy_buffer_state
 	/* Size of input buffer in bytes, not including room for EOB
 	 * characters.
 	 */
-	yy_size_t yy_buf_size;
+	int yy_buf_size;
 
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	yy_size_t yy_n_chars;
+	int yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -272,7 +499,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -289,8 +516,8 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via php_restart()), so that the user can continue scanning by
-	 * just pointing php_in at a new input file.
+	 * (via yyrestart()), so that the user can continue scanning by
+	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
 
@@ -300,7 +527,7 @@ struct yy_buffer_state
 /* Stack of input buffers. */
 static size_t yy_buffer_stack_top = 0; /**< index of top of stack. */
 static size_t yy_buffer_stack_max = 0; /**< capacity of stack. */
-static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
+static YY_BUFFER_STATE * yy_buffer_stack = NULL; /**< Stack as an array. */
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
@@ -311,112 +538,101 @@ static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 #define YY_CURRENT_BUFFER ( (yy_buffer_stack) \
                           ? (yy_buffer_stack)[(yy_buffer_stack_top)] \
                           : NULL)
-
 /* Same as previous macro, but useful when we know that the buffer stack is not
  * NULL or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-/* yy_hold_char holds the character lost when php_text is formed. */
+/* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
-static yy_size_t yy_n_chars;		/* number of characters read into yy_ch_buf */
-yy_size_t php_leng;
+static int yy_n_chars;		/* number of characters read into yy_ch_buf */
+int yyleng;
 
 /* Points to current character in buffer. */
-static char *yy_c_buf_p = (char *) 0;
+static char *yy_c_buf_p = NULL;
 static int yy_init = 0;		/* whether we need to initialize */
 static int yy_start = 0;	/* start state number */
 
-/* Flag which is used to allow php_wrap()'s to do buffer switches
- * instead of setting up a fresh php_in.  A bit of a hack ...
+/* Flag which is used to allow yywrap()'s to do buffer switches
+ * instead of setting up a fresh yyin.  A bit of a hack ...
  */
 static int yy_did_buffer_switch_on_eof;
 
-void php_restart (FILE *input_file  );
-void php__switch_to_buffer (YY_BUFFER_STATE new_buffer  );
-YY_BUFFER_STATE php__create_buffer (FILE *file,int size  );
-void php__delete_buffer (YY_BUFFER_STATE b  );
-void php__flush_buffer (YY_BUFFER_STATE b  );
-void php_push_buffer_state (YY_BUFFER_STATE new_buffer  );
-void php_pop_buffer_state (void );
+void yyrestart ( FILE *input_file  );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer  );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size  );
+void yy_delete_buffer ( YY_BUFFER_STATE b  );
+void yy_flush_buffer ( YY_BUFFER_STATE b  );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer  );
+void yypop_buffer_state ( void );
 
-static void php_ensure_buffer_stack (void );
-static void php__load_buffer_state (void );
-static void php__init_buffer (YY_BUFFER_STATE b,FILE *file  );
+static void yyensure_buffer_stack ( void );
+static void yy_load_buffer_state ( void );
+static void yy_init_buffer ( YY_BUFFER_STATE b, FILE *file  );
+#define YY_FLUSH_BUFFER yy_flush_buffer( YY_CURRENT_BUFFER )
 
-#define YY_FLUSH_BUFFER php__flush_buffer(YY_CURRENT_BUFFER )
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size  );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str  );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len  );
 
-YY_BUFFER_STATE php__scan_buffer (char *base,yy_size_t size  );
-YY_BUFFER_STATE php__scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE php__scan_bytes (yyconst char *bytes,yy_size_t len  );
+void *yyalloc ( yy_size_t  );
+void *yyrealloc ( void *, yy_size_t  );
+void yyfree ( void *  );
 
-void *php_alloc (yy_size_t  );
-void *php_realloc (void *,yy_size_t  );
-void php_free (void *  );
-
-#define yy_new_buffer php__create_buffer
-
+#define yy_new_buffer yy_create_buffer
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        php_ensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            php__create_buffer(php_in,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
-
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        php_ensure_buffer_stack (); \
+        yyensure_buffer_stack (); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            php__create_buffer(php_in,YY_BUF_SIZE ); \
+            yy_create_buffer( yyin, YY_BUF_SIZE ); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
-
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
 
 #define php_wrap() (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
+typedef flex_uint8_t YY_CHAR;
 
-typedef unsigned char YY_CHAR;
-
-FILE *php_in = (FILE *) 0, *php_out = (FILE *) 0;
+FILE *yyin = NULL, *yyout = NULL;
 
 typedef int yy_state_type;
 
-extern int php_lineno;
+extern int yylineno;
+int yylineno = 1;
 
-int php_lineno = 1;
-
-extern char *php_text;
+extern char *yytext;
 #ifdef yytext_ptr
 #undef yytext_ptr
 #endif
-#define yytext_ptr php_text
+#define yytext_ptr yytext
 
-static yy_state_type yy_get_previous_state (void );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
-static int yy_get_next_buffer (void );
-#if defined(__GNUC__) && __GNUC__ >= 3
-__attribute__((__noreturn__))
-#endif
-static void yy_fatal_error (yyconst char msg[]  );
+static yy_state_type yy_get_previous_state ( void );
+static yy_state_type yy_try_NUL_trans ( yy_state_type current_state  );
+static int yy_get_next_buffer ( void );
+static void yynoreturn yy_fatal_error ( const char* msg  );
 
 /* Done after the current pattern has been matched and before the
- * corresponding action - sets up php_text.
+ * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	php_leng = (size_t) (yy_cp - yy_bp); \
+	yyleng = (int) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-
 #define YY_NUM_RULES 41
 #define YY_END_OF_BUFFER 42
 /* This struct is not used in this scanner,
@@ -426,7 +642,7 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[194] =
+static const flex_int16_t yy_accept[194] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,   42,    7,    1,    7,    7,   40,   40,   14,
@@ -452,7 +668,7 @@ static yyconst flex_int16_t yy_accept[194] =
 
     } ;
 
-static yyconst YY_CHAR yy_ec[256] =
+static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -484,7 +700,7 @@ static yyconst YY_CHAR yy_ec[256] =
        35,   35,   35,   35,   35
     } ;
 
-static yyconst YY_CHAR yy_meta[72] =
+static const YY_CHAR yy_meta[72] =
     {   0,
         1,    2,    3,    2,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    4,    1,
@@ -496,7 +712,7 @@ static yyconst YY_CHAR yy_meta[72] =
         7
     } ;
 
-static yyconst flex_uint16_t yy_base[212] =
+static const flex_int16_t yy_base[212] =
     {   0,
         0,    2,   23,    0,   92,   93,   94,   99,  100,  145,
       214,  215,  467,  552,  552,  552,  212,  552,  444,  552,
@@ -524,7 +740,7 @@ static yyconst flex_uint16_t yy_base[212] =
       546
     } ;
 
-static yyconst flex_int16_t yy_def[212] =
+static const flex_int16_t yy_def[212] =
     {   0,
       194,  194,  193,    3,  195,  195,  196,  196,  197,  193,
       198,  198,  193,  193,  193,  193,  193,  193,  193,  193,
@@ -552,7 +768,7 @@ static yyconst flex_int16_t yy_def[212] =
       193
     } ;
 
-static yyconst flex_uint16_t yy_nxt[624] =
+static const flex_int16_t yy_nxt[624] =
     {   0,
       193,   92,   15,   92,   15,   92,  137,   92,  137,  130,
        99,  193,  193,  193,  126,  126,  193,  138,  127,   16,
@@ -625,7 +841,7 @@ static yyconst flex_uint16_t yy_nxt[624] =
       193,  193,  193
     } ;
 
-static yyconst flex_int16_t yy_chk[624] =
+static const flex_int16_t yy_chk[624] =
     {   0,
         0,   53,    1,   53,    2,   92,  137,   92,  137,  210,
       207,    0,    0,    0,  109,  109,    0,  137,  109,    1,
@@ -699,7 +915,7 @@ static yyconst flex_int16_t yy_chk[624] =
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static yyconst flex_int32_t yy_rule_can_match_eol[42] =
+static const flex_int32_t yy_rule_can_match_eol[42] =
     {   0,
 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -708,8 +924,8 @@ static yyconst flex_int32_t yy_rule_can_match_eol[42] =
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
 
-extern int php__flex_debug;
-int php__flex_debug = 0;
+extern int yy_flex_debug;
+int yy_flex_debug = 0;
 
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
@@ -718,7 +934,7 @@ int php__flex_debug = 0;
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-char *php_text;
+char *yytext;
 #line 1 "php.l"
 #line 2 "php.l"
 /*
@@ -829,10 +1045,12 @@ debug_print(const char *s, ...)
 		if ((result = linetable_read(buf, max_size)) == -1) \
 			result = YY_NULL; \
 	} while (0)
-/* Definitions */
-/* We accept multi-bytes character */
+#line 1048 "php.c"
+#line 112 "php.l"
+ /* Definitions */
+ /* We accept multi-bytes character */
 
-#line 836 "php.c"
+#line 1053 "php.c"
 
 #define INITIAL 0
 #define PHP 1
@@ -853,36 +1071,36 @@ debug_print(const char *s, ...)
 #define YY_EXTRA_TYPE void *
 #endif
 
-static int yy_init_globals (void );
+static int yy_init_globals ( void );
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int php_lex_destroy (void );
+int yylex_destroy ( void );
 
-int php_get_debug (void );
+int yyget_debug ( void );
 
-void php_set_debug (int debug_flag  );
+void yyset_debug ( int debug_flag  );
 
-YY_EXTRA_TYPE php_get_extra (void );
+YY_EXTRA_TYPE yyget_extra ( void );
 
-void php_set_extra (YY_EXTRA_TYPE user_defined  );
+void yyset_extra ( YY_EXTRA_TYPE user_defined  );
 
-FILE *php_get_in (void );
+FILE *yyget_in ( void );
 
-void php_set_in  (FILE * _in_str  );
+void yyset_in  ( FILE * _in_str  );
 
-FILE *php_get_out (void );
+FILE *yyget_out ( void );
 
-void php_set_out  (FILE * _out_str  );
+void yyset_out  ( FILE * _out_str  );
 
-yy_size_t php_get_leng (void );
+			int yyget_leng ( void );
 
-char *php_get_text (void );
+char *yyget_text ( void );
 
-int php_get_lineno (void );
+int yyget_lineno ( void );
 
-void php_set_lineno (int _line_number  );
+void yyset_lineno ( int _line_number  );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -890,9 +1108,9 @@ void php_set_lineno (int _line_number  );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int php_wrap (void );
+extern "C" int yywrap ( void );
 #else
-extern int php_wrap (void );
+extern int yywrap ( void );
 #endif
 #endif
 
@@ -901,19 +1119,18 @@ extern int php_wrap (void );
 #endif
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int );
+static void yy_flex_strncpy ( char *, const char *, int );
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * );
+static int yy_flex_strlen ( const char * );
 #endif
 
 #ifndef YY_NO_INPUT
-
 #ifdef __cplusplus
-static int yyinput (void );
+static int yyinput ( void );
 #else
-static int input (void );
+static int input ( void );
 #endif
 
 #endif
@@ -922,11 +1139,11 @@ static int input (void );
         static int yy_start_stack_depth = 0;
         static int *yy_start_stack = NULL;
     
-    static void yy_push_state (int _new_state );
+    static void yy_push_state ( int _new_state );
     
-    static void yy_pop_state (void );
+    static void yy_pop_state ( void );
     
-    static int yy_top_state (void );
+    static int yy_top_state ( void );
     
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
@@ -943,7 +1160,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( php_text, php_leng, 1, php_out )) {} } while (0)
+#define ECHO do { if (fwrite( yytext, (size_t) yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -954,20 +1171,20 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
-			     (c = getc( php_in )) != EOF && c != '\n'; ++n ) \
+			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
 		if ( c == '\n' ) \
 			buf[n++] = (char) c; \
-		if ( c == EOF && ferror( php_in ) ) \
+		if ( c == EOF && ferror( yyin ) ) \
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
 		result = n; \
 		} \
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, php_in))==0 && ferror(php_in)) \
+		while ( (result = (int) fread(buf, 1, (yy_size_t) max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -975,7 +1192,7 @@ static int input (void );
 				break; \
 				} \
 			errno=0; \
-			clearerr(php_in); \
+			clearerr(yyin); \
 			} \
 		}\
 \
@@ -1008,12 +1225,12 @@ static int input (void );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int php_lex (void);
+extern int yylex (void);
 
-#define YY_DECL int php_lex (void)
+#define YY_DECL int yylex (void)
 #endif /* !YY_DECL */
 
-/* Code executed at the beginning of each rule, after php_text and php_leng
+/* Code executed at the beginning of each rule, after yytext and yyleng
  * have been set up.
  */
 #ifndef YY_USER_ACTION
@@ -1026,9 +1243,9 @@ extern int php_lex (void);
 #endif
 
 #define YY_RULE_SETUP \
-	if ( php_leng > 0 ) \
+	if ( yyleng > 0 ) \
 		YY_CURRENT_BUFFER_LVALUE->yy_at_bol = \
-				(php_text[php_leng - 1] == '\n'); \
+				(yytext[yyleng - 1] == '\n'); \
 	YY_USER_ACTION
 
 /** The main scanner function which does all the work.
@@ -1050,31 +1267,31 @@ YY_DECL
 		if ( ! (yy_start) )
 			(yy_start) = 1;	/* first start state */
 
-		if ( ! php_in )
-			php_in = stdin;
+		if ( ! yyin )
+			yyin = stdin;
 
-		if ( ! php_out )
-			php_out = stdout;
+		if ( ! yyout )
+			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			php_ensure_buffer_stack ();
+			yyensure_buffer_stack ();
 			YY_CURRENT_BUFFER_LVALUE =
-				php__create_buffer(php_in,YY_BUF_SIZE );
+				yy_create_buffer( yyin, YY_BUF_SIZE );
 		}
 
-		php__load_buffer_state( );
+		yy_load_buffer_state(  );
 		}
 
 	{
-#line 124 "php.l"
+#line 125 "php.l"
 
-#line 1072 "php.c"
+#line 1288 "php.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
 
-		/* Support of php_text. */
+		/* Support of yytext. */
 		*yy_cp = (yy_hold_char);
 
 		/* yy_bp points to the position in yy_ch_buf of the start of
@@ -1097,9 +1314,9 @@ yy_match:
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
 				if ( yy_current_state >= 194 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+					yy_c = yy_meta[yy_c];
 				}
-			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
 		while ( yy_current_state != 193 );
@@ -1113,11 +1330,11 @@ yy_find_action:
 
 		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
 			{
-			yy_size_t yyl;
-			for ( yyl = 0; yyl < php_leng; ++yyl )
-				if ( php_text[yyl] == '\n' )
-					   
-    php_lineno++;
+			int yyl;
+			for ( yyl = 0; yyl < yyleng; ++yyl )
+				if ( yytext[yyl] == '\n' )
+					
+    yylineno++;
 ;
 			}
 
@@ -1135,7 +1352,7 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 125 "php.l"
+#line 126 "php.l"
 {
 				ECHO;
 				if (pre_here_document == 1) {
@@ -1148,55 +1365,55 @@ YY_RULE_SETUP
 /* Start PHP */
 case 2:
 YY_RULE_SETUP
-#line 134 "php.l"
+#line 135 "php.l"
 ECHO; BEGIN PHP;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 135 "php.l"
+#line 136 "php.l"
 ECHO; BEGIN PHP;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 136 "php.l"
+#line 137 "php.l"
 ECHO; BEGIN PHP;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 137 "php.l"
+#line 138 "php.l"
 ECHO; BEGIN PHP;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 138 "php.l"
+#line 139 "php.l"
 ECHO; BEGIN PHP;
 	YY_BREAK
 /* Ignore HTML */
 case 7:
 YY_RULE_SETUP
-#line 140 "php.l"
+#line 141 "php.l"
 ECHO;
 	YY_BREAK
 /* End of PHP */
 case 8:
 YY_RULE_SETUP
-#line 142 "php.l"
+#line 143 "php.l"
 ECHO; BEGIN INITIAL;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 143 "php.l"
+#line 144 "php.l"
 ECHO; BEGIN INITIAL;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 144 "php.l"
+#line 145 "php.l"
 ECHO; BEGIN INITIAL;
 	YY_BREAK
 /* Comment */
 case 11:
 YY_RULE_SETUP
-#line 147 "php.l"
+#line 148 "php.l"
 {
 				int c;
 
@@ -1218,23 +1435,23 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 165 "php.l"
+#line 166 "php.l"
 DBG_PRINT("<%s>", LEXTEXT);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 166 "php.l"
+#line 167 "php.l"
 DBG_PRINT("<%s>", LEXTEXT);
 	YY_BREAK
 /* String */
 case 14:
 YY_RULE_SETUP
-#line 169 "php.l"
+#line 170 "php.l"
 { strbuf_reset(string); BEGIN STRING; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 170 "php.l"
+#line 171 "php.l"
 {
 				DBG_PRINT("<S:%s>", strbuf_value(string));
 				BEGIN PHP;
@@ -1245,22 +1462,22 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 177 "php.l"
+#line 178 "php.l"
 strbuf_puts(string, LEXTEXT);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 178 "php.l"
+#line 179 "php.l"
 strbuf_putc(string, LEXTEXT[0]);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 180 "php.l"
+#line 181 "php.l"
 yy_push_state(REPLACE);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 181 "php.l"
+#line 182 "php.l"
 {
 				yy_pop_state();
 				return PHP_STRING;
@@ -1269,12 +1486,12 @@ YY_RULE_SETUP
 /* Literal */
 case 20:
 YY_RULE_SETUP
-#line 186 "php.l"
+#line 187 "php.l"
 { strbuf_reset(string); BEGIN LITERAL; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 187 "php.l"
+#line 188 "php.l"
 {
 				DBG_PRINT("<L:%s>", strbuf_value(string));
 				BEGIN PHP;
@@ -1285,18 +1502,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 194 "php.l"
+#line 195 "php.l"
 strbuf_puts(string, LEXTEXT);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 195 "php.l"
+#line 196 "php.l"
 strbuf_putc(string, LEXTEXT[0]);
 	YY_BREAK
 /* Here document */
 case 24:
 YY_RULE_SETUP
-#line 198 "php.l"
+#line 199 "php.l"
 {
 				DBG_PRINT("<L:%s>", LEXTEXT);
 				/* extract word and save */
@@ -1309,7 +1526,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 207 "php.l"
+#line 208 "php.l"
 {
 				const char *keyword = strtrim((const char *)LEXTEXT, TRIM_HEAD, NULL);
 				ECHO;
@@ -1323,20 +1540,20 @@ YY_RULE_SETUP
 /* Cast */
 case 26:
 YY_RULE_SETUP
-#line 218 "php.l"
+#line 219 "php.l"
 
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 219 "php.l"
+#line 220 "php.l"
 
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 220 "php.l"
+#line 221 "php.l"
 {
 				/*
-				 * 0123456	php_leng = 6
+				 * 0123456	yyleng = 6
 				 * ${abc}\0
 				 */
 				if (YY_START == STRING)
@@ -1351,10 +1568,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 234 "php.l"
+#line 235 "php.l"
 {
 				/*
-				 * 01234	php_leng = 4
+				 * 01234	yyleng = 4
 				 * $abc\0
 				 */
 				if (YY_START == STRING)
@@ -1369,17 +1586,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 248 "php.l"
+#line 249 "php.l"
 ECHO;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 250 "php.l"
+#line 251 "php.l"
 DBG_PRINT("<N:%s>", LEXTEXT);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 251 "php.l"
+#line 252 "php.l"
 {
 				int id = php_reserved_word(LEXTEXT, LEXLENG);
 				if (id) {
@@ -1394,7 +1611,7 @@ YY_RULE_SETUP
 /* Operator */
 case 33:
 YY_RULE_SETUP
-#line 262 "php.l"
+#line 263 "php.l"
 {
 				int c = LEXTEXT[0];
 				if (c == PHP_LBRACE)
@@ -1408,47 +1625,47 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 272 "php.l"
+#line 273 "php.l"
 {
 				return LEXTEXT[0];
 			}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 275 "php.l"
+#line 276 "php.l"
 ECHO;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 276 "php.l"
+#line 277 "php.l"
 ECHO;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 277 "php.l"
+#line 278 "php.l"
 ECHO;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 278 "php.l"
+#line 279 "php.l"
 ECHO;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 279 "php.l"
+#line 280 "php.l"
 { ECHO; return PHP_DOLLAR; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 280 "php.l"
+#line 281 "php.l"
 ECHO;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 282 "php.l"
+#line 283 "php.l"
 ECHO;
 	YY_BREAK
-#line 1452 "php.c"
+#line 1668 "php.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(PHP):
 case YY_STATE_EOF(STRING):
@@ -1470,15 +1687,15 @@ case YY_STATE_EOF(REPLACE):
 			{
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
-			 * just pointed php_in at a new source and called
-			 * php_lex().  If so, then we have to assure
+			 * just pointed yyin at a new source and called
+			 * yylex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
 			 * back-up) that will match for the new input source.
 			 */
 			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-			YY_CURRENT_BUFFER_LVALUE->yy_input_file = php_in;
+			YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
 			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
 
@@ -1532,11 +1749,11 @@ case YY_STATE_EOF(REPLACE):
 				{
 				(yy_did_buffer_switch_on_eof) = 0;
 
-				if ( php_wrap( ) )
+				if ( yywrap(  ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
-					 * php_text, we can now set up
+					 * yytext, we can now set up
 					 * yy_c_buf_p so that if some total
 					 * hoser (like flex itself) wants to
 					 * call the scanner after we return the
@@ -1586,7 +1803,7 @@ case YY_STATE_EOF(REPLACE):
 	} /* end of action switch */
 		} /* end of scanning one token */
 	} /* end of user's declarations */
-} /* end of php_lex */
+} /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -1599,7 +1816,7 @@ static int yy_get_next_buffer (void)
 {
     	char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
 	char *source = (yytext_ptr);
-	yy_size_t number_to_move, i;
+	int number_to_move, i;
 	int ret_val;
 
 	if ( (yy_c_buf_p) > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] )
@@ -1628,7 +1845,7 @@ static int yy_get_next_buffer (void)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (yy_size_t) ((yy_c_buf_p) - (yytext_ptr)) - 1;
+	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr) - 1);
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -1641,7 +1858,7 @@ static int yy_get_next_buffer (void)
 
 	else
 		{
-			yy_size_t num_to_read =
+			int num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
@@ -1655,7 +1872,7 @@ static int yy_get_next_buffer (void)
 
 			if ( b->yy_is_our_buffer )
 				{
-				yy_size_t new_size = b->yy_buf_size * 2;
+				int new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -1664,11 +1881,12 @@ static int yy_get_next_buffer (void)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					php_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
+					yyrealloc( (void *) b->yy_ch_buf,
+							 (yy_size_t) (b->yy_buf_size + 2)  );
 				}
 			else
 				/* Can't grow it, we don't own it. */
-				b->yy_ch_buf = 0;
+				b->yy_ch_buf = NULL;
 
 			if ( ! b->yy_ch_buf )
 				YY_FATAL_ERROR(
@@ -1696,7 +1914,7 @@ static int yy_get_next_buffer (void)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			php_restart(php_in  );
+			yyrestart( yyin  );
 			}
 
 		else
@@ -1710,12 +1928,15 @@ static int yy_get_next_buffer (void)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if (((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
-		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) php_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		int new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) yyrealloc(
+			(void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t) new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+		/* "- 2" to take care of EOB's */
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_size = (int) (new_size - 2);
 	}
 
 	(yy_n_chars) += number_to_move;
@@ -1749,9 +1970,9 @@ static int yy_get_next_buffer (void)
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 194 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+				yy_c = yy_meta[yy_c];
 			}
-		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 		}
 
 	return yy_current_state;
@@ -1777,9 +1998,9 @@ static int yy_get_next_buffer (void)
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
 		if ( yy_current_state >= 194 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+			yy_c = yy_meta[yy_c];
 		}
-	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 	yy_is_jam = (yy_current_state == 193);
 
 		return yy_is_jam ? 0 : yy_current_state;
@@ -1813,7 +2034,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			yy_size_t offset = (yy_c_buf_p) - (yytext_ptr);
+			int offset = (int) ((yy_c_buf_p) - (yytext_ptr));
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -1830,14 +2051,14 @@ static int yy_get_next_buffer (void)
 					 */
 
 					/* Reset buffer status. */
-					php_restart(php_in );
+					yyrestart( yyin );
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( php_wrap( ) )
-						return EOF;
+					if ( yywrap(  ) )
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -1856,13 +2077,13 @@ static int yy_get_next_buffer (void)
 		}
 
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
-	*(yy_c_buf_p) = '\0';	/* preserve php_text */
+	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
 
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = (c == '\n');
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_at_bol )
-		   
-    php_lineno++;
+		
+    yylineno++;
 ;
 
 	return c;
@@ -1874,32 +2095,32 @@ static int yy_get_next_buffer (void)
  * 
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void php_restart  (FILE * input_file )
+    void yyrestart  (FILE * input_file )
 {
     
 	if ( ! YY_CURRENT_BUFFER ){
-        php_ensure_buffer_stack ();
+        yyensure_buffer_stack ();
 		YY_CURRENT_BUFFER_LVALUE =
-            php__create_buffer(php_in,YY_BUF_SIZE );
+            yy_create_buffer( yyin, YY_BUF_SIZE );
 	}
 
-	php__init_buffer(YY_CURRENT_BUFFER,input_file );
-	php__load_buffer_state( );
+	yy_init_buffer( YY_CURRENT_BUFFER, input_file );
+	yy_load_buffer_state(  );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * 
  */
-    void php__switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
+    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
 {
     
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		php_pop_buffer_state();
-	 *		php_push_buffer_state(new_buffer);
+	 *		yypop_buffer_state();
+	 *		yypush_buffer_state(new_buffer);
      */
-	php_ensure_buffer_stack ();
+	yyensure_buffer_stack ();
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -1912,21 +2133,21 @@ static int yy_get_next_buffer (void)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	php__load_buffer_state( );
+	yy_load_buffer_state(  );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (php_wrap()) processing, but the only time this flag
-	 * is looked at is after php_wrap() is called, so it's safe
+	 * EOF (yywrap()) processing, but the only time this flag
+	 * is looked at is after yywrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
-static void php__load_buffer_state  (void)
+static void yy_load_buffer_state  (void)
 {
     	(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
 	(yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
-	php_in = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
+	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
 	(yy_hold_char) = *(yy_c_buf_p);
 }
 
@@ -1936,35 +2157,35 @@ static void php__load_buffer_state  (void)
  * 
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE php__create_buffer  (FILE * file, int  size )
+    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size )
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) php_alloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in php__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
-	b->yy_buf_size = (yy_size_t)size;
+	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) php_alloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) yyalloc( (yy_size_t) (b->yy_buf_size + 2)  );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in php__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	php__init_buffer(b,file );
+	yy_init_buffer( b, file );
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with php__create_buffer()
+ * @param b a buffer created with yy_create_buffer()
  * 
  */
-    void php__delete_buffer (YY_BUFFER_STATE  b )
+    void yy_delete_buffer (YY_BUFFER_STATE  b )
 {
     
 	if ( ! b )
@@ -1974,27 +2195,27 @@ static void php__load_buffer_state  (void)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		php_free((void *) b->yy_ch_buf  );
+		yyfree( (void *) b->yy_ch_buf  );
 
-	php_free((void *) b  );
+	yyfree( (void *) b  );
 }
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a php_restart() or at EOF.
+ * such as during a yyrestart() or at EOF.
  */
-    static void php__init_buffer  (YY_BUFFER_STATE  b, FILE * file )
+    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
 
 {
 	int oerrno = errno;
     
-	php__flush_buffer(b );
+	yy_flush_buffer( b );
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then php__init_buffer was _probably_
-     * called from php_restart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then yy_init_buffer was _probably_
+     * called from yyrestart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -2011,7 +2232,7 @@ static void php__load_buffer_state  (void)
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * 
  */
-    void php__flush_buffer (YY_BUFFER_STATE  b )
+    void yy_flush_buffer (YY_BUFFER_STATE  b )
 {
     	if ( ! b )
 		return;
@@ -2031,7 +2252,7 @@ static void php__load_buffer_state  (void)
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		php__load_buffer_state( );
+		yy_load_buffer_state(  );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -2040,14 +2261,14 @@ static void php__load_buffer_state  (void)
  *  @param new_buffer The new state.
  *  
  */
-void php_push_buffer_state (YY_BUFFER_STATE new_buffer )
+void yypush_buffer_state (YY_BUFFER_STATE new_buffer )
 {
     	if (new_buffer == NULL)
 		return;
 
-	php_ensure_buffer_stack();
+	yyensure_buffer_stack();
 
-	/* This block is copied from php__switch_to_buffer. */
+	/* This block is copied from yy_switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -2061,8 +2282,8 @@ void php_push_buffer_state (YY_BUFFER_STATE new_buffer )
 		(yy_buffer_stack_top)++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from php__switch_to_buffer. */
-	php__load_buffer_state( );
+	/* copied from yy_switch_to_buffer. */
+	yy_load_buffer_state(  );
 	(yy_did_buffer_switch_on_eof) = 1;
 }
 
@@ -2070,18 +2291,18 @@ void php_push_buffer_state (YY_BUFFER_STATE new_buffer )
  *  The next element becomes the new top.
  *  
  */
-void php_pop_buffer_state (void)
+void yypop_buffer_state (void)
 {
     	if (!YY_CURRENT_BUFFER)
 		return;
 
-	php__delete_buffer(YY_CURRENT_BUFFER );
+	yy_delete_buffer(YY_CURRENT_BUFFER );
 	YY_CURRENT_BUFFER_LVALUE = NULL;
 	if ((yy_buffer_stack_top) > 0)
 		--(yy_buffer_stack_top);
 
 	if (YY_CURRENT_BUFFER) {
-		php__load_buffer_state( );
+		yy_load_buffer_state(  );
 		(yy_did_buffer_switch_on_eof) = 1;
 	}
 }
@@ -2089,7 +2310,7 @@ void php_pop_buffer_state (void)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void php_ensure_buffer_stack (void)
+static void yyensure_buffer_stack (void)
 {
 	yy_size_t num_to_alloc;
     
@@ -2099,15 +2320,15 @@ static void php_ensure_buffer_stack (void)
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
-		num_to_alloc = 1; // After all that talk, this was set to 1 anyways...
-		(yy_buffer_stack) = (struct yy_buffer_state**)php_alloc
+      num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in php_ensure_buffer_stack()" );
-								  
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
+
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
+
 		(yy_buffer_stack_max) = num_to_alloc;
 		(yy_buffer_stack_top) = 0;
 		return;
@@ -2119,12 +2340,12 @@ static void php_ensure_buffer_stack (void)
 		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = (yy_buffer_stack_max) + grow_size;
-		(yy_buffer_stack) = (struct yy_buffer_state**)php_realloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)yyrealloc
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
-			YY_FATAL_ERROR( "out of dynamic memory in php_ensure_buffer_stack()" );
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -2136,9 +2357,9 @@ static void php_ensure_buffer_stack (void)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * 
- * @return the newly allocated buffer state object. 
+ * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE php__scan_buffer  (char * base, yy_size_t  size )
+YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size )
 {
 	YY_BUFFER_STATE b;
     
@@ -2146,69 +2367,69 @@ YY_BUFFER_STATE php__scan_buffer  (char * base, yy_size_t  size )
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
-		return 0;
+		return NULL;
 
-	b = (YY_BUFFER_STATE) php_alloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yyalloc( sizeof( struct yy_buffer_state )  );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in php__scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_buffer()" );
 
-	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
-	b->yy_input_file = 0;
+	b->yy_input_file = NULL;
 	b->yy_n_chars = b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	php__switch_to_buffer(b  );
+	yy_switch_to_buffer( b  );
 
 	return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to php_lex() will
+/** Setup the input buffer state to scan a string. The next call to yylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * 
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       php__scan_bytes() instead.
+ *       yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE php__scan_string (yyconst char * yystr )
+YY_BUFFER_STATE yy_scan_string (const char * yystr )
 {
     
-	return php__scan_bytes(yystr,strlen(yystr) );
+	return yy_scan_bytes( yystr, (int) strlen(yystr) );
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to php_lex() will
+/** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE php__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
-	yy_size_t i;
+	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = _yybytes_len + 2;
-	buf = (char *) php_alloc(n  );
+	n = (yy_size_t) (_yybytes_len + 2);
+	buf = (char *) yyalloc( n  );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in php__scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = php__scan_buffer(buf,n );
+	b = yy_scan_buffer( buf, n );
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in php__scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -2225,13 +2446,14 @@ YY_BUFFER_STATE php__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_le
 		yy_size_t new_size;
 
 		(yy_start_stack_depth) += YY_START_STACK_INCR;
-		new_size = (yy_start_stack_depth) * sizeof( int );
+		new_size = (yy_size_t) (yy_start_stack_depth) * sizeof( int );
 
 		if ( ! (yy_start_stack) )
-			(yy_start_stack) = (int *) php_alloc(new_size  );
+			(yy_start_stack) = (int *) yyalloc( new_size  );
 
 		else
-			(yy_start_stack) = (int *) php_realloc((void *) (yy_start_stack),new_size  );
+			(yy_start_stack) = (int *) yyrealloc(
+					(void *) (yy_start_stack), new_size  );
 
 		if ( ! (yy_start_stack) )
 			YY_FATAL_ERROR( "out of memory expanding start-condition stack" );
@@ -2259,9 +2481,9 @@ YY_BUFFER_STATE php__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_le
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg )
+static void yynoreturn yy_fatal_error (const char* msg )
 {
-			(void) fprintf( stderr, "%s\n", msg );
+			fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -2271,14 +2493,14 @@ static void yy_fatal_error (yyconst char* msg )
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up php_text. */ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-		php_text[php_leng] = (yy_hold_char); \
-		(yy_c_buf_p) = php_text + yyless_macro_arg; \
+		yytext[yyleng] = (yy_hold_char); \
+		(yy_c_buf_p) = yytext + yyless_macro_arg; \
 		(yy_hold_char) = *(yy_c_buf_p); \
 		*(yy_c_buf_p) = '\0'; \
-		php_leng = yyless_macro_arg; \
+		yyleng = yyless_macro_arg; \
 		} \
 	while ( 0 )
 
@@ -2287,94 +2509,94 @@ static void yy_fatal_error (yyconst char* msg )
 /** Get the current line number.
  * 
  */
-int php_get_lineno  (void)
+int yyget_lineno  (void)
 {
-        
-    return php_lineno;
+    
+    return yylineno;
 }
 
 /** Get the input stream.
  * 
  */
-FILE *php_get_in  (void)
+FILE *yyget_in  (void)
 {
-        return php_in;
+        return yyin;
 }
 
 /** Get the output stream.
  * 
  */
-FILE *php_get_out  (void)
+FILE *yyget_out  (void)
 {
-        return php_out;
+        return yyout;
 }
 
 /** Get the length of the current token.
  * 
  */
-yy_size_t php_get_leng  (void)
+int yyget_leng  (void)
 {
-        return php_leng;
+        return yyleng;
 }
 
 /** Get the current token.
  * 
  */
 
-char *php_get_text  (void)
+char *yyget_text  (void)
 {
-        return php_text;
+        return yytext;
 }
 
 /** Set the current line number.
  * @param _line_number line number
  * 
  */
-void php_set_lineno (int  _line_number )
+void yyset_lineno (int  _line_number )
 {
     
-    php_lineno = _line_number;
+    yylineno = _line_number;
 }
 
 /** Set the input stream. This does not discard the current
  * input buffer.
  * @param _in_str A readable stream.
  * 
- * @see php__switch_to_buffer
+ * @see yy_switch_to_buffer
  */
-void php_set_in (FILE *  _in_str )
+void yyset_in (FILE *  _in_str )
 {
-        php_in = _in_str ;
+        yyin = _in_str ;
 }
 
-void php_set_out (FILE *  _out_str )
+void yyset_out (FILE *  _out_str )
 {
-        php_out = _out_str ;
+        yyout = _out_str ;
 }
 
-int php_get_debug  (void)
+int yyget_debug  (void)
 {
-        return php__flex_debug;
+        return yy_flex_debug;
 }
 
-void php_set_debug (int  _bdebug )
+void yyset_debug (int  _bdebug )
 {
-        php__flex_debug = _bdebug ;
+        yy_flex_debug = _bdebug ;
 }
 
 static int yy_init_globals (void)
 {
         /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from php_lex_destroy(), so don't allocate here.
+     * This function is called from yylex_destroy(), so don't allocate here.
      */
 
-    /* We do not touch php_lineno unless the option is enabled. */
-    php_lineno =  1;
+    /* We do not touch yylineno unless the option is enabled. */
+    yylineno =  1;
     
-    (yy_buffer_stack) = 0;
+    (yy_buffer_stack) = NULL;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
-    (yy_c_buf_p) = (char *) 0;
+    (yy_c_buf_p) = NULL;
     (yy_init) = 0;
     (yy_start) = 0;
 
@@ -2384,40 +2606,40 @@ static int yy_init_globals (void)
 
 /* Defined in main.c */
 #ifdef YY_STDINIT
-    php_in = stdin;
-    php_out = stdout;
+    yyin = stdin;
+    yyout = stdout;
 #else
-    php_in = (FILE *) 0;
-    php_out = (FILE *) 0;
+    yyin = NULL;
+    yyout = NULL;
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * php_lex_init()
+     * yylex_init()
      */
     return 0;
 }
 
-/* php_lex_destroy is for both reentrant and non-reentrant scanners. */
-int php_lex_destroy  (void)
+/* yylex_destroy is for both reentrant and non-reentrant scanners. */
+int yylex_destroy  (void)
 {
     
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		php__delete_buffer(YY_CURRENT_BUFFER  );
+		yy_delete_buffer( YY_CURRENT_BUFFER  );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
-		php_pop_buffer_state();
+		yypop_buffer_state();
 	}
 
 	/* Destroy the stack itself. */
-	php_free((yy_buffer_stack) );
+	yyfree((yy_buffer_stack) );
 	(yy_buffer_stack) = NULL;
 
     /* Destroy the start condition stack. */
-        php_free((yy_start_stack)  );
+        yyfree( (yy_start_stack)  );
         (yy_start_stack) = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * php_lex() is called, initialization will occur. */
+     * yylex() is called, initialization will occur. */
     yy_init_globals( );
 
     return 0;
@@ -2428,7 +2650,7 @@ int php_lex_destroy  (void)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
+static void yy_flex_strncpy (char* s1, const char * s2, int n )
 {
 		
 	int i;
@@ -2438,7 +2660,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s )
+static int yy_flex_strlen (const char * s )
 {
 	int n;
 	for ( n = 0; s[n]; ++n )
@@ -2448,12 +2670,12 @@ static int yy_flex_strlen (yyconst char * s )
 }
 #endif
 
-void *php_alloc (yy_size_t  size )
+void *yyalloc (yy_size_t  size )
 {
-			return (void *) malloc( size );
+			return malloc(size);
 }
 
-void *php_realloc  (void * ptr, yy_size_t  size )
+void *yyrealloc  (void * ptr, yy_size_t  size )
 {
 		
 	/* The cast to (char *) in the following accommodates both
@@ -2463,18 +2685,17 @@ void *php_realloc  (void * ptr, yy_size_t  size )
 	 * any pointer type to void*, and deal with argument conversions
 	 * as though doing an assignment.
 	 */
-	return (void *) realloc( (char *) ptr, size );
+	return realloc(ptr, size);
 }
 
-void php_free (void * ptr )
+void yyfree (void * ptr )
 {
-			free( (char *) ptr );	/* see php_realloc() for (char *) cast */
+			free( (char *) ptr );	/* see yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
-#line 282 "php.l"
-
+#line 283 "php.l"
 
 /*
  * php: read PHP file and pickup tag entries.
@@ -2489,6 +2710,7 @@ php(const struct parser_param *param)
 	if (linetable_open(param->file) == -1)
 		die("'%s' cannot open.", param->file);
 
+	BEGIN(INITIAL);
 	LEXRESTART(NULL);
 	LEXLINENO = 1;
 	while ((token = LEXLEX(param)) != 0) {
