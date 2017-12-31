@@ -1,4 +1,4 @@
-/* ANSI-C code produced by gperf version 3.0.4 */
+/* ANSI-C code produced by gperf version 3.1 */
 /* Command-line: gperf --language=ANSI-C --struct-type --slot-name=name --hash-fn-name=php_hash --lookup-fn-name=php_lookup  */
 /* Computed positions: -k'1-2,4-5,8-9' */
 
@@ -26,7 +26,7 @@
       && ('w' == 119) && ('x' == 120) && ('y' == 121) && ('z' == 122) \
       && ('{' == 123) && ('|' == 124) && ('}' == 125) && ('~' == 126))
 /* The character set is not based on ISO-646.  */
-#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
+#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gperf@gnu.org>."
 #endif
 
 
@@ -145,13 +145,15 @@ struct keyword { char *name; int token; };
 #define MAX_HASH_VALUE 649
 /* maximum key range = 647, duplicates = 0 */
 
-#if (defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || defined(__cplusplus) || defined(__GNUC_STDC_INLINE__)
-inline
-#elif defined(__GNUC__)
+#ifdef __GNUC__
 __inline
+#else
+#ifdef __cplusplus
+inline
+#endif
 #endif
 static unsigned int
-php_hash (register const char *str, register unsigned int len)
+php_hash (register const char *str, register size_t len)
 {
   static unsigned short asso_values[] =
     {
@@ -182,7 +184,7 @@ php_hash (register const char *str, register unsigned int len)
       650, 650, 650, 650, 650, 650, 650, 650, 650, 650,
       650, 650, 650, 650, 650, 650
     };
-  register int hval = len;
+  register unsigned int hval = len;
 
   switch (hval)
     {
@@ -211,14 +213,8 @@ php_hash (register const char *str, register unsigned int len)
   return hval;
 }
 
-#ifdef __GNUC__
-__inline
-#if defined __GNUC_STDC_INLINE__ || defined __GNUC_GNU_INLINE__
-__attribute__ ((__gnu_inline__))
-#endif
-#endif
 struct keyword *
-php_lookup (register const char *str, register unsigned int len)
+php_lookup (register const char *str, register size_t len)
 {
   static struct keyword wordlist[] =
     {
@@ -611,9 +607,9 @@ php_lookup (register const char *str, register unsigned int len)
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
     {
-      register int key = php_hash (str, len);
+      register unsigned int key = php_hash (str, len);
 
-      if (key <= MAX_HASH_VALUE && key >= 0)
+      if (key <= MAX_HASH_VALUE)
         {
           register const char *s = wordlist[key].name;
 

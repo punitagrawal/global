@@ -631,7 +631,7 @@ main(int argc, char **argv)
 	if (dbpath == NULL)
 		die_with_code(-status, "%s", gtags_dbpath_error);
 	if (print_target) {
-		const char *target;
+		const char *target = NULL;
 		if (!strcmp("dbpath", print_target))
 			target = dbpath;
 		else if (!strcmp("root", print_target))
@@ -850,7 +850,7 @@ main(int argc, char **argv)
 	 * decide tag type.
 	 */
 	if (context_file) {
-		if (isregex(av))
+		if (!literal && isregex(av))
 			die_with_code(2, "regular expression is not allowed with the --from-here option.");
 		db = decide_tag_by_context(av, context_file, atoi(context_lineno));
 	} else {

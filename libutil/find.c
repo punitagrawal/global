@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2008,
- *	2009, 2011, 2012, 2014, 2015, 2016
+ *	2009, 2011, 2012, 2014, 2015, 2016, 2017
  * Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -107,30 +107,13 @@ static const int check_looplink = 1;
 static int accept_dotfiles = 0;
 static int skip_unreadable = 0;
 static int find_explain = 0;
-/*
- * trim: remove blanks and '\'.
- */
-static void
-trim(char *s)
-{
-	char *p;
-
-	for (p = s; *s; s++) {
-		if (isspace((unsigned char)*s))
-			continue;	
-		if (*s == '\\' && *(s + 1))
-			s++;
-		*p++ = *s;
-	}
-	*p = 0;
-}
 /**
  * get the reason for skipping
  *
  *	@param[in]	path	path name (must start with "./")
  *	@return		<directory or not> | <reason for skipping>
  *		directory or not: 1: directory, 0: file
- *		reason: 1: dot file, 2: tag file, 0: others
+ *		reason: 1: dot file, 0: others
  */
 static int
 getreason(const char *path)
@@ -171,8 +154,9 @@ prepare_source(void)
 {
 	static regex_t suff_area;
 	STRBUF *sb = strbuf_open(0);
-	char *sufflist = NULL;
-	char *langmap = NULL;
+	char *default_langmap = DEFAULTLANGMAP;
+	char *langmap = default_langmap;
+	char *p;
 	int flags = REG_EXTENDED;
 
 	/*
@@ -187,44 +171,69 @@ prepare_source(void)
 	 * make suffix list.
 	 */
 	strbuf_reset(sb);
-	if (getconfs("langmap", sb)) {
+	if (getconfs("langmap", sb))
 		langmap =  check_strdup(strbuf_value(sb));
-	}
 	strbuf_reset(sb);
-	make_suffixes(langmap ? langmap : DEFAULTLANGMAP, sb);
-	sufflist = check_strdup(strbuf_value(sb));
-	trim(sufflist);
-	{
-		const char *suffp;
-
-		strbuf_reset(sb);
-		strbuf_puts(sb, "\\.(");       /* ) */
-		for (suffp = sufflist; suffp; ) {
-			const char *p;
-
-			for (p = suffp; *p && *p != ','; p++) {
-				if (!isalnum((unsigned char)*p))
-					strbuf_putc(sb, '\\');
-				strbuf_putc(sb, *p);
+	p = langmap;
+	strbuf_puts(sb, "/(");
+	if (debug)
+		fprintf(stderr, "langmap = %s\n", langmap);
+	while (*p) {
+		/* skip language name */
+		for (; *p && *p != ':'; p++)
+			;
+		if (*p == 0)
+			die_with_code(2, "syntax error in the langmap '%s'.", langmap);
+		p++;
+		/* pick up a suffix or a glob pattern */
+		while (*p == '.' || *p == '(') {
+			if (*p == '.') {	/* suffix */
+				strbuf_puts(sb, "[^/]+\\.");
+				for (p++; *p && *p != '.' && *p != '(' && *p != ','; p++) {
+					if (!isalnum(*p))
+						strbuf_putc(sb, '\\');
+					strbuf_putc(sb, *p);
+				}
+			} else if (*p == '(') {	/* glob pattern */
+				for (p++; *p && *p != ')'; p++) {
+					if (*p == '.')
+						strbuf_puts(sb, "\\.");
+					else if (*p == '*')
+						strbuf_puts(sb, "[^/]*");
+					else if (*p == '?')
+						strbuf_puts(sb, "[^/]");
+					else if (*p == '[') {
+						strbuf_putc(sb, '[');
+						if (*++p == '!') {
+							strbuf_putc(sb, '^');
+							p++;
+						}
+						for (; *p && *p != ']'; p++)
+							strbuf_putc(sb, *p);
+						if (*p == 0)
+							die_with_code(2, "syntax error in the langmap '%s'.", langmap);
+						strbuf_putc(sb, ']');
+					} else
+						strbuf_putc(sb, *p);
+				}
+				if (*p == 0)
+					die_with_code(2, "syntax error in the langmap '%s'.", langmap);
+				p++;
 			}
-			if (!*p)
-				break;
-			assert(*p == ',');
 			strbuf_putc(sb, '|');
-			suffp = ++p;
 		}
-		strbuf_puts(sb, ")$");
-		/*
-		 * compile regular expression.
-		 */
-		if (regcomp(&suff_area, strbuf_value(sb), flags) != 0)
-			die("cannot compile regular expression.");
+		if (*p == ',')
+			p++;
 	}
+	strbuf_unputc(sb, '|');
+	strbuf_puts(sb, ")$");
+	if (debug)
+		fprintf(stderr, "prepare_source: %s\n", strbuf_value(sb));
+	if (regcomp(&suff_area, strbuf_value(sb), flags) != 0)
+		die("cannot compile regular expression.");
 	strbuf_close(sb);
-	if (langmap)
+	if (langmap != default_langmap)
 		free(langmap);
-	if (sufflist)
-		free(sufflist);
 	return &suff_area;
 }
 /**
@@ -263,7 +272,6 @@ prepare_skip(void)
 	skiplist = check_strdup(strbuf_value(reg));
 	if (debug)
 		fprintf(stderr, "DBG: Original skip list:\n%s\n", skiplist);
-	/* trim(skiplist);*/
 	strbuf_reset(reg);
 	/*
 	 * construct regular expression.
@@ -540,7 +548,30 @@ out:
 	free(real);
 	return ret;
 }
+/**
+ * skips '.', '..'.
+ * It also skips '.xxxx' and tag files for performance.
+ */
+static int
+ignore(const char *path)
+{
+	int db;
 
+	if (path[0] == '.') {
+		if (path[1] == '\0' || (path[1] == '.' && path[2] == '\0'))
+			return 1;
+		if (!find_explain && !accept_dotfiles)
+			return 1;
+	}
+	if (!find_explain) {
+		if (path[0] == 'G') {
+			for (db = 0; db < GTAGLIM; db++)
+				if (!strcmp(dbname(db), path))
+					return 1;
+		}
+	}
+	return 0;
+}
 /**
  * getdirs: get directory list
  *
@@ -568,9 +599,7 @@ getdirs(const char *dir, STRBUF *sb)
 		return -1;
 	}
 	while ((dp = readdir(dirp)) != NULL) {
-		if (!strcmp(dp->d_name, "."))
-			continue;
-		if (!strcmp(dp->d_name, ".."))
+		if (ignore(dp->d_name))
 			continue;
 		if (stat(makepath(dir, dp->d_name, NULL), &st) < 0) {
 			warning("cannot stat '%s'. ignored.", trimpath(dp->d_name));

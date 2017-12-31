@@ -1,4 +1,4 @@
-/* ANSI-C code produced by gperf version 3.0.4 */
+/* ANSI-C code produced by gperf version 3.1 */
 /* Command-line: gperf --language=ANSI-C --struct-type --slot-name=name --hash-fn-name=c_hash --lookup-fn-name=c_lookup  */
 /* Computed positions: -k'1-2,4,6-9,12,14' */
 
@@ -26,7 +26,7 @@
       && ('w' == 119) && ('x' == 120) && ('y' == 121) && ('z' == 122) \
       && ('{' == 123) && ('|' == 124) && ('}' == 125) && ('~' == 126))
 /* The character set is not based on ISO-646.  */
-#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
+#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gperf@gnu.org>."
 #endif
 
 
@@ -157,13 +157,15 @@ struct keyword { char *name; int token; };
 #define MAX_HASH_VALUE 352
 /* maximum key range = 350, duplicates = 0 */
 
-#if (defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || defined(__cplusplus) || defined(__GNUC_STDC_INLINE__)
-inline
-#elif defined(__GNUC__)
+#ifdef __GNUC__
 __inline
+#else
+#ifdef __cplusplus
+inline
+#endif
 #endif
 static unsigned int
-c_hash (register const char *str, register unsigned int len)
+c_hash (register const char *str, register size_t len)
 {
   static unsigned short asso_values[] =
     {
@@ -194,7 +196,7 @@ c_hash (register const char *str, register unsigned int len)
       353, 353, 353, 353, 353, 353, 353, 353, 353, 353,
       353, 353, 353, 353, 353, 353, 353
     };
-  register int hval = len;
+  register unsigned int hval = len;
 
   switch (hval)
     {
@@ -234,14 +236,8 @@ c_hash (register const char *str, register unsigned int len)
   return hval;
 }
 
-#ifdef __GNUC__
-__inline
-#if defined __GNUC_STDC_INLINE__ || defined __GNUC_GNU_INLINE__
-__attribute__ ((__gnu_inline__))
-#endif
-#endif
 struct keyword *
-c_lookup (register const char *str, register unsigned int len)
+c_lookup (register const char *str, register size_t len)
 {
   static struct keyword wordlist[] =
     {
@@ -462,9 +458,9 @@ c_lookup (register const char *str, register unsigned int len)
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
     {
-      register int key = c_hash (str, len);
+      register unsigned int key = c_hash (str, len);
 
-      if (key <= MAX_HASH_VALUE && key >= 0)
+      if (key <= MAX_HASH_VALUE)
         {
           register const char *s = wordlist[key].name;
 
