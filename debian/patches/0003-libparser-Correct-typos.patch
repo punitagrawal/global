@@ -8,7 +8,7 @@ Subject: libparser: Correct typos
  2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/libparser/C.c b/libparser/C.c
-index 9216e73..2fdc73b 100644
+index c222d11..785d510 100644
 --- a/libparser/C.c
 +++ b/libparser/C.c
 @@ -193,7 +193,7 @@ C_family(const struct parser_param *param, int type)
@@ -20,7 +20,7 @@ index 9216e73..2fdc73b 100644
  				level = savelevel;
  			}
  			startmacro = startsharp = 0;
-@@ -637,7 +637,7 @@ condition_macro(const struct parser_param *param, int cc)
+@@ -641,7 +641,7 @@ condition_macro(const struct parser_param *param, int cc)
  		DBG_PRINT(piflevel, "#endif");
  		if (minus) {
  			if (param->flags & PARSER_WARNING)
@@ -30,7 +30,7 @@ index 9216e73..2fdc73b 100644
  			if (cur->if0only)
  				level = cur->start;
 diff --git a/libparser/Cpp.c b/libparser/Cpp.c
-index 8a43a13..0d3d507 100644
+index efd6b74..30b592e 100644
 --- a/libparser/Cpp.c
 +++ b/libparser/Cpp.c
 @@ -312,7 +312,7 @@ Cpp(const struct parser_param *param)
@@ -42,7 +42,7 @@ index 8a43a13..0d3d507 100644
  				level = savelevel;
  			}
  			startmacro = startsharp = 0;
-@@ -743,7 +743,7 @@ condition_macro(const struct parser_param *param, int cc)
+@@ -747,7 +747,7 @@ condition_macro(const struct parser_param *param, int cc)
  		DBG_PRINT(piflevel, "#endif");
  		if (minus) {
  			if (param->flags & PARSER_WARNING)

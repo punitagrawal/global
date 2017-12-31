@@ -7,7 +7,7 @@ Subject: gtags: Fix lintian warning with gtags manpage
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/gtags/manual.in b/gtags/manual.in
-index 77a5d44..773bdcc 100644
+index 1573daa..f7743f1 100644
 --- a/gtags/manual.in
 +++ b/gtags/manual.in
 @@ -59,7 +59,7 @@
