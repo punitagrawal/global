@@ -31,5 +31,10 @@ override_dh_auto_install:
 		 vim74-gtags-cscope.patch; do						\
 		rm -f debian/$(DEB_SOURCE)/usr/share/$(DEB_SOURCE)/gtags/$$x;		\
 	done
-	rm -fr debian/$(DEB_SOURCE)/usr/share/$(DEB_SOURCE)/gtags/script
+
+	for x in elvis-global global-client gtags-client htags-client less-global	\
+		maps2conf.pl;								\
+	do										\
+		rm -f debian/$(DEB_SOURCE)/usr/share/$(DEB_SOURCE)/gtags/script/$$x;	\
+	done
 	rm -fr debian/$(DEB_SOURCE)/var
