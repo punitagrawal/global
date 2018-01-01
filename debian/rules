@@ -15,12 +15,12 @@ override_dh_autoreconf:
 	dh_autoreconf sh reconf.sh
 
 override_dh_auto_configure:
-	dh_auto_configure -- --with-exuberant-ctags=/usr/bin/ctags --disable-static \
+	dh_auto_configure -- --with-exuberant-ctags=/usr/bin/ctags --disable-static 	\
 		--datadir=/usr/share/$(DEB_SOURCE)
 
 override_dh_auto_install:
 	dh_auto_install
-	mv $(CURDIR)/debian/$(DEB_SOURCE)/usr/share/$(DEB_SOURCE)/gtags/gtags.el \
+	mv $(CURDIR)/debian/$(DEB_SOURCE)/usr/share/$(DEB_SOURCE)/gtags/gtags.el 	\
 		$(CURDIR)/debian/$(DEB_SOURCE)/usr/share/emacs/site-lisp/$(DEB_SOURCE)
 
 	rm debian/$(DEB_SOURCE)/usr/lib/$(DEB_HOST_MULTIARCH)/gtags/*.la
