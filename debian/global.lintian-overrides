@@ -2,3 +2,6 @@
 # web-server. There is no need for them to be marked executable.
 global: script-not-executable usr/share/global/gtags/completion.cgi
 global: script-not-executable usr/share/global/gtags/global.cgi
+
+# htags depends on a specific version of jquery.js
+global: embedded-javascript-library usr/share/global/gtags/jquery/jquery.js please use libjs-jquery
