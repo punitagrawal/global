@@ -1,3 +1,9 @@
+global (6.5.6-2+deb9u1) stretch-security; urgency=high
+
+  * Backport fix for CVE-2017-17531 from 6.6.1
+
+ -- Punit Agrawal <punit@debian.org>  Wed, 03 Jan 2018 21:41:34 +0000
+
 global (6.5.6-2) unstable; urgency=medium
 
   * Include gtags.conf manpage in the package
