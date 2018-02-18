@@ -6,7 +6,7 @@ const char *help_const = "Options:\n\
 +no\n\
        Line number.\n\
 -b browser\n\
-       Browser to use. By default, it is assumed mozilla.\n\
+       Browser to use. By default, it is assumed firefox.\n\
 -d name\n\
        Print definitions.\n\
 --help\n\
