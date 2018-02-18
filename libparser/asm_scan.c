@@ -2605,6 +2605,7 @@ void yyfree (void * ptr )
 void
 asm_initscan(void)
 {
+	BEGIN(INITIAL);
 	LEXRESTART(NULL);
 	LEXLINENO = 1;
 }

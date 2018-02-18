@@ -1,15 +1,15 @@
 .\" This file is generated automatically by convert.pl from gozilla/manual.in.
 .TH GOZILLA 1 "March 2010" "GNU Project"
 .SH NAME
-gozilla \- force mozilla to display specified part of a source file
+gozilla \- force a browser to display specified part of a source file
 .SH SYNOPSIS
 \fBgozilla\fP [-b browser][-p][+no] file
 .br
 \fBgozilla\fP [-b browser][-p] -d name
 .br
 .SH DESCRIPTION
-\fBGozilla\fP forces \fBmozilla\fP to display specified part of a source file.
-\fBGozilla\fP can be used with other browsers like firefox and epiphany.
+\fBGozilla\fP forces firefox to display specified part of a source file.
+\fBGozilla\fP can be used with other browsers like chrome and epiphany.
 .PP
 In advance of using this command, you must execute \fBgtags\fP(1)
 and \fBhtags\fP(1) at the root directory of the project to make tag files.
@@ -34,7 +34,7 @@ The following options are available:
 Line number.
 .TP
 \fB-b\fP \fIbrowser\fP
-Browser to use. By default, it is assumed \fBmozilla\fP.
+Browser to use. By default, it is assumed \fBfirefox\fP.
 .TP
 \fB-d\fP \fIname\fP
 Print definitions.
@@ -67,16 +67,13 @@ Hypertext of source code.
 \'HTML/MAP\'
 Mapping file for converting tag name into the path of tag list.
 .TP
-\'$HOME/.gozillarc\'
-Alias file. Please read the source code for details.
-.TP
 \'gtags.conf\', \'$HOME/.globalrc\'
 Configuration data for GNU GLOBAL.
 See \fBgtags.conf\fP(5).
 .SH ENVIRONMENT
 .TP
 \fBBROWSER\fP
-Browser to use. By default, it is assumed \fBmozilla\fP.
+Browser to use. By default, it is assumed \fBfirefox\fP.
 If you want to load the default browser in OSX, you may set this variable
 to \fBosx-default\fP.
 .TP
@@ -92,12 +89,10 @@ $ gtags
 $ htags
 $ global -x main
 main              82 ctags.c          main(argc, argv)
-$ mozilla &
 $ gozilla +82 ctags.c
 $ gozilla -d main
 .PP
-$ firefox &
-$ gozilla -b firefox +82 ctags.c
+$ gozilla -b lynx +82 ctags.c
 .fi
 .SH DIAGNOSTICS
 \fBGozilla\fP exits with a non-0 value if an error occurred, 0 otherwise.
@@ -105,17 +100,14 @@ $ gozilla -b firefox +82 ctags.c
 \fBglobal\fP(1),
 \fBgtags\fP(1),
 \fBhtags\fP(1),
-\fBfirefox\fP(1),
 \fBepiphany\fP(1),
 \fBmozilla\fP(1),
+\fBfirefox\fP(1),
 \fBgtags.conf\fP(5).
 .PP
 GNU GLOBAL source code tag system
 .br
 (http://www.gnu.org/software/global/).
-.SH BUGS
-\fBGozilla\fP can accept not only source files but also text files,
-directories, HTML files and even URLs, because it is omnivorous.
 .SH AUTHORS
 Shigio YAMAGUCHI.
 .SH HISTORY

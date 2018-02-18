@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU GLOBAL source code tagging system
 *************************************
 
-This manual documents version 6.6.1 of the GNU GLOBAL source code
+This manual documents version 6.6.2 of the GNU GLOBAL source code
 tagging system.
 
 * Menu:
@@ -1636,7 +1636,7 @@ File: global.info,  Node: Reference,  Next: Copying This Manual,  Prev: Other to
 * gtags::          gtags - create tag files for global
 * htags::          htags - generate a hypertext from a set of source files
 * htags-server::   htags-server - a private Web/CGI server for htags
-* gozilla::        gozilla - force mozilla to display specified part of a source file
+* gozilla::        gozilla - force a browser to display specified part of a source file
 * gtags-cscope::   gtags-cscope - interactively examine a C program
 * globash::        globash - a special shell for GLOBAL using GNU bash
 * gtags.conf::     gtags.conf - configuration data for GNU GLOBAL
@@ -2621,13 +2621,13 @@ The htags-server command appeared in GLOBAL-6.3 (2014).
 
 File: global.info,  Node: gozilla,  Next: gtags-cscope,  Prev: htags-server,  Up: Reference
 
-5.5 gozilla - force mozilla to display specified part of a source file
-======================================================================
+5.5 gozilla - force a browser to display specified part of a source file
+========================================================================
 
 NAME
 ----
 
-gozilla - force mozilla to display specified part of a source file
+gozilla - force a browser to display specified part of a source file
 
 SYNOPSIS
 --------
@@ -2638,8 +2638,8 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-Gozilla forces mozilla to display specified part of a source file.
-Gozilla can be used with other browsers like firefox and epiphany.
+Gozilla forces firefox to display specified part of a source file.
+Gozilla can be used with other browsers like chrome and epiphany.
 
    In advance of using this command, you must execute gtags(1) and
 htags(1) at the root directory of the project to make tag files.  Then
@@ -2663,7 +2663,7 @@ The following options are available:
 '+no'
      Line number.
 '-b' browser
-     Browser to use.  By default, it is assumed mozilla.
+     Browser to use.  By default, it is assumed firefox.
 '-d' name
      Print definitions.
 '--help'
@@ -2688,8 +2688,6 @@ FILES
      Hypertext of source code.
 'HTML/MAP'
      Mapping file for converting tag name into the path of tag list.
-'$HOME/.gozillarc'
-     Alias file.  Please read the source code for details.
 'gtags.conf', '$HOME/.globalrc'
      Configuration data for GNU GLOBAL. See gtags.conf(5).
 
@@ -2697,7 +2695,7 @@ ENVIRONMENT
 -----------
 
 BROWSER
-     Browser to use.  By default, it is assumed mozilla.  If you want to
+     Browser to use.  By default, it is assumed firefox.  If you want to
      load the default browser in OSX, you may set this variable to
      osx-default.
 GTAGSDBPATH
@@ -2713,11 +2711,9 @@ EXAMPLES
      $ htags
      $ global -x main
      main              82 ctags.c          main(argc, argv)
-     $ mozilla &
      $ gozilla +82 ctags.c
      $ gozilla -d main
-     $ firefox &
-     $ gozilla -b firefox +82 ctags.c
+     $ gozilla -b lynx +82 ctags.c
 
 DIAGNOSTICS
 -----------
@@ -2727,17 +2723,11 @@ Gozilla exits with a non-0 value if an error occurred, 0 otherwise.
 SEE ALSO
 --------
 
-global(1), gtags(1), htags(1), firefox(1), epiphany(1), mozilla(1),
+global(1), gtags(1), htags(1), epiphany(1), mozilla(1), firefox(1),
 gtags.conf(5).
 
    GNU GLOBAL source code tag system
 (http://www.gnu.org/software/global/).
-
-BUGS
-----
-
-Gozilla can accept not only source files but also text files,
-directories, HTML files and even URLs, because it is omnivorous.
 
 AUTHORS
 -------
@@ -3834,16 +3824,16 @@ Node: Configuration49728
 Node: Plug-in50432
 Node: Incremental updating51352
 Node: Reference52536
-Node: global53238
-Node: gtags66621
-Node: htags75869
-Node: htags-server85696
-Node: gozilla87938
-Node: gtags-cscope90969
-Node: globash102484
-Node: gtags.conf103699
-Node: Copying This Manual107578
-Node: GNU Free Documentation License107815
-Node: Index130206
+Node: global53240
+Node: gtags66623
+Node: htags75871
+Node: htags-server85698
+Node: gozilla87940
+Node: gtags-cscope90722
+Node: globash102237
+Node: gtags.conf103452
+Node: Copying This Manual107331
+Node: GNU Free Documentation License107568
+Node: Index129959
 
 End Tag Table
