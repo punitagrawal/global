@@ -1,0 +1,21 @@
+From: Punit Agrawal <punit@debian.org>
+Date: Thu, 22 Feb 2018 20:30:31 +0000
+Subject: reconf.sh: Force update during autoreconf
+
+---
+ reconf.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/reconf.sh b/reconf.sh
+index 0e7e7e7..76cc15e 100644
+--- a/reconf.sh
++++ b/reconf.sh
+@@ -115,7 +115,7 @@ echo "- Clean up config.cache..."
+ rm -f config.cache
+ 
+ echo "- Generating configure items..."
+-(set -x; autoreconf --symlink --verbose --install) &&
++(set -x; autoreconf --symlink --verbose --install --force) &&
+ case $1 in
+ '')	echo "You are ready to execute ./configure"
+ 	;;
