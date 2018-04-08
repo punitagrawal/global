@@ -34,7 +34,4 @@ In  /usr/share/doc/global/examples directory you should find:
  - Patches and a helper script for nvi.
  - An example of the optional gtags.conf file.
 
-The globash.rc is now installed in /etc and may be invoked
-via the globash(1) wrapper.
-
- -- Punit Agrawal <punitagrawal@gmail.com>  Sun, 11 Dec 2016 20:06:15 +0000
+ -- Punit Agrawal <punit@debian.org>  Sun, 08 Apr 2018 14:21:15 +0100
