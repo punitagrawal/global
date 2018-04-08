@@ -16,7 +16,7 @@ Package: global
 Architecture: any
 Depends: ${shlibs:Depends}, emacsen-common, ${misc:Depends}
 Recommends: python
-Suggests: lynx | www-browser, doxygen (>=1.4.3), apache | httpd, id-utils, exuberant-ctags, python-pygments
+Suggests: lynx | www-browser, doxygen (>=1.4.3), id-utils, exuberant-ctags, python-pygments
 Description: Source code search and browse tools
  GNU GLOBAL is a source code tag system that works the same way across
  diverse environments. Currently, it supports the following:
