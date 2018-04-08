@@ -1,3 +1,10 @@
+global (6.6.2-2) unstable; urgency=medium
+
+  * Install globash.rc (Closes: #894424)
+  * Drop webservers from suggested packages
+
+ -- Punit Agrawal <punit@debian.org>  Sun, 08 Apr 2018 14:47:16 +0100
+
 global (6.6.2-1) unstable; urgency=medium
 
   * New upstream version 6.6.2
