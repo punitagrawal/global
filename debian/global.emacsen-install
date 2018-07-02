@@ -14,16 +14,16 @@ if [ ${FLAVOR} != emacs ]
 then
 	echo install/${PACKAGE}: byte-compiling for ${FLAVOR}
 
-	# Copy the temp .el files
 	install -m 755 -d ${elc_dir}
+
+        # remove the redundant files
+	rm -f ${elc_dir}/*.el ${elc_dir}/*.elc
+
+	# Copy the temp .el files
 	cp ${el_path_list} ${elc_dir}
 
 	# Byte compile them
 	${FLAVOR} ${byte_compile_options} ${elc_path_list}
-
-	# remove the redundant .el files
-	# presumes that any .el files in the <flavor> dir are trash.
-	rm ${elc_dir}/*.el
 fi
 exit 0;
 
