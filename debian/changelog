@@ -1,3 +1,14 @@
+global (6.6.2-3) unstable; urgency=medium
+
+  [ Daniel Gröber ]
+  * Don't remove *.el files from site-lisp dir (Closes: #902877)
+
+  [ Punit Agrawal ]
+  * Update homepage link to use https
+  * Update standards version to 4.1.4
+
+ -- Punit Agrawal <punit@debian.org>  Tue, 03 Jul 2018 23:13:54 +0100
+
 global (6.6.2-2) unstable; urgency=medium
 
   * Install globash.rc (Closes: #894424)
