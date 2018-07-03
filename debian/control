@@ -7,7 +7,7 @@ Build-Depends: debhelper (>=10),
  emacsen-common, flex, bison, gperf,
  libtool-bin
 Maintainer: Punit Agrawal <punit@debian.org>
-Homepage: http://www.gnu.org/software/global/global.html
+Homepage: https://www.gnu.org/software/global/global.html
 Vcs-Git: https://github.com/punitagrawal/global.git
 Vcs-Browser: https://github.com/punitagrawal/global
 Standards-Version: 4.1.3
