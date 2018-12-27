@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2008,
- *	2009, 2010, 2012, 2014, 2015, 2016
+ *	2009, 2010, 2012, 2014, 2015, 2016, 2018
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -69,11 +69,11 @@ int _CRT_glob = __CRT_GLOB_USE_MINGW__ | __CRT_GLOB_BRACKET_GROUPS__;
 
 static void usage(void);
 static void help(void);
+int printconf(const char *);
 int main(int, char **);
 int incremental(const char *, const char *);
 void updatetags(const char *, const char *, IDSET *, STRBUF *);
 void createtags(const char *, const char *);
-int printconf(const char *);
 
 int cflag;					/**< compact format */
 int iflag;					/**< incremental update */
@@ -86,6 +86,7 @@ int show_version;
 int show_help;
 int show_config;
 int skip_unreadable;
+int skip_symlink;
 int accept_dotfiles;
 char *gtagsconf;
 char *gtagslabel;
@@ -119,7 +120,34 @@ help(void)
 	fputs(help_const, stdout);
 	exit(0);
 }
+/**
+ * printconf: print configuration data.
+ *
+ *	@param[in]	name	label of config data
+ *	@return		exit code
+ */
+int
+printconf(const char *name)
+{
+	int num;
+	int exist = 1;
 
+	if (getconfn(name, &num))
+		fprintf(stdout, "%d\n", num);
+	else if (getconfb(name))
+		fprintf(stdout, "1\n");
+	else {
+		STRBUF *sb = strbuf_open(0);
+		if (getconfs(name, sb))
+			fprintf(stdout, "%s\n", strbuf_value(sb));
+		else
+			exist = 0;
+		strbuf_close(sb);
+	}
+	return exist;
+}
+
+static const char *short_options = "cd:f:iIn:oOqvwse";
 static struct option const long_options[] = {
 	/*
 	 * These options have long name and short name.
@@ -150,6 +178,7 @@ static struct option const long_options[] = {
 #define OPT_SINGLE_UPDATE	132
 #define OPT_ACCEPT_DOTFILES	133
 #define OPT_SKIP_UNREADABLE	134
+#define OPT_GTAGSSKIP_SYMLINK	135
 	/* flag value */
 	{"accept-dotfiles", no_argument, NULL, OPT_ACCEPT_DOTFILES},
 	{"debug", no_argument, &debug, 1},
@@ -166,6 +195,7 @@ static struct option const long_options[] = {
 	{"config", optional_argument, NULL, OPT_CONFIG},
 	{"gtagsconf", required_argument, NULL, OPT_GTAGSCONF},
 	{"gtagslabel", required_argument, NULL, OPT_GTAGSLABEL},
+	{"skip-symlink", optional_argument, NULL, OPT_GTAGSSKIP_SYMLINK},
 	{"path", required_argument, NULL, OPT_PATH},
 	{"single-update", required_argument, NULL, OPT_SINGLE_UPDATE},
 	{ 0 }
@@ -234,7 +264,7 @@ main(int argc, char **argv)
 			fprintf(stderr, "gtags-hook failed: %s\n", strbuf_value(sb));
 	}
 	logging_arguments(argc, argv);
-	while ((optchar = getopt_long(argc, argv, "cd:f:iIn:oOqvwse", long_options, &option_index)) != EOF) {
+	while ((optchar = getopt_long(argc, argv, short_options, long_options, &option_index)) != EOF) {
 		switch (optchar) {
 		case 0:
 			/* already flags set */
@@ -257,6 +287,19 @@ main(int argc, char **argv)
 			break;
 		case OPT_SKIP_UNREADABLE:
 			skip_unreadable = 1;
+			break;
+		case OPT_GTAGSSKIP_SYMLINK:
+			skip_symlink = SKIP_SYMLINK_FOR_ALL;
+			if (optarg) {
+				if (!strcmp(optarg, "f"))
+					skip_symlink = SKIP_SYMLINK_FOR_FILE;
+				else if (!strcmp(optarg, "d"))
+					skip_symlink = SKIP_SYMLINK_FOR_DIR;
+				else if (!strcmp(optarg, "a"))
+					skip_symlink = SKIP_SYMLINK_FOR_ALL;
+				else
+					die("--skip-symlink: %s: unknown type.", optarg);
+			}
 			break;
 		case 'c':
 			cflag++;
@@ -296,6 +339,8 @@ main(int argc, char **argv)
 			break;
 		}
 	}
+	if (skip_symlink)
+		set_skip_symlink(skip_symlink);
 	if (qflag) {
 		vflag = 0;
 		setquiet();
@@ -570,7 +615,6 @@ main(int argc, char **argv)
 	closeconf();
 	strbuf_close(sb);
 	print_statistics(statistics);
-
 	return 0;
 }
 /**
@@ -1019,30 +1063,4 @@ createtags(const char *dbpath, const char *root)
 		statistics_time_end(tim);
 	}
 	strbuf_close(sb);
-}
-/**
- * printconf: print configuration data.
- *
- *	@param[in]	name	label of config data
- *	@return		exit code
- */
-int
-printconf(const char *name)
-{
-	int num;
-	int exist = 1;
-
-	if (getconfn(name, &num))
-		fprintf(stdout, "%d\n", num);
-	else if (getconfb(name))
-		fprintf(stdout, "1\n");
-	else {
-		STRBUF *sb = strbuf_open(0);
-		if (getconfs(name, sb))
-			fprintf(stdout, "%s\n", strbuf_value(sb));
-		else
-			exist = 0;
-		strbuf_close(sb);
-	}
-	return exist;
 }

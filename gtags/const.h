@@ -38,10 +38,12 @@ const char *help_const = "Options:\n\
        Update tag files incrementally.\n\
        It's better to use global(1) with the -u command.\n\
 -O, --objdir\n\
-       Use BSD-style objdir as the location of tag files.\n\
-       If $MAKEOBJDIRPREFIX directory exists, gtags creates\n\
-       $MAKEOBJDIRPREFIX/<current directory> directory and makes\n\
-       tag files in it.\n\
+       Use BSD-style obj directory as the location of tag files.\n\
+       If GTAGSOBJDIRPREFIX is set and $GTAGSOBJDIRPREFIX directory exists,\n\
+       gtags creates $GTAGSOBJDIRPREFIX/<current directory> directory\n\
+       and makes tag files in it.\n\
+       Though you can use MAKEOBJDIRPREFIX instead of GTAGSOBJDIRPREFIX,\n\
+       it is deprecated.\n\
        If dbpath is specified, this option is ignored.\n\
 --single-update file\n\
        Update tag files for a single file.\n\
@@ -50,6 +52,10 @@ const char *help_const = "Options:\n\
        This option implies the -i option.\n\
 --skip-unreadable\n\
        Skip unreadable files.\n\
+--skip-symlink [=type]\n\
+       Skip symbolic links. If type is 'f' then skip only symbolic links for\n\
+       file, else if 'd' then skip only symbolic links for directory.\n\
+       The default value of type is 'a' (all symbolic links).\n\
 --sqlite3\n\
        Use Sqlite 3 API to make tag files. By default, BSD/DB 1.85 API is used.\n\
        To use this option, you need to invoke configure script with\n\

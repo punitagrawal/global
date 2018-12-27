@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU GLOBAL source code tagging system
 *************************************
 
-This manual documents version 6.6.2 of the GNU GLOBAL source code
+This manual documents version 6.6.3 of the GNU GLOBAL source code
 tagging system.
 
 * Menu:
@@ -2069,16 +2069,22 @@ The following options are available:
      Update tag files incrementally.  It's better to use global(1) with
      the '-u' command.
 '-O', '--objdir'
-     Use BSD-style objdir as the location of tag files.  If
-     '$MAKEOBJDIRPREFIX' directory exists, gtags creates
-     '$MAKEOBJDIRPREFIX/<current directory>' directory and makes tag
-     files in it.  If dbpath is specified, this option is ignored.
+     Use BSD-style obj directory as the location of tag files.  If
+     GTAGSOBJDIRPREFIX is set and '$GTAGSOBJDIRPREFIX' directory exists,
+     gtags creates '$GTAGSOBJDIRPREFIX/<current directory>' directory
+     and makes tag files in it.  Though you can use MAKEOBJDIRPREFIX
+     instead of GTAGSOBJDIRPREFIX, it is deprecated.  If dbpath is
+     specified, this option is ignored.
 '--single-update' file
      Update tag files for a single file.  It is considered that file was
      added, updated or deleted, and there is no change in other files.
      This option implies the '-i' option.
 '--skip-unreadable'
      Skip unreadable files.
+'--skip-symlink' [=type]
+     Skip symbolic links.  If type is 'f' then skip only symbolic links
+     for file, else if 'd' then skip only symbolic links for directory.
+     The default value of type is 'a' (all symbolic links).
 '--sqlite3'
      Use Sqlite 3 API to make tag files.  By default, BSD/DB 1.85 API is
      used.  To use this option, you need to invoke configure script with
@@ -2150,12 +2156,14 @@ GTAGS_COMMANDLINE
      read only.
 GTAGS_OPTIONS
      The value of this variable is inserted in the head of arguments.
-MAKEOBJDIR
-     If this variable is set, '$MAKEOBJDIR' is used as the name of
-     BSD-style objdir.  The default is 'obj'.
-MAKEOBJDIRPREFIX
-     If this variable is set, '$MAKEOBJDIRPREFIX' is used as the prefix
-     of BSD-style objdir.  The default is '/usr/obj'.
+GTAGSOBJDIR
+     If this variable is set, it is used as the name of BSD-style
+     objdir.  The default is 'obj'.  Though you can use MAKEOBJDIR
+     instead of GTAGSOBJDIR, it is deprecated.
+GTAGSOBJDIRPREFIX
+     If this variable is set, it is used as the prefix of BSD-style
+     objdir.  The default is '/usr/obj'.  Though you can use
+     MAKEOBJDIRPREFIX instead of GTAGSOBJDIRPREFIX, it is deprecated.
 TMPDIR
      The location used to stored temporary files.  The default is
      '/tmp'.
@@ -2825,7 +2833,7 @@ Requesting the initial search
 After the cross-reference is ready, gtags-cscope will display this menu:
 
      Find this symbol:
-     Find this function definition:
+     Find this global definition:
      Find functions called by this function (N/A):
      Find references of this function:
      Find this text string:
@@ -2833,6 +2841,7 @@ After the cross-reference is ready, gtags-cscope will display this menu:
      Find this egrep pattern:
      Find this file:
      Find files #including this file:
+     Find assignments to this symbol:
 
    Press the <Up> or <Down> keys repeatedly to move to the desired input
 field, type the text to search for, and then press the <Return> key.
@@ -3826,14 +3835,14 @@ Node: Incremental updating51352
 Node: Reference52536
 Node: global53240
 Node: gtags66623
-Node: htags75871
-Node: htags-server85698
-Node: gozilla87940
-Node: gtags-cscope90722
-Node: globash102237
-Node: gtags.conf103452
-Node: Copying This Manual107331
-Node: GNU Free Documentation License107568
-Node: Index129959
+Node: htags76375
+Node: htags-server86202
+Node: gozilla88444
+Node: gtags-cscope91226
+Node: globash102777
+Node: gtags.conf103992
+Node: Copying This Manual107871
+Node: GNU Free Documentation License108108
+Node: Index130499
 
 End Tag Table

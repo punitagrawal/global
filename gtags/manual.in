@@ -1,6 +1,6 @@
 #
 # Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
-#	2007, 2008, 2009, 2010, 2012, 2014, 2015, 2016
+#	2007, 2008, 2009, 2010, 2012, 2014, 2015, 2016, 2018
 #	Tama Communications Corporation
 #
 # This file is part of GNU GLOBAL.
@@ -23,7 +23,7 @@
 #	o man format reference manual.
 #	o texinfo format reference manual.
 #
-@HEADER	GTAGS,1,September 2016,GNU Project
+@HEADER	GTAGS,1,June 2018,GNU Project
 @NAME	gtags - create tag files for global
 @SYNOPSIS
 	@name{gtags} [-ciIOqvw][-d @arg{tag-file}][-f @arg{file}][@arg{dbpath}]
@@ -80,10 +80,12 @@
 		Update tag files incrementally.
 		It's better to use @xref{global,1} with the @option{-u} command.
 	@item{@option{-O}, @option{--objdir}}
-		Use BSD-style objdir as the location of tag files.
-		If @file{$MAKEOBJDIRPREFIX} directory exists, @name{gtags} creates
-		@file{$MAKEOBJDIRPREFIX/<current directory>} directory and makes
-		tag files in it.
+		Use BSD-style obj directory as the location of tag files.
+		If @var{GTAGSOBJDIRPREFIX} is set and @file{$GTAGSOBJDIRPREFIX} directory exists,
+		@name{gtags} creates @file{$GTAGSOBJDIRPREFIX/<current directory>} directory
+		and makes tag files in it.
+		Though you can use @var{MAKEOBJDIRPREFIX} instead of @var{GTAGSOBJDIRPREFIX},
+		it is deprecated.
 		If @arg{dbpath} is specified, this option is ignored.
 	@item{@option{--single-update} @arg{file}}
 		Update tag files for a single file.
@@ -92,6 +94,10 @@
 		This option implies the @option{-i} option.
 	@item{@option{--skip-unreadable}}
 		Skip unreadable files.
+	@item{@option{--skip-symlink} [=@arg{type}]}
+		Skip symbolic links. If @arg{type} is 'f' then skip only symbolic links for
+		file, else if 'd' then skip only symbolic links for directory.
+		The default value of @arg{type} is 'a' (all symbolic links).
 	@item{@option{--sqlite3}}
 		Use Sqlite 3 API to make tag files. By default, BSD/DB 1.85 API is used.
 		To use this option, you need to invoke configure script with
@@ -160,12 +166,16 @@
 		real whitespace is represented as '%20'. This is read only.
 	@item{@var{GTAGS_OPTIONS}}
 		The value of this variable is inserted in the head of arguments.
-	@item{@var{MAKEOBJDIR}}
-		If this variable is set, @file{$MAKEOBJDIR} is used as the name
-		of BSD-style objdir. The default is @file{obj}.
-	@item{@var{MAKEOBJDIRPREFIX}}
-		If this variable is set, @file{$MAKEOBJDIRPREFIX} is used as the prefix
-		of BSD-style objdir. The default is @file{/usr/obj}.
+	@item{@var{GTAGSOBJDIR}}
+		If this variable is set, it is used as the name of BSD-style objdir.
+		The default is @file{obj}.
+		Though you can use @var{MAKEOBJDIR} instead of @var{GTAGSOBJDIR},
+		it is deprecated.
+	@item{@var{GTAGSOBJDIRPREFIX}}
+		If this variable is set, it is used as the prefix of BSD-style objdir.
+		The default is @file{/usr/obj}.
+		Though you can use @var{MAKEOBJDIRPREFIX} instead of @var{GTAGSOBJDIRPREFIX},
+		it is deprecated.
 	@item{@var{TMPDIR}}
 		The location used to stored temporary files. The default is @file{/tmp}.
 	@end_itemize

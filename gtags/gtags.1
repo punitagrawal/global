@@ -1,5 +1,5 @@
 .\" This file is generated automatically by convert.pl from gtags/manual.in.
-.TH GTAGS 1 "September 2016" "GNU Project"
+.TH GTAGS 1 "June 2018" "GNU Project"
 .SH NAME
 gtags \- create tag files for global
 .SH SYNOPSIS
@@ -74,10 +74,12 @@ Update tag files incrementally.
 It's better to use \fBglobal\fP(1) with the \fB-u\fP command.
 .TP
 \fB-O\fP, \fB--objdir\fP
-Use BSD-style objdir as the location of tag files.
-If \'$MAKEOBJDIRPREFIX\' directory exists, \fBgtags\fP creates
-\'$MAKEOBJDIRPREFIX/<current directory>\' directory and makes
-tag files in it.
+Use BSD-style obj directory as the location of tag files.
+If \fBGTAGSOBJDIRPREFIX\fP is set and \'$GTAGSOBJDIRPREFIX\' directory exists,
+\fBgtags\fP creates \'$GTAGSOBJDIRPREFIX/<current directory>\' directory
+and makes tag files in it.
+Though you can use \fBMAKEOBJDIRPREFIX\fP instead of \fBGTAGSOBJDIRPREFIX\fP,
+it is deprecated.
 If \fIdbpath\fP is specified, this option is ignored.
 .TP
 \fB--single-update\fP \fIfile\fP
@@ -88,6 +90,11 @@ This option implies the \fB-i\fP option.
 .TP
 \fB--skip-unreadable\fP
 Skip unreadable files.
+.TP
+\fB--skip-symlink\fP [=\fItype\fP]
+Skip symbolic links. If \fItype\fP is 'f' then skip only symbolic links for
+file, else if 'd' then skip only symbolic links for directory.
+The default value of \fItype\fP is 'a' (all symbolic links).
 .TP
 \fB--sqlite3\fP
 Use Sqlite 3 API to make tag files. By default, BSD/DB 1.85 API is used.
@@ -173,13 +180,17 @@ real whitespace is represented as '%20'. This is read only.
 \fBGTAGS_OPTIONS\fP
 The value of this variable is inserted in the head of arguments.
 .TP
-\fBMAKEOBJDIR\fP
-If this variable is set, \'$MAKEOBJDIR\' is used as the name
-of BSD-style objdir. The default is \'obj\'.
+\fBGTAGSOBJDIR\fP
+If this variable is set, it is used as the name of BSD-style objdir.
+The default is \'obj\'.
+Though you can use \fBMAKEOBJDIR\fP instead of \fBGTAGSOBJDIR\fP,
+it is deprecated.
 .TP
-\fBMAKEOBJDIRPREFIX\fP
-If this variable is set, \'$MAKEOBJDIRPREFIX\' is used as the prefix
-of BSD-style objdir. The default is \'/usr/obj\'.
+\fBGTAGSOBJDIRPREFIX\fP
+If this variable is set, it is used as the prefix of BSD-style objdir.
+The default is \'/usr/obj\'.
+Though you can use \fBMAKEOBJDIRPREFIX\fP instead of \fBGTAGSOBJDIRPREFIX\fP,
+it is deprecated.
 .TP
 \fBTMPDIR\fP
 The location used to stored temporary files. The default is \'/tmp\'.

@@ -187,6 +187,7 @@ help(void)
 #define MATCH_PART_LAST  2
 #define MATCH_PART_ALL   3
 
+static const char *short_options = "acde:EifFgGIlL:MnNoOpPqrsS:tTuvVx";
 static struct option const long_options[] = {
 	{"absolute", no_argument, NULL, 'a'},
 	{"completion", no_argument, NULL, 'c'},
@@ -415,7 +416,7 @@ main(int argc, char **argv)
 	openconf(root);
 	setenv_from_config();
 	logging_arguments(argc, argv);
-	while ((optchar = getopt_long(argc, argv, "acde:EifFgGIlL:MnNoOpPqrsS:tTuvVx", long_options, &option_index)) != EOF) {
+	while ((optchar = getopt_long(argc, argv, short_options, long_options, &option_index)) != EOF) {
 		switch (optchar) {
 		case 0:
 			break;
@@ -1097,7 +1098,7 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 	}
 	if (chdir(root) < 0)
 		die("cannot move to '%s' directory.", root);
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 	strbuf_puts(sb, lid);
 	strbuf_sprintf(sb, " --file=%s/ID", quote_shell(dbpath));
 	strbuf_puts(sb, " --key=token");
@@ -1152,7 +1153,7 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 		*p = '\0';
 		puts(line);
 	}
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 	if (pclose(ip) != 0)
 		die("terminated abnormally (errno = %d).", errno);
 #else
@@ -1313,7 +1314,7 @@ idutils(const char *pattern, const char *dbpath)
 	 * make lid command line.
 	 * Invoke lid with the --result=grep option to generate grep format.
 	 */
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 	strbuf_puts(ib, lid);
 	strbuf_sprintf(ib, " --file=%s/ID", quote_shell(dbpath));
 	strbuf_puts(ib, " --separator=newline");
@@ -1411,7 +1412,7 @@ idutils(const char *pattern, const char *dbpath)
 			break;
 		}
 	}
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 	if (pclose(ip) != 0)
 		die("terminated abnormally (errno = %d).", errno);
 #else
