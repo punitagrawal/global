@@ -1,3 +1,2 @@
 0001-gtags-Fix-lintian-warning-with-gtags-manpage.patch
 0003-libparser-Correct-typos.patch
-0003-reconf.sh-Force-update-during-autoreconf.patch
