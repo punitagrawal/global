@@ -1,3 +1,10 @@
+global (6.6.3-1) unstable; urgency=medium
+
+  * New upstream version 6.6.3
+  * Drop changes to reconf.sh
+
+ -- Punit Agrawal <punit@debian.org>  Thu, 27 Dec 2018 11:42:54 +0900
+
 global (6.6.2-3) unstable; urgency=medium
 
   [ Daniel Gröber ]
