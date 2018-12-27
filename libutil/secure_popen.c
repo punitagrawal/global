@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if !((defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__))
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -32,8 +33,53 @@
 #endif
 
 #include "die.h"
+#include "pool.h"
 #include "secure_popen.h"
 
+#define ARGS	20
+static POOL *pool;
+static char *argv[ARGS];
+static int argc;
+
+/*
+ * Secure popen does not use sh(1). So, it is more secure.
+ */
+/*
+ * Constructing args
+ *
+ *	secure_open_args();
+ *	secure_add_args("find");
+ *	secure_add_args(".");
+ *	secure_add_args("-type");
+ *	secure_add_args("f");
+ *	secure_add_args("-print");
+ *	args = secure_close_args();
+ *
+ *	args -->[0] = "find"
+ *		[1] = "."
+ *		[2] = "-type"
+ *		[3] = "f"
+ *		[4] = "-print"
+ *		[5] = NULL
+ */
+void
+secure_open_args(void) {
+	if (pool == NULL)
+		pool = pool_open();
+	pool_reset(pool);
+	argc = 0;
+}
+void
+secure_add_args(char *string) {
+	argv[argc++] = pool_strdup(pool, string, 0);
+	if (argc >= ARGS)
+		die("secure_add_args: argv overflow.");
+}
+char **
+secure_close_args() {
+	argv[argc] = NULL;
+	return argv;
+}
 /*
  * Secure substitution of popen(3)
  */
@@ -48,7 +94,7 @@ static pid_t pid;
  * The process which can be invoked at the same time is restricted to only one.
  */
 FILE *
-secure_popen(const char *command, const char *type, char *const argv[])
+secure_popen(const char *command, const char *type, char **argv)
 {
 	FILE *ip;
 	int fd[2];
@@ -96,3 +142,4 @@ secure_pclose(FILE *ip)
 
 	return (ppid == -1 ? -1 : status);
 }
+#endif
