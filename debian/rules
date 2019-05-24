@@ -16,7 +16,7 @@ override_dh_autoreconf:
 
 override_dh_auto_configure:
 	dh_auto_configure -- --with-exuberant-ctags=/usr/bin/ctags --disable-static 	\
-		--datadir=/usr/share/$(DEB_SOURCE)
+		--datadir=/usr/share/$(DEB_SOURCE) --with-sqlite3
 
 override_dh_auto_install:
 	dh_auto_install

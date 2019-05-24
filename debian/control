@@ -3,7 +3,7 @@ Section: devel
 Priority: optional
 Build-Depends: debhelper (>=10),
  texinfo,
- libncurses5-dev, libltdl-dev,
+ libncurses5-dev, libltdl-dev, libsqlite3-dev,
  emacsen-common, flex, bison, gperf,
  libtool-bin
 Maintainer: Punit Agrawal <punit@debian.org>
