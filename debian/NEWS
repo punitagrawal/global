@@ -1,3 +1,7 @@
+global (6.6.3-3) unstable; urgency=medium
+
+  Enable build with universal ctags.
+
 global (6.5.7-2) unstable; urgency=medium
 
   Starting from 6.5.7-2, global data files that were previously placed
