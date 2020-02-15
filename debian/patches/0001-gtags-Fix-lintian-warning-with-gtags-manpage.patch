@@ -7,15 +7,15 @@ Subject: gtags: Fix lintian warning with gtags manpage
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/gtags/manual.in b/gtags/manual.in
-index 66ca6a2..b956888 100644
+index 38aad24..8416545 100644
 --- a/gtags/manual.in
 +++ b/gtags/manual.in
 @@ -59,7 +59,7 @@
  		@var{bindir}, @var{libdir}, @var{datadir}, @var{localstatedir} and @var{sysconfdir}.
  	@item{@option{-d}, @option{--dump} @arg{tag-file}}
- 		Dump a tag file as text to the standard output. Output format is
--		'key<tab>data'. This is for debugging.
-+		\'key<tab>data'. This is for debugging.
+ 		Dump a tag file as text to the standard output.
+-		Output format is 'key<tab>data'. This is for debugging.
++		Output format is \'key<tab>data'. This is for debugging.
  	@item{@option{--explain}}
  		Explain handling files.
  	@item{@option{-f}, @option{--file} @arg{file}}
