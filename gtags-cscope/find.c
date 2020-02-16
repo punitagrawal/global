@@ -247,13 +247,27 @@ findinclude(char *pattern)
 /*
  * [display.c]
  *
- * {"Find", "assignments to this symbol (N/A)",    findassign},
+ * {"Find", "assignments to this symbol",    findassign},
  */
 char *
 findassign(char *pattern)
 {
-	/* Since this function has not yet been implemented, it always returns an error. */
-	return FAILED;
+	int status;
+	STATIC_STRBUF(sb);
+	strbuf_clear(sb);
+
+	strbuf_puts(sb, common());
+	strbuf_sprintf(sb, " -d %s | sed -n /\\b%s\\b\"[ \t]*=[^=]\"/p > %s", quote_shell(pattern), quote_shell(pattern), temp1);
+	status = mysystem("findassign_1", strbuf_value(sb));
+	if (status != 0)
+		return FAILED;
+	strbuf_reset(sb);
+	strbuf_puts(sb, common());
+	strbuf_sprintf(sb, " -rs %s | sed -n /\\b%s\\b\"[ \t]*=[^=]\"/p >> %s", quote_shell(pattern), quote_shell(pattern), temp1);
+	status = mysystem("findassign_2", strbuf_value(sb));
+	if (status != 0)
+		return FAILED;
+	return NULL;
 }
 #else /* UNIX */
 /*
@@ -539,6 +553,7 @@ findassign(char *pattern)
 	const char *line;
 	char **argv;
 	FILE *ip, *op;
+	int i;
 	char *opts[] = {"-d", "-rs", NULL};
 	STATIC_STRBUF(sb);
 	strbuf_clear(sb);
@@ -554,7 +569,7 @@ findassign(char *pattern)
 	op = fopen(temp1, "w");
 	if (op == NULL)
 		return FAILED;
-	for (int i = 0; opts[i] != NULL; i++) {
+	for (i = 0; opts[i] != NULL; i++) {
 		secure_open_args();
 		common();
 		secure_add_args(opts[i]);

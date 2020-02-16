@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000-2018 Tama Communications Corporation
+ Copyright (c) 2000-2019 Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
  unlimited permission to copy and/or distribute it, with or without
@@ -18,6 +18,26 @@ ___________________________________
 
 GNU GLOBAL NEWS - User visible changes.
 At least, you should search '[INCOMPATIBLE CHANGES]' for each version.
+
+Version 6.6.4 - December 24 2019
+
+[INCOMPATIBLE CHANGES]
+o htags: Now the -g, --suggest and --suggest2 option does not make ID
+  database, since mkid(1) often fails on some systems. If mkid works
+  in your system, you can use ID database by the following command line:
+	$ gtags -I		# create ID database explicitly
+	$ htags --suggest2
+
+[CHANGES]
+New facilities:
+o gtags.vim: New custom variable 'Gtags_Emacs_Like_Mode'.
+  If this variable is 1, use the tag files of the project to which the current
+  file belongs. By default, use the tag files of the current project.
+
+[FIXED BUGS]
+o gtags.vim: Gtags command discarded all unsaved changes. Now it brings
+  the following error: E37: No write since last change (add ! to override).
+o gtags: Now gtags skips java annotations (@...[(...)]).
 
 Version 6.6.3 - December 17 2018
 

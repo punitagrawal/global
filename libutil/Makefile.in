@@ -123,7 +123,8 @@ am_libgloutil_a_OBJECTS = assoc.$(OBJEXT) conf.$(OBJEXT) \
 	xargs.$(OBJEXT) encodepath.$(OBJEXT) rewrite.$(OBJEXT) \
 	compress.$(OBJEXT) checkalloc.$(OBJEXT) pool.$(OBJEXT) \
 	fileop.$(OBJEXT) statistics.$(OBJEXT) args.$(OBJEXT) \
-	logging.$(OBJEXT) nearsort.$(OBJEXT) secure_popen.$(OBJEXT)
+	logging.$(OBJEXT) nearsort.$(OBJEXT) secure_popen.$(OBJEXT) \
+	convert.$(OBJEXT) output.$(OBJEXT)
 libgloutil_a_OBJECTS = $(am_libgloutil_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -143,8 +144,8 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/abs2rel.Po ./$(DEPDIR)/args.Po \
 	./$(DEPDIR)/assoc.Po ./$(DEPDIR)/char.Po \
 	./$(DEPDIR)/checkalloc.Po ./$(DEPDIR)/compress.Po \
-	./$(DEPDIR)/conf.Po ./$(DEPDIR)/date.Po ./$(DEPDIR)/dbop.Po \
-	./$(DEPDIR)/defined.Po ./$(DEPDIR)/die.Po \
+	./$(DEPDIR)/conf.Po ./$(DEPDIR)/convert.Po ./$(DEPDIR)/date.Po \
+	./$(DEPDIR)/dbop.Po ./$(DEPDIR)/defined.Po ./$(DEPDIR)/die.Po \
 	./$(DEPDIR)/encodepath.Po ./$(DEPDIR)/env.Po \
 	./$(DEPDIR)/fileop.Po ./$(DEPDIR)/find.Po \
 	./$(DEPDIR)/getdbpath.Po ./$(DEPDIR)/gpathop.Po \
@@ -152,8 +153,8 @@ am__depfiles_remade = ./$(DEPDIR)/abs2rel.Po ./$(DEPDIR)/args.Po \
 	./$(DEPDIR)/is_unixy.Po ./$(DEPDIR)/langmap.Po \
 	./$(DEPDIR)/linetable.Po ./$(DEPDIR)/locatestring.Po \
 	./$(DEPDIR)/logging.Po ./$(DEPDIR)/makepath.Po \
-	./$(DEPDIR)/nearsort.Po ./$(DEPDIR)/path.Po \
-	./$(DEPDIR)/pool.Po ./$(DEPDIR)/rewrite.Po \
+	./$(DEPDIR)/nearsort.Po ./$(DEPDIR)/output.Po \
+	./$(DEPDIR)/path.Po ./$(DEPDIR)/pool.Po ./$(DEPDIR)/rewrite.Po \
 	./$(DEPDIR)/secure_popen.Po ./$(DEPDIR)/split.Po \
 	./$(DEPDIR)/statistics.Po ./$(DEPDIR)/strbuf.Po \
 	./$(DEPDIR)/strhash.Po ./$(DEPDIR)/strlimcpy.Po \
@@ -428,7 +429,7 @@ strmake.h tab.h test.h token.h usable.h version.h is_unixy.h abs2rel.h \
 split.h strlimcpy.h linetable.h env.h char.h date.h langmap.h \
 varray.h idset.h strhash.h xargs.h format.h encodepath.h rewrite.h \
 compress.h checkalloc.h pool.h fileop.h statistics.h args.h logging.h nearsort.h \
-secure_popen.h
+secure_popen.h convert.h output.h
 
 libgloutil_a_SOURCES = \
 assoc.c conf.c dbop.c defined.c die.c find.c getdbpath.c gtagsop.c locatestring.c \
@@ -436,7 +437,7 @@ makepath.c path.c gpathop.c strbuf.c strmake.c tab.c test.c \
 token.c usable.c version.c is_unixy.c abs2rel.c split.c strlimcpy.c linetable.c \
 env.c char.c date.c langmap.c varray.c idset.c strhash.c xargs.c encodepath.c rewrite.c \
 compress.c checkalloc.c pool.c fileop.c statistics.c args.c logging.c nearsort.c \
-secure_popen.c
+secure_popen.c convert.c output.c
 
 libgloutil_a_DEPENDENCIES = $(libgloutil_a_LIBADD)
 man_MANS = gtags.conf.5
@@ -498,6 +499,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checkalloc.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compress.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/date.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbop.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/defined.Po@am__quote@ # am--include-marker
@@ -517,6 +519,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logging.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/makepath.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nearsort.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/output.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/path.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pool.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rewrite.Po@am__quote@ # am--include-marker
@@ -749,6 +752,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/checkalloc.Po
 	-rm -f ./$(DEPDIR)/compress.Po
 	-rm -f ./$(DEPDIR)/conf.Po
+	-rm -f ./$(DEPDIR)/convert.Po
 	-rm -f ./$(DEPDIR)/date.Po
 	-rm -f ./$(DEPDIR)/dbop.Po
 	-rm -f ./$(DEPDIR)/defined.Po
@@ -768,6 +772,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/logging.Po
 	-rm -f ./$(DEPDIR)/makepath.Po
 	-rm -f ./$(DEPDIR)/nearsort.Po
+	-rm -f ./$(DEPDIR)/output.Po
 	-rm -f ./$(DEPDIR)/path.Po
 	-rm -f ./$(DEPDIR)/pool.Po
 	-rm -f ./$(DEPDIR)/rewrite.Po
@@ -837,6 +842,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/checkalloc.Po
 	-rm -f ./$(DEPDIR)/compress.Po
 	-rm -f ./$(DEPDIR)/conf.Po
+	-rm -f ./$(DEPDIR)/convert.Po
 	-rm -f ./$(DEPDIR)/date.Po
 	-rm -f ./$(DEPDIR)/dbop.Po
 	-rm -f ./$(DEPDIR)/defined.Po
@@ -856,6 +862,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/logging.Po
 	-rm -f ./$(DEPDIR)/makepath.Po
 	-rm -f ./$(DEPDIR)/nearsort.Po
+	-rm -f ./$(DEPDIR)/output.Po
 	-rm -f ./$(DEPDIR)/path.Po
 	-rm -f ./$(DEPDIR)/pool.Po
 	-rm -f ./$(DEPDIR)/rewrite.Po

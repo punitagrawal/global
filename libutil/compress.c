@@ -169,14 +169,13 @@ abbrev_dump(void)
  *	@return		compressed string
  */
 char *
-compress(const char *in, const char *name)
+compress(const char *in, const char *name, STRBUF *sb)
 {
-	STATIC_STRBUF(sb);
 	const char *p = in;
 	int length = strlen(name);
 	int spaces = 0;
 
-	strbuf_clear(sb);
+	strbuf_reset(sb);
 	while (*p) {
 		if (*p == ' ') {
 			spaces++;
@@ -248,13 +247,12 @@ compress(const char *in, const char *name)
  *	@return		uncompressed string
  */
 char *
-uncompress(const char *in, const char *name)
+uncompress(const char *in, const char *name, STRBUF *sb)
 {
-	STATIC_STRBUF(sb);
 	const char *p;
 	int i;
 
-	strbuf_clear(sb);
+	strbuf_reset(sb);
 	for (p = in;  *p; p++) {
 		if (*p == '@') {
 			int spaces = 0;

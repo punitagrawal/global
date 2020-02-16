@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000-2018
+ Copyright (c) 2000-2019
 	Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
@@ -18,6 +18,21 @@ ___________________________________
 		----------------------------------
 
 ChangeLog about GNU GLOBAL
+
+June 7 2019, Shigio YAMAGUCHI
+
+	Removed the -T option of perl from the CGI scripts in htags/,
+	because env(1) cannot treat it correctly without -S option on FreeBSD.
+
+	$ cat test.sh
+	#!/usr/bin/env perl -T
+	print "Hello!\n";
+	$ ./test.sh
+	env: perl -T: No such file or directory
+
+March 21 2019, Shigio YAMAGUCHI
+
+	Moved convert.c, convert.h, output.c, output.h from 'global/' to 'libutil/'.
 
 July 15 2018, Shigio YAMAGUCHI
 

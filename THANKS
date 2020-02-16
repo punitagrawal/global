@@ -23,7 +23,10 @@ Thanks to the following people for their contributions.
 Thanks to:		for his(her):
 ---------------------------------------------------------------------------
 A.E. Brouwer		advice about writing code for generic UNIX.
+Andrey Butirsky		concept of 'Gtags_Emacs_Like_Mode'.
+			bug fix patch for gtags.vim (Gtags command discarded all unsaved changes).
 Andrew Gallatin		bug report about generating wrong path.
+Andrew Ng		bug fix patch for global/output.c (segmentation violation).
 Aneesh Kumar		bug report about beta facility of gtags(1).
 Andrés Azar		Cygwin trouble report.
 Andy Newman		bug report about treating tab character.
@@ -75,6 +78,7 @@ Hidetaka KOIE		bug report and advice about configure.in for Solaris7.
 Hiroshi MIURA		idea about printing file name on browser's status bar.
 Hirohito Kato		bug fix patch for gtags-parser to pick up objects in extern "C" {...} block.
 Hiroyuki KOBAYASHI	bug report and fix patch for gtags-parser(1).
+James Ahlborn		bug fix patch for the java parser of gtags(1) to skip annotations.
 Jason Hood		port to DJGPP and Mingw32, and many important bug reports & fixes.
 			He also contributed to much of the --color and --literal option of global(1).
 			He also done many bug fixes and improvements of the C++ parser of gtags(1).

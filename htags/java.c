@@ -1,6 +1,50 @@
 #line 1 "java.c"
+/*
+ * Copyright (c) 2002, 2004 Tama Communications Corporation
+ *
+ * This file is part of GNU GLOBAL.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#line 3 "java.c"
+/*
+ * scanner for java source code.
+ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif
+#include "global.h"
+#include "anchor.h"
+#include "common.h"
+#include "htags.h"
+#include "../libparser/java_res.h"
+
+#define lex_symbol_generation_rule(x) java_ ## x
+#include "lexcommon.h"
+
+#ifdef ECHO
+#undef ECHO
+#endif
+#define ECHO	echos(LEXTEXT)
+
+#define YY_USER_ACTION DEFAULT_YY_USER_ACTION
+
+#line 47 "java.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -743,57 +787,11 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "java.l"
-#line 2 "java.l"
-/*
- * Copyright (c) 2002, 2004 Tama Communications Corporation
- *
- * This file is part of GNU GLOBAL.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/*
- * scanner for java source code.
- */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <stdio.h>
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-#include "global.h"
-#include "anchor.h"
-#include "common.h"
-#include "htags.h"
-#include "../libparser/java_res.h"
-
-#define lex_symbol_generation_rule(x) java_ ## x
-#include "lexcommon.h"
-
-#ifdef ECHO
-#undef ECHO
-#endif
-#define ECHO	echos(LEXTEXT)
-
-#define YY_USER_ACTION DEFAULT_YY_USER_ACTION
-
-#line 792 "java.c"
 #line 49 "java.l"
  /* Definitions */
 
-#line 796 "java.c"
+#line 794 "java.c"
 
 #define INITIAL 0
 #define JAVA 1
@@ -1031,7 +1029,7 @@ YY_DECL
 #line 62 "java.l"
 
  /* Comment */
-#line 1034 "java.c"
+#line 1032 "java.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1203,7 +1201,7 @@ YY_RULE_SETUP
 #line 114 "java.l"
 ECHO;
 	YY_BREAK
-#line 1206 "java.c"
+#line 1204 "java.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(JAVA):
 case YY_STATE_EOF(C_COMMENT):

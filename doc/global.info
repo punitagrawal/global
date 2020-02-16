@@ -1,4 +1,4 @@
-This is global.info, produced by makeinfo version 6.5 from global.texi.
+This is global.info, produced by makeinfo version 6.7 from global.texi.
 
 INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU GLOBAL source code tagging system
 *************************************
 
-This manual documents version 6.6.3 of the GNU GLOBAL source code
+This manual documents version 6.6.4 of the GNU GLOBAL source code
 tagging system.
 
 * Menu:
@@ -3846,3 +3846,8 @@ Node: GNU Free Documentation License108108
 Node: Index130499
 
 End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:

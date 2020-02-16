@@ -1,6 +1,77 @@
 #line 1 "asm_scan.c"
+/*
+ * Copyright (c) 2002, 2004, 2010 Tama Communications Corporation
+ *
+ * This file is part of GNU GLOBAL.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#line 3 "asm_scan.c"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
+#define YYLTYPE		int
+
+#include "internal.h"
+#include "asm_parse.h"
+#include "asm_res.h"
+#include "die.h"
+#include "linetable.h"
+#include "strbuf.h"
+
+#define lex_symbol_generation_rule(x) asm_ ## x
+#define LEXLEX lex_symbol_generation_rule(lex)
+#define LEXTEXT lex_symbol_generation_rule(text)
+#define LEXLENG lex_symbol_generation_rule(leng)
+#define LEXLINENO lex_symbol_generation_rule(lineno)
+#define LEXRESTART lex_symbol_generation_rule(restart)
+#define LEXLVAL lex_symbol_generation_rule(lval)
+#define LEXLLOC lex_symbol_generation_rule(lloc)
+
+#define YY_DECL	int LEXLEX(const struct parser_param *param)
+
+#define YY_INPUT(buf, result, max_size) do {				\
+	if ((result = linetable_read(buf, max_size)) == -1)		\
+		result = YY_NULL;					\
+} while (0)
+
+#define ADD_SYM(tag, lno) do {						\
+	LEXLVAL = strbuf_getlen(asm_symtable);				\
+	LEXLLOC = (lno);						\
+	strbuf_puts0(asm_symtable, tag);				\
+} while (0)
+
+#undef PUT
+#define PUT(type, tag, lno) do {					\
+	const char *line_image = linetable_get(lno, NULL);		\
+	char *nl = strchr(line_image, '\n');				\
+	if (nl != NULL)							\
+		*nl = '\0';						\
+	param->put(type, tag, lno, param->file, line_image, param->arg);\
+	if (nl != NULL)							\
+		*nl = '\n';						\
+} while (0)
+
+static int last_directive;
+
+#line 74 "asm_scan.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -895,82 +966,10 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "asm_scan.l"
-#line 2 "asm_scan.l"
-/*
- * Copyright (c) 2002, 2004, 2010 Tama Communications Corporation
- *
- * This file is part of GNU GLOBAL.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
 
-#define YYLTYPE		int
 
-#include "internal.h"
-#include "asm_parse.h"
-#include "asm_res.h"
-#include "die.h"
-#include "linetable.h"
-#include "strbuf.h"
-
-#define lex_symbol_generation_rule(x) asm_ ## x
-#define LEXLEX lex_symbol_generation_rule(lex)
-#define LEXTEXT lex_symbol_generation_rule(text)
-#define LEXLENG lex_symbol_generation_rule(leng)
-#define LEXLINENO lex_symbol_generation_rule(lineno)
-#define LEXRESTART lex_symbol_generation_rule(restart)
-#define LEXLVAL lex_symbol_generation_rule(lval)
-#define LEXLLOC lex_symbol_generation_rule(lloc)
-
-#define YY_DECL	int LEXLEX(const struct parser_param *param)
-
-#define YY_INPUT(buf, result, max_size) do {				\
-	if ((result = linetable_read(buf, max_size)) == -1)		\
-		result = YY_NULL;					\
-} while (0)
-
-#define ADD_SYM(tag, lno) do {						\
-	LEXLVAL = strbuf_getlen(asm_symtable);				\
-	LEXLLOC = (lno);						\
-	strbuf_puts0(asm_symtable, tag);				\
-} while (0)
-
-#undef PUT
-#define PUT(type, tag, lno) do {					\
-	const char *line_image = linetable_get(lno, NULL);		\
-	char *nl = strchr(line_image, '\n');				\
-	if (nl != NULL)							\
-		*nl = '\0';						\
-	param->put(type, tag, lno, param->file, line_image, param->arg);\
-	if (nl != NULL)							\
-		*nl = '\n';						\
-} while (0)
-
-static int last_directive;
-
-#line 971 "asm_scan.c"
-
-#line 973 "asm_scan.c"
+#line 972 "asm_scan.c"
 
 #define INITIAL 0
 #define C_COMMENT 1
@@ -1208,7 +1207,7 @@ YY_DECL
 
 #line 94 "asm_scan.l"
  /* Ignore spaces */
-#line 1211 "asm_scan.c"
+#line 1210 "asm_scan.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1534,7 +1533,7 @@ YY_RULE_SETUP
 #line 204 "asm_scan.l"
 ECHO;
 	YY_BREAK
-#line 1537 "asm_scan.c"
+#line 1536 "asm_scan.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(CPP_COMMENT):
 case YY_STATE_EOF(STRING):

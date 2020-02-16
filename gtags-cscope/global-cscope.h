@@ -30,7 +30,7 @@
  DAMAGE. 
  =========================================================================*/
 
-/* $Id: global-cscope.h,v 1.8 2018/01/12 00:18:02 shigio Exp $ */
+/* $Id: global-cscope.h,v 1.9 2019/05/15 18:36:51 h-iwamoto Exp $ */
 
 /*
  *	global type, data, and function definitions
@@ -178,7 +178,7 @@ typedef RETSIGTYPE (*sighandler_t)(int);
 
 #ifndef __attribute__
 /* This feature is available in gcc versions 2.5 and later.  */
-# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || __STRICT_ANSI__
+# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5)
 #  define __attribute__(x)
 # endif
 /* The __-protected variants of `format' and `printf' attributes
