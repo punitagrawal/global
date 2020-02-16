@@ -1,3 +1,12 @@
+global (6.6.4-1) unstable; urgency=medium
+
+  * New upstream version 6.6.4
+  * Update patches to new upstream version
+  * Update Standards-Version to 4.5.0
+  * Update global to use python3 (Closes: #945647)
+
+ -- Punit Agrawal <punit@debian.org>  Sun, 16 Feb 2020 19:43:35 +0900
+
 global (6.6.3-3) unstable; urgency=medium
 
   * Drop embedded sqlite3
