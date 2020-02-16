@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006
+ * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2019
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -195,7 +195,7 @@ gpath_put(const char *path, int type)
  *	@param[out]	type	path type
  *			GPATH_SOURCE: source file,
  *			GPATH_OTHER: other file
- *	@return		file id
+ *	@return		file id (string)
  */
 const char *
 gpath_path2fid(const char *path, int *type)
@@ -212,7 +212,7 @@ gpath_path2fid(const char *path, int *type)
 /**
  * gpath_fid2path: convert id into path
  *
- *	@param[in]	fid	file id
+ *	@param[in]	fid	file id (string)
  *	@param[out]	type	path type
  *			GPATH_SOURCE: source file,
  *			GPATH_OTHER: other file
@@ -232,11 +232,11 @@ gpath_fid2path(const char *fid, int *type)
 /*
  * gpath_path2nfid: convert path into id
  *
- *	i)	path	path name
- *	o)	type	path type
+ *	@param[in]	path	path name
+ *	@param[out]	type	path type
  *			GPATH_SOURCE: source file
  *			GPATH_OTHER: other file
- *	r)		file id (integer)
+ *	@return		file id (integer)
  */
 int
 gpath_path2nfid(const char *path, int *type)
@@ -247,11 +247,11 @@ gpath_path2nfid(const char *path, int *type)
 /*
  * gpath_nfid2path: convert id into path
  *
- *	i)	nfid	file id (integer)
- *	o)	type	path type
+ *	@param[in]	nfid	file id (integer)
+ *	@param[out]	type	path type
  *			GPATH_SOURCE: source file
  *			GPATH_OTHER: other file
- *	r)		path name
+ *	@return		path name
  */
 const char *
 gpath_nfid2path(int nfid, int *type)
@@ -289,6 +289,44 @@ gpath_nextkey(void)
 {
 	assert(_mode != 1);
 	return _nextkey;
+}
+/**
+ * gpath_count: count the number of records
+ *
+ *	@param[in]	type	record type
+ *			GPATH_SOURCE: source file
+ *			GPATH_OTHER: other file
+ *			GPATH_BOTH: both above
+ *	@return		number of records
+ */
+int
+gpath_count(int type)
+{
+	const char *path;
+	int count, source_count, other_count;
+
+	count = source_count = other_count = 0;
+	for (path = dbop_first(dbop, "./", NULL, DBOP_PREFIX); path != NULL; path = dbop_next(dbop)) {
+		const char *flag = dbop_getflag(dbop);
+		if (flag && *flag == 'o')
+			other_count++;
+		else
+			source_count++;
+	}
+	switch (type) {
+	case GPATH_SOURCE:
+		count = source_count;
+		break;
+	case GPATH_OTHER:
+		count = other_count;
+		break;
+	case GPATH_BOTH:
+		count = source_count + other_count;
+		break;
+	default:
+		break;
+	}
+	return count;
 }
 /**
  * gpath_close: close gpath tag file

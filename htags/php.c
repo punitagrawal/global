@@ -1,6 +1,60 @@
 #line 1 "php.c"
+/*
+ * Copyright (c) 2002, 2004, 2005, 2006, 2008 Tama Communications Corporation
+ *
+ * This file is part of GNU GLOBAL.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#line 3 "php.c"
+/*
+ * scanner for php source code.
+ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#include "global.h"
+#include "anchor.h"
+#include "common.h"
+#include "incop.h"
+#include "htags.h"
+#include "../libparser/php_res.h"
+
+#define lex_symbol_generation_rule(x) php_ ## x
+#include "lexcommon.h"
+
+#ifdef ECHO
+#undef ECHO
+#endif
+#define ECHO	echos(LEXTEXT)
+
+#define YY_USER_ACTION DEFAULT_YY_USER_ACTION
+#define LEFT_BRACE '('
+
+static int pre_here_document;
+static char end_of_here_document[IDENTLEN];
+
+#line 57 "php.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -833,67 +887,11 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "php.l"
-#line 2 "php.l"
-/*
- * Copyright (c) 2002, 2004, 2005, 2006, 2008 Tama Communications Corporation
- *
- * This file is part of GNU GLOBAL.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/*
- * scanner for php source code.
- */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <stdio.h>
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#include "global.h"
-#include "anchor.h"
-#include "common.h"
-#include "incop.h"
-#include "htags.h"
-#include "../libparser/php_res.h"
-
-#define lex_symbol_generation_rule(x) php_ ## x
-#include "lexcommon.h"
-
-#ifdef ECHO
-#undef ECHO
-#endif
-#define ECHO	echos(LEXTEXT)
-
-#define YY_USER_ACTION DEFAULT_YY_USER_ACTION
-#define LEFT_BRACE '('
-
-static int pre_here_document;
-static char end_of_here_document[IDENTLEN];
-
-#line 892 "php.c"
 #line 59 "php.l"
  /* Definitions */
 
-#line 896 "php.c"
+#line 894 "php.c"
 
 #define INITIAL 0
 #define PHP 1
@@ -1132,7 +1130,7 @@ YY_DECL
 #line 72 "php.l"
 
  /* Start PHP */
-#line 1135 "php.c"
+#line 1133 "php.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1478,7 +1476,7 @@ YY_RULE_SETUP
 #line 248 "php.l"
 ECHO;
 	YY_BREAK
-#line 1481 "php.c"
+#line 1479 "php.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(PHP):
 case YY_STATE_EOF(C_COMMENT):

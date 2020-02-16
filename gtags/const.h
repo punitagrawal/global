@@ -16,8 +16,8 @@ const char *help_const = "Options:\n\
        you can refer to install directories by read only variables:\n\
        bindir, libdir, datadir, localstatedir and sysconfdir.\n\
 -d, --dump tag-file\n\
-       Dump a tag file as text to the standard output. Output format is\n\
-       'key<tab>data'. This is for debugging.\n\
+       Dump a tag file as text to the standard output.\n\
+       Output format is 'key<tab>data'. This is for debugging.\n\
 --explain\n\
        Explain handling files.\n\
 -f, --file file\n\

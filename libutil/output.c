@@ -24,8 +24,23 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include <stdio.h>
-#include "global.h"
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#include "compress.h"
 #include "convert.h"
+#include "die.h"
+#include "format.h"
+#include "gparam.h"
+#include "makepath.h"
+#include "output.h"
+#include "strbuf.h"
+#include "strlimcpy.h"
 
 /**
  * Stuff for the compact format
@@ -39,9 +54,10 @@ static const char *src;			/**< source code */
 
 static int put_compact_format(CONVERT *, GTP *, const char *, int);
 static void put_standard_format(CONVERT *, GTP *, int);
-extern const char *root;
-extern int nosource;
-extern int format;
+static int nosource;
+static int format;
+
+static STRBUF *sb_uncompress;
 
 /** get next number and seek to the next character */
 #define GET_NEXT_NUMBER(p) do {                                                \
@@ -52,16 +68,21 @@ extern int format;
         } while (0)
 
 void
-start_output(void)
+start_output(int a_format, int a_nosource)
 {
+	format = a_format;
+	nosource = a_nosource;
 	curpath[0] = curtag[0] = '\0';
 	cur_lineno = last_lineno = 0;
 	fp = NULL;
 	src = "";
+	sb_uncompress = strbuf_open(0);
 }
 void
 end_output(void)
 {
+	if (sb_uncompress)
+		strbuf_close(sb_uncompress);
 	if (fp)
 		fclose(fp);
 }
@@ -146,7 +167,7 @@ put_compact_format(CONVERT *cv, GTP *gtp, const char *root, int flags)
 	if (!isdigit(*p))
 		die("invalid compact format.");
 	if (flags & GTAGS_COMPNAME)
-		tagname = (char *)uncompress(tagname, gtp->tag);
+		tagname = (char *)uncompress(tagname, gtp->tag, sb_uncompress);
 	if (flags & GTAGS_COMPLINE) {
 		/*
 		 * If GTAGS_COMPLINE flag is set, each line number is expressed as
@@ -240,7 +261,7 @@ put_standard_format(CONVERT *cv, GTP *gtp, int flags)
 		p++;
 	*p++ = '\0';			/* b */
 	if (flags & GTAGS_COMPNAME) {
-		strlimcpy(namebuf, (char *)uncompress(tagname, gtp->tag), sizeof(namebuf));
+		strlimcpy(namebuf, (char *)uncompress(tagname, gtp->tag, sb_uncompress), sizeof(namebuf));
 		tagname = namebuf;
 	}
 	if (nosource) {
@@ -250,7 +271,7 @@ put_standard_format(CONVERT *cv, GTP *gtp, int flags)
 			p++;
 		image = p + 1;		/* c + 1 */
 		if (flags & GTAGS_COMPRESS)
-			image = (char *)uncompress(image, gtp->tag);
+			image = (char *)uncompress(image, gtp->tag, sb_uncompress);
 	}
 	convert_put_using(cv, tagname, gtp->path, gtp->lineno, image, fid);
 }

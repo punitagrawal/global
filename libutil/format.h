@@ -42,28 +42,35 @@
  * +----------------------------------------------
  * |./src/main.c<TAB>227<TAB>main()
  *
- * (5) path name format (FORMAT_PATH)
+ * (5) ctags format (FORMAT_CTAGS_PLUS)
+ *
+ * +----------------------------------------------
+ * |main<TAB>./src/main.c<TAB>227<TAB>main()
+ *
+ * (6) path name format (FORMAT_PATH)
  *
  * +----------------------------------------------
  * |./src/main.c
  *
- * (6) grep format (FORMAT_GREP)
+ * (7) grep format (FORMAT_GREP)
  *
  * +----------------------------------------------
  * |./src/main.c:227:main()
  *
- * (7) cscope line mode format (FORMAT_CSCOPE)
+ * (8) cscope line mode format (FORMAT_CSCOPE)
  *
  * +----------------------------------------------
  * |./src/main.c main 227 main()
+ *
  */
 #define FORMAT_CTAGS		1
 #define FORMAT_CTAGS_X		2
 #define FORMAT_CTAGS_XID	3
 #define FORMAT_CTAGS_MOD	4
-#define FORMAT_PATH		5
-#define FORMAT_GREP		6
-#define FORMAT_CSCOPE		7
+#define FORMAT_CTAGS_PLUS	5
+#define FORMAT_PATH		6
+#define FORMAT_GREP		7
+#define FORMAT_CSCOPE		8
 
 /*
  * FORMAT_CTAGS_X

@@ -600,12 +600,14 @@ main(int argc, char **argv)
 		case OPT_RESULT:
 			if (!strcmp(optarg, "ctags-x"))
 				format = FORMAT_CTAGS_X;
-			else if (!strcmp(optarg, "ctags-xid"))
+			else if (!strcmp(optarg, "ctags-xid"))	/* undocumented */
 				format = FORMAT_CTAGS_XID;
 			else if (!strcmp(optarg, "ctags"))
 				format = FORMAT_CTAGS;
-			else if (!strcmp(optarg, "ctags-mod"))
+			else if (!strcmp(optarg, "ctags-mod"))	/* undocumented */
 				format = FORMAT_CTAGS_MOD;
+			else if (!strcmp(optarg, "ctags-plus"))	/* undocumented */
+				format = FORMAT_CTAGS_PLUS;
 			else if (!strcmp(optarg, "path"))
 				format = FORMAT_PATH;
 			else if (!strcmp(optarg, "grep"))
@@ -947,6 +949,23 @@ main(int argc, char **argv)
 			abslib++;
 		} else
 			die("invalid path style.");
+	}
+	{
+		int conv_flags = 0;
+
+		if (use_color)
+			conv_flags |= CONVERT_COLOR;
+		if (gflag)
+			conv_flags |= CONVERT_GREP;
+		if (Gflag)
+			conv_flags |= CONVERT_BASIC;
+		if (iflag)
+			conv_flags |= CONVERT_ICASE;
+		if (Iflag)
+			conv_flags |= CONVERT_IDUTILS;
+		if (Pflag)
+			conv_flags |= CONVERT_PATH;
+		set_convert_flags(conv_flags);
 	}
 	/*
 	 * exec lid(idutils).
@@ -1852,7 +1871,7 @@ search(const char *pattern, const char *root, const char *cwd, const char *dbpat
 	GTP *gtp;
 	int flags = 0;
 
-	start_output();
+	start_output(format, nosource);
 	/*
 	 * open tag file.
 	 */

@@ -42,8 +42,8 @@ In addition to the variables listed in the ENVIRONMENT section,
 you can refer to install directories by read only variables:
 @var{bindir}, @var{libdir}, @var{datadir}, @var{localstatedir} and @var{sysconfdir}.
 @item @samp{-d}, @samp{--dump} tag-file
-Dump a tag file as text to the standard output. Output format is
-'key<tab>data'. This is for debugging.
+Dump a tag file as text to the standard output.
+Output format is 'key<tab>data'. This is for debugging.
 @item @samp{--explain}
 Explain handling files.
 @item @samp{-f}, @samp{--file} file

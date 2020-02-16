@@ -1,6 +1,114 @@
 #line 1 "php.c"
+/*
+ * Copyright (c) 2003, 2006, 2010 Tama Communications Corporation
+ *
+ * This file is part of GNU GLOBAL.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#line 3 "php.c"
+/*
+ * scanner for PHP source code.
+ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <stdio.h>
+#include <stdarg.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
+#include "internal.h"
+#include "die.h"
+#include "gparam.h"
+#include "linetable.h"
+#include "strbuf.h"
+#include "php_res.h"
+
+#define lex_symbol_generation_rule(x) php_ ## x
+#define LEXLEX lex_symbol_generation_rule(lex)
+#define LEXTEXT lex_symbol_generation_rule(text)
+#define LEXLENG lex_symbol_generation_rule(leng)
+#define LEXRESTART lex_symbol_generation_rule(restart)
+#define LEXLINENO lex_symbol_generation_rule(lineno)
+
+#define YY_DECL	int LEXLEX(const struct parser_param *param)
+
+#define PHP_TOKEN		1
+#define PHP_VARIABLE		2
+#define PHP_STRING		3
+#define PHP_POINTER		4
+#define PHP_DOLLAR		5
+#define PHP_LPAREN		'('
+#define PHP_RPAREN		')'
+#define PHP_LBRACE		'{'
+#define PHP_RBRACE		'}'
+#define PHP_LBRACK		'['
+#define PHP_RBRACK		']'
+
+static void debug_print(const char *, ...);
+static int level;			/* block nest level */
+static STRBUF *string;			/* string */
+static char end_of_here_document[IDENTLEN];
+static int pre_here_document;
+
+/*
+ * For debug.
+ */
+static void
+debug_print(const char *s, ...)
+{
+	va_list ap;
+
+	va_start(ap, s);
+	(void)vfprintf(stderr, s, ap);
+	va_end(ap);
+}
+
+#undef DBG_PRINT
+#define DBG_PRINT if (!(param->flags & PARSER_DEBUG));else debug_print
+
+#undef YYLMAX
+#define YYLMAX 1024
+
+#undef ECHO
+#define ECHO DBG_PRINT("%s", LEXTEXT)
+
+#undef PUT
+#define PUT(type, tag, lno) do {					\
+	const char *line_image = linetable_get(lno, NULL);		\
+	char *nl = strchr(line_image, '\n');				\
+	if (nl != NULL)							\
+		*nl = '\0';						\
+	param->put(type, tag, lno, param->file, line_image, param->arg);\
+	if (nl != NULL)							\
+		*nl = '\n';						\
+} while (0)
+
+/*
+ * IO routine.
+ */
+#define YY_INPUT(buf,result,max_size) \
+	do { \
+		if ((result = linetable_read(buf, max_size)) == -1) \
+			result = YY_NULL; \
+	} while (0)
+
+#line 111 "php.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -936,121 +1044,12 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "php.l"
-#line 2 "php.l"
-/*
- * Copyright (c) 2003, 2006, 2010 Tama Communications Corporation
- *
- * This file is part of GNU GLOBAL.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/*
- * scanner for PHP source code.
- */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <stdio.h>
-#include <stdarg.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-
-#include "internal.h"
-#include "die.h"
-#include "gparam.h"
-#include "linetable.h"
-#include "strbuf.h"
-#include "php_res.h"
-
-#define lex_symbol_generation_rule(x) php_ ## x
-#define LEXLEX lex_symbol_generation_rule(lex)
-#define LEXTEXT lex_symbol_generation_rule(text)
-#define LEXLENG lex_symbol_generation_rule(leng)
-#define LEXRESTART lex_symbol_generation_rule(restart)
-#define LEXLINENO lex_symbol_generation_rule(lineno)
-
-#define YY_DECL	int LEXLEX(const struct parser_param *param)
-
-#define PHP_TOKEN		1
-#define PHP_VARIABLE		2
-#define PHP_STRING		3
-#define PHP_POINTER		4
-#define PHP_DOLLAR		5
-#define PHP_LPAREN		'('
-#define PHP_RPAREN		')'
-#define PHP_LBRACE		'{'
-#define PHP_RBRACE		'}'
-#define PHP_LBRACK		'['
-#define PHP_RBRACK		']'
-
-static void debug_print(const char *, ...);
-static int level;			/* block nest level */
-static STRBUF *string;			/* string */
-static char end_of_here_document[IDENTLEN];
-static int pre_here_document;
-
-/*
- * For debug.
- */
-static void
-debug_print(const char *s, ...)
-{
-	va_list ap;
-
-	va_start(ap, s);
-	(void)vfprintf(stderr, s, ap);
-	va_end(ap);
-}
-
-#undef DBG_PRINT
-#define DBG_PRINT if (!(param->flags & PARSER_DEBUG));else debug_print
-
-#undef YYLMAX
-#define YYLMAX 1024
-
-#undef ECHO
-#define ECHO DBG_PRINT("%s", LEXTEXT)
-
-#undef PUT
-#define PUT(type, tag, lno) do {					\
-	const char *line_image = linetable_get(lno, NULL);		\
-	char *nl = strchr(line_image, '\n');				\
-	if (nl != NULL)							\
-		*nl = '\0';						\
-	param->put(type, tag, lno, param->file, line_image, param->arg);\
-	if (nl != NULL)							\
-		*nl = '\n';						\
-} while (0)
-
-/*
- * IO routine.
- */
-#define YY_INPUT(buf,result,max_size) \
-	do { \
-		if ((result = linetable_read(buf, max_size)) == -1) \
-			result = YY_NULL; \
-	} while (0)
-#line 1048 "php.c"
 #line 112 "php.l"
  /* Definitions */
  /* We accept multi-bytes character */
 
-#line 1053 "php.c"
+#line 1052 "php.c"
 
 #define INITIAL 0
 #define PHP 1
@@ -1285,7 +1284,7 @@ YY_DECL
 	{
 #line 125 "php.l"
 
-#line 1288 "php.c"
+#line 1287 "php.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1665,7 +1664,7 @@ YY_RULE_SETUP
 #line 283 "php.l"
 ECHO;
 	YY_BREAK
-#line 1668 "php.c"
+#line 1667 "php.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(PHP):
 case YY_STATE_EOF(STRING):

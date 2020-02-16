@@ -1327,8 +1327,11 @@ main(int argc, char **argv)
 			strbuf_puts(sb, " -v");
 		if (wflag)
 			strbuf_puts(sb, " -w");
+		/*
+		 * Please see the release note of global-6.6.4.
 		if (suggest2 && enable_idutils && usable("mkid"))
 			strbuf_puts(sb, " -I");
+		*/
 		if (arg_dbpath[0]) {
 			strbuf_putc(sb, ' ');
 			strbuf_puts(sb, arg_dbpath);

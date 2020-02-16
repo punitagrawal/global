@@ -1,6 +1,53 @@
 #line 1 "cpp.c"
+/*
+ * Copyright (c) 2002, 2004 Tama Communications Corporation
+ *
+ * This file is part of GNU GLOBAL.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#line 3 "cpp.c"
+/*
+ * scanner for C++ source code.
+ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif
+#include "global.h"
+#include "anchor.h"
+#include "incop.h"
+#include "common.h"
+#include "htags.h"
+#include "../libparser/cpp_res.h"
+
+#define lex_symbol_generation_rule(x) cpp_ ## x
+#include "lexcommon.h"
+
+#ifdef ECHO
+#undef ECHO
+#endif
+#define ECHO	echos(LEXTEXT)
+
+#define YY_USER_ACTION DEFAULT_YY_USER_ACTION
+
+static int last_directive;
+
+#line 50 "cpp.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -764,59 +811,11 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "cpp.l"
-#line 2 "cpp.l"
-/*
- * Copyright (c) 2002, 2004 Tama Communications Corporation
- *
- * This file is part of GNU GLOBAL.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-/*
- * scanner for C++ source code.
- */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <stdio.h>
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-#include "global.h"
-#include "anchor.h"
-#include "incop.h"
-#include "common.h"
-#include "htags.h"
-#include "../libparser/cpp_res.h"
-
-#define lex_symbol_generation_rule(x) cpp_ ## x
-#include "lexcommon.h"
-
-#ifdef ECHO
-#undef ECHO
-#endif
-#define ECHO	echos(LEXTEXT)
-
-#define YY_USER_ACTION DEFAULT_YY_USER_ACTION
-
-static int last_directive;
-#line 815 "cpp.c"
 #line 51 "cpp.l"
  /* Definitions */
 
-#line 819 "cpp.c"
+#line 818 "cpp.c"
 
 #define INITIAL 0
 #define CPP 1
@@ -1054,7 +1053,7 @@ YY_DECL
 #line 64 "cpp.l"
 
  /* Backslash-newline */
-#line 1057 "cpp.c"
+#line 1056 "cpp.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1302,7 +1301,7 @@ YY_RULE_SETUP
 #line 180 "cpp.l"
 ECHO;
 	YY_BREAK
-#line 1305 "cpp.c"
+#line 1304 "cpp.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(CPP):
 case YY_STATE_EOF(CPP_COMMENT):

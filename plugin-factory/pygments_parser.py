@@ -27,7 +27,7 @@ import optparse
 import pygments.lexers
 from pygments.token import Token
 
-EXUBERANT_CTAGS = "/opt/local/bin/ctags"
+EXUBERANT_CTAGS = "/usr/local/bin/ctags"
 
 # In most cases, lexers can be looked up with lowercase form of formal
 # language names. This dictionary defines exceptions.

@@ -67,6 +67,7 @@ int gpath_path2nfid(const char *, int *);
 const char *gpath_nfid2path(int, int *);
 const char *gpath_put(const char *, int);
 void gpath_delete(const char *);
+int gpath_count(int);
 void gpath_close(void);
 int gpath_nextkey(void);
 GFIND *gfind_open(const char *, const char *, int, int);
