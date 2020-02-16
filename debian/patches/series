@@ -1,3 +1,4 @@
 0001-gtags-Fix-lintian-warning-with-gtags-manpage.patch
 0002-libparser-Correct-typos.patch
 0003-libdb-Drop-embedded-sqlite3.patch
+0004-pygments_parser-Convert-to-using-python3.patch
