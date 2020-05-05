@@ -1,3 +1,9 @@
+global (6.6.4-3) unstable; urgency=medium
+
+  * debian/patches: Fix compilation issue with GCC 10
+
+ -- Punit Agrawal <punit@debian.org>  Tue, 05 May 2020 11:04:01 +0900
+
 global (6.6.4-2) unstable; urgency=medium
 
   * debian: Install config file in /etc/gtags
