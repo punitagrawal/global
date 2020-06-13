@@ -35,4 +35,3 @@ Description: Source code search and browse tools
  .
  Doxygen now supports using global as its source browser, with the
  USE_HTAGS option.
-

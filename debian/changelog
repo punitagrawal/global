@@ -1,5 +1,8 @@
 global (6.6.4-4) UNRELEASED; urgency=medium
 
+  [ Debian Janitor ]
+  * debian: Trim trailing whitespace.
+
   [ Hong Xu ]
   * debian/rules: Enable universal ctags
 
@@ -201,7 +204,7 @@ global (6.5.5-0.1) experimental; urgency=medium
   [ Wookey ]
   * Non-maintainer upload.
   * Update to upstream release - 6.5.5
-  * Add missing emacsen-common build-dep 
+  * Add missing emacsen-common build-dep
   * Remove obsolete dpkg|install-info dependency
   * Bump standards to 3.9.6
   * Use system libltdl instead of embedded one
@@ -348,8 +351,8 @@ global (3.55-1) unstable; urgency=medium
 global (3.54-1) unstable; urgency=low
 
   * New upstream version.
-  * Many new features/fixes, including C++ support. 
-  * Updated for standards version 3 and FHS compliance. 
+  * Many new features/fixes, including C++ support.
+  * Updated for standards version 3 and FHS compliance.
 
  -- Ron C. Lee <ron@microtronics.com.au>  Sat, 13 Nov 1999 08:18:22 +1030
 
