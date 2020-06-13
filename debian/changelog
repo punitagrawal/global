@@ -2,6 +2,7 @@ global (6.6.4-4) UNRELEASED; urgency=low
 
   * Trim trailing whitespace.
   * Bump debhelper from old 10 to 12.
+  * Set debhelper-compat version in Build-Depends.
 
  -- Debian Janitor <janitor@jelmer.uk>  Sat, 13 Jun 2020 01:11:01 -0000
 

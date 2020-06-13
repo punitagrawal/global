@@ -1,7 +1,7 @@
 Source: global
 Section: devel
 Priority: optional
-Build-Depends: debhelper (>= 12~),
+Build-Depends: debhelper-compat (= 12),
  texinfo,
  libncurses5-dev, libltdl-dev, libsqlite3-dev,
  emacsen-common, flex, bison, gperf,
