@@ -2,6 +2,7 @@ global (6.6.4-4) UNRELEASED; urgency=medium
 
   [ Debian Janitor ]
   * debian: Trim trailing whitespace.
+  * debian: Bump debhelper from old 10 to 12.
 
   [ Hong Xu ]
   * debian/rules: Enable universal ctags
