@@ -1,3 +1,10 @@
+global (6.6.4-4) UNRELEASED; urgency=medium
+
+  [ Hong Xu ]
+  * debian/rules: Enable universal ctags
+
+ -- Punit Agrawal <punit@debian.org>  Sun, 26 Jul 2020 09:46:01 +0900
+
 global (6.6.4-3) unstable; urgency=medium
 
   * debian/patches: Fix compilation issue with GCC 10
