@@ -1,4 +1,4 @@
-global (6.6.4-4) UNRELEASED; urgency=medium
+global (6.6.4-4) unstable; urgency=medium
 
   [ Debian Janitor ]
   * debian: Trim trailing whitespace.
