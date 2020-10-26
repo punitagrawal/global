@@ -83,11 +83,11 @@ sub langmapstatement {
 	my(@statement);
 	my %name = (
 		'c'	=> 'C',
-		'yacc'	=> 'yacc',
-		'asm'	=> 'Assembly',
+		'yacc'	=> 'Yacc',
 		'java'	=> 'Java',
 		'cpp'	=> 'C++',
 		'php'	=> 'PHP',
+		'asm'	=> 'assembly language',
 	);
 	my $line = '';
 	my @maps = split(/,/, $maps);
@@ -103,7 +103,7 @@ sub langmapstatement {
 		}
 		$line .= $name{$lang};
 	}
-	$line .= " source files are supported.\n";
+	$line .= " source files.\n";
 	unshift(@statement, $line);
 	foreach (@maps) {
 		my($lang, $suffixes) = /([^:]+):(.*)/;

@@ -28,7 +28,7 @@
 	@name{htags} [-aDfFghInosTvw][-d @arg{dbpath}][-m @arg{name}][-t @arg{title}][@arg{dir}]
 @DESCRIPTION
 	@name{Htags} generates a hypertext from a set of source files of
-	C, C++, Yacc, Java, PHP and Assembly.
+	C, Yacc, Java, PHP and assembly.
 
 	In advance of using this command, you should execute @xref{gtags,1}
 	in the root directory of a source project.
@@ -55,6 +55,8 @@
 		Enable auto-completion facility for the input form.
 		If @arg{limit} is specified, number of candidates is limited to the value.
 		Please note this function requires javascript language in your browser.
+	@item{@option{-C}, @option{--directory} @arg{dir}}
+		Change the directory before doing all the work including parameter analysis.
 	@item{@option{--caution}}
 		Display a caution message on the top page.
 	@item{@option{--cflow} @arg{cflowfile}}
@@ -113,6 +115,8 @@
 		By default, @name{htags} doesn't generate them.
 		You can choose the position using @arg{position},
 		which allows one of @val{before}, @val{right} or @val{after} (default).
+	@item{@option{--help}}
+		Print a usage message.
 	@item{@option{--html-header} @arg{file}}
 		Insert a header record derived from @arg{file}
 		into the HTML header of each file.
@@ -178,6 +182,8 @@
 		@arg{treeview-famfamfam}. The default is @arg{treeview}.
 	@item{@option{-v}, @option{--verbose}}
 		Verbose mode.
+	@item{@option{--version}}
+		Show version number.
 	@item{@option{-w}, @option{--warning}}
 		Print warning messages.
 	@item{@arg{dir}}

@@ -7,7 +7,7 @@ htags \- generate a hypertext from a set of source files
 .br
 .SH DESCRIPTION
 \fBHtags\fP generates a hypertext from a set of source files of
-C, C++, Yacc, Java, PHP and Assembly.
+C, Yacc, Java, PHP and assembly.
 .PP
 In advance of using this command, you should execute \fBgtags\fP(1)
 in the root directory of a source project.
@@ -35,6 +35,9 @@ Make an alphabetical index suitable for a large project.
 Enable auto-completion facility for the input form.
 If \fIlimit\fP is specified, number of candidates is limited to the value.
 Please note this function requires javascript language in your browser.
+.TP
+\fB-C\fP, \fB--directory\fP \fIdir\fP
+Change the directory before doing all the work including parameter analysis.
 .TP
 \fB--caution\fP
 Display a caution message on the top page.
@@ -112,6 +115,9 @@ Insert a function header for each function.
 By default, \fBhtags\fP doesn't generate them.
 You can choose the position using \fIposition\fP,
 which allows one of \'before\', \'right\' or \'after\' (default).
+.TP
+\fB--help\fP
+Print a usage message.
 .TP
 \fB--html-header\fP \fIfile\fP
 Insert a header record derived from \fIfile\fP
@@ -198,6 +204,9 @@ Possible values of \fItype\fP are as follows: \fItreeview\fP, \fIfiletree\fP,
 .TP
 \fB-v\fP, \fB--verbose\fP
 Verbose mode.
+.TP
+\fB--version\fP
+Show version number.
 .TP
 \fB-w\fP, \fB--warning\fP
 Print warning messages.

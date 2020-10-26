@@ -19,6 +19,22 @@ ___________________________________
 GNU GLOBAL NEWS - User visible changes.
 At least, you should search '[INCOMPATIBLE CHANGES]' for each version.
 
+Version 6.6.5 - September 3 2020
+
+[INCOMPATIBLE CHANGES]
+o gtags: Now gtags_hook is not executed when the following options are specified:
+  --version, --help, --config, --dump.
+  This change might be considered a bug fix.
+
+[CHANGES]
+New facilities:
+o gtags: Added new option: -C (--directory)
+  Change the directory before doing all the work including parameter analysis.
+
+[DEPRECATED]
+o gtags: the built-in C++ parser is deprecated, since it is not well maintained.
+  Currently, it is hard to say that GLOBAL supports C++ language.
+
 Version 6.6.4 - December 24 2019
 
 [INCOMPATIBLE CHANGES]

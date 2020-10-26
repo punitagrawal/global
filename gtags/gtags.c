@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2008,
- *	2009, 2010, 2012, 2014, 2015, 2016, 2018
+ *	2009, 2010, 2012, 2014, 2015, 2016, 2018, 2020
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -147,8 +147,8 @@ printconf(const char *name)
 	return exist;
 }
 
-static const char *short_options = "cd:f:iIn:oOqvwse";
-static struct option const long_options[] = {
+const char *short_options = "cC:d:f:iIn:oOqvwse";
+struct option const long_options[] = {
 	/*
 	 * These options have long name and short name.
 	 * We throw them to the processing of short options.
@@ -157,6 +157,7 @@ static struct option const long_options[] = {
 	 * is left for compatibility.
 	 */
 	{"compact", no_argument, NULL, 'c'},
+	{"directory", required_argument, NULL, 'C'},
 	{"dump", required_argument, NULL, 'd'},
 	{"file", required_argument, NULL, 'f'},
 	{"idutils", no_argument, NULL, 'I'},
@@ -172,13 +173,11 @@ static struct option const long_options[] = {
 	 * The following are long name only.
 	 */
 #define OPT_CONFIG		128
-#define OPT_GTAGSCONF		129
-#define OPT_GTAGSLABEL		130
-#define OPT_PATH		131
-#define OPT_SINGLE_UPDATE	132
-#define OPT_ACCEPT_DOTFILES	133
-#define OPT_SKIP_UNREADABLE	134
-#define OPT_GTAGSSKIP_SYMLINK	135
+#define OPT_PATH		129
+#define OPT_SINGLE_UPDATE	130
+#define OPT_ACCEPT_DOTFILES	131
+#define OPT_SKIP_UNREADABLE	132
+#define OPT_GTAGSSKIP_SYMLINK	133
 	/* flag value */
 	{"accept-dotfiles", no_argument, NULL, OPT_ACCEPT_DOTFILES},
 	{"debug", no_argument, &debug, 1},
@@ -232,10 +231,10 @@ main(int argc, char **argv)
 	STATISTICS_TIME *tim;
 
 	/*
-	 * Setup GTAGSCONF and GTAGSLABEL environment variable
-	 * according to the --gtagsconf and --gtagslabel option.
+	 * pick up --gtagsconf, --gtagslabel and --directory (-C).
 	 */
-	preparse_options(argc, argv);
+	if (preparse_options(argc, argv) < 0)
+		usage();
 	/*
 	 * Get the project root directory.
 	 */
@@ -255,13 +254,38 @@ main(int argc, char **argv)
 	}
 	/*
 	 * Execute gtags_hook before the jobs.
+	 * The hook is not executed when the following options are specified.
+         *	--help, --dump, --config, --version
+	 * These are informational options only.
 	 */
-	if (getconfs("gtags_hook", sb)) {
-		char *p = serialize_options(argc, argv);
-		set_env("GTAGS_COMMANDLINE", p);
-		free(p);
-		if (system(strbuf_value(sb)))
-			fprintf(stderr, "gtags-hook failed: %s\n", strbuf_value(sb));
+	{
+		int skip_hook = 0;
+
+		/* Make a decision whether to execute gtags_hook. */
+		while ((optchar = getopt_long(argc, argv,
+			short_options, long_options, &option_index)) != EOF) {
+			switch (optchar) {
+			case OPT_CONFIG:
+			case 'd':
+				skip_hook++;
+				break;
+			default:
+				break;
+			}
+		}
+		optind = 1;		/* Reset getopt(3) library. */
+		if (show_version || show_help)
+			skip_hook++;
+		if (skip_hook) {
+			if (debug)
+				fprintf(stderr, "Gtags_hook is skipped.\n");
+		} else if (getconfs("gtags_hook", sb)) {
+			char *p = serialize_options(argc, argv);
+			set_env("GTAGS_COMMANDLINE", p);
+			free(p);
+			if (system(strbuf_value(sb)))
+				fprintf(stderr, "gtags-hook failed: %s\n", strbuf_value(sb));
+		}
 	}
 	logging_arguments(argc, argv);
 	while ((optchar = getopt_long(argc, argv, short_options, long_options, &option_index)) != EOF) {
@@ -276,7 +300,8 @@ main(int argc, char **argv)
 			break;
 		case OPT_GTAGSCONF:
 		case OPT_GTAGSLABEL:
-			/* These options are already parsed in preparse_options() */
+		case 'C':
+			/* These options are already parsed in preparse_options(). */
 			break;
 		case OPT_SINGLE_UPDATE:
 			iflag++;

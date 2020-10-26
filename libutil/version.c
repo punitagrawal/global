@@ -30,7 +30,7 @@
 #endif
 #include "version.h"
 
-const char *copy = "\
+static const char *copy = "\
 Copyright (c) %s Tama Communications Corporation\n\
 License GPLv3+: GNU GPL version 3 or later <http://www.gnu.org/licenses/gpl.html>\n\
 This is free software; you are free to change and redistribute it.\n\

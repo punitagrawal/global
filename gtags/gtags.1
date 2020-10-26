@@ -3,7 +3,7 @@
 .SH NAME
 gtags \- create tag files for global
 .SH SYNOPSIS
-\fBgtags\fP [-ciIOqvw][-d \fItag-file\fP][-f \fIfile\fP][\fIdbpath\fP]
+\fBgtags\fP [-ciIOqvw][-C \fIdir\fP][-d \fItag-file\fP][-f \fIfile\fP][\fIdbpath\fP]
 .br
 .SH DESCRIPTION
 \fBGtags\fP is used to create tag files for \fBglobal\fP(1).
@@ -12,18 +12,19 @@ gtags \- create tag files for global
 picks up symbols and writes the cross-reference data into the tag files
 (\'GTAGS\', \'GRTAGS\' and \'GPATH\').
 .PP
-If \'gtags.files\' exists in the current directory
-or a file is specified by the \fB-f\fP option,
-target files are limited by it. Lines starting with \'. \' are comments.
-.PP
-C, yacc, Assembly, Java, C++ and PHP source files are supported.
+By default, \fBgtags\fP picks up
+C, Yacc, assembly language, Java, C++ and PHP source files.
 Files whose names end in \'.c\', \'.h\' are assumed to be C source files.
-Files whose names end in \'.y\' are assumed to be yacc source files.
-Files whose names end in \'.s\', \'.S\' are assumed to be Assembly source files.
+Files whose names end in \'.y\' are assumed to be Yacc source files.
+Files whose names end in \'.s\', \'.S\' are assumed to be assembly language source files.
 Files whose names end in \'.java\' are assumed to be Java source files.
 Files whose names end in \'.c++\', \'.cc\', \'.hh\', \'.cpp\', \'.cxx\', \'.hxx\', \'.hpp\', \'.C\', \'.H\' are assumed to be C++ source files.
 Files whose names end in \'.php\', \'.php3\', \'.phtml\' are assumed to be PHP source files.
 Other files are assumed to be text files. Gtags does not treat binary files.
+.PP
+If \'gtags.files\' exists in the current directory
+or a file is specified by the \fB-f\fP option,
+target files are limited by it. Lines starting with \'. \' are comments.
 .SH OPTIONS
 The following options are available:
 .PP
@@ -36,6 +37,11 @@ By default, \fBgtags\fP ignores them.
 Make \'GTAGS\' in compact format.
 This option does not influence \'GRTAGS\',
 because that is always made in compact format.
+.TP
+\fB-C\fP, \fB--directory\fP \fIdir\fP
+Change the directory before doing all the work including parameter analysis.
+This option is ignored in \fBGTAGS_OPTIONS\fP.
+Please specify it on the command line directly.
 .TP
 \fB--config\fP[=\fIname\fP]
 Print the value of config variable \fIname\fP.
@@ -65,6 +71,9 @@ Set environment variable \fBGTAGSCONF\fP to \fIfile\fP.
 .TP
 \fB--gtagslabel\fP \fIlabel\fP
 Set environment variable \fBGTAGSLABEL\fP to \fIlabel\fP.
+.TP
+\fB--help\fP
+Print a usage message.
 .TP
 \fB-I\fP, \fB--idutils\fP
 In addition to tag files, make ID database for \fBidutils\fP(1).
@@ -109,6 +118,9 @@ Quiet mode.
 .TP
 \fB-v\fP, \fB--verbose\fP
 Verbose mode.
+.TP
+\fB--version\fP
+Show version number.
 .TP
 \fB-w\fP, \fB--warning\fP
 Print warning messages.
@@ -214,6 +226,10 @@ after loading configuration file. You can use this hook to update
 \'gtags.files\' dynamically.
 "./" in it always means the project root directory, since \fBgtags\fP is
 always invoked there.
+
+.br
+This hook is ignored when the following options are specified:
+--version, --help, --config, --dump.
 .TP
 icase_path (boolean)
 Ignore case distinctions in the path.
@@ -267,9 +283,11 @@ GNU GLOBAL source code tag system
 \'GTAGS\' and \'GRTAGS\' are very large.
 In advance of using this command, check the space of your disk.
 .PP
-Assembly support is far from complete.
+Assembly language support is far from complete.
 It extracts only ENTRY() and ALTENTRY() from source file.
 Probably valid only for FreeBSD and Linux kernel source.
+.PP
+C++ support is deprecated.
 .PP
 There is no concurrency control about tag files.
 .SH AUTHOR

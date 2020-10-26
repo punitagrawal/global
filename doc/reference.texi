@@ -4,7 +4,7 @@
 * gtags::          gtags - create tag files for global
 * htags::          htags - generate a hypertext from a set of source files
 * htags-server::   htags-server - a private Web/CGI server for htags
-* gozilla::        gozilla - force a browser to display specified part of a source file
+* gozilla::        gozilla - force firefox to display specified part of a source file
 * gtags-cscope::   gtags-cscope - interactively examine a C program
 * globash::        globash - a special shell for GLOBAL using GNU bash
 * gtags.conf::     gtags.conf - configuration data for GNU GLOBAL
@@ -23,7 +23,7 @@
 @section htags-server - a private Web/CGI server for htags
 @include htags-server.ref
 @node gozilla
-@section gozilla - force a browser to display specified part of a source file
+@section gozilla - force firefox to display specified part of a source file
 @include gozilla.ref
 @node gtags-cscope
 @section gtags-cscope - interactively examine a C program

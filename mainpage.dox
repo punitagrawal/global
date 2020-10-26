@@ -10,7 +10,7 @@ ___________________________________
 @endverbatim
 
 GNU GLOBAL is a source code tagging system that works the same way across diverse
-environments. It supports C, C++, Yacc, Java, PHP4 and assembly source code.
+environments. It supports C, Yacc, Java, PHP4 and assembly source code.
 
 @section s1 The main() files
 

@@ -45,7 +45,7 @@
 #include "const.h"
 
 /**
- gozilla - force mozilla browser to display specified part of a source file.
+ gozilla - force firefox to display specified part of a source file.
 */
 
 static void usage(void);

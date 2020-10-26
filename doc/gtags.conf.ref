@@ -24,7 +24,7 @@ and read from the first one that exists and is readable.
 option of the configure script. [objdir] is @file{obj} by default; you can change it
 by @var{GTAGSOBJDIR} or @var{MAKEOBJDIR}.
 
-Syntax is similar to termcap(5) except for some extensions described later.
+Its syntax is similar to termcap(5) except for some extensions described later.
 A file includes one or more records. You should select a record using a label.
 Default label is @samp{default}. If @var{GTAGSLABEL} is set, its value is used.
 Please be aware the meaning of @samp{default} is different from that of termcap(5).
@@ -56,7 +56,7 @@ b has a value @samp{XYZ}.
 @unnumberedsubsec Including another record
 Tc is a special variable; it reads in definitions in another record.
 It is similar to the tc of termcap(5).
-Syntax is as follows:@*
+Its syntax is as follows:@*
 tc=label[@@file]@*
 If only a label is given, tc is read from a record specified by the label
 in the same file. If @@file is also given, tc is read from a record

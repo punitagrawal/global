@@ -23,13 +23,13 @@
 #       o texinfo format reference manual.
 #
 @HEADER GOZILLA,1,March 2010,GNU Project
-@NAME   gozilla - force a browser to display specified part of a source file
+@NAME   gozilla - force firefox to display specified part of a source file
 @SYNOPSIS
 	@name{gozilla} [-b browser][-p][+no] file
 	@name{gozilla} [-b browser][-p] -d name
 @DESCRIPTION
 	@name{Gozilla} forces firefox to display specified part of a source file.
-	@name{Gozilla} can be used with other browsers like chrome and epiphany.
+	@name{Gozilla} can be used with other browsers like chrome.
 
 	In advance of using this command, you must execute @xref{gtags,1}
 	and @xref{htags,1} at the root directory of the project to make tag files.
@@ -109,7 +109,6 @@
 	@xref{gtags,1},
 	@xref{htags,1},
 	@xref{epiphany,1},
-	@xref{mozilla,1},
 	@xref{firefox,1},
 	@xref{gtags.conf,5}.
 

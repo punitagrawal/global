@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006,
- *	2007, 2008, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+ *	2007, 2008, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+ *	2020
  *	Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -177,9 +178,7 @@ help(void)
 #define OPT_PATH_STYLE		133
 #define OPT_PATH_CONVERT	134
 #define OPT_USE_COLOR		135
-#define OPT_GTAGSCONF		136
-#define OPT_GTAGSLABEL		137
-#define OPT_PRINT		138
+#define OPT_PRINT		136
 #define SORT_FILTER     1
 #define PATH_FILTER     2
 #define BOTH_FILTER     (SORT_FILTER|PATH_FILTER)
@@ -187,9 +186,10 @@ help(void)
 #define MATCH_PART_LAST  2
 #define MATCH_PART_ALL   3
 
-static const char *short_options = "acde:EifFgGIlL:MnNoOpPqrsS:tTuvVx";
-static struct option const long_options[] = {
+const char *short_options = "acC:de:EifFgGIlL:MnNoOpPqrsS:tTuvVx";
+struct option const long_options[] = {
 	{"absolute", no_argument, NULL, 'a'},
+	{"directory", required_argument, NULL, 'C'},
 	{"completion", no_argument, NULL, 'c'},
 	{"definition", no_argument, NULL, 'd'},
 	{"extended-regexp", no_argument, NULL, 'E'},
@@ -392,6 +392,11 @@ main(int argc, char **argv)
 	int status = 0;
 
 	/*
+	 * pick up --gtagsconf, --gtagslabel and --directory (-C).
+	 */
+	if (preparse_options(argc, argv) < 0)
+		usage();
+	/*
 	 * get path of following directories.
 	 *	o current directory
 	 *	o root of source tree
@@ -405,11 +410,6 @@ main(int argc, char **argv)
 		root = get_root();
 		dbpath = get_dbpath();
 	}
-	/*
-	 * Setup GTAGSCONF and GTAGSLABEL environment variable
-	 * according to the --gtagsconf and --gtagslabel option.
-	 */
-	preparse_options(argc, argv);
 	/*
 	 * Open configuration file.
 	 */
@@ -568,7 +568,8 @@ main(int argc, char **argv)
 			break;
 		case OPT_GTAGSCONF:
 		case OPT_GTAGSLABEL:
-			/* These options are already parsed in preparse_options() */
+		case 'C':
+			/* These options are already parsed in preparse_options(). */
 			break;
 		case OPT_MATCH_PART:
 			if (!strcmp(optarg, "first"))

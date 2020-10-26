@@ -5,7 +5,7 @@ ___________________________________
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  Copyright (c) 2000, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012,
-	2014
+	2014, 2020
 	Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
@@ -155,7 +155,7 @@ Q10. Does GLOBAL support multi-byte code set?
      Which character code set is supported?
 
 A10. GLOBAL doesn't support multi-byte character code set yet.
-     GLOBAL supports only ASCII and ASCII supersets.
+     GLOBAL supports only ASCII and ASCII super-sets.
 
 ----------------------------------------------------------------------------
 Q11. Can GLOBAL running on a UNIX machine treat source files
@@ -165,5 +165,13 @@ A11. GLOBAL supports only native text format of POSIX.
      Besides, please go by the own responsibility.
 
 ----------------------------------------------------------------------------
+Q12. Does GLOBAL support C++ language?
+
+A12. The answer is yes and no.
+     The built-in C++ parser is deprecated, since it is not well maintained.
+     However, GLOBAL has a plug-in parser mechanism. Using the mechanism,
+     anyone can write parsers for their favorite languages and incorporate
+     them into GLOBAL. (see plugin-factory/)
+     So, if you write a parser for C++ language, GLOBAL supports it.
 
 End of FAQ.

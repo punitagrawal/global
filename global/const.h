@@ -57,6 +57,8 @@ Options:\n\
        or GREP_COLOR defines it.\n\
        This option is effective to the following commands:\n\
        <no command>, -f, -g, -I, -P.\n\
+-C, --directory dir\n\
+       Change the directory before doing all the work including parameter analysis.\n\
 -d, --definition\n\
        Print locations of definitions.\n\
 -e, --regexp pattern\n\

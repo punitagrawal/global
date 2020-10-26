@@ -97,8 +97,6 @@ decode_path(const char *path)
 	STATIC_STRBUF(sb);
 	const char *p;
 
-	if (strchr(path, '%') == NULL)
-		return (char *)path;
 	strbuf_clear(sb);
 	for (p = path; *p; p++) {
 		if (*p == '%') {

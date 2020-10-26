@@ -131,6 +131,7 @@ Patrick Strasser	many bug reports about htags(1).
 Paul Lew		advice about the build in Solaris environment.
 Paulius Bulotas		bug report and fix patch for gozilla(1).
 Pawel Wilk		idea about home_etc facility on PLD Linux/GNU.
+Pavel Zhukov		bug report about the duplicate symbol error with the -fno-common of gcc.
 Per Nordlöw		bug report that gtags-parser(1) cannot treat 'extern "C" { ... }'.
 Peter Münster		bug report that gtags lose enum member.
 Philip Hands		advice on improving security of global(1).

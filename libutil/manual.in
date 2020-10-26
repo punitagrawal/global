@@ -40,7 +40,7 @@
 	option of the configure script. [objdir] is @file{obj} by default; you can change it
 	by @var{GTAGSOBJDIR} or @var{MAKEOBJDIR}.
 
-	Syntax is similar to @xref{termcap,5} except for some extensions described later.
+	Its syntax is similar to @xref{termcap,5} except for some extensions described later.
 	A file includes one or more records. You should select a record using a label.
 	Default label is @samp{default}. If @var{GTAGSLABEL} is set, its value is used.
 	Please be aware the meaning of @samp{default} is different from that of @xref{termcap,5}.
@@ -72,7 +72,7 @@
 @Including another record
 	@name{Tc} is a special variable; it reads in definitions in another record.
 	It is similar to the @name{tc} of @xref{termcap,5}.
-	Syntax is as follows:@br
+	Its syntax is as follows:@br
 	@name{tc}=@arg{label}[@@@arg{file}]@br
 	If only a @arg{label} is given, @name{tc} is read from a record specified by the @arg{label}
 	in the same file. If @@@arg{file} is also given, @name{tc} is read from a record

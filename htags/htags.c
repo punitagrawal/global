@@ -41,8 +41,6 @@
 #include <sys/param.h>
 #include <errno.h>
 
-#include "args.h"
-#include "checkalloc.h"
 #include "getopt.h"
 #include "regex.h"
 #include "global.h"
@@ -253,13 +251,14 @@ const char *include_file_suffixes = DEFAULTINCLUDEFILESUFFIXES;	/**< include_fil
 static const char *langmap = DEFAULTLANGMAP;	/**< langmap */
 int grtags_is_empty = 0;						/**< grtags_is_empty */
 
-static const char *short_options = "acd:DfFghIm:nNoqst:Tvwx";
-static struct option const long_options[] = {
+const char *short_options = "acC:d:DfFghIm:nNoqst:Tvwx";
+struct option const long_options[] = {
 	/*
 	 * These options have long name and short name.
 	 * We throw them to the processing of short options.
 	 */
         {"alphabet", no_argument, NULL, 'a'},
+        {"directory", required_argument, NULL, 'C'},
         {"dbpath", required_argument, NULL, 'd'},
         {"dynamic", no_argument, NULL, 'D'},
         {"form", no_argument, NULL, 'f'},
@@ -300,19 +299,17 @@ static struct option const long_options[] = {
 	/* accept value */
 #define OPT_CVSWEB		128
 #define OPT_CVSWEB_CVSROOT	129
-#define OPT_GTAGSCONF		130
-#define OPT_GTAGSLABEL		131
-#define OPT_NCOL		132
-#define OPT_INSERT_FOOTER	133
-#define OPT_INSERT_HEADER	134
-#define OPT_ITEM_ORDER		135
-#define OPT_TABS		136
-#define OPT_CFLOW		137
-#define OPT_AUTO_COMPLETION	138
-#define OPT_TREE_VIEW		139
-#define OPT_HTML_HEADER		140
-#define OPT_CALL_TREE		141
-#define OPT_CALLEE_TREE		142
+#define OPT_NCOL		130
+#define OPT_INSERT_FOOTER	131
+#define OPT_INSERT_HEADER	132
+#define OPT_ITEM_ORDER		133
+#define OPT_TABS		134
+#define OPT_CFLOW		135
+#define OPT_AUTO_COMPLETION	136
+#define OPT_TREE_VIEW		137
+#define OPT_HTML_HEADER		138
+#define OPT_CALL_TREE		139
+#define OPT_CALLEE_TREE		140
         {"auto-completion", optional_argument, NULL, OPT_AUTO_COMPLETION},
         {"call-tree", required_argument, NULL, OPT_CALL_TREE},
         {"callee-tree", required_argument, NULL, OPT_CALLEE_TREE},
@@ -1081,13 +1078,14 @@ main(int argc, char **argv)
         int option_index = 0;
 	STATISTICS_TIME *tim;
 
+	/*
+	 * pick up --gtagsconf, --gtagslabel and --directory (-C).
+	 */
+	if (preparse_options(argc, argv) < 0)
+		usage();
+
 	arg_dbpath[0] = 0;
 	basic_check();
-	/*
-	 * Setup GTAGSCONF and GTAGSLABEL environment variable
-	 * according to the --gtagsconf and --gtagslabel option.
-	 */
-	preparse_options(argc, argv);
 	/*
 	 * Load configuration values.
 	 */
@@ -1140,7 +1138,8 @@ main(int argc, char **argv)
 			break;
 		case OPT_GTAGSCONF:
 		case OPT_GTAGSLABEL:
-			/* These options are already parsed in preparse_options() */
+		case 'C':
+			/* These options are already parsed in preparse_options(). */
 			break;
 		case OPT_INSERT_FOOTER:
 			insert_footer = optarg;
