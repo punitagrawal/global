@@ -2,4 +2,3 @@
 0002-libparser-Correct-typos.patch
 0003-libdb-Drop-embedded-sqlite3.patch
 0004-pygments_parser-Convert-to-using-python3.patch
-0005-libutil-args-Make-global-variables-static.patch
