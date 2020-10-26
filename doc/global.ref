@@ -14,7 +14,7 @@ global -u[qv]@*
 @end quotation
 @unnumberedsubsec DESCRIPTION
 Global finds locations of given symbols
-in C, C++, Yacc, Java, PHP and Assembly source files,
+in C, Yacc, Java, PHP and assembly source files,
 and prints the path name, line number and line image of the locations.
 Global can locate not only definitions but also references
 and other symbols.
@@ -87,6 +87,8 @@ variable @var{GREP_COLORS} (only @var{mt} and @var{ms} are effective at present)
 or @var{GREP_COLOR} defines it.
 This option is effective to the following commands:
 <no command>, -f, -g, -I, -P.
+@item @samp{-C}, @samp{--directory} dir
+Change the directory before doing all the work including parameter analysis.
 @item @samp{-d}, @samp{--definition}
 Print locations of definitions.
 @item @samp{-e}, @samp{--regexp} pattern
@@ -292,7 +294,7 @@ Configuration label. The default is default.
 @item @var{GTAGSLIBPATH}
 If this variable is set, it is used as the path to search
 for library functions. If the given symbol is not
-found in the project, global also searches in these paths.
+found in the current project, global also searches in these paths.
 Since only @file{GTAGS} is targeted in the retrieval, this variable is
 ignored when @samp{-r} or @samp{-s} is specified.
 @item @var{GTAGSLOGGING}

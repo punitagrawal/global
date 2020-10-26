@@ -8,6 +8,8 @@ const char *help_const = "Options:\n\
        Enable auto-completion facility for the input form.\n\
        If limit is specified, number of candidates is limited to the value.\n\
        Please note this function requires javascript language in your browser.\n\
+-C, --directory dir\n\
+       Change the directory before doing all the work including parameter analysis.\n\
 --caution\n\
        Display a caution message on the top page.\n\
 --cflow cflowfile\n\
@@ -66,6 +68,8 @@ const char *help_const = "Options:\n\
        By default, htags doesn't generate them.\n\
        You can choose the position using position,\n\
        which allows one of before, right or after (default).\n\
+--help\n\
+       Print a usage message.\n\
 --html-header file\n\
        Insert a header record derived from file\n\
        into the HTML header of each file.\n\
@@ -131,6 +135,8 @@ const char *help_const = "Options:\n\
        treeview-famfamfam. The default is treeview.\n\
 -v, --verbose\n\
        Verbose mode.\n\
+--version\n\
+       Show version number.\n\
 -w, --warning\n\
        Print warning messages.\n\
 dir\n\

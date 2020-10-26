@@ -46,7 +46,7 @@
 
 #include "convert.h"
 static int debug = 0;
-int flags;
+static int flags;
 
 /**
  * This module converts records before output.

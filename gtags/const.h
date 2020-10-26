@@ -1,6 +1,6 @@
 /* This file is generated automatically by convert.pl from gtags/manual.in. */
 const char *progname = "gtags";
-const char *usage_const = "Usage: gtags [-ciIOqvw][-d tag-file][-f file][dbpath]\n";
+const char *usage_const = "Usage: gtags [-ciIOqvw][-C dir][-d tag-file][-f file][dbpath]\n";
 const char *help_const = "Options:\n\
 --accept-dotfiles\n\
        Accept files and directories whose names begin with a dot.\n\
@@ -9,6 +9,10 @@ const char *help_const = "Options:\n\
        Make GTAGS in compact format.\n\
        This option does not influence GRTAGS,\n\
        because that is always made in compact format.\n\
+-C, --directory dir\n\
+       Change the directory before doing all the work including parameter analysis.\n\
+       This option is ignored in GTAGS_OPTIONS.\n\
+       Please specify it on the command line directly.\n\
 --config[=name]\n\
        Print the value of config variable name.\n\
        If name is not specified then print all names and values.\n\
@@ -32,6 +36,8 @@ const char *help_const = "Options:\n\
        Set environment variable GTAGSCONF to file.\n\
 --gtagslabel label\n\
        Set environment variable GTAGSLABEL to label.\n\
+--help\n\
+       Print a usage message.\n\
 -I, --idutils\n\
        In addition to tag files, make ID database for idutils(1).\n\
 -i, --incremental\n\
@@ -66,6 +72,8 @@ const char *help_const = "Options:\n\
        Quiet mode.\n\
 -v, --verbose\n\
        Verbose mode.\n\
+--version\n\
+       Show version number.\n\
 -w, --warning\n\
        Print warning messages.\n\
 dbpath\n\

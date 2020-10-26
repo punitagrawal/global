@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2014 Tama Communications Corporation
+ * Copyright (c) 2010, 2014, 2020 Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
  *
@@ -22,6 +22,7 @@
 #endif
 #include <ctype.h>
 #include <stdio.h>
+#include "getopt.h"
 #include "checkalloc.h"
 #include "die.h"
 #include "env.h"
@@ -29,6 +30,7 @@
 #include "strbuf.h"
 #include "test.h"
 #include "gpathop.h"
+#include "args.h"
 #if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 #include "path.h"
 #endif
@@ -39,10 +41,10 @@
 #define ARGS_GFIND	3
 #define ARGS_BOTH	4
 
-int type;
-const char **argslist;
-FILE *ip;
-GFIND *gp;
+static int type;
+static char *const *argslist;
+static FILE *ip;
+static GFIND *gp;
 
 /**
  * args_open:
@@ -50,10 +52,10 @@ GFIND *gp;
  *	@param[in]	args	args array
  */
 void
-args_open(const char **args)
+args_open(char *const *argv)
 {
 	type = ARGS_ARGS;
-	argslist = args;
+	argslist = argv;
 }
 /**
  * args_open_filelist: args_open like interface for handling output of find(1).
@@ -81,10 +83,10 @@ args_open_filelist(const char *filename)
  *				When "-" is specified, read from standard input.
  */
 void
-args_open_both(const char **args, const char *filename)
+args_open_both(char *const *argv, const char *filename)
 {
 	type = ARGS_BOTH;
-	argslist = args;
+	argslist = argv;
 	if (!strcmp(filename, "-")) {
 		ip = stdin;
 	} else {
@@ -176,51 +178,65 @@ args_close(void)
  *	@param[in]	argc	main()'s argc integer
  *	@param[in]	argv	main()'s argv string array
  *
- * Setup the "GTAGSCONF" and the "GTAGSLABEL" environment variables
+ * Setup the "GTAGSCONF" and "GTAGSLABEL" environment variables
  * according to the --gtagsconf and --gtagslabel options.
+ * Additionally changes directory acording to the --directory.
  */
-void
+int
 preparse_options(int argc, char *const *argv)
 {
-	int i;
-	char *p;
+	int optchar;
+	int option_index = 0;
 	char *confpath = NULL;
 	char *label = NULL;
-	const char *opt_gtagsconf = "--gtagsconf";
-	const char *opt_gtagslabel = "--gtagslabel";
+	char *dir = NULL;
+	extern const char *short_options;
+	extern struct option const long_options[];
 
-	for (i = 1; i < argc; i++) {
-		if ((p = locatestring(argv[i], opt_gtagsconf, MATCH_AT_FIRST))) {
-			if (*p == '\0') {
-				if (++i >= argc)
-					die("%s needs an argument.", opt_gtagsconf);
-				confpath = argv[i];
-			} else {
-				if (*p++ == '=' && *p)
-					confpath = p;
-			}
-		} else if ((p = locatestring(argv[i], opt_gtagslabel, MATCH_AT_FIRST))) {
-			if (*p == '\0') {
-				if (++i >= argc)
-					die("%s needs an argument.", opt_gtagslabel);
-				label = argv[i];
-			} else {
-				if (*p++ == '=' && *p)
-					label = p;
-			}
+	/*
+	 * restart scanning of the same argv by setting optind = 1.
+	 */
+        optind = 1;
+	while ((optchar = getopt_long(argc, argv, short_options, long_options, &option_index)) != EOF) {
+		switch (optchar) {
+		case 'C':
+			dir = optarg;
+			break;
+		case OPT_GTAGSCONF:
+			confpath = optarg;
+			break;
+		case OPT_GTAGSLABEL:
+			label = optarg;
+			break;
+		case '?':
+			return -1;
+		default:
+			break;
 		}
 	}
+	/*
+	 * Change the directory before doing all the work including parameter analysis.
+	 */
+	if (dir)
+		if (chdir(dir) < 0)
+			die("cannot change directory to '%s'.", dir);
 	if (confpath) {
 		char real[MAXPATHLEN];
 
 		if (!test("f", confpath))
-			die("%s file not found.", opt_gtagsconf);
+			die("--gtagsconf file not found.");
 		if (!realpath(confpath, real))
-			die("cannot get absolute path of %s file.", opt_gtagsconf);
+			die("cannot get absolute path of --gtagsconf file.");
 		set_env("GTAGSCONF", real);
 	}
 	if (label)
 		set_env("GTAGSLABEL", label);
+	/*
+	 * restart scanning of the same argv by setting optind = 1.
+	 * This is needed for the calling of getopt() in main().
+	 */
+        optind = 1;
+	return 0;
 }
 /**
  * prepend_options: creates a new argv main() array, by prepending (space separated)

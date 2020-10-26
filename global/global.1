@@ -21,7 +21,7 @@ global \- print locations of given symbols
 .br
 .SH DESCRIPTION
 \fBGlobal\fP finds locations of given symbols
-in C, C++, Yacc, Java, PHP and Assembly source files,
+in C, Yacc, Java, PHP and assembly source files,
 and prints the path name, line number and line image of the locations.
 \fBGlobal\fP can locate not only definitions but also references
 and other symbols.
@@ -104,6 +104,9 @@ variable \fBGREP_COLORS\fP (only \fBmt\fP and \fBms\fP are effective at present)
 or \fBGREP_COLOR\fP defines it.
 This option is effective to the following commands:
 <no command>, -f, -g, -I, -P.
+.TP
+\fB-C\fP, \fB--directory\fP \fIdir\fP
+Change the directory before doing all the work including parameter analysis.
 .TP
 \fB-d\fP, \fB--definition\fP
 Print locations of definitions.
@@ -351,7 +354,7 @@ Configuration label. The default is \fIdefault\fP.
 \fBGTAGSLIBPATH\fP
 If this variable is set, it is used as the path to search
 for library functions. If the given symbol is not
-found in the project, \fBglobal\fP also searches in these paths.
+found in the current project, \fBglobal\fP also searches in these paths.
 Since only \'GTAGS\' is targeted in the retrieval, this variable is
 ignored when \fB-r\fP or \fB-s\fP is specified.
 .TP

@@ -7,7 +7,7 @@ htags [-aDfFghInosTvw][-d dbpath][-m name][-t title][dir]@*
 @end quotation
 @unnumberedsubsec DESCRIPTION
 Htags generates a hypertext from a set of source files of
-C, C++, Yacc, Java, PHP and Assembly.
+C, Yacc, Java, PHP and assembly.
 
 In advance of using this command, you should execute gtags(1)
 in the root directory of a source project.
@@ -34,6 +34,8 @@ Make an alphabetical index suitable for a large project.
 Enable auto-completion facility for the input form.
 If limit is specified, number of candidates is limited to the value.
 Please note this function requires javascript language in your browser.
+@item @samp{-C}, @samp{--directory} dir
+Change the directory before doing all the work including parameter analysis.
 @item @samp{--caution}
 Display a caution message on the top page.
 @item @samp{--cflow} cflowfile
@@ -92,6 +94,8 @@ Insert a function header for each function.
 By default, htags doesn't generate them.
 You can choose the position using position,
 which allows one of @samp{before}, @samp{right} or @samp{after} (default).
+@item @samp{--help}
+Print a usage message.
 @item @samp{--html-header} file
 Insert a header record derived from file
 into the HTML header of each file.
@@ -157,6 +161,8 @@ treeview-red, treeview-black, treeview-gray,
 treeview-famfamfam. The default is treeview.
 @item @samp{-v}, @samp{--verbose}
 Verbose mode.
+@item @samp{--version}
+Show version number.
 @item @samp{-w}, @samp{--warning}
 Print warning messages.
 @item dir
