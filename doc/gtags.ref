@@ -124,7 +124,7 @@ Tag file for references.
 @item @file{GPATH}
 Tag file for source files.
 @item @file{gtags.conf}, @file{$HOME/.globalrc}
-Configuration data for GNU GLOBAL.
+Configuration data for GNU Global.
 See gtags.conf(5).
 @item @file{gtags.files}
 The list of candidates of target files.
@@ -142,8 +142,9 @@ The size of the B-tree cache. The default is 50000000 (bytes).
 @item @var{GTAGSCONF}
 Configuration file.
 @item @var{GTAGSFORCECPP}
-If this variable is set, each file whose suffix is @file{.h} is treated
-as a C++ source file.
+If this variable is set, each file whose suffix is @file{.h} is forcibly
+parsed by the built-in C++ parser. Do not set this variable if you are
+using plug-in parsers. This variable and the built-in C++ parser are deprecated.
 @item @var{GTAGSFORCEENDBLOCK}
 If this variable is set, each @} at the first column brings end of block
 of 0 level.
@@ -235,7 +236,7 @@ global(1),
 htags(1),
 gtags.conf(5).
 
-GNU GLOBAL source code tag system@*
+GNU Global source code tag system@*
 (http://www.gnu.org/software/global/).
 @unnumberedsubsec BUG
 @file{GTAGS} and @file{GRTAGS} are very large.

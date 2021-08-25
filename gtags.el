@@ -3,7 +3,7 @@
 ;(setq debug-on-error t)
 ;;
 ;; Copyright (c) 1997, 1998, 1999, 2000, 2006, 2007, 2008, 2009, 2010
-;;		2011, 2012, 2013
+;;		2011, 2012, 2013, 2021
 ;;	Tama Communications Corporation
 ;;
 ;; This file is part of GNU GLOBAL.
@@ -24,9 +24,13 @@
 
 ;; GLOBAL home page is at: http://www.gnu.org/software/global/
 ;; Author: Tama Communications Corporation
-;; Version: 3.9
+;; Version: 4.0
 ;; Keywords: tools
-
+;;
+;; Required Emacs:
+;; GNU Emacs version 25.1 or later is required. However, if you don't
+;; use 'gtags-visit-rootdir' then version 22 or later is good enought.
+;;
 ;; Gtags-mode is implemented as a minor mode so that it can work with any
 ;; other major modes. Gtags-select mode is implemented as a major mode.
 ;;
@@ -124,6 +128,12 @@
                  (const :tag "Distinguish case" nil))
   :group 'gtags)
 
+(defcustom gtags-path-order 'alphabet
+  "*Controls the sort order in [GTAGS SELECT MODE]."
+  :type '(choice (const :tag "Alphabetical order" alphabet)
+                 (const :tag "Nearness order" nearness))
+  :group 'gtags)
+
 (defcustom gtags-read-only nil
   "Gtags read only mode"
   :type 'boolean
@@ -195,13 +205,8 @@
   "Whether we are running XEmacs/Lucid Emacs")
 (defvar gtags-rootdir nil
   "Root directory of source tree.")
-(defvar gtags-global-command nil
+(defvar gtags-global-command "global"
   "Command name of global.")
-
-;; Set global's command name
-(setq gtags-global-command (getenv "GTAGSGLOBAL"))
-(if (or (not gtags-global-command) (equal gtags-global-command ""))
-    (setq gtags-global-command "global"))
 
 ;; Key mapping of gtags-mode.
 (if gtags-suggested-key-mapping
@@ -293,76 +298,40 @@
 ;
 ; TRAMP style default-directory.
 ; /<method>:[<user id>@]<host name>:<directory>
+; |<------------ prefix ---------->|
 ; Ex: /ssh:remoteuser@remotehost:/usr/src/sys/
 ;
-(defconst gtags-tramp-path-regexp "^/\\([^:]+\\):\\([^:]+\\):\\(.*\\)"
-  "Regexp matching tramp path name.")
-(defconst gtags-tramp-user-host-regexp "^\\([^@]+\\)@\\(.*\\)"
-  "Regexp matching tramp user@host name.")
-(defvar gtags-tramp-active nil
-  "TRAMP activity.")
-(defvar gtags-tramp-saved-global-command nil
-  "Save area of the command name of global.")
+; (file-remote-p default-directory) returns the prefix part.
+;
+(defun gtags-strip-remote-prefix (file)
+  (if (not file)
+      nil
+      (let ((prefix (file-remote-p file)))
+        (if prefix
+            ; Remove the prefix part.
+            (substring file (length prefix))
+            file))))
 
-; The substitute of buffer-file-name
-(defun gtags-buffer-file-name ()
-  (if buffer-file-name
-      (if (string-match gtags-tramp-path-regexp buffer-file-name)
-          (match-string 3 buffer-file-name)
-          buffer-file-name)
-      nil))
-(defun gtags-push-tramp-environment ()
-    (let ((tramp-path default-directory))
-      (if (string-match gtags-tramp-path-regexp tramp-path)
-          (let ((shell         (match-string 1 tramp-path))
-                (user-and-host (match-string 2 tramp-path))
-                (cwd           (match-string 3 tramp-path)))
-            ;
-            ; Server side GLOBAL cannot treat other than rsh and ssh.
-            ;
-            (cond
-             ((equal shell "rsh"))
-             ((equal shell "ssh"))
-             ((equal shell "rcp")
-              (setq shell "rsh"))
-             ((equal shell "scp")
-              (setq shell "ssh"))
-             (t
-               (setq shell "ssh")))
-            (let (host user)
-              (if (string-match gtags-tramp-user-host-regexp user-and-host)
-                  (progn
-                    (setq user (match-string 1 user-and-host))
-                    (setq host (match-string 2 user-and-host)))
-                  (progn
-                    (setq user nil)
-                    (setq host user-and-host)))
-              ;
-              ; Move to tramp mode only when all the items are assembled.
-              ;
-              (if (and shell host cwd)
-                  (progn
-                    (setq gtags-tramp-active t)
-                    (setq gtags-tramp-saved-global-command gtags-global-command)
-                    ; Use 'global-client even if environment variable GTAGSGLOBAL is set.
-                    ;(setq gtags-global-command (getenv "GTAGSGLOBAL"))
-                    ;(if (or (not gtags-global-command) (equal gtags-global-command ""))
-                        (setq gtags-global-command "global-client")
-                    ;)
-                    (push (concat "GTAGSREMOTESHELL=" shell) process-environment)
-                    (push (concat "GTAGSREMOTEHOST="   host) process-environment)
-                    (push (concat "GTAGSREMOTEUSER="   user) process-environment)
-                    (push (concat "GTAGSREMOTECWD="     cwd) process-environment))))))))
+(defun gtags-put-on-remote-prefix (file)
+  (if (not file)
+      nil
+      (let ((prefix (file-remote-p file)))
+        (if (not prefix)
+            (progn
+              (setq prefix (file-remote-p default-directory))
+              ; Insert remote prefix.
+              (if prefix
+                  (concat prefix file)))
+            file))))
 
-(defun gtags-pop-tramp-environment ()
-  (if gtags-tramp-active
-      (progn
-        (setq gtags-tramp-active nil)
-        (setq gtags-global-command gtags-tramp-saved-global-command)
-        (pop process-environment)
-        (pop process-environment)
-        (pop process-environment)
-        (pop process-environment))))
+(defun gtags-tramp-path-name (file)
+  (if (or (not (string-match "^/" file)) (file-remote-p file))
+      file				; Relative path or remote path are always passes.
+      (if (not (file-remote-p default-directory))
+          file				; Local absolute path name.
+          (if (file-remote-p file)
+              file			; Remote path name.
+              (gtags-put-on-remote-prefix file)))))	; Make remote path name
 
 ;; End of TRAMP support
 
@@ -371,10 +340,7 @@
 ;;
 (defun gtags-auto-update ()
     (if (and gtags-mode gtags-auto-update buffer-file-name)
-        (progn
-          (gtags-push-tramp-environment)
-          (call-process gtags-global-command nil nil nil "-u" (concat "--single-update=" (gtags-buffer-file-name)))
-          (gtags-pop-tramp-environment))))
+        (process-file gtags-global-command nil nil nil "-u" (concat "--single-update=" (gtags-strip-remote-prefix buffer-file-name)))))
 ;;
 ;; utility
 ;;
@@ -463,9 +429,7 @@
         (setq option (concat option "i")))
     ; build completion list
     (set-buffer (generate-new-buffer "*Completions*"))
-    (gtags-push-tramp-environment)
-    (call-process gtags-global-command nil t nil option string)
-    (gtags-pop-tramp-environment)
+    (process-file gtags-global-command nil t nil option string)
     (goto-char (point-min))
     ;
     ; The specification of the completion for files is different from that for symbols.
@@ -493,7 +457,7 @@
     (save-excursion
       (setq buffer (generate-new-buffer (generate-new-buffer-name "*rootdir*")))
       (set-buffer buffer)
-      (if (= (call-process gtags-global-command nil t nil "-pr") 0)
+      (if (= (process-file gtags-global-command nil t nil "-pr") 0)
         (setq path (file-name-as-directory (buffer-substring (point-min)(1- (point-max))))))
       (kill-buffer buffer))
     path))
@@ -501,7 +465,7 @@
 ;; decode path name
 ;; The path is encoded by global(1) with the --encode-path="..." option.
 ;; A blank is encoded to %20.
-(defun gtags-decode-pathname (path)
+(defun gtags-decode-path-name (path)
   (let (start result)
     (while (setq start (string-match "%\\([0-9a-f][0-9a-f]\\)" path))
       (setq result (concat result
@@ -519,8 +483,6 @@
     (setq path gtags-rootdir)
     (if (not path)
         (setq path (gtags-get-rootpath)))
-    (if (not path)
-        (setq insert-default-directory (if (string-match gtags-tramp-path-regexp default-directory) nil t)))
     ;
     ; 19.6.5 Reading File Names (GNU Emacs Lisp Reference Manual)
     ; If both default and initial are nil and the buffer is visiting a file,
@@ -530,12 +492,12 @@
         (if (and insert-default-directory (not path))
             default-directory
             path))
-    (setq input (read-file-name "Visit root directory: " path default-path t))
+    (setq input (read-file-name "Visit root directory: " (gtags-put-on-remote-prefix path) default-path t))
     (if (equal "" input) nil
-      (if (not (file-directory-p input))
-        (message "%s is not directory." input)
-       (setq gtags-rootdir (expand-file-name input))
-       (setenv "GTAGSROOT" gtags-rootdir)))))
+        (if (not (file-directory-p input))
+            (message "%s is not directory." input)
+        (setq gtags-rootdir (expand-file-name input))
+        (setenv "GTAGSROOT" gtags-rootdir)))))
 
 (defun gtags-find-tag (&optional other-win)
   "Input tag name and move to the definition."
@@ -634,7 +596,7 @@
   (interactive)
   (let (tagname prompt input)
     (setq prompt "Parse file: ")
-    (setq input (read-file-name prompt (gtags-buffer-file-name) (gtags-buffer-file-name) t))
+    (setq input (read-file-name prompt (buffer-file-name) (buffer-file-name) t))
     (if (or (equal "" input) (not (file-regular-p input)))
         (message "Please specify an existing source file.")
        (setq tagname input)
@@ -658,11 +620,13 @@
 (defun gtags-display-browser ()
   "Display current screen on hypertext browser."
   (interactive)
+  (if (file-remote-p default-directory)
+      (message "gtags-display-browser: This command is not available in Tramp mode."))
   (if (= (gtags-current-lineno) 0)
       (message "This is a null file.")
       (if (not buffer-file-name)
           (message "This buffer doesn't have the file name.")
-          (call-process "gozilla"  nil nil nil (concat "+" (number-to-string (gtags-current-lineno))) (gtags-buffer-file-name)))))
+          (process-file "gozilla"  nil nil nil (concat "+" (number-to-string (gtags-current-lineno))) (file-name-nondirectory buffer-file-name)))))
 
 ; Private event-point
 ; (If there is no event-point then we use this version.
@@ -748,9 +712,11 @@
     (setq option "-x")
     (if (gtags-ignore-casep)
         (setq option (concat option "i")))
+    (if (equal 'nearness gtags-path-order)
+        (setq option (concat option "N")))
     (if (char-equal flag-char ?C)
 	; replaces the Windows path delimiter (\\) by / which is understood by global.
-        (setq context (concat "--from-here=" (number-to-string (gtags-current-lineno)) ":" (replace-in-string (gtags-buffer-file-name) "\\\\" "/")))
+        (setq context (concat "--from-here=" (number-to-string (gtags-current-lineno)) ":" (replace-in-string (gtags-strip-remote-prefix buffer-file-name) "\\\\" "/")))
         (setq option (concat option flag)))
     (cond
      ((char-equal flag-char ?C)
@@ -797,28 +763,44 @@
     (setq buffer (generate-new-buffer (generate-new-buffer-name (concat "*GTAGS SELECT* " prefix tagname))))
     (set-buffer buffer)
     (message "Searching %s ..." tagname)
-    (let (status)
-      (gtags-push-tramp-environment)
+    (let (status path-style)
+      (setq path-style "--path-style=")
       ;
       ; Path style is defined in gtags-path-style:
       ;   root: relative from the root of the project (Default)
       ;   relative: relative from the current directory
-      ;	absolute: absolute (relative from the system root directory)
+      ;	  absolute: absolute from the root directory
       ; In TRAMP mode, 'root' is automatically converted to 'relative'.
       ;
       (cond
        ((equal gtags-path-style 'absolute)
-        (setq option (concat option "a")))
-       ((and (not gtags-tramp-active) (equal gtags-path-style 'root))
-        (let (rootdir)
-          (if gtags-rootdir
-            (setq rootdir gtags-rootdir)
-           (setq rootdir (gtags-get-rootpath)))
-          (if rootdir (cd rootdir)))))
-      (setq status (if (equal flag "C")
-                      (call-process gtags-global-command nil t nil option "--encode-path=\" \t\"" context tagname)
-                      (call-process gtags-global-command nil t nil option "--encode-path=\" \t\"" tagname)))
-      (gtags-pop-tramp-environment)
+        (setq path-style (concat path-style "absolute")))
+       ((equal gtags-path-style 'relative)
+        (setq path-style (concat path-style "relative")))
+       ((equal gtags-path-style 'root)
+        (setq path-style (concat path-style "relative"))
+        (if (not (file-remote-p default-directory))
+            (let (rootdir)
+              (if gtags-rootdir
+                  (setq rootdir gtags-rootdir)
+                  (setq rootdir (gtags-get-rootpath)))
+              (if rootdir (cd rootdir))))))
+      (if (equal flag "f")
+          (setq tagname (gtags-strip-remote-prefix tagname)))
+      ;
+      ; Since Emacs 25.1, let-bind additional environment variables to
+      ; `process-environment' are sent to the remote process.
+      ; 'gtags-visit-rootdir requires this facility.
+      ;
+      (let* ((gtagsroot (gtags-strip-remote-prefix (getenv "GTAGSROOT")))
+             (process-environment
+               (if gtagsroot
+                   (cons (concat "GTAGSROOT=" gtagsroot) process-environment)
+                   process-environment)))
+        (setq status (if (equal flag "C")
+                         (process-file gtags-global-command nil t nil option path-style "--encode-path=\" \t\"" context tagname)
+                         (process-file gtags-global-command nil t nil option path-style "--encode-path=\" \t\"" tagname)))
+      )
       (if (not (= 0 status))
           (progn (message (buffer-substring (point-min)(1- (point-max))))
             (gtags-pop-context))
@@ -857,7 +839,7 @@
     (if (not (looking-at "[^ \t]+[ \t]+\\([0-9]+\\)[ \t]\\([^ \t]+\\)[ \t]"))
         (gtags-pop-context)
       (setq line (string-to-number (gtags-match-string 1)))
-      (setq file (gtags-decode-pathname (gtags-match-string 2)))
+      (setq file (gtags-tramp-path-name (gtags-decode-path-name (gtags-match-string 2))))
       ;;
       ;; Why should we load new file before killing current-buffer?
       ;;

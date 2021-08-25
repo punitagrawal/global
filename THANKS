@@ -5,7 +5,7 @@ ___________________________________
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  Copyright (c) 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2012
-	2013, 2014, 2015, 2016, 2017
+	2013, 2014, 2015, 2016, 2017, 2020
 	Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
@@ -29,6 +29,7 @@ Andrew Gallatin		bug report about generating wrong path.
 Andrew Ng		bug fix patch for global/output.c (segmentation violation).
 Aneesh Kumar		bug report about beta facility of gtags(1).
 Andrés Azar		Cygwin trouble report.
+Andrés ramí rez	patche that significantly improve TRAMP support.
 Andy Newman		bug report about treating tab character.
 Andy Zhou		bug report about gtags-parser overlook 'extern' prefixed function.
 Arne Schmitz		bug report about gtags-parser.
@@ -50,9 +51,9 @@ David Aspinwall		port to Cygwin 32 environment.
 David Brownlee		advice about fine coding style of C.
 David Keegan		patch for support of java 1.5 enums.
 David Panariti		patch for a bug fix of exuberant-ctags.c.
-Dimitri van Heesch      integration of Doxygen and GLOBAL.
+Dimitri van Heesch      integration of Doxygen and Global.
 Don Fisher		bug report about the buffer overflow in htags(1).
-Dunford, Martin		advice about Windows 32 version of GLOBAL.
+Dunford, Martin		advice about Windows 32 version of Global.
 Dirk Schultheis		advice about compat.h for Solaris.
 Earl Chew		bug fix patch for gtags-visit-rootdir of gtags.el.
 Emile Heyns		advice about writing code for generic UNIX.
@@ -71,13 +72,14 @@ Gustaf Waldemarson	bug report and advices about tag files corruption.
 Hageseter, Trond E.	bug report about gtags-parser.
 Hendrik Visage		bug report about gtags-parser(here document of PHP).
 Hideaki Okada		idea about -g option of global(1).
-Hideki Iwamoto		many bug reports, fixes and improvements about GLOBAL.
+Hideki Iwamoto		many bug reports, fixes and improvements about Global.
 			See also AUTHORS file.
 Hideki Mori		advice about the name of parser.
 Hidetaka KOIE		bug report and advice about configure.in for Solaris7.
 Hiroshi MIURA		idea about printing file name on browser's status bar.
 Hirohito Kato		bug fix patch for gtags-parser to pick up objects in extern "C" {...} block.
 Hiroyuki KOBAYASHI	bug report and fix patch for gtags-parser(1).
+Ingmar Sittl		bug report of the shebang of pygments_parser.py.
 James Ahlborn		bug fix patch for the java parser of gtags(1) to skip annotations.
 Jason Hood		port to DJGPP and Mingw32, and many important bug reports & fixes.
 			He also contributed to much of the --color and --literal option of global(1).
@@ -115,7 +117,7 @@ Marcello Nuccio		bug report about globash.rc.
 Marco Corvi		advice about Digital Unix 4.0C.
 Marcus Harnisch		suggestion about the --skip-unreadable option of gtags(1).
 Marius Gedminas		bug report and fix patch for htags(1).
-Mark Nudelman		GLOBAL tag support on less(1).
+Mark Nudelman		Global tag support on less(1).
 Marty Leisner		advice about --version option and some bug reports.
 Manolis Ragkousis	suggestion and patch for PATH_MAX for GNU/Hurd systems.
 Masahiro Fujiwara	bug report and fix patch for htags(1).
@@ -124,6 +126,8 @@ Masato Yoshida		bug report and fix method about <NOFRAME> tag.
 Mathieu Virbel		bug report and fix patch about dead symbolic link for gtags(1).
 Motonori Iwamuro	bug report and fix method about strbuf_fgets function.
 Mikolaj Sitarz		suggestion of the --single-update option of gtags(1).
+Michael Albinus		advice about using process-file function for TRAMP support.
+Michael Labbé		bug report about configure.ac (realpath).
 Michael Tocci		bug report about the C++ parser.
 Oleg Checkulaev		advice about writing code for generic UNIX.
 Oliver Paukstadt	idea about -c (gzipped html) option of htags(1).
@@ -140,7 +144,7 @@ Pavel Nedev		bug report about a defect when GTAGSLIBPATH + compact format.
 Ray Simard		detailed investigation about POSIX dirent(3).
 Richard Stallman	advice about gtags.el and GNU style packaging.
 Rob Fitzgerald		bug fix patch for global(1).
-Rohit Grover		bug report about GLOBAL's packaging.
+Rohit Grover		bug report about Global's packaging.
 Ron Lee			Debian package, htmake(1) and many bug reports.
 Rongsong Shen		bug report about gtags(1).
 Rui Lopes		report about build error in *BSD and revision of term.
@@ -153,12 +157,12 @@ Sanpei Yoshiro Mihira	bug report of xargs.c in Windows 32.
 Sean Farley		bug report of gozilla's wrong installation method.
 Seigo Ishigane		patch for pygments_parser.py.in needed in python3 + Windows.
 Sergio Talens-Oliag	writing on-line manual for systags(1).
-Shankar Chakkere	useful method to use vim editor with GLOBAL.
+Shankar Chakkere	useful method to use vim editor with Global.
 Shigeyuki Yamano	idea about -h option of htags(1).
 Shuichi KITAGUCHI	bug report in the built-in parser of gtags.
 Silas S. Brown		proofreading about manuals.
 Simon Dommett		many bug reports and fix patches.
-			He also rewrote GLOBAL's comments in the Doxygen style.
+			He also rewrote Global's comments in the Doxygen style.
 Stephen Huntley		bug report about htags(1).
 Sven Verdoolaege	support for gtags.pl(nvi-1.81.5).
 Steve Kirkendall	two commands of Elvis for external tagging system.
@@ -168,7 +172,7 @@ Tero Saarni		bug report about long line problem of htags(1).
 Thomas Gerigk		bug report about skip variable in gtags.conf.
 Thomas Klausner		report about groff's command error of *.1.
 Thomas Viehweger	patch for gtags.el to support XEmacs.
-Tim Vanderhoek		GLOBAL tag support on more(1).
+Tim Vanderhoek		Global tag support on more(1).
 Tobias Polzin		suggestion about correct treatment of CVS repository in htags.
 			He also changed gtags.el to leave visited files after 'gtags-pop-stack'.
 			He also reported C++ parsing problem with constructors and destructors.

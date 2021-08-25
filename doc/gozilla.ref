@@ -55,7 +55,7 @@ Hypertext of source code.
 @item @file{HTML/MAP}
 Mapping file for converting tag name into the path of tag list.
 @item @file{gtags.conf}, @file{$HOME/.globalrc}
-Configuration data for GNU GLOBAL.
+Configuration data for GNU Global.
 See gtags.conf(5).
 @end table
 @unnumberedsubsec ENVIRONMENT
@@ -90,7 +90,7 @@ epiphany(1),
 firefox(1),
 gtags.conf(5).
 
-GNU GLOBAL source code tag system@*
+GNU Global source code tag system@*
 (http://www.gnu.org/software/global/).
 @unnumberedsubsec AUTHORS
 Shigio YAMAGUCHI.

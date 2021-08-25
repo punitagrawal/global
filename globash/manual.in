@@ -23,11 +23,11 @@
 #	o texinfo format reference manual.
 #
 @HEADER	GLOBASH,1,May 2010,GNU Project
-@NAME	globash - a special shell for GLOBAL using GNU bash
+@NAME	globash - a special shell for Global using GNU bash
 @SYNOPSIS
 	@name{globash}
 @DESCRIPTION
-	@name{Globash} is a special shell for GLOBAL using GNU bash.
+	@name{Globash} is a special shell for Global using GNU bash.
 	You can use a lot of functions to ease reading source code,
 	like tag stack, tag mark and cookie.
 	At first, you should make tag files using @name{gtags} and
@@ -58,9 +58,9 @@
 	@xref{htags,1},
 	@xref{less,1}.
 
-        GNU GLOBAL source code tag system@br
+        GNU Global source code tag system@br
         (http://www.gnu.org/software/global/).
 @AUTHOR
 	Shigio YAMAGUCHI.
 @HISTORY
-	The @name{globash} command appeared in GLOBAL-4.1 (2001).
+	The @name{globash} command appeared in Global-4.1 (2001).

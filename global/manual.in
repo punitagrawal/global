@@ -286,7 +286,7 @@
 		and file @file{GTAGSROOT} exists in the same directory as @file{GTAGS}
 		then @name{global} sets @var{GTAGSROOT} to the contents of the file.
 	@item{@file{gtags.conf}, @file{$HOME/.globalrc}}
-		Configuration data for GNU GLOBAL.
+		Configuration data for GNU Global.
 		See @xref{gtags.conf,5}.
 	@end_itemize
 @ENVIRONMENT
@@ -351,7 +351,7 @@
 	@xref{less,1},
 	@xref{gtags.conf,5}.
 
-        GNU GLOBAL source code tag system@br
+        GNU Global source code tag system@br
         (http://www.gnu.org/software/global/).
 @AUTHOR
 	Shigio YAMAGUCHI, Hideki IWAMOTO and others.

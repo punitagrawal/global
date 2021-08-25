@@ -2,10 +2,10 @@ This is global.info, produced by makeinfo version 6.7 from global.texi.
 
 INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
-* GLOBAL: (global).             GNU GLOBAL source code tagging system.
+* Global: (global).             GNU Global source code tagging system.
 END-INFO-DIR-ENTRY
 
-This file documents the GNU GLOBAL source code tagging system.
+This file documents the GNU Global source code tagging system.
 
    Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2010,
 2011, 2012, 2013 Tama Communications Corporation
@@ -20,10 +20,10 @@ Free Documentation License".
 
 File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
-GNU GLOBAL source code tagging system
+GNU Global source code tagging system
 *************************************
 
-This manual documents version 6.6.5 of the GNU GLOBAL source code
+This manual documents version 6.6.7 of the GNU Global source code
 tagging system.
 
 * Menu:
@@ -42,10 +42,10 @@ File: global.info,  Node: Introduction,  Next: Command line,  Prev: Top,  Up: To
 1 Overview of this tool
 ***********************
 
-1.1 What is GNU GLOBAL?
+1.1 What is GNU Global?
 =======================
 
-GNU GLOBAL is a source code tagging system that works the same way
+GNU Global is a source code tagging system that works the same way
 across diverse environments, such as Emacs editor, Vi editor, Less
 viewer, Bash shell, various web browsers, etc.  You can find the
 locations of symbols such as functions, macros, structs and classes in
@@ -57,7 +57,7 @@ different from them at the point of independence of any editor.
 1.2 Concept of project
 ======================
 
-GNU GLOBAL can treat a source tree containing sub-directories as a
+GNU Global can treat a source tree containing sub-directories as a
 project.  Anywhere in the project, you can utilize a high performance
 tag database.  You need not specify where the database is, as global(1)
 locates it by itself.  Because of this feature, you can move freely in a
@@ -66,7 +66,7 @@ project, and in and out of many projects.
 1.3 Features
 ============
 
-GNU GLOBAL has the following features:
+GNU Global has the following features:
 
    * supports C, Yacc, Java, PHP4 and assembly.
 
@@ -131,7 +131,7 @@ File: global.info,  Node: Command line,  Next: Applications,  Prev: Introduction
 **************
 
 You can use tag facilities from the shell command line.  It is a big
-merit of GLOBAL compared with any other tagging system.
+merit of Global compared with any other tagging system.
 
 * Menu:
 
@@ -466,14 +466,14 @@ File: global.info,  Node: Applications,  Next: Other topics,  Prev: Command line
 * Menu:
 
 * GloBash::                             Global facility for Bash.
-* Less viewer::                         Less using GLOBAL.
-* Nvi-1.81.5 editor::                   Nvi-1.81.5 using GLOBAL.
-* Elvis editor::                        Elvis using GLOBAL.
-* Vim editor::                          Vim using GLOBAL.
-* Emacs editor::                        Extended Emacs using GLOBAL.
+* Less viewer::                         Less using Global.
+* Nvi-1.81.5 editor::                   Nvi-1.81.5 using Global.
+* Elvis editor::                        Elvis using Global.
+* Vim editor::                          Vim using Global.
+* Emacs editor::                        Extended Emacs using Global.
 * Gtags-cscope::                        Gtags-cscope.
 * Web browser::                         Hypertext generator.
-* Doxygen documentation system::        Doxygen using GLOBAL.
+* Doxygen documentation system::        Doxygen using Global.
 
 
 File: global.info,  Node: GloBash,  Next: Less viewer,  Up: Applications
@@ -679,10 +679,10 @@ File: global.info,  Node: Usage(globash),  Prev: Preparation(globash),  Up: GloB
 
 File: global.info,  Node: Less viewer,  Next: Nvi-1.81.5 editor,  Prev: GloBash,  Up: Applications
 
-3.2 Less using GLOBAL
+3.2 Less using Global
 =====================
 
-You can use GLOBAL as a tagging system of less(1) viewer instead of
+You can use Global as a tagging system of less(1) viewer instead of
 ctags.
 
 * Menu:
@@ -697,7 +697,7 @@ File: global.info,  Node: Features(Less),  Next: Preparation(Less),  Up: Less vi
 3.2.1 Features
 --------------
 
-   * You can use most of GLOBAL's facilities from less(1) viewer.
+   * You can use most of Global's facilities from less(1) viewer.
    * Less viewer supports duplicated tag.
 
 
@@ -768,7 +768,7 @@ File: global.info,  Node: Usage(Less),  Prev: Preparation(Less),  Up: Less viewe
               # all files including 'init' in their path.
               $ global -Px init | less -T-
 
-   * If your editor doesn't support GLOBAL directly then you can use
+   * If your editor doesn't support Global directly then you can use
      less(1) as a footstool.
 
               # invoke less
@@ -803,10 +803,10 @@ File: global.info,  Node: Usage(Less),  Prev: Preparation(Less),  Up: Less viewe
 
 File: global.info,  Node: Nvi-1.81.5 editor,  Next: Elvis editor,  Prev: Less viewer,  Up: Applications
 
-3.3 Nvi-1.81.5 using GLOBAL
+3.3 Nvi-1.81.5 using Global
 ===========================
 
-You can use GLOBAL as a tagging system of Nvi editor instead of ctags.
+You can use Global as a tagging system of Nvi editor instead of ctags.
 
 * Menu:
 
@@ -820,7 +820,7 @@ File: global.info,  Node: Features(Nvi-1.81.5),  Next: Preparation(Nvi-1.81.5), 
 3.3.1 Features
 --------------
 
-   * You can use most of GLOBAL's facilities from Nvi.
+   * You can use most of Global's facilities from Nvi.
    * Intelligent recognition of the current token and its type.
 
 
@@ -920,11 +920,11 @@ File: global.info,  Node: Usage(Nvi-1.81.5),  Prev: Preparation(Nvi-1.81.5),  Up
 
 File: global.info,  Node: Elvis editor,  Next: Vim editor,  Prev: Nvi-1.81.5 editor,  Up: Applications
 
-3.4 Elvis using GLOBAL
+3.4 Elvis using Global
 ======================
 
 Elvis 2.1 or later has two variables, 'tagprg' and 'tagprgonce', for
-running an external tag search program.  You can use them for GLOBAL.
+running an external tag search program.  You can use them for Global.
 
 * Menu:
 
@@ -938,7 +938,7 @@ File: global.info,  Node: Features(Elvis),  Next: Preparation(Elvis),  Up: Elvis
 3.4.1 Features
 --------------
 
-   * You can use most of GLOBAL's facilities from Elvis.
+   * You can use most of Global's facilities from Elvis.
    * Mouse is supported.
 
 
@@ -1060,7 +1060,7 @@ File: global.info,  Node: Usage(Elvis),  Prev: Preparation(Elvis),  Up: Elvis ed
 
 File: global.info,  Node: Vim editor,  Next: Emacs editor,  Prev: Elvis editor,  Up: Applications
 
-3.5 Vim using GLOBAL
+3.5 Vim using Global
 ====================
 
 In Vim 6.2 or later, you can use the 'gtags.vim' script.
@@ -1077,7 +1077,7 @@ File: global.info,  Node: Features(Vim),  Next: Preparation(Vim),  Up: Vim edito
 3.5.1 Features
 --------------
 
-   * You can use most of GLOBAL's facilities from Vim.
+   * You can use most of Global's facilities from Vim.
    * Intelligent recognition of the current token and its type.
    * Special characters '%', '#' and input completion are available.
 
@@ -1230,10 +1230,10 @@ File: global.info,  Node: Usage(Vim),  Prev: Preparation(Vim),  Up: Vim editor
 
 File: global.info,  Node: Emacs editor,  Next: Gtags-cscope,  Prev: Vim editor,  Up: Applications
 
-3.6 Extended Emacs using GLOBAL
+3.6 Extended Emacs using Global
 ===============================
 
-You can use GLOBAL as a tagging system of Emacs editor instead of etags.
+You can use Global as a tagging system of Emacs editor instead of etags.
 
 * Menu:
 
@@ -1247,7 +1247,7 @@ File: global.info,  Node: Features(Emacs),  Next: Preparation(Emacs),  Up: Emacs
 3.6.1 Features
 --------------
 
-   * You can use most of GLOBAL's facilities from the editor.
+   * You can use most of Global's facilities from the editor.
    * More intelligent recognition of the current token and its type.
    * Tag completion is available for input tag name.
    * Mouse is supported.
@@ -1395,9 +1395,9 @@ File: global.info,  Node: Gtags-cscope,  Next: Web browser,  Prev: Emacs editor,
 3.7 Gtags-cscope
 ================
 
-You can also use cscope as a client of GNU GLOBAL. GLOBAL package
+You can also use cscope as a client of GNU Global.  Global package
 includes a command named 'gtags-cscope' which is a port of cscope, that
-is, it is cscope itself except that it use GLOBAL as a search engine
+is, it is cscope itself except that it use Global as a search engine
 instead of cscope's one.
 
 
@@ -1421,7 +1421,7 @@ File: global.info,  Node: Web browser,  Next: Doxygen documentation system,  Pre
 3.8 Hypertext generator
 =======================
 
-You can use GLOBAL's facilities from web browsers.
+You can use Global's facilities from web browsers.
 
 * Menu:
 
@@ -1507,10 +1507,10 @@ source directory.
 
 File: global.info,  Node: Doxygen documentation system,  Prev: Web browser,  Up: Applications
 
-3.9 Doxygen using GLOBAL
+3.9 Doxygen using Global
 ========================
 
-You can use GLOBAL as a source browser of Doxygen.
+You can use Global as a source browser of Doxygen.
 
    Doxygen Release 1.4.3 or later has config option 'USE_HTAGS'.  When
 enabled in combination with 'SOURCE_BROWSER=YES', htags(1) is used as a
@@ -1540,17 +1540,17 @@ File: global.info,  Node: Other topics,  Next: Reference,  Prev: Applications,  
 
 * Menu:
 
-* Configuration::                       How to configure GLOBAL.
+* Configuration::                       How to configure Global.
 * Plug-in::                             Plug-in parser.
 * Incremental updating::                Incremental updating.
 
 
 File: global.info,  Node: Configuration,  Next: Plug-in,  Up: Other topics
 
-4.1 How to configure GLOBAL
+4.1 How to configure Global
 ===========================
 
-You can customize GLOBAL using configuration file.
+You can customize Global using configuration file.
 
          # cp gtags.conf /etc/gtags.conf         # system wide config file.
          # vi /etc/gtags.conf
@@ -1558,8 +1558,8 @@ You can customize GLOBAL using configuration file.
          $ cp gtags.conf $HOME/.globalrc         # personal config file.
          $ vi $HOME/.globalrc
 
-   If '$HOME/.globalrc' exists then GLOBAL uses it; else if
-'/etc/gtags.conf' exists then GLOBAL uses it; otherwise default value is
+   If '$HOME/.globalrc' exists then Global uses it; else if
+'/etc/gtags.conf' exists then Global uses it; otherwise default value is
 used.  The format of 'gtags.conf' resembles termcap(5).  By default,
 'default' target is used.  About the capabilities, please see each
 command manual.  *Note Reference::.
@@ -1578,7 +1578,7 @@ function layer plug-in parser.
 
    You can use Universal Ctags as a plug-in parser too.
 
-         # Installation of GLOBAL
+         # Installation of Global
          # It assumed that ctags command is installed in '/usr/local/bin'.
 
          $ ./configure --with-universal-ctags=/usr/local/bin/ctags
@@ -1586,7 +1586,7 @@ function layer plug-in parser.
          $ sudo make install
 
          # Executing of gtags
-         # It assumed that GLOBAL is installed in '/usr/local'.
+         # It assumed that Global is installed in '/usr/local'.
 
          $ export GTAGSCONF=/usr/local/share/gtags/gtags.conf
          $ export GTAGSLABEL=new-ctags
@@ -1637,8 +1637,8 @@ File: global.info,  Node: Reference,  Next: Copying This Manual,  Prev: Other to
 * htags-server::   htags-server - a private Web/CGI server for htags
 * gozilla::        gozilla - force firefox to display specified part of a source file
 * gtags-cscope::   gtags-cscope - interactively examine a C program
-* globash::        globash - a special shell for GLOBAL using GNU bash
-* gtags.conf::     gtags.conf - configuration data for GNU GLOBAL
+* globash::        globash - a special shell for Global using GNU bash
+* gtags.conf::     gtags.conf - configuration data for GNU Global
 
 
 File: global.info,  Node: global,  Next: gtags,  Up: Reference
@@ -1912,7 +1912,7 @@ FILES
      exists in the same directory as 'GTAGS' then global sets GTAGSROOT
      to the contents of the file.
 'gtags.conf', '$HOME/.globalrc'
-     Configuration data for GNU GLOBAL. See gtags.conf(5).
+     Configuration data for GNU Global.  See gtags.conf(5).
 
 ENVIRONMENT
 -----------
@@ -1980,7 +1980,7 @@ SEE ALSO
 
 gtags(1), htags(1), less(1), gtags.conf(5).
 
-   GNU GLOBAL source code tag system
+   GNU Global source code tag system
 (http://www.gnu.org/software/global/).
 
 AUTHOR
@@ -2130,7 +2130,7 @@ FILES
 'GPATH'
      Tag file for source files.
 'gtags.conf', '$HOME/.globalrc'
-     Configuration data for GNU GLOBAL. See gtags.conf(5).
+     Configuration data for GNU Global.  See gtags.conf(5).
 'gtags.files'
      The list of candidates of target files.
 '.notfunction'
@@ -2148,8 +2148,10 @@ GTAGSCACHE
 GTAGSCONF
      Configuration file.
 GTAGSFORCECPP
-     If this variable is set, each file whose suffix is '.h' is treated
-     as a C++ source file.
+     If this variable is set, each file whose suffix is '.h' is forcibly
+     parsed by the built-in C++ parser.  Do not set this variable if you
+     are using plug-in parsers.  This variable and the built-in C++
+     parser are deprecated.
 GTAGSFORCEENDBLOCK
      If this variable is set, each } at the first column brings end of
      block of 0 level.
@@ -2241,7 +2243,7 @@ SEE ALSO
 
 global(1), htags(1), gtags.conf(5).
 
-   GNU GLOBAL source code tag system
+   GNU Global source code tag system
 (http://www.gnu.org/software/global/).
 
 BUG
@@ -2465,7 +2467,7 @@ FILES
 'GPATH'
      Tag file for source files.
 'gtags.conf', '$HOME/.globalrc'
-     Configuration data for GNU GLOBAL. See gtags.conf(5).
+     Configuration data for GNU Global.  See gtags.conf(5).
 'HTML/FILEMAP'
      Mapping file for converting file name into the path of the file.
 'HTML/GTAGSROOT'
@@ -2532,7 +2534,7 @@ SEE ALSO
 
 htags-server(1), global(1), gtags(1), gtags.conf(5).
 
-   GNU GLOBAL source code tag system
+   GNU Global source code tag system
 (http://www.gnu.org/software/global/).
 
 BUG
@@ -2634,7 +2636,7 @@ SEE ALSO
 
 global(1), gtags(1), htags(1), python(1), ruby(1).
 
-   GNU GLOBAL source code tag system
+   GNU Global source code tag system
 (http://www.gnu.org/software/global/).
 
 AUTHOR
@@ -2645,7 +2647,7 @@ Shigio YAMAGUCHI.
 HISTORY
 -------
 
-The htags-server command appeared in GLOBAL-6.3 (2014).
+The htags-server command appeared in Global-6.3 (2014).
 
 
 File: global.info,  Node: gozilla,  Next: gtags-cscope,  Prev: htags-server,  Up: Reference
@@ -2718,7 +2720,7 @@ FILES
 'HTML/MAP'
      Mapping file for converting tag name into the path of tag list.
 'gtags.conf', '$HOME/.globalrc'
-     Configuration data for GNU GLOBAL. See gtags.conf(5).
+     Configuration data for GNU Global.  See gtags.conf(5).
 
 ENVIRONMENT
 -----------
@@ -2754,7 +2756,7 @@ SEE ALSO
 
 global(1), gtags(1), htags(1), epiphany(1), firefox(1), gtags.conf(5).
 
-   GNU GLOBAL source code tag system
+   GNU Global source code tag system
 (http://www.gnu.org/software/global/).
 
 AUTHORS
@@ -2798,7 +2800,7 @@ cross-reference is rebuilt, it is updated incrementally, which makes
 rebuilding faster than the initial build.
 
    gtags-cscope is a tool which just borrows user interface of cscope;
-it is GLOBAL itself for the substance.
+it is Global itself for the substance.
 
 OPTIONS
 -------
@@ -3050,7 +3052,7 @@ VIEWER
      Preferred file display program (such as less), which overrides
      EDITOR (see above).
 
-   The following environment variables are of GLOBAL origin.
+   The following environment variables are of Global origin.
 
 GTAGSCONF
      Configuration file.
@@ -3094,20 +3096,20 @@ FILES
      exists in the same directory as 'GTAGS' then global sets GTAGSROOT
      to the contents of the file.
 'gtags.conf', '$HOME/.globalrc'
-     Configuration data for GNU GLOBAL. See gtags.conf(5).
+     Configuration data for GNU Global.  See gtags.conf(5).
 
 SEE ALSO
 --------
 
 gtags(1), global(1), htags(1).
 
-   GNU GLOBAL source code tag system
+   GNU Global source code tag system
 (http://www.gnu.org/software/global/).
 
 BUG
 ---
 
-The function field of the display is almost <unknown> since GLOBAL
+The function field of the display is almost <unknown> since Global
 doesn't recognize it.
 
    'Find functions called by this function' is not implemented.
@@ -3122,20 +3124,20 @@ HISTORY
 
 Cscope was originally developed at Bell Labs in the early 1980s, and was
 released as free software under the BSD license in April 2000.
-Gtags-cscope is a derivative of cscope to use GLOBAL as the back-end.
+Gtags-cscope is a derivative of cscope to use Global as the back-end.
 Its line-oriented interface was originally written in 2006, and was
 re-implemented in 2011 using cscope itself.
 
 
 File: global.info,  Node: globash,  Next: gtags.conf,  Prev: gtags-cscope,  Up: Reference
 
-5.7 globash - a special shell for GLOBAL using GNU bash
+5.7 globash - a special shell for Global using GNU bash
 =======================================================
 
 NAME
 ----
 
-globash - a special shell for GLOBAL using GNU bash
+globash - a special shell for Global using GNU bash
 
 SYNOPSIS
 --------
@@ -3145,7 +3147,7 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-Globash is a special shell for GLOBAL using GNU bash.  You can use a lot
+Globash is a special shell for Global using GNU bash.  You can use a lot
 of functions to ease reading source code, like tag stack, tag mark and
 cookie.  At first, you should make tag files using gtags and invoke this
 command in the project.  Please refer to the help (type 'ghelp<RET>')
@@ -3178,7 +3180,7 @@ SEE ALSO
 
 gtags(1), htags(1), less(1).
 
-   GNU GLOBAL source code tag system
+   GNU Global source code tag system
 (http://www.gnu.org/software/global/).
 
 AUTHOR
@@ -3189,18 +3191,18 @@ Shigio YAMAGUCHI.
 HISTORY
 -------
 
-The globash command appeared in GLOBAL-4.1 (2001).
+The globash command appeared in Global-4.1 (2001).
 
 
 File: global.info,  Node: gtags.conf,  Prev: globash,  Up: Reference
 
-5.8 gtags.conf - configuration data for GNU GLOBAL
+5.8 gtags.conf - configuration data for GNU Global
 ==================================================
 
 NAME
 ----
 
-gtags.conf - configuration data for GNU GLOBAL
+gtags.conf - configuration data for GNU Global
 
 SYNOPSIS
 --------
@@ -3318,13 +3320,13 @@ SEE ALSO
 
 global(1), gozilla(1), gtags(1), htags(1).
 
-   GNU GLOBAL source code tag system
+   GNU Global source code tag system
 (http://www.gnu.org/software/global/).
 
 HISTORY
 -------
 
-The gtags.conf file appeared in GLOBAL-3.0 (1998).
+The gtags.conf file appeared in Global-3.0 (1998).
 
 
 File: global.info,  Node: Copying This Manual,  Next: Index,  Prev: Reference,  Up: Top
@@ -3843,27 +3845,27 @@ Node: Features(Emacs)40164
 Node: Preparation(Emacs)40496
 Node: Usage(Emacs)41734
 Node: Gtags-cscope45029
-Node: Web browser45814
-Node: Features(browser)46193
-Node: Preparation(browser)46676
-Node: Usage(browser)47859
-Node: Doxygen documentation system48620
-Node: Other topics49336
-Node: Configuration49651
-Node: Plug-in50355
-Node: Incremental updating51275
-Node: Reference52459
-Node: global53161
-Node: gtags66658
-Node: htags76880
-Node: htags-server86888
-Node: gozilla89130
-Node: gtags-cscope91881
-Node: globash103432
-Node: gtags.conf104647
-Node: Copying This Manual108534
-Node: GNU Free Documentation License108771
-Node: Index131162
+Node: Web browser45815
+Node: Features(browser)46194
+Node: Preparation(browser)46677
+Node: Usage(browser)47860
+Node: Doxygen documentation system48621
+Node: Other topics49337
+Node: Configuration49652
+Node: Plug-in50356
+Node: Incremental updating51276
+Node: Reference52460
+Node: global53162
+Node: gtags66660
+Node: htags77026
+Node: htags-server87035
+Node: gozilla89277
+Node: gtags-cscope92029
+Node: globash103581
+Node: gtags.conf104796
+Node: Copying This Manual108683
+Node: GNU Free Documentation License108920
+Node: Index131311
 
 End Tag Table
 

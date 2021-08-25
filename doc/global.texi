@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename global.info
-@settitle GNU GLOBAL source code tagging system
+@settitle GNU Global source code tagging system
 @comment %**end of header
 
 @include version.texi
@@ -13,12 +13,12 @@
 @ifinfo
 @dircategory Development
 @direntry
-* GLOBAL: (global).             GNU GLOBAL source code tagging system.
+* Global: (global).             GNU Global source code tagging system.
 @end direntry
 @end ifinfo
 
 @ifinfo
-This file documents the GNU GLOBAL source code tagging system.
+This file documents the GNU Global source code tagging system.
 
 Copyright @copyright{} 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2010,
 2011, 2012, 2013 Tama Communications Corporation
@@ -33,8 +33,8 @@ Free Documentation License".
 @end ifinfo
 
 @titlepage
-@title GNU GLOBAL Source Code Tag System
-@subtitle Edition @value{EDITION}, for GNU GLOBAL version @value{VERSION}
+@title GNU Global Source Code Tag System
+@subtitle Edition @value{EDITION}, for GNU Global version @value{VERSION}
 @subtitle @value{UPDATED}
 @author by Tama Communications Corporation
 @c copyright page
@@ -43,7 +43,7 @@ Free Documentation License".
 Copyright @copyright{} 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2010,
 2011, 2012, 2013 Tama Communications Corporation
 @sp 2
-This manual is for @acronym{GNU} GLOBAL (version @value{VERSION},
+This manual is for @acronym{GNU} Global (version @value{VERSION},
 @value{UPDATED}), a source code tagging system that works the same way
 across diverse environments.
 @sp 2
@@ -62,9 +62,9 @@ Free Documentation License".
 
 @ifnottex
 @node Top
-@top GNU GLOBAL source code tagging system
+@top GNU Global source code tagging system
 
-This manual documents version @value{VERSION} of the GNU GLOBAL source code tagging system.
+This manual documents version @value{VERSION} of the GNU Global source code tagging system.
 
 @menu
 * Introduction::                        Overview of this tool.
@@ -83,9 +83,9 @@ This manual documents version @value{VERSION} of the GNU GLOBAL source code tagg
 @node Introduction
 @chapter Overview of this tool
 
-@section What is GNU GLOBAL?
+@section What is GNU Global?
 
-GNU GLOBAL is a source code tagging system that works the same way
+GNU Global is a source code tagging system that works the same way
 across diverse environments, such as Emacs editor, Vi editor,
 Less viewer, Bash shell, various web browsers, etc.
 You can find the locations of symbols such as functions, macros, structs and classes
@@ -97,7 +97,7 @@ independence of any editor.
 
 @section Concept of project
 
-GNU GLOBAL can treat a source tree containing sub-directories as a project.
+GNU Global can treat a source tree containing sub-directories as a project.
 Anywhere in the project, you can utilize a high performance tag database.
 You need not specify where the database is, as global(1) locates it by itself.
 Because of this feature, you can move freely in a project,
@@ -105,7 +105,7 @@ and in and out of many projects.
 
 @section Features
 
-GNU GLOBAL has the following features:
+GNU Global has the following features:
 
 @itemize @bullet
 @item supports C, Yacc, Java, PHP4 and assembly.
@@ -174,7 +174,7 @@ GNU GLOBAL has the following features:
 @chapter Command line
 
 You can use tag facilities from the shell command line.
-It is a big merit of GLOBAL compared with any other tagging system.
+It is a big merit of Global compared with any other tagging system.
 
 @menu
 * Preparation::                         Preparation.
@@ -570,14 +570,14 @@ one command. For example:
 
 @menu
 * GloBash::                             Global facility for Bash.
-* Less viewer::                         Less using GLOBAL.
-* Nvi-1.81.5 editor::                   Nvi-1.81.5 using GLOBAL.
-* Elvis editor::                        Elvis using GLOBAL.
-* Vim editor::                          Vim using GLOBAL.
-* Emacs editor::                        Extended Emacs using GLOBAL.
+* Less viewer::                         Less using Global.
+* Nvi-1.81.5 editor::                   Nvi-1.81.5 using Global.
+* Elvis editor::                        Elvis using Global.
+* Vim editor::                          Vim using Global.
+* Emacs editor::                        Extended Emacs using Global.
 * Gtags-cscope::                        Gtags-cscope.
 * Web browser::                         Hypertext generator.
-* Doxygen documentation system::        Doxygen using GLOBAL.
+* Doxygen documentation system::        Doxygen using Global.
 @end menu
 
 @c ***************************************************************************
@@ -811,9 +811,9 @@ Cookie directories are valid until you delete them.
 @c Less viewer
 @c ***************************************************************************
 @node Less viewer
-@section Less using GLOBAL
+@section Less using Global
 
-You can use GLOBAL as a tagging system of less(1) viewer instead of ctags.
+You can use Global as a tagging system of less(1) viewer instead of ctags.
 
 @menu
 * Features(Less)::                       Features.
@@ -827,7 +827,7 @@ You can use GLOBAL as a tagging system of less(1) viewer instead of ctags.
 
 @itemize @bullet
 @item
-You can use most of GLOBAL's facilities from less(1) viewer.
+You can use most of Global's facilities from less(1) viewer.
 @item
 Less viewer supports duplicated tag.
 @end itemize
@@ -911,7 +911,7 @@ In the same way, you can use the following command lines:
     $ global -Px init | less -T-
 @end example
 
-@item If your editor doesn't support GLOBAL directly then you can use less(1)
+@item If your editor doesn't support Global directly then you can use less(1)
 as a footstool.
 
 @example
@@ -951,9 +951,9 @@ as a footstool.
 @c Nvi-1.81.5 editor
 @c ***************************************************************************
 @node Nvi-1.81.5 editor
-@section Nvi-1.81.5 using GLOBAL
+@section Nvi-1.81.5 using Global
 
-You can use GLOBAL as a tagging system of Nvi editor instead of ctags.
+You can use Global as a tagging system of Nvi editor instead of ctags.
 
 @menu
 * Features(Nvi-1.81.5)::                Features.
@@ -967,7 +967,7 @@ You can use GLOBAL as a tagging system of Nvi editor instead of ctags.
 
 @itemize @bullet
 @item
-You can use most of GLOBAL's facilities from Nvi.
+You can use most of Global's facilities from Nvi.
 @item
 Intelligent recognition of the current token and its type.
 @end itemize
@@ -1085,10 +1085,10 @@ display the tags stack.
 @c Elvis editor
 @c ***************************************************************************
 @node Elvis editor
-@section Elvis using GLOBAL
+@section Elvis using Global
 
 Elvis 2.1 or later has two variables, @code{tagprg} and @code{tagprgonce}, for
-running an external tag search program. You can use them for GLOBAL.
+running an external tag search program. You can use them for Global.
 
 @menu
 * Features(Elvis)::                     Features.
@@ -1102,7 +1102,7 @@ running an external tag search program. You can use them for GLOBAL.
 
 @itemize @bullet
 @item
-You can use most of GLOBAL's facilities from Elvis.
+You can use most of Global's facilities from Elvis.
 @item
 Mouse is supported.
 @end itemize
@@ -1254,7 +1254,7 @@ To come back, double-click the right button.
 @c Vim editor
 @c ***************************************************************************
 @node Vim editor
-@section Vim using GLOBAL
+@section Vim using Global
 
 In Vim 6.2 or later, you can use the @file{gtags.vim} script.
 
@@ -1270,7 +1270,7 @@ In Vim 6.2 or later, you can use the @file{gtags.vim} script.
 
 @itemize @bullet
 @item
-You can use most of GLOBAL's facilities from Vim.
+You can use most of Global's facilities from Vim.
 @item
 Intelligent recognition of the current token and its type.
 @item
@@ -1471,9 +1471,9 @@ Suggested map:
 @c Emacs editor
 @c ***************************************************************************
 @node Emacs editor
-@section Extended Emacs using GLOBAL
+@section Extended Emacs using Global
 
-You can use GLOBAL as a tagging system of Emacs editor instead of etags.
+You can use Global as a tagging system of Emacs editor instead of etags.
 
 @menu
 * Features(Emacs)::                     Features.
@@ -1487,7 +1487,7 @@ You can use GLOBAL as a tagging system of Emacs editor instead of etags.
 
 @itemize @bullet
 @item
-You can use most of GLOBAL's facilities from the editor.
+You can use most of Global's facilities from the editor.
 @item
 More intelligent recognition of the current token and its type.
 @item
@@ -1657,9 +1657,9 @@ To return to the previous position, click the right button.
 @node Gtags-cscope
 @section Gtags-cscope
 
-You can also use cscope as a client of GNU GLOBAL. GLOBAL package includes
+You can also use cscope as a client of GNU Global. Global package includes
 a command named 'gtags-cscope' which is a port of cscope, that is, it is cscope
-itself except that it use GLOBAL as a search engine instead of cscope's one.
+itself except that it use Global as a search engine instead of cscope's one.
 
 @example
 
@@ -1687,7 +1687,7 @@ you can use the tag stack facility of Vim.
 @node Web browser
 @section Hypertext generator
 
-You can use GLOBAL's facilities from web browsers.
+You can use Global's facilities from web browsers.
 
 @menu
 * Features(browser)::                   Features.
@@ -1773,9 +1773,9 @@ But in this case, you must not move the HTML directory from the source directory
 @c Doxygen documentation system
 @c ***************************************************************************
 @node Doxygen documentation system
-@section Doxygen using GLOBAL
+@section Doxygen using Global
 
-You can use GLOBAL as a source browser of Doxygen.
+You can use Global as a source browser of Doxygen.
 
 Doxygen Release 1.4.3 or later has config option @code{USE_HTAGS}.
 When enabled in combination with @code{SOURCE_BROWSER=YES}, htags(1) is
@@ -1806,16 +1806,16 @@ $ lynx html/index.html
 @chapter Other topics
 
 @menu
-* Configuration::                       How to configure GLOBAL.
+* Configuration::                       How to configure Global.
 * Plug-in::                             Plug-in parser.
 * Incremental updating::                Incremental updating.
 @end menu
 
 @c ***************************************************************************
 @node   Configuration
-@section How to configure GLOBAL
+@section How to configure Global
 
-You can customize GLOBAL using configuration file.
+You can customize Global using configuration file.
 
 @example
     # cp gtags.conf /etc/gtags.conf         # system wide config file.
@@ -1825,8 +1825,8 @@ You can customize GLOBAL using configuration file.
     $ vi $HOME/.globalrc
 @end example
 
-If @file{$HOME/.globalrc} exists then GLOBAL uses it; else if @file{/etc/gtags.conf}
-exists then GLOBAL uses it; otherwise default value is used.
+If @file{$HOME/.globalrc} exists then Global uses it; else if @file{/etc/gtags.conf}
+exists then Global uses it; otherwise default value is used.
 The format of @file{gtags.conf} resembles termcap(5). By default, 'default'
 target is used.
 About the capabilities, please see each command manual. @xref{Reference}.
@@ -1844,7 +1844,7 @@ See @file{plugin-factory/} to discover the function layer plug-in parser.
 You can use Universal Ctags as a plug-in parser too.
 
 @example
-    # Installation of GLOBAL
+    # Installation of Global
     # It assumed that ctags command is installed in '/usr/local/bin'.
 
     $ ./configure --with-universal-ctags=/usr/local/bin/ctags
@@ -1852,7 +1852,7 @@ You can use Universal Ctags as a plug-in parser too.
     $ sudo make install
 
     # Executing of gtags
-    # It assumed that GLOBAL is installed in '/usr/local'.
+    # It assumed that Global is installed in '/usr/local'.
 
     $ export GTAGSCONF=/usr/local/share/gtags/gtags.conf
     $ export GTAGSLABEL=new-ctags

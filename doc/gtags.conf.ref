@@ -1,6 +1,6 @@
 @c This file is generated automatically by convert.pl from libutil/manual.in.
 @unnumberedsubsec NAME
-gtags.conf - configuration data for GNU GLOBAL
+gtags.conf - configuration data for GNU Global
 @unnumberedsubsec SYNOPSIS
 @quotation
 @file{gtags.conf}@*
@@ -109,7 +109,7 @@ gozilla(1),
 gtags(1),
 htags(1).
 
-GNU GLOBAL source code tag system@*
+GNU Global source code tag system@*
 (http://www.gnu.org/software/global/).
 @unnumberedsubsec HISTORY
-The gtags.conf file appeared in GLOBAL-3.0 (1998).
+The gtags.conf file appeared in Global-3.0 (1998).

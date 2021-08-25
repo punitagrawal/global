@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 @HEADER	GTAGS.CONF,5,Nov 2015,GNU Project
-@NAME	gtags.conf - configuration data for GNU GLOBAL
+@NAME	gtags.conf - configuration data for GNU Global
 @SYNOPSIS
 	@file{gtags.conf}
 	@file{~/.globalrc}
@@ -125,7 +125,7 @@
 	@xref{gtags,1},
 	@xref{htags,1}.
 
-	GNU GLOBAL source code tag system@br
+	GNU Global source code tag system@br
 	(http://www.gnu.org/software/global/).
 @HISTORY
-	The @name{gtags.conf} file appeared in GLOBAL-3.0 (1998).
+	The @name{gtags.conf} file appeared in Global-3.0 (1998).
