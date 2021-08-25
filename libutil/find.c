@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2008,
- *	2009, 2011, 2012, 2014, 2015, 2016, 2017, 2018
+ *	2009, 2011, 2012, 2014, 2015, 2016, 2017, 2018, 2020
  * Tama Communications Corporation
  *
  * This file is part of GNU GLOBAL.
@@ -69,7 +69,7 @@
 #include "strbuf.h"
 #include "strlimcpy.h"
 #include "test.h"
-#include "varray.h"
+#include "vstack.h"
 
 /*
  * use an appropriate string comparison for the file system; define the position of the root slash.
@@ -485,13 +485,12 @@ skipthisfile(const char *path)
  * Directory Stack
  */
 static char dir[MAXPATHLEN];			/**< directory path */
-static VARRAY *stack;				/**< dynamic allocated array */
+static VSTACK *vstack;				/**< dynamic allocated stack */
 struct stack_entry {
 	STRBUF *sb;
 	char *real;
 	char *dirp, *start, *end, *p;
 };
-static int current_entry;			/**< current entry of the stack */
 
 /**
  * getrealpath: return a real path of dir using allocated area.
@@ -533,11 +532,11 @@ has_symlinkloop(const char *dir)
 		ret = 1;
 		goto out;
 	}
-	sp = varray_assign(stack, 0, 0);
+	sp = varray_assign(vstack->varray, 0, 0);
 #ifdef SLOOPDEBUG
 	fprintf(stderr, "TEST-2\n");
 #endif
-	for (i = current_entry; i >= 0; i--) {
+	for (i = vstack->stack_top; i >= 0; i--) {
 #ifdef SLOOPDEBUG
 		fprintf(stderr, "%d:\tcheck '%s' == '%s'\n", i, real, sp[i].real);
 #endif
@@ -709,9 +708,8 @@ find_open(const char *start, int explain)
 	/*
 	 * setup stack.
 	 */
-	stack = varray_open(sizeof(struct stack_entry), 50);
-	current_entry = 0;
-	curp = varray_assign(stack, current_entry, 1);
+	vstack = vstack_open(sizeof(struct stack_entry), 50);
+	curp = vstack_push(vstack);
 	strlimcpy(dir, start, sizeof(dir));
 	curp->dirp = dir + strlen(dir);
 	curp->sb = strbuf_open(0);
@@ -856,7 +854,7 @@ find_read_traverse(void)
 {
 	static char val[MAXPATHLEN];
 	char path[MAXPATHLEN];
-	struct stack_entry *curp = varray_assign(stack, current_entry, 1);
+	struct stack_entry *curp = vstack_top(vstack);
 
 	for (;;) {
 		while (curp->p < curp->end) {
@@ -923,7 +921,7 @@ find_read_traverse(void)
 				/*
 				 * Push stack.
 				 */
-				curp = varray_assign(stack, ++current_entry, 1);
+				curp = vstack_push(vstack);
 				curp->dirp = dirp + strlen(dirp);
 				curp->real = getrealpath(dir);
 				curp->sb = sb;
@@ -935,12 +933,12 @@ find_read_traverse(void)
 		curp->sb = NULL;
 		free(curp->real);
 		curp->real = NULL;
-		if (current_entry == 0)
-			break;
 		/*
 		 * Pop stack.
 		 */
-		curp = varray_assign(stack, --current_entry, 0);
+		curp = vstack_pop(vstack);
+		if (curp == NULL)
+			break;
 		*(curp->dirp) = 0;
 	}
 	find_eof = 1;
@@ -975,8 +973,8 @@ find_close(void)
 {
 	assert(find_mode != 0);
 	if (find_mode == FIND_OPEN) {
-		if (stack)
-			varray_close(stack);
+		if (vstack)
+			vstack_close(vstack);
 	} else if (find_mode == FILELIST_OPEN) {
 		/*
 		 * The --file=- option is specified, we don't close file

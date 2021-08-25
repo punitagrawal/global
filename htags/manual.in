@@ -209,7 +209,7 @@
 	@item{@file{GPATH}}
 		Tag file for source files.
 	@item{@file{gtags.conf}, @file{$HOME/.globalrc}}
-		Configuration data for GNU GLOBAL.
+		Configuration data for GNU Global.
 		See @xref{gtags.conf,5}.
 	@item{@file{HTML/FILEMAP}}
 		Mapping file for converting file name into the path of the file.
@@ -274,7 +274,7 @@
 	@xref{gtags,1},
 	@xref{gtags.conf,5}.
 
-        GNU GLOBAL source code tag system@br
+        GNU Global source code tag system@br
         (http://www.gnu.org/software/global/).
 @BUG
 	Generated hypertext is VERY LARGE.

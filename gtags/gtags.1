@@ -1,5 +1,5 @@
 .\" This file is generated automatically by convert.pl from gtags/manual.in.
-.TH GTAGS 1 "June 2018" "GNU Project"
+.TH GTAGS 1 "February 2021" "GNU Project"
 .SH NAME
 gtags \- create tag files for global
 .SH SYNOPSIS
@@ -148,7 +148,7 @@ Tag file for references.
 Tag file for source files.
 .TP
 \'gtags.conf\', \'$HOME/.globalrc\'
-Configuration data for GNU GLOBAL.
+Configuration data for GNU Global.
 See \fBgtags.conf\fP(5).
 .TP
 \'gtags.files\'
@@ -169,8 +169,9 @@ The size of the B-tree cache. The default is 50000000 (bytes).
 Configuration file.
 .TP
 \fBGTAGSFORCECPP\fP
-If this variable is set, each file whose suffix is \'.h\' is treated
-as a C++ source file.
+If this variable is set, each file whose suffix is \'.h\' is forcibly
+parsed by the built-in C++ parser. Do not set this variable if you are
+using plug-in parsers. This variable and the built-in C++ parser are deprecated.
 .TP
 \fBGTAGSFORCEENDBLOCK\fP
 If this variable is set, each } at the first column brings end of block
@@ -276,7 +277,7 @@ considered corrupted.
 \fBhtags\fP(1),
 \fBgtags.conf\fP(5).
 .PP
-GNU GLOBAL source code tag system
+GNU Global source code tag system
 .br
 (http://www.gnu.org/software/global/).
 .SH BUG

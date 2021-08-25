@@ -4,7 +4,7 @@ ___________________________________
 |  |   |  |  |  |  |     |     |  |
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Copyright (c) 2000-2019 Tama Communications Corporation
+ Copyright (c) 2000-2021 Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
  unlimited permission to copy and/or distribute it, with or without
@@ -16,8 +16,40 @@ ___________________________________
 
 		----------------------------------
 
-GNU GLOBAL NEWS - User visible changes.
+GNU Global NEWS - User visible changes.
 At least, you should search '[INCOMPATIBLE CHANGES]' for each version.
+
+Version 6.6.7 - July 1 2021
+
+[FIXED BUGS]
+o Pygments-enabled gtags failed to start. Now it works.
+  (Changed the shebang of pygments_parser.py.in from '#!/usr/bin/env python'
+  to '#!@PYTHON@'.)
+
+Version 6.6.6 - May 2 2021
+
+[CHANGES]
+New facilities:
+o gtags.el: Added native support for TRAMP.
+  'global-client' command is no longer needed to use TRAMP.
+
+  Required:
+    GNU Emacs version 25.1 or later (Tested on version 26).
+    If you don't use 'gtags-visit-rootdir' then version 22 is good enough.
+    You also need to install Global at the remote site.
+  Limitations: gtags-path-style: 'root is automatically converted to 'relative.
+
+o gtags.el: New custom variable 'gtags-path-order'.
+  value: 'alphabet (default) or 'nearness.
+
+[DEPRECATED]
+o gtags: environment variable GTAGSFORCECPP is deprecated.
+
+[FIXED BUGS]
+o configure: configure script failed with an error 'realpath not found.' on MacOS 11.1.
+  Now, it works.
+o gtags: If GTAGSFORCECPP was defined and --explain was used and the first file is a
+  '*.h', gtags crashed. Now it works.
 
 Version 6.6.5 - September 3 2020
 
@@ -33,7 +65,7 @@ o gtags: Added new option: -C (--directory)
 
 [DEPRECATED]
 o gtags: the built-in C++ parser is deprecated, since it is not well maintained.
-  Currently, it is hard to say that GLOBAL supports C++ language.
+  Currently, it is hard to say that Global supports C++ language.
 
 Version 6.6.4 - December 24 2019
 
@@ -99,7 +131,7 @@ Version 6.6.1 - December 16 2017
 [FIXED BUG]
 o gozilla: A critical vulnerability (CVE-2017-17531) was found in a unknown
   function of gozilla(1). It allows remote attackers to execute arbitrary
-  code via a crafted URL. All gozilla(1) before GLOBAL-6.6.1 have the vulnerability.
+  code via a crafted URL. All gozilla(1) before Global-6.6.1 have the vulnerability.
   Now it is fixed.
 
 - What is the unknown function?
@@ -295,16 +327,16 @@ o Some inappropriate error messages were changed.
 	$ cp /dev/null GTAGS
 	$ global -x main
 
-	(GLOBAL-6.5.4)	global: /tmp/test/GTAGS seems older format. Please remake tag files.
-	(GLOBAL-6.5.5)	global: /tmp/test/GTAGS seems to be corrupted.
+	(Global-6.5.4)	global: /tmp/test/GTAGS seems older format. Please remake tag files.
+	(Global-6.5.5)	global: /tmp/test/GTAGS seems to be corrupted.
 
   Error2: Corrupted file
 
 	$ echo aaa >GTAGS
 	$ global -x main
 
-	(GLOBAL-6.5.4)	global: GTAGS not found.
-	(GLOBAL-6.5.5)	global: /tmp/test/GTAGS seems to be corrupted.
+	(Global-6.5.4)	global: GTAGS not found.
+	(Global-6.5.5)	global: /tmp/test/GTAGS seems to be corrupted.
 
 Version 6.5.4 - Mar 27 2016
 
@@ -811,7 +843,7 @@ Version 6.2.6 - December 11 2012
 New facilities:
 ctags-5.8.patch: Patch against ctags-5.8. This adds new option --gtags and new
   function makeSimpleReferenceTag() to ctags. These are for making reference tags
-  for GLOBAL, and enable you to write a single parser for both GLOBAL and ctags
+  for Global, and enable you to write a single parser for both Global and ctags
   at once.
 exuberant-ctags.so: Added support for ctags --gtags option.
 
@@ -839,13 +871,13 @@ Version 6.2.4 - May 30 2012
 
 [FIXED BUGS]
 Gtags with the -f option brings segmentation fault. Now it works.
-This bug exists only in GLOBAL-6.2.3.
+This bug exists only in Global-6.2.3.
 
 Version 6.2.3 - May 26 2012
 
 [FIXED BUGS]
 o Built-in parser: When attribute specifier appeared immediately after
-  `struct', `union' or `enum' keyword, GLOBAL could not pick up tag name.
+  `struct', `union' or `enum' keyword, Global could not pick up tag name.
   Now it works correctly.
 
 [CHANGES]
@@ -922,9 +954,9 @@ Version 6.1 - October 7 2011
 
 [CHANGES]
 New facility:
-o Server side GLOBAL
+o Server side Global
   You can use some shell scripts instead of global, gtags and htags.
-  By this facility, you need not install GLOBAL in your client machine.
+  By this facility, you need not install Global in your client machine.
 
   Client machine       Network         Server machine
   +--------------+                    +---------------+
@@ -941,8 +973,8 @@ Version 6.0 - September 7 2011
 
 [CHANGES]
 New facilities:
-o Now GLOBAL allows path names which include blanks.
-o Now GLOBAL refuses looping symbolic links.
+o Now Global allows path names which include blanks.
+o Now Global refuses looping symbolic links.
 o global: the -c command accepts -T option.
 o global: the -c command locates symbols in the directories in GTAGSLIBPATH.
 o global: New --match-part option.
@@ -1098,7 +1130,7 @@ o global: Under Cygwin environment, global blocks for a few seconds if there is 
 o htags: Htags with the -g and -d option didn't work correctly.
 
 [INCOMPATIBLE CHANGES]
-o GLOBAL's commands locates gtags.conf also in the sysconfdir.
+o Global's commands locates gtags.conf also in the sysconfdir.
   You can see the path using the following command line:
 
 	$ gtags --config=sysconfdir
@@ -1114,7 +1146,7 @@ o globash: Added -m(-vim) option to the show command.
 
 [INCOMPATIBLE CHANGES]
 o Renamed the -S(--secure-cgi) option to --system-cgi. This is because
-  the parameter of the --secure-cgi was changed in GLOBAL-5.9.1.
+  the parameter of the --secure-cgi was changed in Global-5.9.1.
 o The site key directory for the --system-cgi option was moved from
   datadir(/usr/local/share) to localstatedir(/usr/local/var) because
   datadir should be used for read-only data.
@@ -1171,7 +1203,7 @@ Version 5.9 - June 8 2010
 
 			*** Caution ***
 
-This version of GLOBAL doesn't support tag files of the former version.
+This version of Global doesn't support tag files of the former version.
 If you install this version, you should remake all tag files again using
 gtags(1) in this package. Though new gtags's speed has improved very much,
 you need not hurry up to upgrade it if you have a lot of tag files of
@@ -1192,7 +1224,7 @@ o gtags: Speed-up using 'sorted writing'.
 
     Warning: POSIX sort program not found. If available, the program will be speed up.
 
-  In that case, please rebuild GLOBAL with the --with-posix-sort option.
+  In that case, please rebuild Global with the --with-posix-sort option.
 
     $ ./configure --with-posix-sort=<path of POXIS sort program in your system>
 
@@ -1203,8 +1235,8 @@ o gtags-cscope: When using gtags-cscope with the -C argument to ignore case,
 o global: The -I command with the --result option fails.
 
 [INCOMPATIBLE CHANGES]
-o GLOBAL shifted to new architecture and new tag files. GLOBAL doesn't use
-  GSYMS tag file any longer. New GLOBAL doesn't support older tag files.
+o Global shifted to new architecture and new tag files. Global doesn't use
+  GSYMS tag file any longer. New Global doesn't support older tag files.
   When you use older tag files, you will see the following message:
 
 	global: /*/GTAGS seems older format. Please remake tag files.
@@ -1313,8 +1345,8 @@ o gtags: Built-in parser by Hideki IWAMOTO.
 o gtags.el: Single 'GTAGS SELECT MODE' buffer of gtags.el by Yushi Oka.
   If "gtags-select-buffer-single" is non-nil, then 'GTAGS SELECT MODE'
   buffer is kept single.
-o gtags-cscope.vim: Plug-in script which integrates GLOBAL and vim editor
-  using cscope interface. Since this script makes vim think GLOBAL is cscope,
+o gtags-cscope.vim: Plug-in script which integrates Global and vim editor
+  using cscope interface. Since this script makes vim think Global is cscope,
   you can use the tag stack facility of vim like cscope. Gtags-cscope can
   coexist with gtags.vim.
 
@@ -1577,7 +1609,7 @@ Version 5.6.1 - August 11 2007
 [FIXED BUGS]
 * global: Global(1) with the -t option didn't print correct line number.
   Gtags.vim also didn't work correctly due to this bug. This bug was
-  introduced in GLOBAL-5.4.
+  introduced in Global-5.4.
 
 Version 5.6 - July 6 2007
 
@@ -1594,7 +1626,7 @@ Version 5.6 - July 6 2007
 
 Version 5.5 - May 5 2007
 
-* GNU GLOBAL became a BOKINware.
+* GNU Global became a BOKINware.
 
 * gtags-parser: Added support for 'enum' (java).
 * gtags.el: Changed to work without event-point function.
@@ -1617,7 +1649,7 @@ Version 5.4 - January 29 2007
 * Further compression of tag files (format version 5).
   Though new global can read older tag file since version-5.0, older
   global cannot read new format. It might say like follows:
-	"GTAGS seems new format. Please install the latest GLOBAL."
+	"GTAGS seems new format. Please install the latest Global."
 
 [OTHER CHANGES]
 * global: Improved performance when the -x option is not specified.
@@ -1637,7 +1669,7 @@ Version 5.3 - November 20 2006
 
 [INCOMPATIBLE CHANGES]
 * global: Changed not to locate other symbols (-s) in GTAGSLIBPATH.
-  This is the original specification of GLOBAL.
+  This is the original specification of Global.
 * global: Discontinued sorting when the -I(--idutils) option specified.
   The output of gid(idutils) is sorted by the suitable way. Though the order is
   slightly differ from global(1), it need not be sorted again.
@@ -1714,7 +1746,7 @@ Version 5.0 - April 21 2006
 * Moved to new tag format. (GTAGS, GRTAGS, GSYMS, GPATH)
   The purpose is as follows:
   o Allows path name including blanks, at least in tag files.
-    (GLOBAL still doesn't support the path name which contains blanks.)
+    (Global still doesn't support the path name which contains blanks.)
   o Decrease disk space used.
   o Make tag format simpler.
   o Realize stable performance.
@@ -1726,7 +1758,7 @@ Version 5.0 - April 21 2006
   The following error messages are displayed in wrong combinations:
   - older global and new tag file
     $ global -x main
-    GTAGS seems new format. Please install the latest GLOBAL.
+    GTAGS seems new format. Please install the latest Global.
   - new global and older tag file
     $ global -x main
     GTAGS seems older format. Please remake tag files.
@@ -1812,7 +1844,7 @@ Other facilities:
   programs. This kit helps you to convert the path of the source
   file into the URL in the hypertext.
 
-* doc/global.txi: Added the usage of Doxygen using GLOBAL.
+* doc/global.txi: Added the usage of Doxygen using Global.
 
 Version 4.8.6 - May 12 2005
 
@@ -1858,7 +1890,7 @@ Version 4.8.3 - February 26 2005
   We leave the support to outside projects and accept their code as is.
   Therefore, anything has not been changed substantially up to now.
 * Renamed gctags(1) to gtags-parser(1) because some systems have
-  another 'gctags' which does not relate to GLOBAL.
+  another 'gctags' which does not relate to Global.
 * Changed gtags-parser(1) to decide language type of the source files
   only by the suffix. In older version, *.h files were considered to be
   C++ source files if they include token 'class'. New version considers
@@ -1875,7 +1907,7 @@ New features:
 * gtags,htags: New configuration variable 'langmap'.
   This variable is used for customizing the mapping of languages and the
   parsers, and it includes the function of obsoleted 'suffixes' variable.
-  If you use 'suffixes' then it is effective else GLOBAL internally
+  If you use 'suffixes' then it is effective else Global internally
   generates the value of 'suffixes' from the 'langmap'.
   The reason to continue 'suffixes' is that it is needed for plug-in parser.
   If you don't use plug-in parser then you should use 'langmap' instead.
@@ -1953,11 +1985,11 @@ Fixed bugs:
 * Global(1) didn't work with the GNU sort(1) based on POSIX 1003.1-2001.
   GNU sort(1) with the latest glibc doesn't accept obsolete +POS1[-POS2]
   style option. Now global(1) works well with it.
-* GLOBAL-4.3 and the later couldn't treat shadow tree. Now it works well.
+* Global-4.3 and the later couldn't treat shadow tree. Now it works well.
 
 Version 4.7 - Feb 1 2004
 
-* gtags.vim: Plug-in script which integrates GLOBAL and vim editor.
+* gtags.vim: Plug-in script which integrates Global and vim editor.
 * global.txi: Added the usage of gtags.vim script.
 * global: The -o option is now available with the -P command.
 * gctags: Fixed a bug: Gctags couldn't recognize the definitions
@@ -2104,7 +2136,7 @@ Version 4.5 - July 4 2002
 
 Version 4.4 - March 30 2002
 
-* Gozilla(1) came back to GLOBAL.
+* Gozilla(1) came back to Global.
 * global, htags: Added -o(--other) option which picks up not only source
   files but also other files like 'README'.
 * htags: New configuration variables: other_files, definition_header, enable_grep
@@ -2134,7 +2166,7 @@ Version 4.3 - January 10 2002
 Version 4.2 - November 24 2001
 
 * Added support for postgres.
-  You need to configure GLOBAL with --with-postgres option.
+  You need to configure Global with --with-postgres option.
 * gtags: When no parser specified in the configuration file, use default value.
 * gtags: Now accepts full path name in configuration variable 'skip'.
 * htags: New --caution option.
@@ -2161,7 +2193,7 @@ Version 4.1 - July 12, 2001
   -i(--ignore-case) option, because -i options is generally used for this
   purpose (see grep(1)).
 * gtags.conf: Renamed global.conf into gtags.conf because the old name was
-  too generic. (GLOBAL accepts old name for compatibility.)
+  too generic. (Global accepts old name for compatibility.)
 
 [OTHER CHANGES]
 
@@ -2241,7 +2273,7 @@ Version 4.0 - September 3, 2000
 Version 3.55 - December 23, 1999
 
 * Fixed a serious bug.
-  Htags(1) in GLOBAL-3.54 has a serious bug:
+  Htags(1) in Global-3.54 has a serious bug:
   '*** HTAGS(1) MAY REMOVE ALL FILES IN THE CURRENT DIRECTORY IN A ERROR CASE. ***'
   If you are using that version of htags(1), please replace it with the later or earlier
   version. Only 3.54 has the bug.

@@ -58,9 +58,9 @@ htags(1),
 python(1),
 ruby(1).
 
-GNU GLOBAL source code tag system@*
+GNU Global source code tag system@*
 (http://www.gnu.org/software/global/).
 @unnumberedsubsec AUTHOR
 Shigio YAMAGUCHI.
 @unnumberedsubsec HISTORY
-The htags-server command appeared in GLOBAL-6.3 (2014).
+The htags-server command appeared in Global-6.3 (2014).

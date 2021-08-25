@@ -18,34 +18,34 @@ ___________________________________
 
 		----------------------------------
 
-Frequently Asked Questions about GLOBAL.
+Frequently Asked Questions about Global.
 
 ----------------------------------------------------------------------------
-Q1. Does GLOBAL support DOS and Windows 32 environment?
+Q1. Does Global support DOS and Windows 32 environment?
 
-A1. No, it doesn't. GNU GLOBAL supports only UNIX(POSIX) environment.
+A1. No, it doesn't. GNU Global supports only UNIX(POSIX) environment.
     But some outside projects develop DOS and Windows 32 version of it.
     Please see:
            http://www.gnu.org/software/global/download.html
 
-    Though GLOBAL doesn't supports DOS and Windows 32 environment,
+    Though Global doesn't supports DOS and Windows 32 environment,
     we accept code for them if the following requirements are met:
     (1) It works in DOS and(or) Windows 32 environment.
     (2) It doesn't influence UNIX environment.
 
 ----------------------------------------------------------------------------
-Q2. GLOBAL skips some functions.
-    For example, GLOBAL skips 'func()' in this example.
+Q2. Global skips some functions.
+    For example, Global skips 'func()' in this example.
 
 	#define M(a)	static char *string = a;
 
 	M(a)
 
-	func() {		<= GLOBAL skip func().
+	func() {		<= Global skip func().
 		...
 	}
 
-A2. GLOBAL cannot recognize 'func()', because M(a) seems to be a function
+A2. Global cannot recognize 'func()', because M(a) seems to be a function
     definition.
 
     It should be follows:
@@ -69,7 +69,7 @@ A2. GLOBAL cannot recognize 'func()', because M(a) seems to be a function
 ----------------------------------------------------------------------------
 Q3. I'm a C++ programmer. Why does not gtags pick up class names in *.h?
 
-A3. GLOBAL treats *.h files as a C source file. If you want to treat them
+A3. Global treats *.h files as a C source file. If you want to treat them
     as a C++ source file, please set environment variable GTAGSFORCECPP.
 
 	% setenv GTAGSFORCECPP
@@ -104,12 +104,12 @@ A5. gtags-cscope(1) requires curses library. There are two choices of yours.
 	Please install curses library. You can get it from:
 	http://www.gnu.org/software/ncurses/
     else 
-	You can install GLOBAL without gtags-cscope(1) like follows:
+	You can install Global without gtags-cscope(1) like follows:
 	$ ./configure --disable-gtagscscope
 	$ make
 
 ----------------------------------------------------------------------------
-Q6. I would like to use GLOBAL with various languages, such as python, ruby,
+Q6. I would like to use Global with various languages, such as python, ruby,
     Erlang, Lua or so on. How to do it?
 
 A6. You can do it using ctags and pygments plug-in parser. It already supports
@@ -143,7 +143,7 @@ A7. For global(1), you can use GTAGSLIBPATH environment variable.
 ----------------------------------------------------------------------------
 Q8. I can't make GSYMS file.
 
-A8. No problem. GSYMS was merged into GRTAGS in GLOBAL-5.9 or later.
+A8. No problem. GSYMS was merged into GRTAGS in Global-5.9 or later.
 ----------------------------------------------------------------------------
 Q9. I'm using gtags-cscope.vim. How to use files which include spaces in path name?
 
@@ -151,27 +151,27 @@ A9. Please apply 'vim74-gtags-cscope.patch' in the package to vim.
     See also README.PATCHES.
 
 ----------------------------------------------------------------------------
-Q10. Does GLOBAL support multi-byte code set?
+Q10. Does Global support multi-byte code set?
      Which character code set is supported?
 
-A10. GLOBAL doesn't support multi-byte character code set yet.
-     GLOBAL supports only ASCII and ASCII super-sets.
+A10. Global doesn't support multi-byte character code set yet.
+     Global supports only ASCII and ASCII super-sets.
 
 ----------------------------------------------------------------------------
-Q11. Can GLOBAL running on a UNIX machine treat source files
+Q11. Can Global running on a UNIX machine treat source files
      which include DOS/Windows style new-line code? And vice versa? 
 
-A11. GLOBAL supports only native text format of POSIX.
+A11. Global supports only native text format of POSIX.
      Besides, please go by the own responsibility.
 
 ----------------------------------------------------------------------------
-Q12. Does GLOBAL support C++ language?
+Q12. Does Global support C++ language?
 
 A12. The answer is yes and no.
      The built-in C++ parser is deprecated, since it is not well maintained.
-     However, GLOBAL has a plug-in parser mechanism. Using the mechanism,
+     However, Global has a plug-in parser mechanism. Using the mechanism,
      anyone can write parsers for their favorite languages and incorporate
-     them into GLOBAL. (see plugin-factory/)
-     So, if you write a parser for C++ language, GLOBAL supports it.
+     them into Global. (see plugin-factory/)
+     So, if you write a parser for C++ language, Global supports it.
 
 End of FAQ.

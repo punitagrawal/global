@@ -1265,7 +1265,7 @@ completion_path(const char *dbpath, const char *prefix)
  * +===========================================+
  *
  * Sort filter is implemented in gtagsop module (libutil/gtagsop.c).
- * Path filter is implemented in convert module (global/convert.c).
+ * Path filter is implemented in convert module (libutil/convert.c).
  */
 /**
  * print number of object.

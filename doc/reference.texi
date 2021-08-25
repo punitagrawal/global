@@ -6,8 +6,8 @@
 * htags-server::   htags-server - a private Web/CGI server for htags
 * gozilla::        gozilla - force firefox to display specified part of a source file
 * gtags-cscope::   gtags-cscope - interactively examine a C program
-* globash::        globash - a special shell for GLOBAL using GNU bash
-* gtags.conf::     gtags.conf - configuration data for GNU GLOBAL
+* globash::        globash - a special shell for Global using GNU bash
+* gtags.conf::     gtags.conf - configuration data for GNU Global
 @end menu
 
 @node global
@@ -29,8 +29,8 @@
 @section gtags-cscope - interactively examine a C program
 @include gtags-cscope.ref
 @node globash
-@section globash - a special shell for GLOBAL using GNU bash
+@section globash - a special shell for Global using GNU bash
 @include globash.ref
 @node gtags.conf
-@section gtags.conf - configuration data for GNU GLOBAL
+@section gtags.conf - configuration data for GNU Global
 @include gtags.conf.ref

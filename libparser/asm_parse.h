@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.4.2.  */
+/* A Bison parser, made by GNU Bison 3.7.5.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_ASM_ASM_PARSE_H_INCLUDED
 # define YY_ASM_ASM_PARSE_H_INCLUDED
@@ -44,23 +45,28 @@
 extern int asm_debug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    ASM_CONST = 258,
-    ASM_CALL = 259,
-    ASM_ENTRY = 260,
-    ASM_EXT = 261,
-    ASM_SYMBOL = 262,
-    ASM_LABEL = 263,
-    ASM_DEFINE = 264,
-    ASM_UNDEF = 265,
-    ASM_DIRECTIVE = 266,
-    ASM_MACRO = 267,
-    ASM_EQU = 268
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    ASM_CONST = 258,               /* ASM_CONST  */
+    ASM_CALL = 259,                /* ASM_CALL  */
+    ASM_ENTRY = 260,               /* ASM_ENTRY  */
+    ASM_EXT = 261,                 /* ASM_EXT  */
+    ASM_SYMBOL = 262,              /* ASM_SYMBOL  */
+    ASM_LABEL = 263,               /* ASM_LABEL  */
+    ASM_DEFINE = 264,              /* "#define"  */
+    ASM_UNDEF = 265,               /* "#undef"  */
+    ASM_DIRECTIVE = 266,           /* ASM_DIRECTIVE  */
+    ASM_MACRO = 267,               /* ASM_MACRO  */
+    ASM_EQU = 268                  /* ASM_EQU  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */

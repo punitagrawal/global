@@ -16,7 +16,7 @@ ___________________________________
 
 		----------------------------------
 
-GNU GLOBAL is a source code tagging system that works the same way across diverse
+GNU Global is a source code tagging system that works the same way across diverse
 environments. It supports C, Yacc, Java, PHP4 and assembly source code.
 
 * Supported OS
@@ -25,7 +25,7 @@ environments. It supports C, Yacc, Java, PHP4 and assembly source code.
 	BSD system - FreeBSD, NetBSD, OpenBSD, MacOSX, etc.
 	Besides, various POSIX compatible systems.
 
-	[Note]  Though GNU GLOBAL supports only UNIX(POSIX) environment,
+	[Note]  Though GNU Global supports only UNIX(POSIX) environment,
 		some outsite projects develop DOS or Windows 32 version of it.
 		Please see:
 			http://www.gnu.org/software/global/download.html
@@ -36,8 +36,8 @@ environments. It supports C, Yacc, Java, PHP4 and assembly source code.
 
 * Documentation
 
-	Please see 'doc/global.texi'(texinfo format) to know how to use GLOBAL.
-	You can see it even on GLOBAL's web site:
+	Please see 'doc/global.texi'(texinfo format) to know how to use Global.
+	You can see it even on Global's web site:
 		http://www.gnu.org/software/global/globaldoc_toc.html
 		http://www.gnu.org/software/global/manual/
 
@@ -46,21 +46,21 @@ environments. It supports C, Yacc, Java, PHP4 and assembly source code.
 
 * License
 
-	You may redistribute copies of GNU GLOBAL under the terms of
+	You may redistribute copies of GNU Global under the terms of
 	the GNU General Public License.  For more information about
 	these matters, see the files named 'LICENSE' and 'COPYING'.
 
 * Latest information
 
-	You can see the latest information on GLOBAL's web site.
+	You can see the latest information on Global's web site.
 
 	http://www.gnu.org/software/global/whatsnew.html
 
 * Mailing list
 
 	If you think you have found a bug or a suggestion for improvements
-	in GLOBAL or you need help about GLOBAL, then some mailing lists are
-	available. Please see GLOBAL's WWW.
+	in Global or you need help about Global, then some mailing lists are
+	available. Please see Global's WWW.
 
 	http://www.gnu.org/software/global/maillist.html
 

@@ -60,7 +60,7 @@
 	cross-reference is rebuilt, it is updated incrementally, which makes rebuilding faster
 	than the initial build.
 
-	@name{gtags-cscope} is a tool which just borrows user interface of cscope; it is GLOBAL
+	@name{gtags-cscope} is a tool which just borrows user interface of cscope; it is Global
 	itself for the substance.
 @OPTIONS
 	Some command line arguments can only occur as the only argument in
@@ -320,7 +320,7 @@
 		@var{EDITOR} (see above).
 	@end_itemize
 
-	The following environment variables are of @name{GLOBAL} origin.
+	The following environment variables are of @name{Global} origin.
 
 	@begin_itemize
 	@item{@var{GTAGSCONF}}
@@ -364,7 +364,7 @@
 		and file @file{GTAGSROOT} exists in the same directory as @file{GTAGS}
 		then @name{global} sets @var{GTAGSROOT} to the contents of the file.
 	@item{@file{gtags.conf}, @file{$HOME/.globalrc}}
-		Configuration data for GNU GLOBAL.
+		Configuration data for GNU Global.
                 See @xref{gtags.conf,5}.
 	@end_itemize
 @SEE ALSO
@@ -372,11 +372,11 @@
 	@xref{global,1},
 	@xref{htags,1}.
 
-	GNU GLOBAL source code tag system@br
+	GNU Global source code tag system@br
 	(http://www.gnu.org/software/global/).
 @BUG
 	The function field of the display is almost <unknown> since
-	@name{GLOBAL} doesn't recognize it.
+	@name{Global} doesn't recognize it.
 
 	@samp{Find functions called by this function} is not implemented.
 @AUTHOR
@@ -384,7 +384,7 @@
 @HISTORY
 	@name{Cscope} was originally developed at Bell Labs in the early 1980s,
 	and was released as free software under the BSD license in April 2000.
-	@name{Gtags-cscope} is a derivative of @name{cscope} to use @name{GLOBAL}
+	@name{Gtags-cscope} is a derivative of @name{cscope} to use @name{Global}
 	as the back-end.
 	Its line-oriented interface was originally written in 2006, and was
 	re-implemented in 2011 using @name{cscope} itself.

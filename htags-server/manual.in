@@ -76,9 +76,9 @@
 	@xref{python,1},
 	@xref{ruby,1}.
 
-        GNU GLOBAL source code tag system@br
+        GNU Global source code tag system@br
         (http://www.gnu.org/software/global/).
 @AUTHOR
 	Shigio YAMAGUCHI.
 @HISTORY
-	The @name{htags-server} command appeared in GLOBAL-6.3 (2014).
+	The @name{htags-server} command appeared in Global-6.3 (2014).

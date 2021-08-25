@@ -43,6 +43,7 @@
 static void trim_suffix_list(STRBUF *, STRHASH *);
 static int match_suffix_list(const char *, const char *, const char *);
 
+STATIC_STRBUF(lastmatch);
 static STRBUF *active_map;
 static int wflag;
 
@@ -239,8 +240,11 @@ decide_lang(const char *suffix)
 	 * as C source files by default. If you set an environment variable
 	 * 'GTAGS_FORCECPP' then C++ parser will be invoked.
 	 */
-	if (!strcmp(suffix, ".h") && getenv("GTAGSFORCECPP") != NULL)
+	if (!strcmp(suffix, ".h") && getenv("GTAGSFORCECPP") != NULL) {
+		strbuf_clear(lastmatch);
+		strbuf_puts(lastmatch, ".h");
 		return "cpp";
+	}
 	lang = strbuf_value(active_map);
 	tail = lang + strbuf_getlen(active_map);
 
@@ -270,8 +274,11 @@ decide_lang_path(const char *path)
 	 * as C source files by default. If you set an environment variable
 	 * 'GTAGS_FORCECPP' then C++ parser will be invoked.
 	 */
-	if (!strcmp(suffix, ".h") && getenv("GTAGSFORCECPP") != NULL)
+	if (!strcmp(suffix, ".h") && getenv("GTAGSFORCECPP") != NULL) {
+		strbuf_clear(lastmatch);
+		strbuf_puts(lastmatch, ".h");
 		return "cpp";
+	}
 	lang = strbuf_value(active_map);
 	tail = lang + strbuf_getlen(active_map);
 
@@ -289,7 +296,6 @@ decide_lang_path(const char *path)
  * return true if the suffix exists in the list.
  * suffix may include '(<glob pattern>)'.
  */
-STATIC_STRBUF(lastmatch);
 const char *
 get_last_match() {
 	return strbuf_value(lastmatch);

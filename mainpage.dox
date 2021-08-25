@@ -1,5 +1,5 @@
 /**
-@mainpage GNU GLOBAL source code tagging system
+@mainpage GNU Global source code tagging system
 @verbatim
 ___________________________________
 |      |  |  |     |  _  |     |  |
@@ -9,7 +9,7 @@ ___________________________________
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @endverbatim
 
-GNU GLOBAL is a source code tagging system that works the same way across diverse
+GNU Global is a source code tagging system that works the same way across diverse
 environments. It supports C, Yacc, Java, PHP4 and assembly source code.
 
 @section s1 The main() files
@@ -28,15 +28,15 @@ environments. It supports C, Yacc, Java, PHP4 and assembly source code.
 
 @section s2 Documentation
 
-	Please see "doc/global.texi" (texinfo format) to know how to use GLOBAL.
-	You can see it even on GLOBAL's web site:
+	Please see "doc/global.texi" (texinfo format) to know how to use Global.
+	You can see it even on Global's web site:
 
 	"http://www.gnu.org/software/global/globaldoc_toc.html"
 	"http://www.gnu.org/software/global/manual/"
 
 @section s3 Latest information
 
-	You can see the latest information on GLOBAL's web site.
+	You can see the latest information on Global's web site.
 
 	"http://www.gnu.org/software/global/whatsnew.html"
 */

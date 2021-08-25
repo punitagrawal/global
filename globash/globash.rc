@@ -869,6 +869,7 @@ ghelp() {
 	echo "	(By default, the previous value is used for pattern and file.)"
 	echo "	list		- prints the tag list."
 	echo "	tags		- prints the tag stack."
+	echo "	pop [n]		- pop the tag stack n times (default: 1)."
 	echo
 	echo "	* The x, r and s command doesn't refer to GTAGSLIBPATH."
 	echo "	  Use global -x, -r or -s, instead."
