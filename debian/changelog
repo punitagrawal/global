@@ -1,3 +1,11 @@
+global (6.6.7-1) unstable; urgency=medium
+
+  * New upstream version 6.6.7
+  * debian: Update patches for new upstream release 6.6.7
+  * Add python3-minimal as a build dependency
+
+ -- Punit Agrawal <punit@debian.org>  Thu, 26 Aug 2021 21:46:06 +0900
+
 global (6.6.5-1) unstable; urgency=medium
 
   * New upstream version 6.6.5
