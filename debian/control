@@ -5,7 +5,7 @@ Build-Depends: debhelper-compat (= 12),
  texinfo,
  libncurses5-dev, libltdl-dev, libsqlite3-dev,
  emacsen-common, flex, bison, gperf,
- libtool-bin
+ libtool-bin, python3-minimal
 Maintainer: Punit Agrawal <punit@debian.org>
 Homepage: https://www.gnu.org/software/global/global.html
 Vcs-Git: https://github.com/punitagrawal/global.git
