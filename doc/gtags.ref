@@ -132,6 +132,8 @@ The list of candidates of target files.
 The list of symbols which is not a definition.
 If this file exists in the project root directory, gtags does not
 regard the symbols listed in this file as definitions.
+Lines starting with ';' are comment lines.
+
 @end table
 @unnumberedsubsec ENVIRONMENT
 The following environment variables affect the execution of gtags:

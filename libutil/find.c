@@ -781,7 +781,20 @@ static char *
 find_read_filelist(void)
 {
 	STATIC_STRBUF(ib);
-	static char buf[MAXPATHLEN + 1];
+	/*
+	 * The buf has room for one character ' ' in front.
+	 *
+	 * __buf
+	 * +---+---+---+---+   +---+
+	 * |' '|   |   |   .....   |
+	 * +---+---+---+---+   +---+
+	 *     ^
+	 *     buf
+	 *      <---  bufsize   --->
+	 */
+        static char __buf[MAXPATHLEN + 2];
+        static char *buf = &__buf[1];
+	static int bufsize = sizeof(__buf) - 1;
 	static char *path;
 
 	strbuf_clear(ib);
@@ -820,7 +833,7 @@ find_read_filelist(void)
 		 *	rootdir  /a/b/
 		 *	buf      /a/b/c/d.c -> c/d.c -> ./c/d.c
 		 */
-		if (normalize(path, rootdir, cwddir, buf, sizeof(buf)) == NULL) {
+		if (normalize(path, rootdir, cwddir, buf, bufsize) == NULL) {
 			warning("'%s' is out of source tree. ignored.", trimpath(path));
 			continue;
 		}

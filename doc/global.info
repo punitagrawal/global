@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU Global source code tagging system
 *************************************
 
-This manual documents version 6.6.7 of the GNU Global source code
+This manual documents version 6.6.8 of the GNU Global source code
 tagging system.
 
 * Menu:
@@ -2136,7 +2136,8 @@ FILES
 '.notfunction'
      The list of symbols which is not a definition.  If this file exists
      in the project root directory, gtags does not regard the symbols
-     listed in this file as definitions.
+     listed in this file as definitions.  Lines starting with ';' are
+     comment lines.
 
 ENVIRONMENT
 -----------
@@ -3857,15 +3858,15 @@ Node: Incremental updating51276
 Node: Reference52460
 Node: global53162
 Node: gtags66660
-Node: htags77026
-Node: htags-server87035
-Node: gozilla89277
-Node: gtags-cscope92029
-Node: globash103581
-Node: gtags.conf104796
-Node: Copying This Manual108683
-Node: GNU Free Documentation License108920
-Node: Index131311
+Node: htags77075
+Node: htags-server87084
+Node: gozilla89326
+Node: gtags-cscope92078
+Node: globash103630
+Node: gtags.conf104845
+Node: Copying This Manual108732
+Node: GNU Free Documentation License108969
+Node: Index131360
 
 End Tag Table
 

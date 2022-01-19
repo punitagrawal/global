@@ -19,6 +19,24 @@ ___________________________________
 
 ChangeLog about GNU GLOBAL
 
+December 13 2021, Shigio YAMAGUHI
+
+	[plugin-factory/PLUGIN_HOWTO.reference]
+	[plugin-factory/uctags-scheme.c-diff]
+	I wrote a document titled 'How to get Universal Ctags to handle references.'
+
+July 19 2021, Shigio YAMAGUHI
+
+	Now you can build Global with external SQLite3 library.
+	--with-sqlite3[=dir]	By default, the embedded version is used.
+
+	$ ./configure --with-sqlite3=/opt/local
+	...
+	$ global --version
+	...
+	Powered by Berkeley DB 1.85 and SQLite3 3.35.5.
+						======= (depends on your system)
+
 June 30 2021, Shigio YAMAGUHI
 
 	Shebang rules:

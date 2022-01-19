@@ -148,6 +148,7 @@ char *encode_chars;
 char *single_update;
 char *path_style;
 char *print_target;
+int newline = '\n';
 
 /*
  * Path filter
@@ -791,8 +792,10 @@ main(int argc, char **argv)
 		xflag = 0;
 	if (nflag > 1)
 		nosource = 1;	/* to keep compatibility */
-	if (print0)
+	if (print0) {
+		newline = '\0';
 		set_print0();
+	}
 	if (cflag && match_part == 0)
 		match_part = MATCH_PART_ALL;
 	/*
@@ -1025,7 +1028,7 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 		flags |= GTOP_IGNORECASE;
 	for (gtp = gtags_first(gtop, prefix, flags); gtp; gtp = gtags_next(gtop)) {
 		fputs(gtp->tag, stdout);
-		fputc('\n', stdout);
+		fputc(newline, stdout);
 		count++;
 	}
 	if (debug)
@@ -1171,7 +1174,8 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 			continue;
 		}
 		*p = '\0';
-		puts(line);
+		fputs(line, stdout);
+		fputc(newline, stdout);
 	}
 #if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 	if (pclose(ip) != 0)
@@ -1236,7 +1240,7 @@ completion_path(const char *dbpath, const char *prefix)
 	gfind_close(gp);
 	for (path = dbop_first(dbop, NULL, NULL, DBOP_KEY); path != NULL; path = dbop_next(dbop)) {
 		fputs(path, stdout);
-		fputc('\n', stdout);
+		fputc(newline, stdout);
 	}
 	dbop_close(dbop);
 }

@@ -148,6 +148,8 @@
 		The list of symbols which is not a definition.
 		If this file exists in the project root directory, @name{gtags} does not
 		regard the symbols listed in this file as definitions.
+		Lines starting with ';' are comment lines.
+
 	@end_itemize
 @ENVIRONMENT
 	The following environment variables affect the execution of @name{gtags}:

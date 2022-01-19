@@ -152,8 +152,8 @@ start_ctags(const struct parser_param *param)
 	CloseHandle(ipipe[1]);
 	CloseHandle(pi.hThread);
 	pid = pi.hProcess;
-	op = fdopen(_open_osfhandle((long)opipe[1], _O_WRONLY), "w");
-	ip = fdopen(_open_osfhandle((long)ipipe[0], _O_RDONLY), "r");
+	op = fdopen(_open_osfhandle((intptr_t)opipe[1], _O_WRONLY), "w");
+	ip = fdopen(_open_osfhandle((intptr_t)ipipe[0], _O_RDONLY), "r");
 	if (ip == NULL || op == NULL)
 		param->die("fdopen failed.");
 

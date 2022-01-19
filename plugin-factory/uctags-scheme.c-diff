@@ -1,0 +1,57 @@
+/*
+ * This is a patch file for Universal Ctags [https://github.com/universal-ctags/ctags]
+ * to treat references in Scheme source files.
+ *
+ * This file is placed into the public domain by the author,
+ * Shigio Yamaguchi <shigio@gnu.org>
+ */
+
+diff -c parsers/scheme.c-org parsers/scheme.c
+*** parsers/scheme.c-org	2021-12-10 02:08:47.000000000 +0900
+--- parsers/scheme.c	2021-12-13 21:50:00.000000000 +0900
+***************
+*** 27,35 ****
+  	K_FUNCTION, K_SET
+  } schemeKind;
+  
+  static kindDefinition SchemeKinds [] = {
+! 	{ true, 'f', "function", "functions" },
+! 	{ true, 's', "set",      "sets" }
+  };
+  
+  /*
+--- 27,43 ----
+  	K_FUNCTION, K_SET
+  } schemeKind;
+  
++ typedef enum {
++ 	R_SCHEME_GENERIC,
++ } schemeRole;
++ 
++ static roleDefinition SchemeRoles [] = {
++ 	{ true, "generic", "generic" },
++ };
++ 
+  static kindDefinition SchemeKinds [] = {
+! 	{ true, 'f', "function", "functions", false},
+! 	{ true, 's', "set",      "sets",      false, ATTACH_ROLES(SchemeRoles)},
+  };
+  
+  /*
+***************
+*** 102,108 ****
+  			if (line == NULL)
+  				break;
+  			readIdentifier (name, cp);
+! 			makeSimpleTag (name, K_SET);
+  		}
+  	}
+  	vStringDelete (name);
+--- 110,116 ----
+  			if (line == NULL)
+  				break;
+  			readIdentifier (name, cp);
+! 			makeSimpleRefTag(name, K_SET, R_SCHEME_GENERIC);
+  		}
+  	}
+  	vStringDelete (name);

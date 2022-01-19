@@ -1,0 +1,94 @@
+___________________________________
+|      |  |  |     |  _  |     |  |
+|  |___|  |  |  |  |    _|  |  |  |    GNU GLOBAL source code tag system
+|  |   |  |  |  |  |     |     |  |
+|  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Copyright (c) 2021 Tama Communications Corporation
+
+ This file is free software; as a special exception the author gives
+ unlimited permission to copy and/or distribute it, with or without
+ modifications, as long as this notice is preserved.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+ implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+                ----------------------------------
+
+How to get Universal Ctags to handle references.
+
+Traditionally ctags collects definitions. In addition Universal Ctags (*1)
+supports reference tags. However, the current parsers don't yet use this feature.
+
+	*1 [https://github.com/universal-ctags/ctags]
+
+This little description is a guide for writing parsers for Universal Ctags
+to handle references. It is of course also available from GNU Global.
+I selected Scheme parser as an example, since it is very simple.
+
+1. When using the current parser
+
+Suppose you have a source file of Scheme language that looks like this:
+
+[a.scm]
++--------------------------------------------------------------
+|(define a 'aaa')
+|(set! a 'bbb')
+|(set! b 'bbb')
+
+You can treat Scheme source code by using Universal Ctags plugin parser.
+Global(1) will show the following output.
+
+$ gtags
+$ global -x a
+a                   1 a.scm            (define a 'aaa')
+a                   2 a.scm            (set! a 'bbb')
+$ global -x a -r
+$ global -x a -s
+$ global -x b
+b                   3 a.scm            (set! b 'bbb')
+$ global -x b -r
+$ global -x b -s
+
+
+2. Changing the parser to treat references
+
+There is no problem in the above example. But for now, let's change the parser
+to treat '(set! a ...)' as a reference for 'a' (*2).
+
+	*2 I'm not claiming that '(set! a ...)' should be considered a reference.
+	   It is just an example.
+
+I made a patch 'uctags-scheme.c-diff' for 'parsers/scheme.c'. Please apply
+this patch to Universal Ctags like this:
+
+	(In the root directory of Universal Ctags)
+	$ patch parsers/scheme.c /usr/local/share/gtags/uctags-scheme.c-diff
+
+Using the patched Universal Ctags, you will see the following output.
+
+$ gtags
+$ global -x a
+a                   1 a.scm            (define a 'aaa')         <- as a definition
+$ global -x a -r
+a                   2 a.scm            (set! a 'bbb')           <- as a reference
+$ global -x a -s
+$ global -x b
+$ global -x b -r
+$ global -x b -s
+b                   3 a.scm            (set! b 'bbb')           <- as an other symbol
+
+You can handle references in any language in the same way.
+Basically, Global works fine if you follow the algorithm below:
+
+foreach (symbols as symbol) {
+	if (symbol is a reverved word)
+		continue;
+	else if (symbol is a definition)
+		call makeSimpleTag();
+	else
+		call makeSimpleRefTag();
+}
+
+For details, please refer to the manual of Universal Ctags.

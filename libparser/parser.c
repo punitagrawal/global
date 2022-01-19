@@ -80,8 +80,11 @@ load_notfunction(const char *filename)
 
 	if ((ip = fopen(filename, "r")) == NULL)
 		die("'%s' cannot read.", filename);
-	for (tablesize = 0; (p = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL; tablesize++)
+	for (tablesize = 0; (p = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL; tablesize++) {
+		if (*p == ';')		/* Lines starting with ';' are comment lines. */
+			continue;
 		strbuf_puts0(sb, p);
+	}
 	fclose(ip);
 	words = (struct words *)check_malloc(sizeof(struct words) * tablesize);
 	/*

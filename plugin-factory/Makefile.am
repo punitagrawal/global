@@ -34,7 +34,8 @@ user_custom_la_SOURCES = user-custom.c
 user_custom_la_LDFLAGS = -module -avoid-version -no-undefined
 
 gtagsdir = ${datadir}/gtags
-gtags_DATA = PLUGIN_HOWTO PLUGIN_HOWTO.pygments
+gtags_DATA = PLUGIN_HOWTO PLUGIN_HOWTO.pygments PLUGIN_HOWTO.reference \
+	     	uctags-scheme.c-diff
 
 scriptdir = ${datadir}/gtags/script
 script_DATA = pygments_parser.py maps2conf.pl

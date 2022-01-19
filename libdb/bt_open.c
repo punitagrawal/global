@@ -402,7 +402,9 @@ nroot(t)
 static int
 tmp(void)
 {
+#ifndef _WIN32
 	sigset_t set, oset;
+#endif
 	int fd;
 	char *envtmp;
 	char path[1024];
