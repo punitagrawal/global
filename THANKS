@@ -38,6 +38,7 @@ Alex Ott		profitable information about LFS(Large file support).
 Alexander Gusak		bug report about c++ parser's segmentation violation.
 Bakken, Luke		bug fix method about stat() in htags(1).
 Bert Gijsbers		investigation about mandoc macro and a bug report.
+Biswapriyo Nath		patch for windows32 platform.
 Bob Bentley		bug report about bless.sh and gtags.
 Brian Carlstrom		bug fix patch for gtags.
 Bvk chaitanya		bug report about global (it cannot find gtags).
@@ -57,6 +58,7 @@ Dunford, Martin		advice about Windows 32 version of Global.
 Dirk Schultheis		advice about compat.h for Solaris.
 Earl Chew		bug fix patch for gtags-visit-rootdir of gtags.el.
 Emile Heyns		advice about writing code for generic UNIX.
+Ergus			bug report that the --print0 was ignored when using the -c command.
 Erik Jonsson		algorithm for detecting binary file.
 Eric Paire		bug report about gtags-parser's memory violation.
 Fabian Wiget		bug report about --from-here with -i option.
@@ -91,6 +93,7 @@ Jean-Marc Saffroy	idea to skip all files whoes first character of name is '.'.
 Jeff Trawick		idea about -l option of htags(1).
 Jeroen Roovers		bug report about htags/Makefile.am.
 Jianbin Kang		bug report about segmentation fault of gtags(1).
+Jim Lowe		bug report about segmentation fault of gtags(1).
 Jonathan Jacobs		bug report about --from-here option of global(1).
 Jordan K. Hubbard	idea about supporting BSD's obj directory.
 Jos Backus		bug report about global.cgi.
@@ -129,6 +132,7 @@ Mikolaj Sitarz		suggestion of the --single-update option of gtags(1).
 Michael Albinus		advice about using process-file function for TRAMP support.
 Michael Labbé		bug report about configure.ac (realpath).
 Michael Tocci		bug report about the C++ parser.
+Miller, Matt		suggestion about comment lines for '.notfunction' file.
 Oleg Checkulaev		advice about writing code for generic UNIX.
 Oliver Paukstadt	idea about -c (gzipped html) option of htags(1).
 Patrick Strasser	many bug reports about htags(1).

@@ -21,7 +21,7 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
-AC_INIT([GNU GLOBAL],[6.6.7])
+AC_INIT([GNU GLOBAL],[6.6.8])
 AC_DEFINE(COPYRIGHT_YEAR,["1996-2021"],[Copyright Year])
 AC_CONFIG_SRCDIR(global/global.c)
 AC_CONFIG_HEADERS([config.h:config-h.in])
@@ -217,14 +217,40 @@ dnl Use sqlite3 API.
 dnl
 AC_MSG_CHECKING(for sqlite3 support)
 AC_ARG_WITH(sqlite3,
-[  --with-sqlite3          use sqlite3 API ],
+[  --with-sqlite3[[=DIR]]    use sqlite3 API ],
 [
-	#LDFLAGS="$LDFLAGS -lsqlite3"
-	AC_DEFINE(USE_SQLITE3,1,[Define if you use sqlite3 API.])
-	AM_CONDITIONAL(USE_SQLITE3, true)
-	AC_MSG_RESULT(yes)
+	if test "$withval" = no; then
+		AM_CONDITIONAL(USE_SQLITE3, false)
+		AM_CONDITIONAL(USE_SQLITE3_VENDORED, false)
+		AC_MSG_RESULT(no)
+	else
+		AC_DEFINE(USE_SQLITE3,1,[Define if you use sqlite3 API.])
+		AM_CONDITIONAL(USE_SQLITE3, true)
+		case "$withval" in
+		''|yes)
+			AM_CONDITIONAL(USE_SQLITE3_VENDORED, true)
+			AC_MSG_RESULT(yes)
+			;;
+		*)
+			if ! test -d "$withval"; then
+				AC_MSG_ERROR([directory $withval not found.])
+			fi
+			if ! test -r "$withval/include/sqlite3.h"; then
+				AC_MSG_ERROR([header $withval/include/sqlite3.h not found.])
+			fi
+			if ! test -r "$withval/lib/libsqlite3.so" && ! test -r "$withval/lib/libsqlite3.dylib"; then
+				AC_MSG_ERROR([library $withval/lib/libsqlite3.* not found.])
+			fi
+			AM_CONDITIONAL(USE_SQLITE3_VENDORED, false)
+			AM_CPPFLAGS="$AM_CPPFLAGS -I$withval/include"
+			LIBS="$LIBS -L$withval/lib -lsqlite3"
+                	AC_MSG_RESULT([yes, using $withval])
+			;;
+		esac
+	fi
 ],[
 	AM_CONDITIONAL(USE_SQLITE3, false)
+	AM_CONDITIONAL(USE_SQLITE3_VENDORED, false)
 	AC_MSG_RESULT(no)
 ])
 
@@ -379,6 +405,7 @@ AC_SUBST(POSIX_SORT)
 AC_SUBST(AM_CPPFLAGS)
 AC_SUBST(LDADD)
 AC_SUBST(LDFLAGS)
+AC_SUBST(LIBS)
 
 dnl
 dnl The definition of config variable skip and suffixes.

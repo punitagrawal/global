@@ -19,6 +19,32 @@ ___________________________________
 GNU Global NEWS - User visible changes.
 At least, you should search '[INCOMPATIBLE CHANGES]' for each version.
 
+Version 6.6.8 - December 17 2021
+
+[CHANGES]
+o gtags: Now you can write comments in '.notfunction' file.
+  Lines starting with ';' are comment lines.
+
+	[.notfunction]
+	+---------------------------
+	|;
+	|; This is a comment.
+	|;
+	|main
+
+o configure: Now you can build Global with external SQLite3 library.
+  --with-sqlite3[=dir]    By default, the embedded version is used.
+
+[NEW DOCUMENT]
+o plugin-factory/PLUGIN_HOWTO.reference:
+  Added a howto document: 'How to get Universal Ctags to handle references'
+
+[FIXED BUGS]
+o global: The --print0 option was ignored when using the --completion command.
+  Now it works.
+o gtags: The --file option could cause segmentation fault.
+  Now it works.
+
 Version 6.6.7 - July 1 2021
 
 [FIXED BUGS]

@@ -16,7 +16,7 @@ INCS = btree.h db.h extern.h mpool.h queue.h compat.h
 SRCS = bt_close.c bt_conv.c bt_debug.c bt_delete.c bt_get.c bt_open.c bt_overflow.c \
         bt_page.c bt_put.c bt_search.c bt_seq.c bt_split.c bt_utils.c db.c mpool.c
 
-if USE_SQLITE3
+if USE_SQLITE3_VENDORED
 INCS += sqlite3.h
 SRCS += sqlite3.c
 AM_CPPFLAGS += -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION
