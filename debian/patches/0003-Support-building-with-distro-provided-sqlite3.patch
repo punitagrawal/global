@@ -1,0 +1,46 @@
+From: Punit Agrawal <punit@debian.org>
+Date: Sun, 22 May 2022 22:28:32 +0100
+Subject: Support building with distro provided sqlite3
+
+Since Global 6.6.8, support was added for building with external
+sqlite3 but the implementation made it difficult to use the Debian
+Sqlite3 due to the library check not taking into account the
+multi-arch library location.
+
+Instead, simplify the configure check to use autotools machinery to
+detect the sqlite3 header and library. In the process support for
+alternate sqlite3 is dropped - this should not affect the Debian
+package which is being built with distro provided sqlite3.
+---
+ configure.ac | 17 +----------------
+ 1 file changed, 1 insertion(+), 16 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 1552d3f..548d841 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -228,23 +228,8 @@ AC_ARG_WITH(sqlite3,
+ 		AM_CONDITIONAL(USE_SQLITE3, true)
+ 		case "$withval" in
+ 		''|yes)
+-			AM_CONDITIONAL(USE_SQLITE3_VENDORED, true)
+-			AC_MSG_RESULT(yes)
+-			;;
+-		*)
+-			if ! test -d "$withval"; then
+-				AC_MSG_ERROR([directory $withval not found.])
+-			fi
+-			if ! test -r "$withval/include/sqlite3.h"; then
+-				AC_MSG_ERROR([header $withval/include/sqlite3.h not found.])
+-			fi
+-			if ! test -r "$withval/lib/libsqlite3.so" && ! test -r "$withval/lib/libsqlite3.dylib"; then
+-				AC_MSG_ERROR([library $withval/lib/libsqlite3.* not found.])
+-			fi
++			AC_CHECK_HEADER(sqlite3.h, AC_CHECK_LIB(sqlite3, sqlite3_open, [LIBS="$LIBS -lsqlite3"], []))
+ 			AM_CONDITIONAL(USE_SQLITE3_VENDORED, false)
+-			AM_CPPFLAGS="$AM_CPPFLAGS -I$withval/include"
+-			LIBS="$LIBS -L$withval/lib -lsqlite3"
+-                	AC_MSG_RESULT([yes, using $withval])
+ 			;;
+ 		esac
+ 	fi

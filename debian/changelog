@@ -2,8 +2,9 @@ global (6.6.8-1) UNRELEASED; urgency=medium
 
   * New upstream version 6.6.8
   * Drop patch to remove vendored sqlite3
+  * Enable detection of distro sqlite3
 
- -- Punit Agrawal <punit@debian.org>  Sun, 22 May 2022 22:03:27 +0100
+ -- Punit Agrawal <punit@debian.org>  Sun, 22 May 2022 22:49:00 +0100
 
 global (6.6.7-1) unstable; urgency=medium
 
