@@ -243,6 +243,8 @@ Cpp(const struct parser_param *param)
 							}
 						}
 						c = nexttoken(NULL, cpp_reserved_word);
+					} else if (c == CPP_FINAL) {
+						c = nexttoken(NULL, cpp_reserved_word);
 					}
 				} while (c == SYMBOL || c == '\n');
 				if (c == ':' || c == '{') /* } */ {

@@ -21,8 +21,8 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
-AC_INIT([GNU GLOBAL],[6.6.8])
-AC_DEFINE(COPYRIGHT_YEAR,["1996-2021"],[Copyright Year])
+AC_INIT([GNU GLOBAL],[6.6.9])
+AC_DEFINE(COPYRIGHT_YEAR,["1996-2022"],[Copyright Year])
 AC_CONFIG_SRCDIR(global/global.c)
 AC_CONFIG_HEADERS([config.h:config-h.in])
 AC_PREREQ(2.59)
@@ -75,7 +75,7 @@ AC_MSG_CHECKING(whether POSIX.1-2008 realpath is equipped)
 AC_CACHE_VAL(ac_cv_posix1_2008_realpath,
 [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdlib.h>
-main(){ (void)realpath("/./tmp", (void *)0); return 0; }
+int main(){ (void)realpath("/./tmp", (void *)0); return 0; }
 ]])],[ac_cv_posix1_2008_realpath=yes],
 [ac_cv_posix1_2008_realpath=no])])
 AC_MSG_RESULT($ac_cv_posix1_2008_realpath)
