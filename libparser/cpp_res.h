@@ -70,44 +70,45 @@
 #define CPP_EXPORT	2028
 #define CPP_EXTERN	2029
 #define CPP_FALSE	2030
-#define CPP_FLOAT	2031
-#define CPP_FOR	2032
-#define CPP_FRIEND	2033
-#define CPP_GOTO	2034
-#define CPP_IF	2035
-#define CPP_INT	2036
-#define CPP_LONG	2037
-#define CPP_MUTABLE	2038
-#define CPP_NAMESPACE	2039
-#define CPP_NEW	2040
-#define CPP_OPERATOR	2041
-#define CPP_PRIVATE	2042
-#define CPP_PROTECTED	2043
-#define CPP_PUBLIC	2044
-#define CPP_REGISTER	2045
-#define CPP_REINTERPRET_CAST	2046
-#define CPP_RETURN	2047
-#define CPP_SHORT	2048
-#define CPP_SIZEOF	2049
-#define CPP_STATIC	2050
-#define CPP_STATIC_CAST	2051
-#define CPP_STRUCT	2052
-#define CPP_SWITCH	2053
-#define CPP_TEMPLATE	2054
-#define CPP_THIS	2055
-#define CPP_THROW	2056
-#define CPP_TRUE	2057
-#define CPP_TRY	2058
-#define CPP_TYPEDEF	2059
-#define CPP_TYPENAME	2060
-#define CPP_TYPEID	2061
-#define CPP_UNION	2062
-#define CPP_UNSIGNED	2063
-#define CPP_USING	2064
-#define CPP_VIRTUAL	2065
-#define CPP_VOID	2066
-#define CPP_WCHAR_T	2067
-#define CPP_WHILE	2068
+#define CPP_FINAL	2031
+#define CPP_FLOAT	2032
+#define CPP_FOR	2033
+#define CPP_FRIEND	2034
+#define CPP_GOTO	2035
+#define CPP_IF	2036
+#define CPP_INT	2037
+#define CPP_LONG	2038
+#define CPP_MUTABLE	2039
+#define CPP_NAMESPACE	2040
+#define CPP_NEW	2041
+#define CPP_OPERATOR	2042
+#define CPP_PRIVATE	2043
+#define CPP_PROTECTED	2044
+#define CPP_PUBLIC	2045
+#define CPP_REGISTER	2046
+#define CPP_REINTERPRET_CAST	2047
+#define CPP_RETURN	2048
+#define CPP_SHORT	2049
+#define CPP_SIZEOF	2050
+#define CPP_STATIC	2051
+#define CPP_STATIC_CAST	2052
+#define CPP_STRUCT	2053
+#define CPP_SWITCH	2054
+#define CPP_TEMPLATE	2055
+#define CPP_THIS	2056
+#define CPP_THROW	2057
+#define CPP_TRUE	2058
+#define CPP_TRY	2059
+#define CPP_TYPEDEF	2060
+#define CPP_TYPENAME	2061
+#define CPP_TYPEID	2062
+#define CPP_UNION	2063
+#define CPP_UNSIGNED	2064
+#define CPP_USING	2065
+#define CPP_VIRTUAL	2066
+#define CPP_VOID	2067
+#define CPP_WCHAR_T	2068
+#define CPP_WHILE	2069
 #define SHARP_SHARP	3001
 #define SHARP_ASSERT	3002
 #define SHARP_DEFINE	3003
@@ -130,12 +131,12 @@
 #define SHARP_WARNING	3020
 struct keyword { char *name; int token; };
 
-#define TOTAL_KEYWORDS 99
+#define TOTAL_KEYWORDS 100
 #define MIN_WORD_LENGTH 2
 #define MAX_WORD_LENGTH 16
 #define MIN_HASH_VALUE 2
-#define MAX_HASH_VALUE 242
-/* maximum key range = 241, duplicates = 0 */
+#define MAX_HASH_VALUE 227
+/* maximum key range = 226, duplicates = 0 */
 
 #ifdef __GNUC__
 __inline
@@ -149,32 +150,32 @@ cpp_hash (register const char *str, register size_t len)
 {
   static unsigned char asso_values[] =
     {
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243,  10, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243,   0, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243,  45, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243,   5, 243,  10,  15,  35,
-       45,  25,  95,  70,  35,  15,  65, 243,  70,  20,
-        0,   5,  60,  15,   5,   0,   0,  10,  90,  80,
-       20,  80,  30,  40, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243, 243, 243, 243,
-      243, 243, 243, 243, 243, 243, 243
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228,  10, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228,   0, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228,  45, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228,   5, 228,  10,  15,  80,
+       40,  25,  90,  80,  80,  15,  70, 228,  25,  25,
+        0,   5,  55,  15,   5,   0,   0,  10, 100, 110,
+       15,  20,  30,  40, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228, 228, 228, 228,
+      228, 228, 228, 228, 228, 228, 228
     };
   register unsigned int hval = len;
 
@@ -228,117 +229,120 @@ cpp_lookup (register const char *str, register size_t len)
       {""},
       {"__attribute__", CPP___ATTRIBUTE__},
       {"#unassert", SHARP_UNASSERT},
-      {"false", CPP_FALSE},
+      {"final", CPP_FINAL},
       {"#error", SHARP_ERROR},
       {"mutable", CPP_MUTABLE},
       {"try", CPP_TRY},
       {"case", CPP_CASE},
-      {""},
-      {"inline", CPP_INLINE},
-      {""},
-      {"volatile", CPP_VOLATILE},
-      {"namespace", CPP_NAMESPACE},
-      {"throw", CPP_THROW},
+      {"false", CPP_FALSE},
       {"export", CPP_EXPORT},
       {""},
       {"new", CPP_NEW},
-      {""},
-      {"#else", SHARP_ELSE},
+      {"namespace", CPP_NAMESPACE},
+      {"class", CPP_CLASS},
+      {"inline", CPP_INLINE},
+      {"dynamic_cast", CPP_DYNAMIC_CAST},
+      {"volatile", CPP_VOLATILE},
+      {""}, {""},
       {"return", CPP_RETURN},
       {""},
       {"__P", CPP___P},
-      {""}, {""},
-      {"signed", CPP_SIGNED},
-      {""},
-      {"__thread", CPP___THREAD},
-      {"char", CPP_CHAR},
-      {"catch", CPP_CATCH},
+      {"else", CPP_ELSE},
+      {"#else", SHARP_ELSE},
       {"extern", CPP_EXTERN},
       {"__const", CPP_CONST},
-      {"#include", SHARP_INCLUDE},
+      {""},
       {"__const__", CPP_CONST},
-      {"#elif", SHARP_ELIF},
+      {""},
       {"#undef", SHARP_UNDEF},
-      {"wchar_t", CPP_WCHAR_T},
-      {"#include_next", SHARP_INCLUDE_NEXT},
       {""},
-      {"using", CPP_USING},
-      {"#ident", SHARP_IDENT},
-      {""}, {""},
-      {"protected", CPP_PROTECTED},
-      {"union", CPP_UNION},
-      {"delete", CPP_DELETE},
-      {"#pragma", SHARP_PRAGMA},
-      {"__inline", CPP_INLINE},
-      {""},
-      {"__inline__", CPP_INLINE},
-      {"#endif", SHARP_ENDIF},
-      {"#import", SHARP_IMPORT},
-      {"register", CPP_REGISTER},
-      {"long", CPP_LONG},
-      {"#sccs", SHARP_SCCS},
-      {"sizeof", CPP_SIZEOF},
-      {""},
-      {"#if", SHARP_IF},
-      {""},
-      {"class", CPP_CLASS},
-      {""},
-      {"#ifndef", SHARP_IFNDEF},
-      {"template", CPP_TEMPLATE},
-      {""}, {""}, {""},
-      {"if", CPP_IF},
-      {""},
-      {"else", CPP_ELSE},
-      {"__volatile", CPP_VOLATILE},
-      {"friend", CPP_FRIEND},
-      {"__volatile__", CPP_VOLATILE},
-      {""},
-      {"this", CPP_THIS},
-      {"short", CPP_SHORT},
-      {"reinterpret_cast", CPP_REINTERPRET_CAST},
-      {"dynamic_cast", CPP_DYNAMIC_CAST},
-      {"#warning", SHARP_WARNING},
-      {""}, {""}, {""},
-      {"default", CPP_DEFAULT},
       {"explicit", CPP_EXPLICIT},
-      {"enum", CPP_ENUM},
-      {"break", CPP_BREAK},
-      {"double", CPP_DOUBLE},
       {""}, {""},
-      {"void", CPP_VOID},
-      {""},
-      {"public", CPP_PUBLIC},
-      {""}, {""},
-      {"true", CPP_TRUE},
-      {""},
       {"typeid", CPP_TYPEID},
       {"typedef", CPP_TYPEDEF},
       {"typename", CPP_TYPENAME},
-      {""}, {""}, {""}, {""},
+      {"protected", CPP_PROTECTED},
+      {"#elif", SHARP_ELIF},
+      {"#ident", SHARP_IDENT},
+      {"#pragma", SHARP_PRAGMA},
+      {""}, {""},
+      {"using", CPP_USING},
+      {"#endif", SHARP_ENDIF},
+      {"#import", SHARP_IMPORT},
+      {""}, {""},
+      {"union", CPP_UNION},
+      {"delete", CPP_DELETE},
+      {""},
+      {"__inline", CPP_INLINE},
+      {""},
+      {"__inline__", CPP_INLINE},
+      {"sizeof", CPP_SIZEOF},
+      {""},
+      {"template", CPP_TEMPLATE},
+      {"bool", CPP_BOOL},
+      {"throw", CPP_THROW},
+      {""},
+      {"if", CPP_IF},
+      {""},
+      {"long", CPP_LONG},
+      {"float", CPP_FLOAT},
+      {""}, {""},
+      {"#if", SHARP_IF},
+      {""},
+      {"#line", SHARP_LINE},
+      {"signed", CPP_SIGNED},
+      {"#ifndef", SHARP_IFNDEF},
+      {"__thread", CPP___THREAD},
+      {"char", CPP_CHAR},
+      {"catch", CPP_CATCH},
+      {"friend", CPP_FRIEND},
+      {""},
+      {"#include", SHARP_INCLUDE},
+      {""},
+      {"break", CPP_BREAK},
+      {"reinterpret_cast", CPP_REINTERPRET_CAST},
+      {"wchar_t", CPP_WCHAR_T},
+      {"#include_next", SHARP_INCLUDE_NEXT},
+      {""}, {""}, {""}, {""}, {""},
+      {"void", CPP_VOID},
+      {""},
+      {"public", CPP_PUBLIC},
+      {"default", CPP_DEFAULT},
       {"__extension__", CPP___EXTENSION__},
+      {""},
+      {"#sccs", SHARP_SCCS},
+      {"double", CPP_DOUBLE},
+      {""},
+      {"register", CPP_REGISTER},
+      {"enum", CPP_ENUM},
+      {"__volatile", CPP_VOLATILE},
+      {""},
+      {"__volatile__", CPP_VOLATILE},
+      {""},
+      {"true", CPP_TRUE},
+      {""}, {""}, {""},
+      {"#warning", SHARP_WARNING},
       {""}, {""},
       {"#ifdef", SHARP_IFDEF},
-      {""}, {""},
-      {"bool", CPP_BOOL},
-      {"#line", SHARP_LINE},
-      {""}, {""}, {""}, {""},
-      {"float", CPP_FLOAT},
-      {""}, {""}, {""}, {""}, {""},
-      {"switch", CPP_SWITCH},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""},
-      {"private", CPP_PRIVATE},
+      {""}, {""}, {""},
+      {"short", CPP_SHORT},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {"this", CPP_THIS},
+      {""}, {""}, {""},
       {"operator", CPP_OPERATOR},
-      {""}, {""}, {""}, {""}, {""}, {""},
-      {"while", CPP_WHILE},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""},
+      {"while", CPP_WHILE},
+      {""},
+      {"private", CPP_PRIVATE},
+      {""}, {""}, {""},
+      {"switch", CPP_SWITCH},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""}, {""},
       {"#define", SHARP_DEFINE}
     };
 

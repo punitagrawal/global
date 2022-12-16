@@ -5,7 +5,7 @@ ___________________________________
 |  ~~  |   ~~|     |  ~  |  |  |   ~~|          for all hackers.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  Copyright (c) 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2012
-	2013, 2014, 2015, 2016, 2017, 2020
+	2013, 2014, 2015, 2016, 2017, 2020, 2022
 	Tama Communications Corporation
 
  This file is free software; as a special exception the author gives
@@ -35,10 +35,11 @@ Andy Zhou		bug report about gtags-parser overlook 'extern' prefixed function.
 Arne Schmitz		bug report about gtags-parser.
 Alain Kalker		patch for global.cgi.tmpl.in to support python's built-in web server.
 Alex Ott		profitable information about LFS(Large file support).
+Alex Pelts		bug fix patch for c++ parser (did not recognize final keyword).
 Alexander Gusak		bug report about c++ parser's segmentation violation.
 Bakken, Luke		bug fix method about stat() in htags(1).
 Bert Gijsbers		investigation about mandoc macro and a bug report.
-Biswapriyo Nath		patch for windows32 platform.
+Biswapriyo Nath		bug fix patch for Windows platform (MinGW).
 Bob Bentley		bug report about bless.sh and gtags.
 Brian Carlstrom		bug fix patch for gtags.
 Bvk chaitanya		bug report about global (it cannot find gtags).

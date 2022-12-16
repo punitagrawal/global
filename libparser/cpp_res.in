@@ -43,6 +43,7 @@ explicit		word
 export			word
 extern			word
 false			word
+final			word
 float			word
 for			word
 friend			word

@@ -21,7 +21,7 @@ ChangeLog about GNU GLOBAL
 
 December 13 2021, Shigio YAMAGUHI
 
-	[plugin-factory/PLUGIN_HOWTO.reference]
+	[plugin-factory/PLUGIN_HOWTO.universal-ctags]
 	[plugin-factory/uctags-scheme.c-diff]
 	I wrote a document titled 'How to get Universal Ctags to handle references.'
 

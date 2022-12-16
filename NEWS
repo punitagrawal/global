@@ -19,6 +19,14 @@ ___________________________________
 GNU Global NEWS - User visible changes.
 At least, you should search '[INCOMPATIBLE CHANGES]' for each version.
 
+Version 6.6.9 - December 12 2022
+
+[FIXED BUGS]
+o gtags(C++ parser): did not recognize 'final' keyword. Now it works.
+o Fixed a couple of bugs in MinGW.
+- Fixed unknown type sigset_t error in MinGW.
+- Fixed pointer to integer cast warnings in MinGW.
+
 Version 6.6.8 - December 17 2021
 
 [CHANGES]
@@ -36,7 +44,7 @@ o configure: Now you can build Global with external SQLite3 library.
   --with-sqlite3[=dir]    By default, the embedded version is used.
 
 [NEW DOCUMENT]
-o plugin-factory/PLUGIN_HOWTO.reference:
+o plugin-factory/PLUGIN_HOWTO.universal-ctags:
   Added a howto document: 'How to get Universal Ctags to handle references'
 
 [FIXED BUGS]

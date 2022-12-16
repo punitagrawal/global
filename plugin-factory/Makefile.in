@@ -427,7 +427,7 @@ pygments_parser_la_LDFLAGS = -module -avoid-version -no-undefined
 user_custom_la_SOURCES = user-custom.c
 user_custom_la_LDFLAGS = -module -avoid-version -no-undefined
 gtagsdir = ${datadir}/gtags
-gtags_DATA = PLUGIN_HOWTO PLUGIN_HOWTO.pygments PLUGIN_HOWTO.reference \
+gtags_DATA = PLUGIN_HOWTO PLUGIN_HOWTO.pygments PLUGIN_HOWTO.universal-ctags \
 	     	uctags-scheme.c-diff
 
 scriptdir = ${datadir}/gtags/script
