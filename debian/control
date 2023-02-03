@@ -3,7 +3,7 @@ Section: devel
 Priority: optional
 Build-Depends: debhelper-compat (= 12),
  texinfo,
- libncurses5-dev, libltdl-dev, libsqlite3-dev,
+ libncurses-dev, libltdl-dev, libsqlite3-dev,
  emacsen-common, flex, bison, gperf,
  libtool-bin, python3-minimal
 Maintainer: Punit Agrawal <punit@debian.org>
