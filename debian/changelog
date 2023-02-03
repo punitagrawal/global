@@ -1,3 +1,12 @@
+global (6.6.9-1) unstable; urgency=medium
+
+  * New upstream version 6.6.9
+  * debian: Standards-Version to 4.6.1
+  * debian: Upgrade dependency package name
+  * debian: Update lintian overrides
+
+ -- Punit Agrawal <punit@debian.org>  Fri, 03 Feb 2023 17:21:03 +0000
+
 global (6.6.8-1) unstable; urgency=medium
 
   * New upstream version 6.6.8
