@@ -72,6 +72,7 @@ George Neville-Neil	report about the useless inspection of gtags(1).
 Giuseppe Corbelli	Global.py for glimmer code editor and an advice about vim.
 Gordon Grimes		bug report about the java parser of gtags.
 Gustaf Waldemarson	bug report and advices about tag files corruption.
+hackerb9		bug report about the --version not showing package name.
 Hageseter, Trond E.	bug report about gtags-parser.
 Hendrik Visage		bug report about gtags-parser(here document of PHP).
 Hideaki Okada		idea about -g option of global(1).
@@ -136,6 +137,9 @@ Michael Tocci		bug report about the C++ parser.
 Miller, Matt		suggestion about comment lines for '.notfunction' file.
 Oleg Checkulaev		advice about writing code for generic UNIX.
 Oliver Paukstadt	idea about -c (gzipped html) option of htags(1).
+Olivier Certner		'--with-python-interpreter' option for configure script.
+			suggestion for auto-detection of pread(2) and pwrite(2).
+			bug report and fix patch about universal-ctags.la.
 Patrick Strasser	many bug reports about htags(1).
 Paul Lew		advice about the build in Solaris environment.
 Paulius Bulotas		bug report and fix patch for gozilla(1).
@@ -157,8 +161,9 @@ Punit Agrawal		bug report about gozilla(1).
 Ruppert Koch		bug report about htags(1).
 S Kaicho		bug report about htags(1).
 Sadaichi Hayashida	idea about generating relative path.
-Satoru SATOH		profitable material for the support of XHTML.
+Samuel Plessis-Fraissard bug fix patch to support multiple c++ namespace opening with a single brace.
 Sanpei Yoshiro Mihira	bug report of xargs.c in Windows 32.
+Satoru SATOH		profitable material for the support of XHTML.
 Sean Farley		bug report of gozilla's wrong installation method.
 Seigo Ishigane		patch for pygments_parser.py.in needed in python3 + Windows.
 Sergio Talens-Oliag	writing on-line manual for systags(1).

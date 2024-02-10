@@ -74,7 +74,10 @@ static void yyerror(const struct parser_param *, const char *);
 
 %start input
 %name-prefix "asm_"
-
+/*
+ * This code does not work (GNU Bison 3.8.2).
+ *	%define api.prefix {asm_}
+ */
 %parse-param { const struct parser_param *param }
 %lex-param { const struct parser_param *param }
 

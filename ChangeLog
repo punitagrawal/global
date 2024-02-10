@@ -19,6 +19,26 @@ ___________________________________
 
 ChangeLog about GNU GLOBAL
 
+November 19 2023, Shigo YAMAGUCHI
+
+	[plugin-factory/PLUGIN_HOWTO.pygments]
+	I changed the last sentence as follows:
+
+	Though it is considered a separate package, not part of GLOBAL proper,
+	we included it for user's convenience.
+	|
+	v
+	Now it is maintained as a part of GNU Global.
+
+April 6 2023, Shigo YAMAGUCHI
+
+	The --with-pread-pwrite option of configure script was removed.
+	Now configure script automatically probes for pread()/pwrite().
+
+	However, it is not enabled on Cygwin environment, because it did not
+	work properly on Cygwin in the past.  If requested by Cygwin users,
+	I will change it.
+
 December 13 2021, Shigio YAMAGUHI
 
 	[plugin-factory/PLUGIN_HOWTO.universal-ctags]

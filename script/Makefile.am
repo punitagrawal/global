@@ -19,9 +19,9 @@ gtagsdir = ${datadir}/gtags
 EXTRA_DIST = ${script_DATA} ${gtags_DATA}
 
 gtags-client:
-	cp global-client gtags-client
+	cp $(srcdir)/global-client gtags-client
 htags-client:
-	cp global-client htags-client
+	cp $(srcdir)/global-client htags-client
 install-data-hook:
 	if cd $(DESTDIR)$(datadir)/gtags/script; then \
 		chmod 755 less-global elvis-global global-client gtags-client htags-client; \

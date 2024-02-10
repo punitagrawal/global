@@ -36,7 +36,6 @@ License GPLv3+: GNU GPL version 3 or later <http://www.gnu.org/licenses/gpl.html
 This is free software; you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n\
 ";
-static const char *sysname = "Global";
 /**
  * get_version: get version string.
  */
@@ -63,7 +62,7 @@ version(const char *name, const int verbose)
 	if (qflag)
 		fprintf(stdout, "%s\n", VERSION);
 	else {
-		fprintf(stdout, "%s (%s) %s\n", name, sysname, VERSION);
+		fprintf(stdout, "%s (%s) %s\n", name, PACKAGE_NAME, VERSION);
 		fprintf(stdout, "Powered by Berkeley DB 1.85");
 #ifdef USE_SQLITE3
 		fprintf(stdout, " and SQLite3 %s", sqlite3_version);

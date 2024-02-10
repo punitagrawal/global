@@ -1,4 +1,4 @@
-#!/opt/local/bin/python
+#!/usr/bin/env python
 #
 # Copyright (c) 2014
 #	Yoshitaro Makise
@@ -27,7 +27,7 @@ import optparse
 import pygments.lexers
 from pygments.token import Token
 
-EXUBERANT_CTAGS = "/opt/local/bin/ctags"
+EXUBERANT_CTAGS = "/usr/local/bin/ctags"
 
 # In most cases, lexers can be looked up with lowercase form of formal
 # language names. This dictionary defines exceptions.
@@ -139,7 +139,7 @@ class PygmentsParser:
 
 class CtagsParser:
     def __init__(self, ctags_command, options):
-        self.process = subprocess.Popen([ctags_command, '-xu', '--filter', '--filter-terminator=' + TERMINATOR, '--format=1'], bufsize=-1,
+        self.process = subprocess.Popen([ctags_command, '-xu', '--tag-relative=no', '--filter', '--filter-terminator=' + TERMINATOR, '--format=1'], bufsize=-1,
                                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=CLOSEFDS,
                                         universal_newlines=True)
         if sys.version_info < (3,):
