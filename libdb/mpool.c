@@ -248,7 +248,7 @@ mpool_get(mp, pgno, flags)
 	 */
 	off = mp->pagesize * (off_t)pgno;
 
-#ifdef HAVE_PREAD
+#if defined(HAVE_PREAD) && !defined(__CYGWIN__)
 	if ((nr = pread(mp->fd, bp->page, mp->pagesize, off)) != mp->pagesize) {
 		if (nr >= 0)
 			errno = EFTYPE;
@@ -446,7 +446,7 @@ mpool_write(mp, bp)
 	/* See the comment in mpool_get for cast addition. */
 	off = mp->pagesize * (off_t)bp->pgno;
 
-#ifdef HAVE_PWRITE
+#if defined(HAVE_PWRITE) && !defined(__CYGWIN__)
 	if (pwrite(mp->fd, bp->page, mp->pagesize, off) != mp->pagesize)
 		return (RET_ERROR);
 #else

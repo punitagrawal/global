@@ -67,6 +67,8 @@ static const char *ctagsnotfound = "Universal Ctags not found. Please see ./conf
 static char *ctagscom = EXUBERANT_CTAGS;
 static const char *ctagsnotfound = "Exuberant Ctags not found. Please see ./configure --help.";
 #endif
+static const char *linenumbernotfound = "%s: line number not found in the tag record. ignored.";
+static const char *tagnamenotfound = "%s: tag name not found in the tag record. ignored.";
 
 #ifdef __GNUC__
 static void terminate_ctags(void) __attribute__((destructor));
@@ -105,6 +107,7 @@ static char argv[] = "\" "
 #else
 	"--format=1 "
 #endif
+	"--tag-relative=no "
 	"-xu "
 	"--filter "
 	"\"--filter-terminator=" TERMINATOR "\n\" "
@@ -185,6 +188,7 @@ static char *argv[] = {
 #else
 	"--format=1",
 #endif
+	"--tag-relative=no",
 	"-xu",
 	"--filter",
 	"--filter-terminator=" TERMINATOR "\n",
@@ -290,10 +294,10 @@ put_line(char *ctags_x, const struct parser_param *param)
 	/*
 	 * Output of ctags:
 	 * ctags -x ...
-	 * main              326 global/global.c  main(int argc, char **argv)
+	 * main              326 ./global/global.c  main(int argc, char **argv)
 	 *
 	 * ctags -x --_xformat="%R %-16N %4n %-16F %C" --extras=+r --fields=+r
-	 * D main              326 global/global.c  main(int argc, char **argv)
+	 * D main              326 ./global/global.c  main(int argc, char **argv)
 	 */
 	switch (*ctags_x) {
 	case 'D':
@@ -312,35 +316,51 @@ put_line(char *ctags_x, const struct parser_param *param)
 		ctags_x++;
 #endif
 	filename = strstr(ctags_x, param->file);
-	if (filename == NULL || filename == ctags_x)
+	if (filename == NULL || filename == ctags_x) {
+		param->warning("%s: file name not found in the tag record. ignored.", param->file);
 		return;
+	}
 	p = filename - 1;
-	if (!isspace((unsigned char)*p))
+	if (!isspace((unsigned char)*p)) {
+		param->warning(linenumbernotfound, param->file);
 		return;
+	}
 	while (p >= ctags_x && isspace((unsigned char)*p))
 		*p-- = '\0';
-	if (p < ctags_x)
+	if (p < ctags_x) {
+		param->warning(linenumbernotfound, param->file);
 		return;
-	if (!isdigit((unsigned char)*p))
+	}
+	if (!isdigit((unsigned char)*p)) {
+		param->warning(linenumbernotfound, param->file);
 		return;
+	}
 	while (p >= ctags_x && isdigit((unsigned char)*p))
 		p--;
-	if (p < ctags_x)
+	if (p < ctags_x) {
+		param->warning(linenumbernotfound, param->file);
 		return;
+	}
 	lineno = atoi(p + 1);
-	if (!isspace((unsigned char)*p))
+	if (!isspace((unsigned char)*p)) {
+		param->warning(tagnamenotfound, param->file);
 		return;
+	}
 	while (p >= ctags_x && isspace((unsigned char)*p))
 		*p-- = '\0';
-	if (p < ctags_x)
+	if (p < ctags_x) {
+		param->warning(tagnamenotfound, param->file);
 		return;
+	}
 	while (p >= ctags_x && !isspace((unsigned char)*p))
 		p--;
 	tagname = p + 1;
 	p = filename + strlen(param->file);
 	if (*p != '\0') {
-		if (!isspace((unsigned char)*p))
+		if (!isspace((unsigned char)*p)) {
+			param->warning("%s: source code image not found in the tag record. ignored.", param->file);
 			return;
+		}
 		*p++ = '\0';
 		while (isspace((unsigned char)*p))
 			p++;

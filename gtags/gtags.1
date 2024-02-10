@@ -269,6 +269,23 @@ to any other tagging systems like \fBctags\fP(1), \fBcscope\fP(1), etc.
 
 .br
 Skip list is also effective when you use the \fB-f\fP or \'gtags.files\'.
+.SH EXAMPLES
+.nf
+#
+# There are several ways to use Universal Ctags plug-in parser.
+#
+$ gtags --gtagsconf=/usr/local/share/gtags/gtags.conf --gtagslabel=universal-ctags
+$ gtags --explain
+or
+$ export GTAGSCONF=/usr/local/share/gtags/gtags.conf
+$ export GTAGSLABEL=universal-ctags
+$ gtags --explain
+or
+# In your project
+$ cp /usr/local/share/gtags/gtags.conf .
+$ vi gtags.conf		# default:tc=native => default:tc=universal-ctags
+$ gtags --explain
+.fi
 .SH DIAGNOSTICS
 \fBGtags\fP exits with a non-0 value if an error occurred, 0 otherwise.
 .PP

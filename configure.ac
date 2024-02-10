@@ -21,11 +21,12 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
-AC_INIT([GNU GLOBAL],[6.6.9])
-AC_DEFINE(COPYRIGHT_YEAR,["1996-2022"],[Copyright Year])
+AC_INIT([GNU Global],[6.6.11])
+AC_DEFINE(COPYRIGHT_YEAR,["1996-2023"],[Copyright Year])
 AC_CONFIG_SRCDIR(global/global.c)
 AC_CONFIG_HEADERS([config.h:config-h.in])
-AC_PREREQ(2.59)
+AC_CONFIG_MACRO_DIRS([m4])
+AC_PREREQ(2.71)
 AM_INIT_AUTOMAKE([1.9.3 gnu subdir-objects])
 
 dnl Checks for programs.
@@ -43,18 +44,25 @@ AC_CHECK_TOOL(AR, ar)
 dnl
 dnl for "plugin-factory/pygments_parser.py"
 dnl
-AM_PATH_PYTHON([2.6],,[PYTHON="/usr/bin/env python"])
+m4_define([PYTHON_INTERPRETER],[[/usr/bin/env python]])
+AC_ARG_WITH([python-interpreter],
+        [AS_HELP_STRING([--with-python-interpreter],
+                        [the Python interpreter to use at run-time in the Pygments plugin]dnl
+[ @<:@default=]m4_expand([PYTHON_INTERPRETER])[@:>@])],
+    [PYTHON=$withval],
+    [PYTHON=""])
+AS_IF([test x"$PYTHON" = x"no"],
+        [AC_MSG_ERROR([a Python interpreter command is needed (even if not installed)])],
+      [test x"$PYTHON" = x || test x"$PYTHON" = x"yes"],
+      [PYTHON="]m4_expand([PYTHON_INTERPRETER])["])
+AC_MSG_NOTICE([using "$PYTHON" as the shebang line's interpreter for 'pygments_parser.py'])
+AC_SUBST([PYTHON])
 
-AC_GNU_SOURCE
+AC_USE_SYSTEM_EXTENSIONS
 
+LT_INIT([dlopen])
 LT_PREREQ([2.2.6b])
 LT_CONFIG_LTDL_DIR([libltdl])
-dnl
-dnl Because autoreconf up to version 2.59 doesn't know LT_INIT,
-dnl we use the old name AC_PROG_LIBTOOL.
-dnl
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
 LTDL_INIT([recursive])
 
 dnl Checks for libraries.
@@ -133,6 +141,7 @@ AC_CHECK_FUNCS(getcwd putenv lstat snprintf)
 AC_CHECK_FUNCS(index rindex bzero bcmp bcopy strchr strrchr memset memcmp memmove)
 AC_CHECK_FUNCS(putc_unlocked getc_unlocked)
 AC_CHECK_FUNCS(gettimeofday getrusage)
+AC_CHECK_FUNCS(pread pwrite)
 AC_DJGPP
 
 AC_ARG_ENABLE(gtagscscope,
@@ -278,24 +287,6 @@ AC_ARG_WITH(home-etc,
                 LDFLAGS="$LDFLAGS -L$HOMEETC/lib -lhome_etc"
                 AC_DEFINE(HAVE_HOME_ETC_H,1,[Define if you use home-etc facility.])
                 AC_MSG_RESULT([yes, using $HOMEETC])
-        fi
-],[
-        AC_MSG_RESULT(no)
-])
-
-dnl
-dnl for pread/pwrite support
-dnl
-AC_MSG_CHECKING(for pread/pwrite support)
-AC_ARG_WITH(pread-pwrite,
-[  --with-pread-pwrite     include pread/pwrite support for BSD db library ],
-[
-        if test "$withval" = no; then
-                AC_MSG_RESULT(no)
-        else
-		AC_DEFINE(HAVE_PREAD, 1, [Define to 1 if you have and use pread.])
-		AC_DEFINE(HAVE_PWRITE, 1, [Define to 1 if you have and use pwrite.])
-                AC_MSG_RESULT([yes])
         fi
 ],[
         AC_MSG_RESULT(no)

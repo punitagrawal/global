@@ -1,4 +1,4 @@
-This is global.info, produced by makeinfo version 6.7 from global.texi.
+This is global.info, produced by makeinfo version 7.1 from global.texi.
 
 INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
@@ -7,7 +7,7 @@ END-INFO-DIR-ENTRY
 
 This file documents the GNU Global source code tagging system.
 
-   Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2010,
+   Copyright © 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2010,
 2011, 2012, 2013 Tama Communications Corporation
 
    Permission is granted to copy, distribute and/or modify this document
@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU Global source code tagging system
 *************************************
 
-This manual documents version 6.6.9 of the GNU Global source code
+This manual documents version 6.6.11 of the GNU Global source code
 tagging system.
 
 * Menu:
@@ -50,8 +50,8 @@ across diverse environments, such as Emacs editor, Vi editor, Less
 viewer, Bash shell, various web browsers, etc.  You can find the
 locations of symbols such as functions, macros, structs and classes in
 your source code and move there easily.  It is useful for hacking a
-large project which contains many sub-directories, many '#ifdef' and
-many 'main()' functions.  It is similar to ctags or etags, but is
+large project which contains many sub-directories, many ‘#ifdef’ and
+many ‘main()’ functions.  It is similar to ctags or etags, but is
 different from them at the point of independence of any editor.
 
 1.2 Concept of project
@@ -68,61 +68,61 @@ project, and in and out of many projects.
 
 GNU Global has the following features:
 
-   * supports C, Yacc, Java, PHP4 and assembly.
+   • supports C, Yacc, Java, PHP4 and assembly.
 
-   * works the same way across diverse environments like follows:
+   • works the same way across diverse environments like follows:
 
-        - Shell command line
-        - Bash shell
-        - Vi editor (Nvi, Elvis, vim)
-        - Less viewer
-        - Emacs editor (Emacs, Mule, Xemacs)
-        - Web browser
-        - Doxygen documentation system
+        − Shell command line
+        − Bash shell
+        − Vi editor (Nvi, Elvis, vim)
+        − Less viewer
+        − Emacs editor (Emacs, Mule, Xemacs)
+        − Web browser
+        − Doxygen documentation system
 
-   * finds locations of specified symbol quickly.
+   • finds locations of specified symbol quickly.
 
-   * locates not only definitions but also references.
+   • locates not only definitions but also references.
 
-   * allows duplicate tags.
+   • allows duplicate tags.
 
-   * locates paths which matches to the specified pattern.
+   • locates paths which matches to the specified pattern.
 
-   * hierarchical searches by default.
+   • hierarchical searches by default.
 
-   * searches not only in a source project but also in library projects.
+   • searches not only in a source project but also in library projects.
 
-   * generates completion list for completing input method.
+   • generates completion list for completing input method.
 
-   * supports various output formats.
+   • supports various output formats.
 
-   * allows customizing of a set of candidate files to be tagged.
+   • allows customizing of a set of candidate files to be tagged.
 
-   * understands POSIX 1003.2 regular expression.
+   • understands POSIX 1003.2 regular expression.
 
-   * supports idutils as an external search engine.
+   • supports idutils as an external search engine.
 
-   * tag files are independent of machine architecture.
+   • tag files are independent of machine architecture.
 
-   * supports incremental updating of tag files.
+   • supports incremental updating of tag files.
 
-   * plug-in parser is available to treat new language.
+   • plug-in parser is available to treat new language.
 
-   * supports customizing using 'gtags.conf'.
+   • supports customizing using ‘gtags.conf’.
 
-   * generates a hypertext of source code.
+   • generates a hypertext of source code.
 
-   * compact format to save disk space.
+   • compact format to save disk space.
 
-   * supports client/server environment (TRAMP ready).
+   • supports client/server environment (TRAMP ready).
 
-   * ignores binary files, dot files and specified files.
+   • ignores binary files, dot files and specified files.
 
-   * includes cscope-compatible program (gtags-cscope).
+   • includes cscope-compatible program (gtags-cscope).
 
-   * includes grep-like command (-g command).
+   • includes grep-like command (-g command).
 
-   * supports grep-like symbol highlighting.
+   • supports grep-like symbol highlighting.
 
 
 File: global.info,  Node: Command line,  Next: Applications,  Prev: Introduction,  Up: Top
@@ -165,9 +165,9 @@ project.
          $ ls G*
          GPATH   GRTAGS  GTAGS
 
-   * 'GTAGS'    definition database
-   * 'GRTAGS'   reference database
-   * 'GPATH'    path name database
+   • ‘GTAGS’    definition database
+   • ‘GRTAGS’   reference database
+   • ‘GPATH’    path name database
 
    You should prepare for considerable disk space for tag files.  For
 example, Linux-2.6.32 source code requires the following disk space.
@@ -220,7 +220,7 @@ Consider the following source tree:
                                  |}              |
                                  +---------------+
 
-   * Once you make tag files at the root directory of a project, you can
+   • Once you make tag files at the root directory of a project, you can
      invoke global(1) from anywhere in the project.  By default, you get
      relative paths of the located files.
 
@@ -241,19 +241,19 @@ Consider the following source tree:
               $ global func1
               global: GTAGS not found.
 
-   * The '-r' option locates references.
+   • The ‘-r’ option locates references.
 
               $ global -r func2
               ../DIR1/fileA.c         # func2() is referred from fileA.c
 
-   * You can use POSIX regular expressions.
+   • You can use POSIX regular expressions.
 
               $ cd /home/user/ROOT
               $ global 'func[1-3]'
               DIR1/fileB.c            # func1, func2 and func3 are matched
               DIR2/fileC.c
 
-   * The '-x' option shows details.  It is similar to the '-x' option of
+   • The ‘-x’ option shows details.  It is similar to the ‘-x’ option of
      ctags(1).
 
               $ global func2
@@ -262,17 +262,17 @@ Consider the following source tree:
               func2              2 DIR2/fileC.c       func2(){ i++; }
               func2              4 DIR2/fileC.c       func2(){ i--; }
 
-   * The '-a' option produces absolute path names.
+   • The ‘-a’ option produces absolute path names.
 
               $ global -a func1
               /home/user/ROOT/DIR1/fileB.c
 
-   * The '-s' command locates symbols which are not defined in 'GTAGS'.
+   • The ‘-s’ command locates symbols which are not defined in ‘GTAGS’.
 
               $ global -xs X
               X                  1 DIR2/fileC.c #ifdef X
 
-   * The '-g' command locates lines which have the specified pattern.
+   • The ‘-g’ command locates lines which have the specified pattern.
 
               $ global -xg '#ifdef'
               #ifdef             1 DIR2/fileC.c #ifdef X
@@ -283,23 +283,23 @@ Consider the following source tree:
 
      Additionally, you can use various options:
 
-     '-O'
+     ‘-O’
           search only in text files.
 
-     '-o'
+     ‘-o’
           search in both source files and text files.
 
-     '-l'
+     ‘-l’
           search only under the current directory.
 
-     The '-e', '-G' and '-i' options are available too.  The usage is
+     The ‘-e’, ‘-G’ and ‘-i’ options are available too.  The usage is
      almost same as egrep(1).
 
      You can even change the output format of global(1) to grep style
-     using '--result=grep' option.  Of course, these options can be used
+     using ‘--result=grep’ option.  Of course, these options can be used
      even by other commands.
 
-   * The '-P' command locates path names which include the specified
+   • The ‘-P’ command locates path names which include the specified
      pattern.
 
               $ global -P fileB
@@ -312,14 +312,14 @@ Consider the following source tree:
               DIR1/fileB.c
               DIR2/fileC.c
 
-   * The '-f' command prints a list of tags in the specified file(s).
+   • The ‘-f’ command prints a list of tags in the specified file(s).
 
               $ global -f DIR2/fileC.c
               func2              2 DIR2/fileC.c   func2(){ i++; }
               func2              4 DIR2/fileC.c   func2(){ i--; }
               func3              6 DIR2/fileC.c   func3(){
 
-   * The '-l' option limits the range of retrieval under the current
+   • The ‘-l’ option limits the range of retrieval under the current
      directory.
 
               $ cd DIR1
@@ -332,15 +332,15 @@ File: global.info,  Node: Applied usage,  Prev: Basic usage,  Up: Command line
 2.3 Applied usage
 =================
 
-   * You can customize a set of candidate files to be tagged.
+   • You can customize a set of candidate files to be tagged.
 
               $ find . -type f -print >/tmp/list     # make a file set
               $ vi /tmp/list                         # customize the file set
               $ gtags -f /tmp/list
 
-   * If your source files are on a read-only device, such as CDROM, then
+   • If your source files are on a read-only device, such as CDROM, then
      you cannot make tag files at the root of the source tree.  In such
-     case, you can make tag files in another place using 'GTAGSROOT'
+     case, you can make tag files in another place using ‘GTAGSROOT’
      environment variable.
 
               $ mkdir /var/dbpath
@@ -351,7 +351,7 @@ File: global.info,  Node: Applied usage,  Prev: Basic usage,  Up: Command line
               $ global func
 
      There is another method for it.  Since global(1) locates tag files
-     also in '/usr/obj' + <current directory>, you can setup like
+     also in ‘/usr/obj’ + <current directory>, you can setup like
      follows: It is 'obj' directory.
 
               $ cd /cdrom/src                 # the root of source tree
@@ -359,17 +359,17 @@ File: global.info,  Node: Applied usage,  Prev: Basic usage,  Up: Command line
               $ gtags /usr/obj/cdrom/src      # make tag files in /usr/obj/cdrom/src
               $ global func
 
-     The '-O, --objdir' option does it automatically for you.
+     The ‘-O, --objdir’ option does it automatically for you.
 
      The path of obj directory can be changed by environment variable
-     'MAKEOBJDIRPREFIX'.
+     ‘MAKEOBJDIRPREFIX’.
 
-   * If you want to locate symbols that are not defined in the source
-     tree, then you can specify library directories with 'GTAGSLIBPATH'
+   • If you want to locate symbols that are not defined in the source
+     tree, then you can specify library directories with ‘GTAGSLIBPATH’
      environment variable.
 
      You should execute gtags(1) at each directory in the
-     'GTAGSLIBPATH'.  If 'GTAGS' is not found there, global ignores such
+     ‘GTAGSLIBPATH’.  If ‘GTAGS’ is not found there, global ignores such
      directories.
 
               $ pwd
@@ -401,7 +401,7 @@ File: global.info,  Node: Applied usage,  Prev: Basic usage,  Up: Command line
               $ global access
               sys/kern/vfs_syscalls.c
 
-   * If you forget symbol names, you can use the '-c' (complete)
+   • If you forget symbol names, you can use the ‘-c’ (complete)
      command.
 
               $ global -c kmem                # maybe k..k.. kmem..
@@ -416,7 +416,7 @@ File: global.info,  Node: Applied usage,  Prev: Basic usage,  Up: Command line
               $ global kmem_suballoc
               ../vm/vm_kern.c
 
-   * You can use the '-c' command with the complete command in the
+   • You can use the ‘-c’ command with the complete command in the
      shell.
 
      In Bash:
@@ -440,12 +440,12 @@ File: global.info,  Node: Applied usage,  Prev: Basic usage,  Up: Command line
      GloBash::).  It supports you in a suitable way without any
      preparation.
 
-   * You can edit all files which have specified tags by typing one
+   • You can edit all files which have specified tags by typing one
      command.  For example:
 
               $ vi `global func1`     # edit fileB.c
 
-   * If you want to browse many files in order, do the following:
+   • If you want to browse many files in order, do the following:
 
               $ global -xr fork | awk '{printf "view +%s %s\n",$2,$3}'
               view +650 ../dev/aic7xxx/aic7xxx_asm.c
@@ -495,11 +495,11 @@ File: global.info,  Node: Features(globash),  Next: Preparation(globash),  Up: G
 3.1.1 Features
 --------------
 
-   * Vi-like tag stack is available.
-   * Emacs-like tag name completion is available.
-   * Automatic invoking of editor.
-   * Tag mark facility is available.
-   * You can manage a directory list by cookie facility.
+   • Vi-like tag stack is available.
+   • Emacs-like tag name completion is available.
+   • Automatic invoking of editor.
+   • Tag mark facility is available.
+   • You can manage a directory list by cookie facility.
 
 
 File: global.info,  Node: Preparation(globash),  Next: Usage(globash),  Prev: Features(globash),  Up: GloBash
@@ -530,10 +530,10 @@ are valid only in a project.
          You are going to get out of the current project.
          Tag stack and marker will be removed. Sure? ([y]/n)_
 
-   If you answer 'y <RET>' or just <RET> then the tag stack and marker
+   If you answer ‘y <RET>’ or just <RET> then the tag stack and marker
 (described later) will be removed.
 
-   If you need help then please type 'ghelp'.
+   If you need help then please type ‘ghelp’.
 
 
 File: global.info,  Node: Usage(globash),  Prev: Preparation(globash),  Up: GloBash
@@ -541,7 +541,7 @@ File: global.info,  Node: Usage(globash),  Prev: Preparation(globash),  Up: GloB
 3.1.3 Usage
 -----------
 
-   * Most of global(1)'s (*note global::) command characters are
+   • Most of global(1)'s (*note global::) command characters are
      available as commands.
 
               [/usr/src/sys] x fork           <- (global -x fork)
@@ -569,7 +569,7 @@ File: global.info,  Node: Usage(globash),  Prev: Preparation(globash),  Up: GloB
 
      If no argument is specified then the latest argument is used.
 
-   * Input completion facility is available.  For each command, suitable
+   • Input completion facility is available.  For each command, suitable
      completion is applied.
 
               [/usr/src/sys] x kmem_<TAB><TAB>
@@ -579,7 +579,7 @@ File: global.info,  Node: Usage(globash),  Prev: Preparation(globash),  Up: GloB
               [/usr/src/sys] x kmem_s<TAB>
               [/usr/src/sys] x kmem_suballoc
 
-   * You can select a tag by 'show' command.
+   • You can select a tag by ‘show’ command.
 
               [/usr/src/sys] x main
               >    1  main              70 alpha/alpha/gensetdefs.c main(in
@@ -590,7 +590,7 @@ File: global.info,  Node: Usage(globash),  Prev: Preparation(globash),  Up: GloB
               (Load editor and show boot/alpha/boot1/boot1.c at line 227.)
 
      The default editor is vi(1).  You can specify it statically by
-     'EDITOR' environment variable or temporarily by options.
+     ‘EDITOR’ environment variable or temporarily by options.
 
               [/usr/src/sys] show -e 3
               (Preloaded emacs show boot/alpha/boot1/boot1.c at line 227.)
@@ -602,26 +602,26 @@ File: global.info,  Node: Usage(globash),  Prev: Preparation(globash),  Up: GloB
      Otherwise, you can use the following commands (with abbreviated
      form):
 
-     'list (l)'
+     ‘list (l)’
           print tag list.
 
-     'first'
+     ‘first’
           go to the first tag.
 
-     'last'
+     ‘last’
           go to the last tag.
 
-     'next (n)'
+     ‘next (n)’
           go to the next tag.
 
-     'prev (p)'
+     ‘prev (p)’
           go to the previous tag.
 
-     'show N (1,2,3,..,999)'
+     ‘show N (1,2,3,..,999)’
           go to Nth tag
 
-   * You can use vi-like tag stack.  You can return to the previous tag
-     list by the 'pop' or 'CTRL-T' command.
+   • You can use vi-like tag stack.  You can return to the previous tag
+     list by the ‘pop’ or ‘CTRL-T’ command.
 
               [/usr/src/sys] x main
               >    1  main              70 alpha/alpha/gensetdefs.c main(in
@@ -636,9 +636,9 @@ File: global.info,  Node: Usage(globash),  Prev: Preparation(globash),  Up: GloB
               [/usr/src/sys] show
               (Load editor and show boot/alpha/boot1/boot1.c at line 227.)
 
-     You can print the current tag stack with 'tags' command.
+     You can print the current tag stack with ‘tags’ command.
 
-   * You can remember tags using the 'mark' command.
+   • You can remember tags using the ‘mark’ command.
 
               [/usr/src/sys] x fork
               >    1  fork              94 kern/kern_fork.c fork(p, uap)
@@ -661,8 +661,8 @@ File: global.info,  Node: Usage(globash),  Prev: Preparation(globash),  Up: GloB
      Marked tags are valid until you go out of the current project or
      quit the current bash(1) session.
 
-   * You can remember directories using the 'cookie' command, and return
-     there using the 'warp' command.
+   • You can remember directories using the ‘cookie’ command, and return
+     there using the ‘warp’ command.
 
               [/usr/src/sys] cookie           <- drop a cookie.
               [/usr/src/sys] cd kern
@@ -697,8 +697,8 @@ File: global.info,  Node: Features(Less),  Next: Preparation(Less),  Up: Less vi
 3.2.1 Features
 --------------
 
-   * You can use most of Global's facilities from less(1) viewer.
-   * Less viewer supports duplicated tag.
+   • You can use most of Global's facilities from less(1) viewer.
+   • Less viewer supports duplicated tag.
 
 
 File: global.info,  Node: Preparation(Less),  Next: Usage(Less),  Prev: Features(Less),  Up: Less viewer
@@ -709,7 +709,7 @@ File: global.info,  Node: Preparation(Less),  Next: Usage(Less),  Prev: Features
 First, do the preparation of global.  *Note Preparation::.
 
    Second, to use global from less(1), you need to set environment
-variable 'LESSGLOBALTAGS' to 'global'.
+variable ‘LESSGLOBALTAGS’ to ‘global’.
 
          $ export LESSGLOBALTAGS=global
 
@@ -719,36 +719,36 @@ File: global.info,  Node: Usage(Less),  Prev: Preparation(Less),  Up: Less viewe
 3.2.3 Usage
 -----------
 
-   * To go to 'func1', you can say
+   • To go to ‘func1’, you can say
 
               $ less -t func1
 
-     Please note that if 'tags' exists in the current directory then
-     less(1) uses it.  If you want to use 'GTAGS' even if 'tags' exists
+     Please note that if ‘tags’ exists in the current directory then
+     less(1) uses it.  If you want to use ‘GTAGS’ even if ‘tags’ exists
      then please specify the tag file explicitly like this:
 
               $ less -TGTAGS -t func1
 
-   * To go to the referenced point of 'func1', please specify 'GRTAGS'.
+   • To go to the referenced point of ‘func1’, please specify ‘GRTAGS’.
 
               $ less -TGRTAGS -t func1
 
-     In the same way, you can use 'GTAGS', 'GRTAGS' or 'GPATH' as tag
+     In the same way, you can use ‘GTAGS’, ‘GRTAGS’ or ‘GPATH’ as tag
      files.
 
-   * If a number of tags are located, less(1) goes to the first tag.
-     You can go to next tag by typing 't' and back by typing 'T'.
+   • If a number of tags are located, less(1) goes to the first tag.
+     You can go to next tag by typing ‘t’ and back by typing ‘T’.
 
-     't'
+     ‘t’
           go to next tag.
-     'T'
+     ‘T’
           go to previous tag.
 
-   * In a less(1) session, you can use the ':t' command to locate a new
+   • In a less(1) session, you can use the ‘:t’ command to locate a new
      symbol.  But in this case, you cannot change the tag file from the
-     one specified by the '-T' option.
+     one specified by the ‘-T’ option.
 
-   * With the '-T-' option, less(1) reads standard input as a tag file.
+   • With the ‘-T-’ option, less(1) reads standard input as a tag file.
      You can connect global and less(1) with a pipe.  It is very
      convenient.
 
@@ -768,7 +768,7 @@ File: global.info,  Node: Usage(Less),  Prev: Preparation(Less),  Up: Less viewe
               # all files including 'init' in their path.
               $ global -Px init | less -T-
 
-   * If your editor doesn't support Global directly then you can use
+   • If your editor doesn't support Global directly then you can use
      less(1) as a footstool.
 
               # invoke less
@@ -820,8 +820,8 @@ File: global.info,  Node: Features(Nvi-1.81.5),  Next: Preparation(Nvi-1.81.5), 
 3.3.1 Features
 --------------
 
-   * You can use most of Global's facilities from Nvi.
-   * Intelligent recognition of the current token and its type.
+   • You can use most of Global's facilities from Nvi.
+   • Intelligent recognition of the current token and its type.
 
 
 File: global.info,  Node: Preparation(Nvi-1.81.5),  Next: Usage(Nvi-1.81.5),  Prev: Features(Nvi-1.81.5),  Up: Nvi-1.81.5 editor
@@ -831,8 +831,8 @@ File: global.info,  Node: Preparation(Nvi-1.81.5),  Next: Usage(Nvi-1.81.5),  Pr
 
 First, do the preparation of global.  *Note Preparation::.
 
-   Second, to use global from Nvi, you need to write to '.nexrc' like
-this.  It is assumed that 'gtags.pl' is put in '$HOME/perl'.
+   Second, to use global from Nvi, you need to write to ‘.nexrc’ like
+this.  It is assumed that ‘gtags.pl’ is put in ‘$HOME/perl’.
 
          $HOME/.nexrc
          +----------------------------
@@ -853,7 +853,7 @@ File: global.info,  Node: Usage(Nvi-1.81.5),  Prev: Preparation(Nvi-1.81.5),  Up
 3.3.3 Usage
 -----------
 
-   * To go to 'func1', you can say
+   • To go to ‘func1’, you can say
 
               :perl tag qw(func1)
 
@@ -862,59 +862,59 @@ File: global.info,  Node: Usage(Nvi-1.81.5),  Prev: Preparation(Nvi-1.81.5),  Up
               ab gta perl tag qw(
               ab gt perl tag qw(
 
-   * To go to the referenced point of 'func1', add the option '-r'
+   • To go to the referenced point of ‘func1’, add the option ‘-r’
 
               :perl tag qw(-r func1)
 
-   * If a number of tags are located, Nvi goes to the first tag.  You
-     can go to next tag by typing ':tagnext' and back by typing
-     ':tagprev'.
+   • If a number of tags are located, Nvi goes to the first tag.  You
+     can go to next tag by typing ‘:tagnext’ and back by typing
+     ‘:tagprev’.
 
      Suggested .nexrc:
               map ^N :tagnext^M
               map ^P :tagprev^M
 
-   * If you don't specify any argument, ':perl tag' command does the
+   • If you don't specify any argument, ':perl tag' command does the
      following:
 
      If the context of the current token is a definition then it is
-     equivalent to ':perl tag qw(-r CURRENT-TOKEN)'.  Otherwise, if it
-     is a reference to some definitions then it is equivalent to ':perl
-     tag qw(CURRENT-TOKEN)' else it is equivalent to ':perl tag qw(-s
-     CURRENT-TOKEN)'.
+     equivalent to ‘:perl tag qw(-r CURRENT-TOKEN)’.  Otherwise, if it
+     is a reference to some definitions then it is equivalent to ‘:perl
+     tag qw(CURRENT-TOKEN)’ else it is equivalent to ‘:perl tag qw(-s
+     CURRENT-TOKEN)’.
 
      Suggested .nexrc:
               map ^] :perl tag^M
 
-     It is similar to 'CTRL-]' command.
+     It is similar to ‘CTRL-]’ command.
 
-   * You can use the '-s' option; it locates symbols which are not
-     defined in 'GTAGS'.
+   • You can use the ‘-s’ option; it locates symbols which are not
+     defined in ‘GTAGS’.
 
               :perl tag qw(-s pat)
 
-   * The '-g', '-f' and '-P' options are also available.  It works like
+   • The ‘-g’, ‘-f’ and ‘-P’ options are also available.  It works like
      the command line.
 
               :perl tag qw(-g pat)
 
-   * When you want to locate tags the name of which start with 'set' or
-     'get', use:
+   • When you want to locate tags the name of which start with ‘set’ or
+     ‘get’, use:
 
               :perl tag qw(^[sg]et)
 
-   * Other tag commands are also available:
+   • Other tag commands are also available:
 
-     'CTRL-T'
+     ‘CTRL-T’
           return to the most recent tag location.
 
-     ':tagpop'
+     ‘:tagpop’
           return to the most recent tag location.
 
-     ':tagtop'
+     ‘:tagtop’
           return to the top of the tag stack.
 
-     ':display tags'
+     ‘:display tags’
           display the tags stack.
 
 
@@ -923,7 +923,7 @@ File: global.info,  Node: Elvis editor,  Next: Vim editor,  Prev: Nvi-1.81.5 edi
 3.4 Elvis using Global
 ======================
 
-Elvis 2.1 or later has two variables, 'tagprg' and 'tagprgonce', for
+Elvis 2.1 or later has two variables, ‘tagprg’ and ‘tagprgonce’, for
 running an external tag search program.  You can use them for Global.
 
 * Menu:
@@ -938,8 +938,8 @@ File: global.info,  Node: Features(Elvis),  Next: Preparation(Elvis),  Up: Elvis
 3.4.1 Features
 --------------
 
-   * You can use most of Global's facilities from Elvis.
-   * Mouse is supported.
+   • You can use most of Global's facilities from Elvis.
+   • Mouse is supported.
 
 
 File: global.info,  Node: Preparation(Elvis),  Next: Usage(Elvis),  Prev: Features(Elvis),  Up: Elvis editor
@@ -949,7 +949,7 @@ File: global.info,  Node: Preparation(Elvis),  Next: Usage(Elvis),  Prev: Featur
 
 First, do the preparation of global.  *Note Preparation::.
 
-   Second, start Elvis and execute 'set tagprg="global -t $1"' like
+   Second, start Elvis and execute ‘set tagprg="global -t $1"’ like
 this:
 
          $ elvis
@@ -967,26 +967,26 @@ File: global.info,  Node: Usage(Elvis),  Prev: Preparation(Elvis),  Up: Elvis ed
 3.4.3 Usage
 -----------
 
-   * To go to 'func1', you can say
+   • To go to ‘func1’, you can say
 
               :tag func1
 
-     It seems the same as original Elvis, but Elvis executes 'global -t
-     func1' internally and read the output instead of tags file.
+     It seems the same as original Elvis, but Elvis executes ‘global -t
+     func1’ internally and read the output instead of tags file.
 
-   * To go to the referenced point of 'func1', add '-r' option.
+   • To go to the referenced point of ‘func1’, add ‘-r’ option.
 
               :tag -r func1
 
-   * To locate symbols which are not defined in 'GTAGS', try this:
+   • To locate symbols which are not defined in ‘GTAGS’, try this:
 
               :tag -s lbolt
 
-   * To locate strings, try this:
+   • To locate strings, try this:
 
               :tag -g Copyright
 
-   * When a lot of results are expected, it's better to use the browse
+   • When a lot of results are expected, it's better to use the browse
      command.
 
               :browse -r fork
@@ -1002,58 +1002,58 @@ File: global.info,  Node: Usage(Elvis),  Prev: Preparation(Elvis),  Up: Elvis ed
               |fork            |ern/init_main.c | (line 191)
               +----------------+----------------+--------------------
 
-   * To get a list of tags in specified files, use the '-f' command.
+   • To get a list of tags in specified files, use the ‘-f’ command.
 
               :browse -f main.c               <- locate definitions in main.c
 
-   * Other tag commands are also available:
+   • Other tag commands are also available:
 
-     'CTRL-]'
+     ‘CTRL-]’
           go to the definition of the current token.
 
-     'CTRL-T'
+     ‘CTRL-T’
           return to the most recent tag context.
 
-     ':tag'
+     ‘:tag’
           without argument, go to the next tag.
 
-     ':pop'
+     ‘:pop’
           return to the most recent tag context.
 
-     ':stack'
+     ‘:stack’
           display the tags stack.
 
-     ':stag'
+     ‘:stag’
           create a new window and move its cursor to the tag's
           definition point.
 
-     ':sbrowse'
-          same as 'browse' but show in a new window.
+     ‘:sbrowse’
+          same as ‘browse’ but show in a new window.
 
-   * You can use POSIX regular expressions.
+   • You can use POSIX regular expressions.
 
               :tag ^put_                  <- locate tags start with 'put_'
 
               :browse -g 'fseek(.*L_SET)' <- locate fseek() using L_SET argument
 
-   * You can browse tag's list of many files.
+   • You can browse tag's list of many files.
 
               :browse -f *.c              <- locate tags in *.c
 
-   * You can browse the files whose path includes specified pattern.
+   • You can browse the files whose path includes specified pattern.
 
               :browse -P /vm/             <- under vm/ directory
               :browse -P \.h$             <- all include files
               :browse -P init             <- path including 'init'
 
-   * You can use mouse for tag operations.
+   • You can use mouse for tag operations.
 
      If you have a mouse, then you can use the left button to
-     double-click on a word in the text, to have Elvis perform a ':tag'
+     double-click on a word in the text, to have Elvis perform a ‘:tag’
      search on that word.  Double-clicking the right button anywhere in
-     the text will perform a ':pop' command.
+     the text will perform a ‘:pop’ command.
 
-     In the selection list of the 'browse' command, you can use the left
+     In the selection list of the ‘browse’ command, you can use the left
      button to double-click on a tag name, to have Elvis select the tag.
      To come back, double-click the right button.
 
@@ -1063,7 +1063,7 @@ File: global.info,  Node: Vim editor,  Next: Emacs editor,  Prev: Elvis editor, 
 3.5 Vim using Global
 ====================
 
-In Vim 6.2 or later, you can use the 'gtags.vim' script.
+In Vim 6.2 or later, you can use the ‘gtags.vim’ script.
 
 * Menu:
 
@@ -1077,9 +1077,9 @@ File: global.info,  Node: Features(Vim),  Next: Preparation(Vim),  Up: Vim edito
 3.5.1 Features
 --------------
 
-   * You can use most of Global's facilities from Vim.
-   * Intelligent recognition of the current token and its type.
-   * Special characters '%', '#' and input completion are available.
+   • You can use most of Global's facilities from Vim.
+   • Intelligent recognition of the current token and its type.
+   • Special characters ‘%’, ‘#’ and input completion are available.
 
    To our regret, the tag stack facility is not available.  If you want
 to use the facility, please try gtags-cscope.vim.  *Note Gtags-cscope::.
@@ -1092,7 +1092,7 @@ File: global.info,  Node: Preparation(Vim),  Next: Usage(Vim),  Prev: Features(V
 
 First, do the preparation of global.  *Note Preparation::.
 
-   Second, copy 'gtags.vim' to your plug-in directory or source it from
+   Second, copy ‘gtags.vim’ to your plug-in directory or source it from
 your vimrc.
 
          $ cp /usr/local/share/gtags/gtags.vim $HOME/.vim/plugin
@@ -1103,7 +1103,7 @@ File: global.info,  Node: Usage(Vim),  Prev: Preparation(Vim),  Up: Vim editor
 3.5.3 Usage
 -----------
 
-   * To go to 'main', you can say
+   • To go to ‘main’, you can say
 
               :Gtags main
 
@@ -1121,16 +1121,16 @@ File: global.info,  Node: Usage(Vim),  Prev: Preparation(Vim),  Up: Vim editor
 
      You can go to any entry using quickfix command.
 
-     ':cn'
+     ‘:cn’
           go to the next entry.
 
-     ':cp'
+     ‘:cp’
           go to the previous entry.
 
-     ':ccN'
+     ‘:ccN’
           go to the N'th entry.
 
-     ':cl'
+     ‘:cl’
           list all entries.
 
      You can see the help of quickfix like this:
@@ -1141,15 +1141,15 @@ File: global.info,  Node: Usage(Vim),  Prev: Preparation(Vim),  Up: Vim editor
               map <C-n> :cn<CR>
               map <C-p> :cp<CR>
 
-   * To go to the referenced point of 'func1', add the '-r' option.
+   • To go to the referenced point of ‘func1’, add the ‘-r’ option.
 
               :Gtags -r func1
 
-   * To locate symbols which are not defined in 'GTAGS', try this:
+   • To locate symbols which are not defined in ‘GTAGS’, try this:
 
               :Gtags -s lbolt
 
-   * To locate strings, try this:
+   • To locate strings, try this:
 
               :Gtags -g int argc
 
@@ -1157,23 +1157,23 @@ File: global.info,  Node: Usage(Vim),  Prev: Preparation(Vim),  Up: Vim editor
 
               :Gtags -ge -C               <- locate '-C'
 
-   * To get a list of tags in specified files, use the '-f' command.
+   • To get a list of tags in specified files, use the ‘-f’ command.
 
               :Gtags -f main.c            <- locate tags in main.c
 
-     If you are editing 'main.c' itself, you can use '%' instead.
+     If you are editing ‘main.c’ itself, you can use ‘%’ instead.
 
               :Gtags -f %                 <- locate tags in main.c
 
-   * You can use POSIX regular expressions.
+   • You can use POSIX regular expressions.
 
               :Gtags ^put_              <- locate tags starting with 'put_'
 
               :Gtags -g fseek(.*SEEK_SET) <- locate fseek() using SEEK_SET
 
-   * Input completion is available.
+   • Input completion is available.
 
-     In the command line, press 'CTRL-D' after some typing and Vim will
+     In the command line, press ‘CTRL-D’ after some typing and Vim will
      show a list of tag names that start with the string.  Press <TAB>
      and Vim will complete the tag name.
 
@@ -1181,13 +1181,13 @@ File: global.info,  Node: Usage(Vim),  Prev: Preparation(Vim),  Up: Vim editor
 
               :Gtags func1                <- 'nc1' is appended by vim
 
-   * You can browse files whose path includes specified pattern.
+   • You can browse files whose path includes specified pattern.
 
               :Gtags -P /vm/              <- under vm/ directory
               :Gtags -P \.h$              <- all include files
               :Gtags -P init              <- path including 'init'
 
-   * You can use all options of global(1) except for '-c -n -p -q -u -v'
+   • You can use all options of global(1) except for ‘-c -n -p -q -u -v’
      and all long name options.  They are sent to global(1) as is.  For
      example:
 
@@ -1197,23 +1197,23 @@ File: global.info,  Node: Usage(Vim),  Prev: Preparation(Vim),  Up: Vim editor
 
      About the other options, please see *note global::.
 
-   * The GtagsCursor command brings you to the definition or reference
+   • The GtagsCursor command brings you to the definition or reference
      of the current token.
 
      If the context of the current token is a definition then it is
-     equivalent to ':Gtags -r CURRENT-TOKEN'; if it is a reference to
-     some definitions then it is equivalent to ':Gtags CURRENT-TOKEN';
-     else it is equivalent to ':Gtags -s CURRENT-TOKEN'.
+     equivalent to ‘:Gtags -r CURRENT-TOKEN’; if it is a reference to
+     some definitions then it is equivalent to ‘:Gtags CURRENT-TOKEN’;
+     else it is equivalent to ‘:Gtags -s CURRENT-TOKEN’.
 
               :GtagsCursor
 
      Suggested map:
               map <C-\>^] :GtagsCursor<CR>
 
-     Though the mapping of ':GtagsCursor' to '^]' seems suitable, it
+     Though the mapping of ‘:GtagsCursor’ to ‘^]’ seems suitable, it
      will bring an inconvenience in the help screen.
 
-   * If you have a hypertext generated by htags(1) then you can display
+   • If you have a hypertext generated by htags(1) then you can display
      the same part of the source code in your browser.  Let's load
      firefox and try this:
 
@@ -1222,7 +1222,7 @@ File: global.info,  Node: Usage(Vim),  Prev: Preparation(Vim),  Up: Vim editor
      Suggested map:
               map <C-g> :Gozilla<CR>
 
-   * If you want to load Vim with all main()s then following command
+   • If you want to load Vim with all main()s then following command
      line is useful.
 
               $ vim '+Gtags main'
@@ -1247,10 +1247,10 @@ File: global.info,  Node: Features(Emacs),  Next: Preparation(Emacs),  Up: Emacs
 3.6.1 Features
 --------------
 
-   * You can use most of Global's facilities from the editor.
-   * More intelligent recognition of the current token and its type.
-   * Tag completion is available for input tag name.
-   * Mouse is supported.
+   • You can use most of Global's facilities from the editor.
+   • More intelligent recognition of the current token and its type.
+   • Tag completion is available for input tag name.
+   • Mouse is supported.
 
 
 File: global.info,  Node: Preparation(Emacs),  Next: Usage(Emacs),  Prev: Features(Emacs),  Up: Emacs editor
@@ -1260,13 +1260,13 @@ File: global.info,  Node: Preparation(Emacs),  Next: Usage(Emacs),  Prev: Featur
 
 First, do the preparation of global.  *Note Preparation::.
 
-   Second, to use global from Emacs, you need to load the 'gtags.el' and
-execute 'gtags-mode' function in it.
+   Second, to use global from Emacs, you need to load the ‘gtags.el’ and
+execute ‘gtags-mode’ function in it.
 
-   Write the call to autoload function to your '$HOME/.emacs', start
-Emacs and execute 'gtags-mode' function.  If you put 'gtags.el' in a
+   Write the call to autoload function to your ‘$HOME/.emacs’, start
+Emacs and execute ‘gtags-mode’ function.  If you put ‘gtags.el’ in a
 directory other than the standard macro directory, you need to add it to
-'load-path'.
+‘load-path’.
 
          $HOME/.emacs
          +------------------------------------------------------
@@ -1281,7 +1281,7 @@ directory other than the standard macro directory, you need to add it to
          +------------------------------------------------------
 
    If you want to get into gtags-mode whenever you get into c-mode then
-you can append the following code to your '$HOME/.emacs'.
+you can append the following code to your ‘$HOME/.emacs’.
 
            (setq c-mode-hook
                '(lambda ()
@@ -1296,23 +1296,23 @@ File: global.info,  Node: Usage(Emacs),  Prev: Preparation(Emacs),  Up: Emacs ed
 3.6.3 Usage
 -----------
 
-   * To go to 'func1', invoke 'gtags-find-tag' and you can see a prompt
+   • To go to ‘func1’, invoke ‘gtags-find-tag’ and you can see a prompt
      in the mini-buffer.  Then input the tag name.
 
               Find tag: func1			<- 'Find tag: ' is a prompt
 
-   * To go to the referenced point of 'func1', invoke 'gtags-find-rtag'.
+   • To go to the referenced point of ‘func1’, invoke ‘gtags-find-rtag’.
 
               Find tag (reference): func1
 
-   * Tag name completion is available.
+   • Tag name completion is available.
 
               Find tag: fuTAB
 
               Find tag: func1                     <- 'nc1' is appended by emacs
 
-   * If a number of tags are located, Emacs goes into "GTAGS SELECT
-     MODE" like this:
+   • If a number of tags are located, Emacs goes into “GTAGS SELECT
+     MODE” like this:
 
 
               +-------------------------------------------------------------
@@ -1332,53 +1332,53 @@ File: global.info,  Node: Usage(Emacs),  Prev: Preparation(Emacs),  Up: Emacs ed
      Please select a tag line by any Emacs command and press <RET>, and
      you can go to the tag's point.  When you want to go to the next or
      previous tag, please return to the above mode with
-     'gtags-pop-stack' and reselect.
+     ‘gtags-pop-stack’ and reselect.
 
      You can customize the path style in this mode by setting
-     'gtags-path-style' variable.
+     ‘gtags-path-style’ variable.
 
-     'root'
+     ‘root’
           relative from the root of the project (Default)
 
-     'relative'
+     ‘relative’
           relative from the current directory
 
-     'absolute'
+     ‘absolute’
           absolute (relative from the system root directory)
 
      There are two methods to set this variable:
 
-        * You can change it dynamically using the 'customize' command of
+        • You can change it dynamically using the ‘customize’ command of
           Emacs.  You will find the entry in the Programming/Tools/Gtags
           group.
 
-        * You can change it when Emacs is loaded using '.emacs' file
+        • You can change it when Emacs is loaded using ‘.emacs’ file
           like this:
 
                    (setq gtags-mode-hook
                      '(lambda ()
                        (setq gtags-path-style 'relative)))
 
-   * 'gtags-find-tag-from-here' command is available.
+   • ‘gtags-find-tag-from-here’ command is available.
 
-     If current token is a definition, it is equivalent to 'Find tag
-     (reference): CURRENT-TOKEN<RET>', otherwise it is equivalent to
-     'Find tag: CURRENT-TOKEN<RET>'.
+     If current token is a definition, it is equivalent to ‘Find tag
+     (reference): CURRENT-TOKEN<RET>’, otherwise it is equivalent to
+     ‘Find tag: CURRENT-TOKEN<RET>’.
 
-   * To locate symbols which are not defined in 'GTAGS', try
-     'gtags-find-symbol'.
+   • To locate symbols which are not defined in ‘GTAGS’, try
+     ‘gtags-find-symbol’.
 
               Find symbol: lbolt          <- 'Find symbol:' is a prompt
 
-   * To locate strings, try 'gtags-find-with-grep'.
+   • To locate strings, try ‘gtags-find-with-grep’.
 
               Find pattern: Copyright
 
-   * You can use POSIX regular expressions.
+   • You can use POSIX regular expressions.
 
               Find tag: ^put_             <- locate tags starting with 'put_'
 
-   * Mouse command is available.
+   • Mouse command is available.
 
      If you use X version Emacs, try the following:
 
@@ -1410,9 +1410,9 @@ in the command mode.
      :set csprg=gtags-cscope
      :cs add GTAGS
 
-   After this, you can use built-in 'cs find' commands in the Vim
-editor.  Though the deceit is not perfect ('cs find d' is not
-implemented), this method might be more convenient than 'gtags.vim' in
+   After this, you can use built-in ‘cs find’ commands in the Vim
+editor.  Though the deceit is not perfect (‘cs find d’ is not
+implemented), this method might be more convenient than ‘gtags.vim’ in
 that you can use the tag stack facility of Vim.
 
 
@@ -1435,12 +1435,12 @@ File: global.info,  Node: Features(browser),  Next: Preparation(browser),  Up: W
 3.8.1 Features
 --------------
 
-   * Htags makes a hypertext from C, Yacc and Java source files.
-   * Once the hypertext is generated, you need nothing other than a web
+   • Htags makes a hypertext from C, Yacc and Java source files.
+   • Once the hypertext is generated, you need nothing other than a web
      browser.
-   * You can move the hypertext to anywhere; it is independent of the
+   • You can move the hypertext to anywhere; it is independent of the
      source code.
-   * You can use all of your browser's functions, such as search,
+   • You can use all of your browser's functions, such as search,
      history, bookmark, save, frames, windows, etc.
 
 
@@ -1466,16 +1466,16 @@ in order like this:
          $ gtags                 # make tag files(GPATH,GTAGS,GRTAGS)
          $ htags                 # make hypertext(HTML/)
 
-   Then you will find a directory named 'HTML' in the current directory.
+   Then you will find a directory named ‘HTML’ in the current directory.
 
    Htags has rich options.  If you are new on htags then you are
-recommended to use the '--suggest' option.  This option makes some
+recommended to use the ‘--suggest’ option.  This option makes some
 popular options effective, and invokes gtags(1) if there is no tag
 files.
 
          $ htags --suggest
 
-   If HTTP server is available then the '-D' and '-f' options are also
+   If HTTP server is available then the ‘-D’ and ‘-f’ options are also
 useful.
 
 
@@ -1512,8 +1512,8 @@ File: global.info,  Node: Doxygen documentation system,  Prev: Web browser,  Up:
 
 You can use Global as a source browser of Doxygen.
 
-   Doxygen Release 1.4.3 or later has config option 'USE_HTAGS'.  When
-enabled in combination with 'SOURCE_BROWSER=YES', htags(1) is used as a
+   Doxygen Release 1.4.3 or later has config option ‘USE_HTAGS’.  When
+enabled in combination with ‘SOURCE_BROWSER=YES’, htags(1) is used as a
 source browser instead of Doxygen's own.
 
    Here is an example.
@@ -1558,9 +1558,9 @@ You can customize Global using configuration file.
          $ cp gtags.conf $HOME/.globalrc         # personal config file.
          $ vi $HOME/.globalrc
 
-   If '$HOME/.globalrc' exists then Global uses it; else if
-'/etc/gtags.conf' exists then Global uses it; otherwise default value is
-used.  The format of 'gtags.conf' resembles termcap(5).  By default,
+   If ‘$HOME/.globalrc’ exists then Global uses it; else if
+‘/etc/gtags.conf’ exists then Global uses it; otherwise default value is
+used.  The format of ‘gtags.conf’ resembles termcap(5).  By default,
 'default' target is used.  About the capabilities, please see each
 command manual.  *Note Reference::.
 
@@ -1573,7 +1573,7 @@ File: global.info,  Node: Plug-in,  Next: Incremental updating,  Prev: Configura
 You can write a new parser for gtags(1).
 
    Command layer plug-in parser was abolished.  Please write function
-layer plug-in parser instead.  See 'plugin-factory/' to discover the
+layer plug-in parser instead.  See ‘plugin-factory/’ to discover the
 function layer plug-in parser.
 
    You can use Universal Ctags as a plug-in parser too.
@@ -1599,7 +1599,7 @@ File: global.info,  Node: Incremental updating,  Prev: Plug-in,  Up: Other topic
 ========================
 
 Modifying some source files, you need not remake the entire tag files.
-Instead, you can use incremental updating facility ('-u' option).
+Instead, you can use incremental updating facility (‘-u’ option).
 
          $ gtags
          $ cd kernel
@@ -1690,36 +1690,36 @@ The following commands are available:
 <no command> pattern
      No command means tag search command.  Print tags which match to
      pattern.  By default, print definition tags.
-'-c', '--completion' [prefix]
+‘-c’, ‘--completion’ [prefix]
      Print symbols which start with prefix.  If prefix is not given,
      print all symbols.
-'-f', '--file' files
-     Print all tags in the files.  This command implies the '-x' option.
-'-g', '--grep' pattern [files]
+‘-f’, ‘--file’ files
+     Print all tags in the files.  This command implies the ‘-x’ option.
+‘-g’, ‘--grep’ pattern [files]
      Print all lines which match to the pattern.  If files are given,
      this command searches in those files.
-'--help'
+‘--help’
      Print a usage message.
-'-I', '--idutils' pattern
+‘-I’, ‘--idutils’ pattern
      Print all lines which match to pattern.  This function uses
      idutils(1) as a search engine.  To use this command, you need to
      install idutils(1) in your system and execute gtags(1) with the
-     '-I' option.
-'-P', '--path' [pattern]
+     ‘-I’ option.
+‘-P’, ‘--path’ [pattern]
      Print path names which match to pattern.  If no pattern is given,
      print all paths in the project.
-'-p', '--print-dbpath'
-     Print location of 'GTAGS'.
-'--print' name
-     Print location of name, which may be one of: 'root', 'dbpath' or
-     'conf'.  'root' means project's root directory.  'dbpath' means a
-     directory where tag databases exist.  'conf' means configuration
+‘-p’, ‘--print-dbpath’
+     Print location of ‘GTAGS’.
+‘--print’ name
+     Print location of name, which may be one of: ‘root’, ‘dbpath’ or
+     ‘conf’.  ‘root’ means project's root directory.  ‘dbpath’ means a
+     directory where tag databases exist.  ‘conf’ means configuration
      file.
-'-u', '--update'
+‘-u’, ‘--update’
      Update tag files incrementally.  This command internally invokes
      gtags(1).  You can execute this command anywhere in the project,
      differing from gtags(1).
-'--version'
+‘--version’
      Show version number.
 
 OPTIONS
@@ -1727,74 +1727,74 @@ OPTIONS
 
 The following options are available:
 
-'-a', '--absolute'
+‘-a’, ‘--absolute’
      Print absolute path names.  By default, print relative path names.
-'--color' when
+‘--color’ when
      Use color to highlight the pattern within the line; when may be one
      of: never, always or auto (default).  The default color is bold red
      text on current background; the environment variable GREP_COLORS
      (only MT and MS are effective at present) or GREP_COLOR defines it.
      This option is effective to the following commands: <no command>,
      -f, -g, -I, -P.
-'-C', '--directory' dir
+‘-C’, ‘--directory’ dir
      Change the directory before doing all the work including parameter
      analysis.
-'-d', '--definition'
+‘-d’, ‘--definition’
      Print locations of definitions.
-'-e', '--regexp' pattern
+‘-e’, ‘--regexp’ pattern
      Use pattern as the pattern; useful to protect patterns starting
-     with '-'.
-'-E', '--extended-regexp'
+     with ‘-’.
+‘-E’, ‘--extended-regexp’
      Interpret pattern as a extended regular expression.  This is the
      default.
-'--encode-path' chars
-     Convert path characters in chars into a '%' symbol, followed by the
+‘--encode-path’ chars
+     Convert path characters in chars into a ‘%’ symbol, followed by the
      two-digit hexadecimal representation of the character.  A blank
-     will be converted to '%20'.
-'-F', '--first-match'
+     will be converted to ‘%20’.
+‘-F’, ‘--first-match’
      End the search without going through all the tag files listed in
      GTAGSLIBPATH when tags are found in a tag file.  This is the
      default.
-'--from-here' context
-     Decide tag type by context.  Its syntax should be 'lineno:path'.
-     If the context is a definition of the pattern then use '-r', else
-     if there is at least one definition of the pattern then use '-d',
-     else use '-s'.  If this option is specified then '-d', '-r' and
-     '-s' on the command line are ignored.  Regular expression is not
+‘--from-here’ context
+     Decide tag type by context.  Its syntax should be ‘lineno:path’.
+     If the context is a definition of the pattern then use ‘-r’, else
+     if there is at least one definition of the pattern then use ‘-d’,
+     else use ‘-s’.  If this option is specified then ‘-d’, ‘-r’ and
+     ‘-s’ on the command line are ignored.  Regular expression is not
      allowed for pattern.  This option assumes use in conversational
      environments such as editors and IDEs.
-'-G', '--basic-regexp'
+‘-G’, ‘--basic-regexp’
      Interpret pattern as a basic regular expression.  The default is an
      extended regular expression.
-'--gtagsconf' file
+‘--gtagsconf’ file
      Set environment variable GTAGSCONF to file.
-'--gtagslabel' label
+‘--gtagslabel’ label
      Set environment variable GTAGSLABEL to label.
-'-i', '--ignore-case'
+‘-i’, ‘--ignore-case’
      Ignore case distinctions in the pattern.
-'-L', '--file-list' file
+‘-L’, ‘--file-list’ file
      Obtain files from file in addition to the arguments.  The argument
      file can be set to '-' to accept a list of files from the standard
      input.  File names must be separated by newline.
-'-l', '--local'
+‘-l’, ‘--local’
      Print only tags which exist under the current directory.
-'--literal'
+‘--literal’
      Execute literal search instead of regular expression search.  This
-     option works with the tag search command, '-g' command, '-P'
-     command and '-I' command.
-'-M', '--match-case'
+     option works with the tag search command, ‘-g’ command, ‘-P’
+     command and ‘-I’ command.
+‘-M’, ‘--match-case’
      Search is case-sensitive.  This is the default.
-'--match-part part'
+‘--match-part part’
      Specify how path name completion should match, where part is one
-     of: 'first', 'last' or 'all' (default).  This option is valid only
-     with the '-c' command in conjunction with '-P'.
-'-n', '--nofilter'
+     of: ‘first’, ‘last’ or ‘all’ (default).  This option is valid only
+     with the ‘-c’ command in conjunction with ‘-P’.
+‘-n’, ‘--nofilter’
      Suppress sort filter and path conversion filter.
-'-N', '--nearness'[=start]
+‘-N’, ‘--nearness’[=start]
      Use Nearness sort method (sorting by closest from start) for the
      output.  By default, alphabetical sort method is used.  This option
-     is effective for the tag search command, '-P' command and '-g'
-     command.  As an exception, '-g' command ignores this option when
+     is effective for the tag search command, ‘-P’ command and ‘-g’
+     command.  As an exception, ‘-g’ command ignores this option when
      files are specified by arguments.  The nearness is defined by how
      many parent directories to go up to reach the target.  The result
      of nearness sort is concatenation of the following ([0]-[n]) in
@@ -1806,62 +1806,62 @@ The following options are available:
           ... (repeat until the project root directory)
           [n] Output of local search in the project root directory except for [0]-[n-1].
      In each directory, they are sorted by alphabetical order.
-'-O', '--only-other'
-     Treat only text files other than source code, like 'README'.  This
-     option is valid only with the '-g' or '-P' command.  This option
-     overrides the '-o' option.
-'-o', '--other'
+‘-O’, ‘--only-other’
+     Treat only text files other than source code, like ‘README’.  This
+     option is valid only with the ‘-g’ or ‘-P’ command.  This option
+     overrides the ‘-o’ option.
+‘-o’, ‘--other’
      Treat not only source files but also text files other than source
-     code, like 'README'.  This option is valid only with the '-g' or
-     '-P' command.
-'--path-style' format
-     Print path names using format, which may be one of: 'relative',
-     'absolute', 'shorter', 'abslib' or 'through'.  'relative' means
-     relative path.  'absolute' means absolute path.  'shorter' means
-     the shorter one of relative and absolute path.  'abslib' means
+     code, like ‘README’.  This option is valid only with the ‘-g’ or
+     ‘-P’ command.
+‘--path-style’ format
+     Print path names using format, which may be one of: ‘relative’,
+     ‘absolute’, ‘shorter’, ‘abslib’ or ‘through’.  ‘relative’ means
+     relative path.  ‘absolute’ means absolute path.  ‘shorter’ means
+     the shorter one of relative and absolute path.  ‘abslib’ means
      absolute path for libraries (GTAGSLIBPATH) and relative path for
-     the rest.  'through' means the relative path from the project root
-     directory (internal format of GPATH). The default is 'relative'.
-     The '--path-style' option is given more priority than the '-a'
+     the rest.  ‘through’ means the relative path from the project root
+     directory (internal format of GPATH). The default is ‘relative’.
+     The ‘--path-style’ option is given more priority than the ‘-a’
      option.
-'--print0'
+‘--print0’
      Print each record followed by a null character instead of a
      newline.
-'-q', '--quiet'
+‘-q’, ‘--quiet’
      Quiet mode.
-'-r', '--reference', '--rootdir'
+‘-r’, ‘--reference’, ‘--rootdir’
      Print reference tags.  Reference means the reference to a symbol
-     which has definitions.  With the '-p' option, print the root
+     which has definitions.  With the ‘-p’ option, print the root
      directory of the project.
-'--result' format
-     Print out using format, which may be one of: 'path' (default),
-     'ctags', 'ctags-x', 'grep' or 'cscope'.  The '--result=ctags' and
-     '--result=ctags-x' options are equivalent to the '-t' and '-x'
-     options respectively.  The '--result' option is given more priority
-     than the '-t' and '-x' options.
-'--single-update' file
-     Update tag files using gtags(1) with the '--single-update' option.
+‘--result’ format
+     Print out using format, which may be one of: ‘path’ (default),
+     ‘ctags’, ‘ctags-x’, ‘grep’ or ‘cscope’.  The ‘--result=ctags’ and
+     ‘--result=ctags-x’ options are equivalent to the ‘-t’ and ‘-x’
+     options respectively.  The ‘--result’ option is given more priority
+     than the ‘-t’ and ‘-x’ options.
+‘--single-update’ file
+     Update tag files using gtags(1) with the ‘--single-update’ option.
      It is considered that file was added, updated or deleted, and there
-     is no change in other files.  This option implies the '-u' option.
-'-s', '--symbol'
+     is no change in other files.  This option implies the ‘-u’ option.
+‘-s’, ‘--symbol’
      Print other symbol tags.  Other symbol means the reference to a
      symbol which has no definition.
-'-S', '--scope' dir
+‘-S’, ‘--scope’ dir
      Print only tags which exist under dir directory.  It is similar to
-     the '-l' option, but you need not change directory.
-'-T', '--through'
+     the ‘-l’ option, but you need not change directory.
+‘-T’, ‘--through’
      Go through all the tag files listed in GTAGSLIBPATH.  By default,
      stop searching when tag is found.  This option is ignored when
-     either '-s', '-r' or '-l' option is specified.
-'-t', '--tags'
+     either ‘-s’, ‘-r’ or ‘-l’ option is specified.
+‘-t’, ‘--tags’
      Use standard ctags format.
-'-V', '--invert-match'
+‘-V’, ‘--invert-match’
      Invert the sense of matching, to select non-matching lines.  This
-     option is valid only with the '-g' or '-P' commands.
-'-v', '--verbose'
+     option is valid only with the ‘-g’ or ‘-P’ commands.
+‘-v’, ‘--verbose’
      Verbose mode.
-'-x', '--cxref'
-     Use standard ctags cxref (with '-x') format.
+‘-x’, ‘--cxref’
+     Use standard ctags cxref (with ‘-x’) format.
 
 EXAMPLES
 --------
@@ -1901,17 +1901,17 @@ EXAMPLES
 FILES
 -----
 
-'GTAGS'
+‘GTAGS’
      Tag file for definitions.
-'GRTAGS'
+‘GRTAGS’
      Tag file for references.
-'GPATH'
+‘GPATH’
      Tag file for source files.
-'GTAGSROOT'
-     If environment variable GTAGSROOT is not set and file 'GTAGSROOT'
-     exists in the same directory as 'GTAGS' then global sets GTAGSROOT
+‘GTAGSROOT’
+     If environment variable GTAGSROOT is not set and file ‘GTAGSROOT’
+     exists in the same directory as ‘GTAGS’ then global sets GTAGSROOT
      to the contents of the file.
-'gtags.conf', '$HOME/.globalrc'
+‘gtags.conf’, ‘$HOME/.globalrc’
      Configuration data for GNU Global.  See gtags.conf(5).
 
 ENVIRONMENT
@@ -1920,11 +1920,11 @@ ENVIRONMENT
 The following environment variables affect the execution of global:
 
 GREP_COLOR
-     The color to use for '--color'; GREP_COLORS has precedence.
+     The color to use for ‘--color’; GREP_COLORS has precedence.
 GREP_COLORS
-     The color (mt or ms) to use for '--color'; see grep(1).
+     The color (mt or ms) to use for ‘--color’; see grep(1).
 GTAGSBLANKENCODE
-     If this variable is set, the '--encode-path=" <TAB>"' option is
+     If this variable is set, the ‘--encode-path=" <TAB>"’ option is
      specified.
 GTAGSCACHE
      The size of the B-tree cache.  The default is 50000000 (bytes).
@@ -1935,39 +1935,39 @@ GTAGSDBPATH
      when GTAGSROOT is not defined.  Use of this variable is not
      recommended.
 GTAGSFORCECPP
-     If this variable is set, each file whose suffix is '.h' is treated
+     If this variable is set, each file whose suffix is ‘.h’ is treated
      as a C++ source file.
 GTAGSLABEL
      Configuration label.  The default is default.
 GTAGSLIBPATH
      If this variable is set, it is used as the path to search for
      library functions.  If the given symbol is not found in the current
-     project, global also searches in these paths.  Since only 'GTAGS'
-     is targeted in the retrieval, this variable is ignored when '-r' or
-     '-s' is specified.
+     project, global also searches in these paths.  Since only ‘GTAGS’
+     is targeted in the retrieval, this variable is ignored when ‘-r’ or
+     ‘-s’ is specified.
 GTAGSLOGGING
-     If this variable is set, '$GTAGSLOGGING' is used as the path name
+     If this variable is set, ‘$GTAGSLOGGING’ is used as the path name
      of a log file.  There is no default value.
 GTAGSROOT
      The root directory of the project.  Usually, it is recognized by
-     existence of 'GTAGS'.  Use of this variable is not recommended.
+     existence of ‘GTAGS’.  Use of this variable is not recommended.
 GTAGSTHROUGH
-     If this variable is set, the '-T' option is specified.
+     If this variable is set, the ‘-T’ option is specified.
 GTAGSOBJDIR, MAKEOBJDIR
      If eigher of the two variable is set, it is used as the name of
      BSD-style objdir.  The former is given priority.  The default is
-     'obj'.
+     ‘obj’.
 GTAGSOBJDIRPREFIX, MAKEOBJDIRPREFIX
      If eigher of the two variable is set, it is used as the prefix of
      BSD-style objdir.  The former is given priority.  The default is
-     '/usr/obj'.
+     ‘/usr/obj’.
 
 CONFIGURATION
 -------------
 
 The following configuration variables affect the execution of global:
 
-'icase_path' (boolean)
+‘icase_path’ (boolean)
      Ignore case distinctions in pattern.
 
 DIAGNOSTICS
@@ -2016,96 +2016,96 @@ Gtags is used to create tag files for global(1).
 
    Gtags recursively collects source files under the current directory,
 picks up symbols and writes the cross-reference data into the tag files
-('GTAGS', 'GRTAGS' and 'GPATH').
+(‘GTAGS’, ‘GRTAGS’ and ‘GPATH’).
 
    By default, gtags picks up C, Yacc, assembly language, Java, C++ and
-PHP source files.  Files whose names end in '.c', '.h' are assumed to be
-C source files.  Files whose names end in '.y' are assumed to be Yacc
-source files.  Files whose names end in '.s', '.S' are assumed to be
-assembly language source files.  Files whose names end in '.java' are
-assumed to be Java source files.  Files whose names end in '.c++',
-'.cc', '.hh', '.cpp', '.cxx', '.hxx', '.hpp', '.C', '.H' are assumed to
-be C++ source files.  Files whose names end in '.php', '.php3', '.phtml'
+PHP source files.  Files whose names end in ‘.c’, ‘.h’ are assumed to be
+C source files.  Files whose names end in ‘.y’ are assumed to be Yacc
+source files.  Files whose names end in ‘.s’, ‘.S’ are assumed to be
+assembly language source files.  Files whose names end in ‘.java’ are
+assumed to be Java source files.  Files whose names end in ‘.c++’,
+‘.cc’, ‘.hh’, ‘.cpp’, ‘.cxx’, ‘.hxx’, ‘.hpp’, ‘.C’, ‘.H’ are assumed to
+be C++ source files.  Files whose names end in ‘.php’, ‘.php3’, ‘.phtml’
 are assumed to be PHP source files.  Other files are assumed to be text
 files.  Gtags does not treat binary files.
 
-   If 'gtags.files' exists in the current directory or a file is
-specified by the '-f' option, target files are limited by it.  Lines
-starting with '. ' are comments.
+   If ‘gtags.files’ exists in the current directory or a file is
+specified by the ‘-f’ option, target files are limited by it.  Lines
+starting with ‘. ’ are comments.
 
 OPTIONS
 -------
 
 The following options are available:
 
-'--accept-dotfiles'
+‘--accept-dotfiles’
      Accept files and directories whose names begin with a dot.  By
      default, gtags ignores them.
-'-c', '--compact'
-     Make 'GTAGS' in compact format.  This option does not influence
-     'GRTAGS', because that is always made in compact format.
-'-C', '--directory' dir
+‘-c’, ‘--compact’
+     Make ‘GTAGS’ in compact format.  This option does not influence
+     ‘GRTAGS’, because that is always made in compact format.
+‘-C’, ‘--directory’ dir
      Change the directory before doing all the work including parameter
      analysis.  This option is ignored in GTAGS_OPTIONS.  Please specify
      it on the command line directly.
-'--config'[=name]
+‘--config’[=name]
      Print the value of config variable name.  If name is not specified
      then print all names and values.  In addition to the variables
      listed in the ENVIRONMENT section, you can refer to install
      directories by read only variables: BINDIR, LIBDIR, DATADIR,
      LOCALSTATEDIR and SYSCONFDIR.
-'-d', '--dump' tag-file
+‘-d’, ‘--dump’ tag-file
      Dump a tag file as text to the standard output.  Output format is
      'key<tab>data'.  This is for debugging.
-'--explain'
+‘--explain’
      Explain handling files.
-'-f', '--file' file
+‘-f’, ‘--file’ file
      Give a list of candidates of target files.  Files which are not on
-     the list are ignored.  The argument file can be set to '-' to
+     the list are ignored.  The argument file can be set to ‘-’ to
      accept a list of files from the standard input.  File names must be
      separated by newline.  To make the list you may use find(1), which
      has rich options for selecting files.
-'--gtagsconf' file
+‘--gtagsconf’ file
      Set environment variable GTAGSCONF to file.
-'--gtagslabel' label
+‘--gtagslabel’ label
      Set environment variable GTAGSLABEL to label.
-'--help'
+‘--help’
      Print a usage message.
-'-I', '--idutils'
+‘-I’, ‘--idutils’
      In addition to tag files, make ID database for idutils(1).
-'-i', '--incremental'
+‘-i’, ‘--incremental’
      Update tag files incrementally.  It's better to use global(1) with
-     the '-u' command.
-'-O', '--objdir'
+     the ‘-u’ command.
+‘-O’, ‘--objdir’
      Use BSD-style obj directory as the location of tag files.  If
-     GTAGSOBJDIRPREFIX is set and '$GTAGSOBJDIRPREFIX' directory exists,
-     gtags creates '$GTAGSOBJDIRPREFIX/<current directory>' directory
+     GTAGSOBJDIRPREFIX is set and ‘$GTAGSOBJDIRPREFIX’ directory exists,
+     gtags creates ‘$GTAGSOBJDIRPREFIX/<current directory>’ directory
      and makes tag files in it.  Though you can use MAKEOBJDIRPREFIX
      instead of GTAGSOBJDIRPREFIX, it is deprecated.  If dbpath is
      specified, this option is ignored.
-'--single-update' file
+‘--single-update’ file
      Update tag files for a single file.  It is considered that file was
      added, updated or deleted, and there is no change in other files.
-     This option implies the '-i' option.
-'--skip-unreadable'
+     This option implies the ‘-i’ option.
+‘--skip-unreadable’
      Skip unreadable files.
-'--skip-symlink' [=type]
+‘--skip-symlink’ [=type]
      Skip symbolic links.  If type is 'f' then skip only symbolic links
      for file, else if 'd' then skip only symbolic links for directory.
      The default value of type is 'a' (all symbolic links).
-'--sqlite3'
+‘--sqlite3’
      Use Sqlite 3 API to make tag files.  By default, BSD/DB 1.85 API is
      used.  To use this option, you need to invoke configure script with
-     '--with-sqlite3' in the build phase.
-'--statistics'
+     ‘--with-sqlite3’ in the build phase.
+‘--statistics’
      Print statistics information.
-'-q', '--quiet'
+‘-q’, ‘--quiet’
      Quiet mode.
-'-v', '--verbose'
+‘-v’, ‘--verbose’
      Verbose mode.
-'--version'
+‘--version’
      Show version number.
-'-w', '--warning'
+‘-w’, ‘--warning’
      Print warning messages.
 dbpath
      The directory in which tag files are generated.  The default is the
@@ -2123,17 +2123,17 @@ EXAMPLES
 FILES
 -----
 
-'GTAGS'
+‘GTAGS’
      Tag file for definitions.
-'GRTAGS'
+‘GRTAGS’
      Tag file for references.
-'GPATH'
+‘GPATH’
      Tag file for source files.
-'gtags.conf', '$HOME/.globalrc'
+‘gtags.conf’, ‘$HOME/.globalrc’
      Configuration data for GNU Global.  See gtags.conf(5).
-'gtags.files'
+‘gtags.files’
      The list of candidates of target files.
-'.notfunction'
+‘.notfunction’
      The list of symbols which is not a definition.  If this file exists
      in the project root directory, gtags does not regard the symbols
      listed in this file as definitions.  Lines starting with ';' are
@@ -2149,7 +2149,7 @@ GTAGSCACHE
 GTAGSCONF
      Configuration file.
 GTAGSFORCECPP
-     If this variable is set, each file whose suffix is '.h' is forcibly
+     If this variable is set, each file whose suffix is ‘.h’ is forcibly
      parsed by the built-in C++ parser.  Do not set this variable if you
      are using plug-in parsers.  This variable and the built-in C++
      parser are deprecated.
@@ -2157,9 +2157,9 @@ GTAGSFORCEENDBLOCK
      If this variable is set, each } at the first column brings end of
      block of 0 level.
 GTAGSLABEL
-     Configuration label.  The default is 'default'.
+     Configuration label.  The default is ‘default’.
 GTAGSLOGGING
-     If this variable is set, '$GTAGSLOGGING' is used as the path name
+     If this variable is set, ‘$GTAGSLOGGING’ is used as the path name
      of a log file.  There is no default value.
 GTAGS_COMMANDLINE
      This variable can only be referenced from the hook (see
@@ -2171,65 +2171,83 @@ GTAGS_OPTIONS
      The value of this variable is inserted in the head of arguments.
 GTAGSOBJDIR
      If this variable is set, it is used as the name of BSD-style
-     objdir.  The default is 'obj'.  Though you can use MAKEOBJDIR
+     objdir.  The default is ‘obj’.  Though you can use MAKEOBJDIR
      instead of GTAGSOBJDIR, it is deprecated.
 GTAGSOBJDIRPREFIX
      If this variable is set, it is used as the prefix of BSD-style
-     objdir.  The default is '/usr/obj'.  Though you can use
+     objdir.  The default is ‘/usr/obj’.  Though you can use
      MAKEOBJDIRPREFIX instead of GTAGSOBJDIRPREFIX, it is deprecated.
 TMPDIR
      The location used to stored temporary files.  The default is
-     '/tmp'.
+     ‘/tmp’.
 
 CONFIGURATION
 -------------
 
 The following configuration variables affect the execution of gtags.
-You can see the default value for each variable with the '--config'
+You can see the default value for each variable with the ‘--config’
 option.
 
-'gtags_parser' (comma separated list)
+‘gtags_parser’ (comma separated list)
      Specify the mapping of language names and plug-in parsers.  Each
      part delimited by the comma consists of a language name, a colon,
      the shared object path, an optional colon followed by a function
      name.  If the function name is not specified, 'parser' is assumed.
      As a special exception, gtags collects values from multiple
-     'gtags_parser' variables.  For these mappings, the first match is
+     ‘gtags_parser’ variables.  For these mappings, the first match is
      adopted.
-'gtags_hook' (command line)
+‘gtags_hook’ (command line)
      Specify a command line which should be executed at the beginning of
      gtags after loading configuration file.  You can use this hook to
-     update 'gtags.files' dynamically.  "./" in it always means the
+     update ‘gtags.files’ dynamically.  "./" in it always means the
      project root directory, since gtags is always invoked there.
      This hook is ignored when the following options are specified:
      -version, -help, -config, -dump.
-'icase_path' (boolean)
+‘icase_path’ (boolean)
      Ignore case distinctions in the path.  Suffixes check is affected
      by this capability.
-'langmap' (comma separated list)
+‘langmap’ (comma separated list)
      Language mapping.  Each comma-separated map consists of a language
      name, a colon, and a list of file extensions.  You can specify a
      glob pattern surrounded by parentheses instead of an extension for
      the files without extensions (e.g.  Make:([Mm]akefile).mak.mk).  As
-     a special exception, gtags collects values from multiple 'langmap'
+     a special exception, gtags collects values from multiple ‘langmap’
      variables.  For these mappings, the first match is adopted.
      Default mapping is:
-     'c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml'.
-'skip' (comma separated list)
+     ‘c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml’.
+‘skip’ (comma separated list)
      Gtags skips files and directories which are given in this list.  As
-     a special exception, gtags collects values from multiple 'skip'
-     variables.  If the value ends with '/', it is assumed as a
+     a special exception, gtags collects values from multiple ‘skip’
+     variables.  If the value ends with ‘/’, it is assumed as a
      directory and gtags skips all files under it.  The value may
      include glob patterns (*, ?, [...], [!...], [^...]).
-     If the value starts with '/', it is assumed a relative path name
+     If the value starts with ‘/’, it is assumed a relative path name
      from the root directory of the project.  You cannot use glob
      patterns for a path name.  However, this direction is out-of-date,
-     and is not recommended.  Instead, you can use '-f' option which can
+     and is not recommended.  Instead, you can use ‘-f’ option which can
      be combined with find(1).  Since find(1) has rich options to select
      files, you can do everything.  Additionally, this technique can
      also be applied to any other tagging systems like ctags(1),
      cscope(1), etc.
-     Skip list is also effective when you use the '-f' or 'gtags.files'.
+     Skip list is also effective when you use the ‘-f’ or ‘gtags.files’.
+
+EXAMPLES
+--------
+
+     #
+     # There are several ways to use Universal Ctags plug-in parser.
+     #
+     $ gtags --gtagsconf=/usr/local/share/gtags/gtags.conf --gtagslabel=universal-ctags
+     $ gtags --explain
+     or
+     $ export GTAGSCONF=/usr/local/share/gtags/gtags.conf
+     $ export GTAGSLABEL=universal-ctags
+     $ gtags --explain
+     or
+     # In your project
+     $ cp /usr/local/share/gtags/gtags.conf .
+     $ vi gtags.conf		# default:tc=native => default:tc=universal-ctags
+     $ gtags --explain
 
 DIAGNOSTICS
 -----------
@@ -2250,11 +2268,11 @@ global(1), htags(1), gtags.conf(5).
 BUG
 ---
 
-'GTAGS' and 'GRTAGS' are very large.  In advance of using this command,
+‘GTAGS’ and ‘GRTAGS’ are very large.  In advance of using this command,
 check the space of your disk.
 
    Assembly language support is far from complete.  It extracts only
-'ENTRY()' and 'ALTENTRY()' from source file.  Probably valid only for
+‘ENTRY()’ and ‘ALTENTRY()’ from source file.  Probably valid only for
 FreeBSD and Linux kernel source.
 
    C++ support is deprecated.
@@ -2295,17 +2313,17 @@ PHP and assembly.
 
    In advance of using this command, you should execute gtags(1) in the
 root directory of a source project.  Then you can execute htags in the
-same place.  Htags makes a directory named 'HTML', and puts a hypertext
-in it.  You can start browsing at 'HTML/index.html'.
+same place.  Htags makes a directory named ‘HTML’, and puts a hypertext
+in it.  You can start browsing at ‘HTML/index.html’.
 
-   Since htags generates a static hypertext as long as neither '-D' nor
-'-f' option is not specified, you can move it anywhere and browse it by
-any browser without any HTTP server.  If you use '-D' or '-f' option,
+   Since htags generates a static hypertext as long as neither ‘-D’ nor
+‘-f’ option is not specified, you can move it anywhere and browse it by
+any browser without any HTTP server.  If you use ‘-D’ or ‘-f’ option,
 you need to use HTTP server.  Though any HTTP server is available,
 htags-server(1) is recommended.
 
    This command has so many options.  If you are new to htags, it is
-recommended to use '--suggest' option.  With that option, htags chooses
+recommended to use ‘--suggest’ option.  With that option, htags chooses
 popular options on your behalf.
 
 OPTIONS
@@ -2313,136 +2331,136 @@ OPTIONS
 
 The following options are available:
 
-'-a', '--alphabet'
+‘-a’, ‘--alphabet’
      Make an alphabetical index suitable for a large project.
-'--auto-completion'[=limit]
+‘--auto-completion’[=limit]
      Enable auto-completion facility for the input form.  If limit is
      specified, number of candidates is limited to the value.  Please
      note this function requires javascript language in your browser.
-'-C', '--directory' dir
+‘-C’, ‘--directory’ dir
      Change the directory before doing all the work including parameter
      analysis.
-'--caution'
+‘--caution’
      Display a caution message on the top page.
-'--cflow' cflowfile
+‘--cflow’ cflowfile
      Add a call tree by cflow(1).  cflowfile must be posix format.  If
      you use GNU cflow, invoke the command at the project root directory
-     with the '--format=posix' option.  This option is deprecated;
-     please use '--call-tree' or '--callee-tree' instead.
-'--call-tree' callfile
+     with the ‘--format=posix’ option.  This option is deprecated;
+     please use ‘--call-tree’ or ‘--callee-tree’ instead.
+‘--call-tree’ callfile
      Add a call tree by cflow(1); callfile must be posix format.  If you
      use GNU cflow, invoke the command at the project root directory
-     with the '--format=posix' option.
-'--callee-tree' calleefile
+     with the ‘--format=posix’ option.
+‘--callee-tree’ calleefile
      Add a callee tree by cflow(1); calleefile must be posix format.  If
      you use GNU cflow, invoke the command at the project root directory
-     with the '--format=posix' and '--reverse' options.
-'--colorize-warned-line'
+     with the ‘--format=posix’ and ‘--reverse’ options.
+‘--colorize-warned-line’
      Use color to highlight warned lines.
-'--cvsweb' url
+‘--cvsweb’ url
      Add a link to cvsweb; url is used as the base of URL. When
-     directory 'CVS' exists in the root directory of the project, the
-     content of 'CVS/Repository' is used as the relative path from the
+     directory ‘CVS’ exists in the root directory of the project, the
+     content of ‘CVS/Repository’ is used as the relative path from the
      base.
-'--cvsweb-cvsroot' cvsroot
+‘--cvsweb-cvsroot’ cvsroot
      Specify cvsroot in cvsweb URL.
-'-D', '--dynamic'
+‘-D’, ‘--dynamic’
      Generate a tag list dynamically using CGI program.  Though this
      option decreases both the size and generation time of hypertext,
      you need to start up HTTP server.
-'-d', '--dbpath' dbpath
-     Specify the directory in which 'GTAGS' exists.  The default is the
+‘-d’, ‘--dbpath’ dbpath
+     Specify the directory in which ‘GTAGS’ exists.  The default is the
      current directory.
-'--disable-grep'
-     Disable grep in the search form ('-f', '--form').
-'--disable-idutils'
-     Disable idutils in the search form ('-f', '--form').
-'-F', '--frame'
+‘--disable-grep’
+     Disable grep in the search form (‘-f’, ‘--form’).
+‘--disable-idutils’
+     Disable idutils in the search form (‘-f’, ‘--form’).
+‘-F’, ‘--frame’
      Use frames for the top page.
-'-f', '--form'
+‘-f’, ‘--form’
      Add a search form using CGI program.  You need to start a HTTP
      server for it.
-'--fixed-guide'
+‘--fixed-guide’
      Put a fixed guide at the bottom of the screen of the browser.
-'--full-path'
+‘--full-path’
      Use full path name in the file index.  By default, use just the
      last component of a path.
-'-g', '--gtags'
-     Execute gtags(1) before starting job.  The '-v', '-w' and dbpath
+‘-g’, ‘--gtags’
+     Execute gtags(1) before starting job.  The ‘-v’, ‘-w’ and dbpath
      options are passed to gtags.
-'--gtagsconf' file
+‘--gtagsconf’ file
      Set environment variable GTAGSCONF to file.
-'--gtagslabel' label
+‘--gtagslabel’ label
      Set environment variable GTAGSLABEL to label.
-'-h', '--func-header'[=position]
+‘-h’, ‘--func-header’[=position]
      Insert a function header for each function.  By default, htags
      doesn't generate them.  You can choose the position using position,
-     which allows one of 'before', 'right' or 'after' (default).
-'--help'
+     which allows one of ‘before’, ‘right’ or ‘after’ (default).
+‘--help’
      Print a usage message.
-'--html-header' file
+‘--html-header’ file
      Insert a header record derived from file into the HTML header of
      each file.
-'-I', '--icon'
+‘-I’, ‘--icon’
      Use icons instead of text for some links.
-'--insert-footer' file
-     Insert custom footer derived from file before '</body>' tag.
-'--insert-header' file
-     Insert custom header derived from file after '<body>' tag.
-'--item-order' spec
+‘--insert-footer’ file
+     Insert custom footer derived from file before ‘</body>’ tag.
+‘--insert-header’ file
+     Insert custom header derived from file after ‘<body>’ tag.
+‘--item-order’ spec
      Specify the order of the items in the top page.  The spec is a
      string consisting of item signs in order.  Each sign means as
-     follows: 'c': caution; 's': search form; 'm': mains; 'd':
-     definitions; 'f': files; 't': call tree.  The default is 'csmdf'.
-'-m', '--main-func' name
-     Specify startup function name; the default is 'main'.
-'--map-file'
-     Generate file 'MAP'.
-'-n', '--line-number'[=columns]
+     follows: ‘c’: caution; ‘s’: search form; ‘m’: mains; ‘d’:
+     definitions; ‘f’: files; ‘t’: call tree.  The default is ‘csmdf’.
+‘-m’, ‘--main-func’ name
+     Specify startup function name; the default is ‘main’.
+‘--map-file’
+     Generate file ‘MAP’.
+‘-n’, ‘--line-number’[=columns]
      Print line numbers.  By default, don't print line numbers.  The
      default value of columns is 4.
-'--no-order-list'
+‘--no-order-list’
      Numbers are not given in list form.
-'-o', '--other'
+‘-o’, ‘--other’
      Pick up not only source files but also other files for the file
      index.
-'-s', '--symbol'
+‘-s’, ‘--symbol’
      Make anchors not only for definitions and references but also other
      symbols.
-'--show-position'
+‘--show-position’
      Print the position string per function definition.  The string can
      be interpreted by general editors in UNIX. The default is false.
-'--statistics'
+‘--statistics’
      Print statistics information.
-'--suggest'
+‘--suggest’
      Htags chooses popular options on behalf of beginners.  It is
-     equivalent to '-aghInosTxv --show-position --fixed-guide' now.
-'--suggest2'
+     equivalent to ‘-aghInosTxv --show-position --fixed-guide’ now.
+‘--suggest2’
      Htags chooses popular options on behalf of beginners.  This option
      enables frame, AJAX and CGI facility in addition to the facilities
-     by the '--suggest' option.  It is equivalent to '--suggest -DfF
-     --auto-completion --tree-view=filetree' now.
-'-T', '--table-flist'[=rows]
-     Use '<table>' tag to display the file index.  You can optionally
+     by the ‘--suggest’ option.  It is equivalent to ‘--suggest -DfF
+     --auto-completion --tree-view=filetree’ now.
+‘-T’, ‘--table-flist’[=rows]
+     Use ‘<table>’ tag to display the file index.  You can optionally
      specify the number of rows; the default is 5.
-'-t', '--title' title
+‘-t’, ‘--title’ title
      Title of the hypertext.  The default is the last component of the
      path of the current directory.
-'--tabs' cols
+‘--tabs’ cols
      Tab stops.  The default is 8.
-'--table-list'
-     Use '<table>' tag to display the tag list.
-'--tree-view'[=type]
+‘--table-list’
+     Use ‘<table>’ tag to display the tag list.
+‘--tree-view’[=type]
      Use treeview for the file index.  Please note this function
      requires javascript language in your browser.  Possible values of
      type are as follows: treeview, filetree, treeview-red,
      treeview-black, treeview-gray, treeview-famfamfam.  The default is
      treeview.
-'-v', '--verbose'
+‘-v’, ‘--verbose’
      Verbose mode.
-'--version'
+‘--version’
      Show version number.
-'-w', '--warning'
+‘-w’, ‘--warning’
      Print warning messages.
 dir
      The directory in which the result of this command is stored.  The
@@ -2461,31 +2479,31 @@ EXAMPLES
 FILES
 -----
 
-'GTAGS'
+‘GTAGS’
      Tag file for definitions.
-'GRTAGS'
+‘GRTAGS’
      Tag file for references.
-'GPATH'
+‘GPATH’
      Tag file for source files.
-'gtags.conf', '$HOME/.globalrc'
+‘gtags.conf’, ‘$HOME/.globalrc’
      Configuration data for GNU Global.  See gtags.conf(5).
-'HTML/FILEMAP'
+‘HTML/FILEMAP’
      Mapping file for converting file name into the path of the file.
-'HTML/GTAGSROOT'
-     If this file exists, CGI program 'global.cgi' sets environment
+‘HTML/GTAGSROOT’
+     If this file exists, CGI program ‘global.cgi’ sets environment
      variable GTAGSROOT to the contents of it.  If you move directory
-     'HTML' from the original place, please make this file.
-'HTML/.htaccess'
+     ‘HTML’ from the original place, please make this file.
+‘HTML/.htaccess’
      Local configuration file for Apache.  This file is generated when
-     the '-f' or '-D' options are specified.
-'HTML/index.html'
+     the ‘-f’ or ‘-D’ options are specified.
+‘HTML/index.html’
      Start-up file.
-'HTML/MAP'
+‘HTML/MAP’
      Mapping file for converting tag name into the path of tag list.
-'HTML/style.css'
+‘HTML/style.css’
      Style sheet file.
-'/usr/local/share/gtags/style.css.tmpl'
-     The template of the style sheet file ('HTML/style.css').
+‘/usr/local/share/gtags/style.css.tmpl’
+     The template of the style sheet file (‘HTML/style.css’).
 
 ENVIRONMENT
 -----------
@@ -2497,14 +2515,14 @@ GTAGSCACHE
 GTAGSCONF
      Configuration file.
 GTAGSLABEL
-     Configuration label.  The default is 'default'.
+     Configuration label.  The default is ‘default’.
 HTAGS_OPTIONS
      The value of this variable is inserted in the head of arguments.
 TMPDIR
      The location used to stored temporary files.  The default is
-     '/tmp'.
+     ‘/tmp’.
 GTAGSFORCECPP
-     If this variable is set, each file whose suffix is '.h' is treated
+     If this variable is set, each file whose suffix is ‘.h’ is treated
      as a C++ source file.
 
 CONFIGURATION
@@ -2512,18 +2530,18 @@ CONFIGURATION
 
 The following configuration variables affect the execution of htags:
 
-'datadir'(string)
-     Shared data directory.  The default is '/usr/local/share' but you
+‘datadir’(string)
+     Shared data directory.  The default is ‘/usr/local/share’ but you
      can change the value using configure script.  Htags looks up
-     template files in the 'gtags' directory in this data directory.
-'include_file_suffixes'(comma separated list)
+     template files in the ‘gtags’ directory in this data directory.
+‘include_file_suffixes’(comma separated list)
      Suffixes of include files.  The default is:
-     'h,hh,hxx,hpp,H,inc.php'.
-'langmap'(comma separated list)
+     ‘h,hh,hxx,hpp,H,inc.php’.
+‘langmap’(comma separated list)
      Language mapping.  Each comma-separated map consists of the
      language name, a colon, and a list of file extensions.  Default
      mapping is:
-     'c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml'.
+     ‘c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml’.
 
 DIAGNOSTICS
 -----------
@@ -2546,7 +2564,7 @@ disk.
 
    PHP support is far from complete.
 
-   The '-f' and '-D' options generate CGI programs.  If you open the
+   The ‘-f’ and ‘-D’ options generate CGI programs.  If you open the
 hypertext to the public, please recognize security dangers.
 
    Htags does not support plug-in parser.
@@ -2595,13 +2613,13 @@ OPTIONS
 -------
 
 The following options are available:
-'-b', '--bind' ip-address
+‘-b’, ‘--bind’ ip-address
      Specifies the IP address on which htags-server listen.  The default
      value is 127.0.0.1.
-'-u', '--use' language
-     Specifies language to use, which may be one of: 'python' and
-     'ruby'.
-'--retry'[=n]
+‘-u’, ‘--use’ language
+     Specifies language to use, which may be one of: ‘python’ and
+     ‘ruby’.
+‘--retry’[=n]
      If the port is already in use, retry n times with incrementing the
      port number.  The default of n is 20.
 port
@@ -2683,7 +2701,7 @@ similar to vi(1) and emacs(1).
 
    Second form:
 You can specify a definition name directly.  The definition name should
-exist in 'GTAGS'.  This option requires 'HTML/MAP' generated by
+exist in ‘GTAGS’.  This option requires ‘HTML/MAP’ generated by
 htags(1).
 
    Some browsers require you to load it before executing gozilla.
@@ -2692,35 +2710,35 @@ OPTIONS
 -------
 
 The following options are available:
-'+no'
+‘+no’
      Line number.
-'-b' browser
+‘-b’ browser
      Browser to use.  By default, it is assumed firefox.
-'-d' name
+‘-d’ name
      Print definitions.
-'--help'
+‘--help’
      Show help.
-'-p'
+‘-p’
      Just print a generated URL instead of displaying it.
 file
      File name or alias name.
-'-q', '--quiet'
+‘-q’, ‘--quiet’
      Quiet mode.
-'-v', '--verbose'
+‘-v’, ‘--verbose’
      Verbose mode.
-'--version'
+‘--version’
      Show version number.
 
 FILES
 -----
 
-'GTAGS'
+‘GTAGS’
      Tag file for definitions.
-'HTML/'
+‘HTML/’
      Hypertext of source code.
-'HTML/MAP'
+‘HTML/MAP’
      Mapping file for converting tag name into the path of tag list.
-'gtags.conf', '$HOME/.globalrc'
+‘gtags.conf’, ‘$HOME/.globalrc’
      Configuration data for GNU Global.  See gtags.conf(5).
 
 ENVIRONMENT
@@ -2810,44 +2828,44 @@ Some command line arguments can only occur as the only argument in the
 execution of gtags-cscope.  They cause the program to just print out
 some output and exit immediately:
 
-'-h'
+‘-h’
      View the long usage help display.
-'-V'
+‘-V’
      Print the version number of gtags-cscope.
-'--help'
-     Same as '-h'
-'--version'
-     Same as '-V'
+‘--help’
+     Same as ‘-h’
+‘--version’
+     Same as ‘-V’
 
    The following options can appear in any combination:
 
-'-a'
+‘-a’
      Print absolute path names.
-'-b'
+‘-b’
      Build the cross-reference only.
-'-C'
+‘-C’
      Ignore letter case when searching.
-'-d'
+‘-d’
      Do not update the cross-reference.
-'-e'
-     Suppress the '^e' command prompt between files.
-'-F' file
+‘-e’
+     Suppress the ‘^e’ command prompt between files.
+‘-F’ file
      Read symbol reference lines from file.  (A symbol reference file is
      created by > and >>, and can also be read using the < command,
      described under "Issuing Subsequent Requests", below.)
-'-i'
+‘-i’
      Ignore SIGINT signal in line-oriented mode.
-'-L'
+‘-L’
      Do a single search with line-oriented output when used with the
      -num pattern option.
-'-l'
-     Line-oriented interface.  This option implies the '-d' option.
-'-[0-9]' pattern
+‘-l’
+     Line-oriented interface.  This option implies the ‘-d’ option.
+‘-[0-9]’ pattern
      Go to input field num (counting from 0) and find pattern.
-'-p' n
+‘-p’ n
      Display the last n file path components instead of the default (1).
-     Use '0' to not display the file name at all.
-'-v'
+     Use ‘0’ to not display the file name at all.
+‘-v’
      Be more verbose in line-oriented mode.
 
 Requesting the initial search
@@ -2901,7 +2919,7 @@ be used:
      Append the displayed list of lines to a file.
 <
      Read lines from a file that is in symbol reference format (created
-     by '>' or '>>'), just like the '-F' option.
+     by ‘>’ or ‘>>’), just like the ‘-F’ option.
 ^
      Filter all lines through a shell command and display the resulting
      lines, replacing the lines that were already there.
@@ -2926,11 +2944,11 @@ be used:
      Move to next input field and search pattern.
 ^c
      Toggle ignore/use letter case when searching.  (When ignoring
-     letter case, a search for 'FILE' will match 'File' and 'file'.)
+     letter case, a search for ‘FILE’ will match ‘File’ and ‘file’.)
 ^r
      Rebuild the cross-reference.
 !
-     Start an interactive shell (type '^d' to return to gtags-cscope).
+     Start an interactive shell (type ‘^d’ to return to gtags-cscope).
 ^l
      Redraw the screen.
 ?
@@ -2939,7 +2957,7 @@ be used:
      Exit gtags-cscope.
 
    NOTE: If the first character of the text to be searched for matches
-one of the above commands, escape it by typing a '\' (backslash) first.
+one of the above commands, escape it by typing a ‘\’ (backslash) first.
 
    Substituting new text for old text
 
@@ -2964,7 +2982,7 @@ commands:
 <Esc>
      Exit without changing the marked lines.
 !
-     Start an interactive shell (type '^d' to return to gtags-cscope).
+     Start an interactive shell (type ‘^d’ to return to gtags-cscope).
 ^l
      Redraw the screen.
 ?
@@ -2974,24 +2992,24 @@ Special keys
      to move around the input fields.  The up-arrow key is useful to
      move to the previous input field instead of using the <Tab> key
      repeatedly.  If you have <CLEAR>, <NEXT>, or <PREV> keys they will
-     act as the '^l', '+', and '-' commands, respectively.
+     act as the ‘^l’, ‘+’, and ‘-’ commands, respectively.
 
 Line-Oriented interface
 -----------------------
 
-The '-l' option lets you use gtags-cscope where a screen-oriented
+The ‘-l’ option lets you use gtags-cscope where a screen-oriented
 interface would not be useful, for example, from another screen-oriented
 program.
 
-   gtags-cscope will prompt with '>>' when it is ready for an input
+   gtags-cscope will prompt with ‘>>’ when it is ready for an input
 line, which starts with the field number (counting from 0), immediately
-followed by the search pattern.  For example, '1main' finds the
-definition of the 'main' function.
+followed by the search pattern.  For example, ‘1main’ finds the
+definition of the ‘main’ function.
 
-   If you just want a single search, instead of the '-l' option use the
-'-L' and '-num pattern' options, and you won't get the '>>' prompt.
+   If you just want a single search, instead of the ‘-l’ option use the
+‘-L’ and ‘-num pattern’ options, and you won't get the ‘>>’ prompt.
 
-   For '-l', gtags-cscope outputs the number of reference lines:
+   For ‘-l’, gtags-cscope outputs the number of reference lines:
 cscope: 2 lines
 
    For each reference found, gtags-cscope outputs a line consisting of
@@ -3002,14 +3020,14 @@ main.c main 161 main(argc, argv)
    Note that the editor is not called to display a single reference,
 unlike the screen-oriented interface.
 
-   You can use the 'c' command to toggle ignore/use letter case when
-searching.  (When ignoring letter case, a search for 'FILE' will match
-'File' and 'file'.)
+   You can use the ‘c’ command to toggle ignore/use letter case when
+searching.  (When ignoring letter case, a search for ‘FILE’ will match
+‘File’ and ‘file’.)
 
-   You can use the 'r' command to rebuild the database.
+   You can use the ‘r’ command to rebuild the database.
 
    gtags-cscope will quit when it detects end-of-file, or when the first
-character of an input line is '^d' or 'q'.
+character of an input line is ‘^d’ or ‘q’.
 
 ENVIRONMENT VARIABLES
 ---------------------
@@ -3022,17 +3040,17 @@ CSCOPE_EDITOR
      EDITOR/VIEWER variables.
 CSCOPE_LINEFLAG
      Format of the line number flag for your editor.  By default, cscope
-     invokes your editor via the equivalent of 'editor +N file', where N
+     invokes your editor via the equivalent of ‘editor +N file’, where N
      is the line number that the editor should jump to.  This format is
      used by both emacs and vi.  If your editor needs something
-     different, specify it in this variable, with '%s' as a placeholder
+     different, specify it in this variable, with ‘%s’ as a placeholder
      for the line number.  Eg: if your editor needs to be invoked as
-     'editor -#103 file' to go to line 103, set this variable to '-#%s'.
+     ‘editor -#103 file’ to go to line 103, set this variable to ‘-#%s’.
 CSCOPE_LINEFLAG_AFTER_FILE
-     Set this variable to 'yes' if your editor needs to be invoked with
+     Set this variable to ‘yes’ if your editor needs to be invoked with
      the line number option after the filename to be edited.  To
      continue the example from CSCOPE_LINEFLAG, above: if your editor
-     needs to see 'editor file -#number', set this environment variable.
+     needs to see ‘editor file -#number’, set this environment variable.
      Users of most standard editors (vi, emacs) do not need to set this
      variable.
 EDITOR
@@ -3048,7 +3066,7 @@ TERMINFO
      not in the standard terminfo directory, see curses and terminfo for
      how to make your own terminal description.
 TMPDIR
-     Temporary file directory, which defaults to '/tmp'.
+     Temporary file directory, which defaults to ‘/tmp’.
 VIEWER
      Preferred file display program (such as less), which overrides
      EDITOR (see above).
@@ -3058,45 +3076,45 @@ VIEWER
 GTAGSCONF
      Configuration file.
 GTAGSGLOBAL
-     If this variable is set, '$GTAGSGLOBAL' is used as the name of
+     If this variable is set, ‘$GTAGSGLOBAL’ is used as the name of
      global(1).  The default is global.
 GTAGSGTAGS
-     If this variable is set, '$GTAGSGTAGS' is used as the name of
+     If this variable is set, ‘$GTAGSGTAGS’ is used as the name of
      gtags(1).  The default is gtags.
 GTAGSDBPATH
      The directory in which the tag files exist.  This value is ignored
      when GTAGSROOT is not defined.
 GTAGSLABEL
-     Configuration label.  The default is 'default'.
+     Configuration label.  The default is ‘default’.
 GTAGSLIBPATH
      If this variable is set, it is used as the path to search for
      library functions.  If the specified tags is not found in the
-     project, global also searches in these paths.  Since only 'GTAGS'
-     is targeted in the retrieval, this variable is ignored when '-r' or
-     '-s' is specified.
+     project, global also searches in these paths.  Since only ‘GTAGS’
+     is targeted in the retrieval, this variable is ignored when ‘-r’ or
+     ‘-s’ is specified.
 GTAGSROOT
      The root directory of the project.
 MAKEOBJDIR
-     If this variable is set, '$MAKEOBJDIR' is used as the name of
-     BSD-style objdir.  The default is 'obj'.
+     If this variable is set, ‘$MAKEOBJDIR’ is used as the name of
+     BSD-style objdir.  The default is ‘obj’.
 MAKEOBJDIRPREFIX
-     If this variable is set, '$MAKEOBJDIRPREFIX' is used as the prefix
-     of BSD-style objdir.  The default is '/usr/obj'.
+     If this variable is set, ‘$MAKEOBJDIRPREFIX’ is used as the prefix
+     of BSD-style objdir.  The default is ‘/usr/obj’.
 
 FILES
 -----
 
-'GTAGS'
+‘GTAGS’
      Tag file for definitions.
-'GRTAGS'
+‘GRTAGS’
      Tag file for references.
-'GPATH'
+‘GPATH’
      Tag file for source files.
-'GTAGSROOT'
-     If environment variable GTAGSROOT is not set and file 'GTAGSROOT'
-     exists in the same directory as 'GTAGS' then global sets GTAGSROOT
+‘GTAGSROOT’
+     If environment variable GTAGSROOT is not set and file ‘GTAGSROOT’
+     exists in the same directory as ‘GTAGS’ then global sets GTAGSROOT
      to the contents of the file.
-'gtags.conf', '$HOME/.globalrc'
+‘gtags.conf’, ‘$HOME/.globalrc’
      Configuration data for GNU Global.  See gtags.conf(5).
 
 SEE ALSO
@@ -3113,7 +3131,7 @@ BUG
 The function field of the display is almost <unknown> since Global
 doesn't recognize it.
 
-   'Find functions called by this function' is not implemented.
+   ‘Find functions called by this function’ is not implemented.
 
 AUTHOR
 ------
@@ -3151,21 +3169,21 @@ DESCRIPTION
 Globash is a special shell for Global using GNU bash.  You can use a lot
 of functions to ease reading source code, like tag stack, tag mark and
 cookie.  At first, you should make tag files using gtags and invoke this
-command in the project.  Please refer to the help (type 'ghelp<RET>')
+command in the project.  Please refer to the help (type ‘ghelp<RET>’)
 for detailed usage.
 
 FILES
 -----
 
-'GTAGS'
+‘GTAGS’
      Tag file for definitions.
-'GRTAGS'
+‘GRTAGS’
      Tag file for references.
-'GPATH'
+‘GPATH’
      Tag file for source files.
-'~/.globashrc'
+‘~/.globashrc’
      Start-up file.
-'~/.globash/'
+‘~/.globash/’
      Session directory.
 
 ENVIRONMENT
@@ -3208,13 +3226,13 @@ gtags.conf - configuration data for GNU Global
 SYNOPSIS
 --------
 
-     'gtags.conf'
-     '~/.globalrc'
+     ‘gtags.conf’
+     ‘~/.globalrc’
 
 DESCRIPTION
 -----------
 
-'gtags.conf' has configuration data for global(1), gozilla(1), gtags(1)
+‘gtags.conf’ has configuration data for global(1), gozilla(1), gtags(1)
 and htags(1).  They look for the following files in this order, and read
 from the first one that exists and is readable.
 (1) -gtagsconf file
@@ -3225,26 +3243,26 @@ from the first one that exists and is readable.
 (6) /etc/gtags.conf
 (7) [sysconfdir]/gtags.conf
 
-   [sysconfdir] is '/usr/local/etc' by default; you can change it by the
--sysconfdir option of the configure script.  [objdir] is 'obj' by
+   [sysconfdir] is ‘/usr/local/etc’ by default; you can change it by the
+-sysconfdir option of the configure script.  [objdir] is ‘obj’ by
 default; you can change it by GTAGSOBJDIR or MAKEOBJDIR.
 
    Its syntax is similar to termcap(5) except for some extensions
 described later.  A file includes one or more records.  You should
-select a record using a label.  Default label is 'default'.  If
+select a record using a label.  Default label is ‘default’.  If
 GTAGSLABEL is set, its value is used.  Please be aware the meaning of
-'default' is different from that of termcap(5).
+‘default’ is different from that of termcap(5).
 
-   Lines starting with '#' are ignored.  A record consists of one or
-more fields separated by ':' and ends with a newline.  The first field
+   Lines starting with ‘#’ are ignored.  A record consists of one or
+more fields separated by ‘:’ and ends with a newline.  The first field
 must have a label name.  Each field of the rest has a variable
 definition.  There are three types in those variables.
 Boolean: This type has no value; existence of variable means true else false.
-Number: This type has a number value after '#'.
-String: This type has a string value after '='.
+Number: This type has a number value after ‘#’.
+String: This type has a string value after ‘=’.
    Most variables are relevant to string type.
 
-   If data includes ':' or newline, you need to quote it by '\'.  An
+   If data includes ‘:’ or newline, you need to quote it by ‘\’.  An
 empty field is permitted, but it doesn't make sense.
 
    When there is more than one definition, the previous one is adopted.
@@ -3255,8 +3273,8 @@ Variable substitution
 ---------------------
 
 Variable substitution similar to sh(1) is available.  You can refer to
-any string variable using '$' prefix.  For example, the following b has
-a value 'XYZ'.
+any string variable using ‘$’ prefix.  For example, the following b has
+a value ‘XYZ’.
      :a=Y:b=X${a}Z:
 
 Including another record
@@ -3347,7 +3365,7 @@ A.1 GNU Free Documentation License
 
                       Version 1.2, November 2002
 
-     Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
+     Copyright © 2000,2001,2002 Free Software Foundation, Inc.
      51 Franklin St, Fifth Floor, Boston, MA  02110-1301, USA
 
      Everyone is permitted to copy and distribute verbatim copies
@@ -3356,7 +3374,7 @@ A.1 GNU Free Documentation License
   0. PREAMBLE
 
      The purpose of this License is to make a manual, textbook, or other
-     functional and useful document "free" in the sense of freedom: to
+     functional and useful document “free” in the sense of freedom: to
      assure everyone the effective freedom to copy and redistribute it,
      with or without modifying it, either commercially or
      noncommercially.  Secondarily, this License preserves for the
@@ -3801,7 +3819,7 @@ Option Index
 * -r:                                    Basic usage.         (line  61)
 * -r <1>:                                Usage(Elvis).        (line  13)
 * -r <2>:                                Usage(Vim).          (line  44)
-* -s:                                    Basic usage.         (line  87)
+* -s:                                    Basic usage.         (line  88)
 * -s <1>:                                Usage(Elvis).        (line  17)
 * -s <2>:                                Usage(Vim).          (line  48)
 * -t:                                    Preparation(Elvis).  (line   9)
@@ -3814,59 +3832,59 @@ Option Index
 
 
 Tag Table:
-Node: Top782
+Node: Top781
 Node: Introduction1426
-Node: Command line4061
-Node: Preparation4483
-Node: Basic usage5793
-Node: Applied usage10718
-Node: Applications15647
-Node: GloBash16352
-Node: Features(globash)16687
-Node: Preparation(globash)17025
-Node: Usage(globash)18080
-Node: Less viewer24025
-Node: Features(Less)24411
-Node: Preparation(Less)24639
-Node: Usage(Less)24992
-Node: Nvi-1.81.5 editor27480
-Node: Features(Nvi-1.81.5)27876
-Node: Preparation(Nvi-1.81.5)28133
-Node: Usage(Nvi-1.81.5)28881
-Node: Elvis editor30722
-Node: Features(Elvis)31175
-Node: Preparation(Elvis)31380
-Node: Usage(Elvis)31784
-Node: Vim editor34753
-Node: Features(Vim)35115
-Node: Preparation(Vim)35566
-Node: Usage(Vim)35918
-Node: Emacs editor39764
-Node: Features(Emacs)40164
-Node: Preparation(Emacs)40496
-Node: Usage(Emacs)41734
-Node: Gtags-cscope45029
-Node: Web browser45815
-Node: Features(browser)46194
-Node: Preparation(browser)46677
-Node: Usage(browser)47860
-Node: Doxygen documentation system48621
-Node: Other topics49337
-Node: Configuration49652
-Node: Plug-in50356
-Node: Incremental updating51276
-Node: Reference52460
-Node: global53162
-Node: gtags66660
-Node: htags77075
-Node: htags-server87084
-Node: gozilla89326
-Node: gtags-cscope92078
-Node: globash103630
-Node: gtags.conf104845
-Node: Copying This Manual108732
-Node: GNU Free Documentation License108969
-Node: Index131360
+Node: Command line4135
+Node: Preparation4557
+Node: Basic usage5885
+Node: Applied usage10898
+Node: Applications15877
+Node: GloBash16582
+Node: Features(globash)16917
+Node: Preparation(globash)17265
+Node: Usage(globash)18328
+Node: Less viewer24341
+Node: Features(Less)24727
+Node: Preparation(Less)24959
+Node: Usage(Less)25320
+Node: Nvi-1.81.5 editor27884
+Node: Features(Nvi-1.81.5)28280
+Node: Preparation(Nvi-1.81.5)28541
+Node: Usage(Nvi-1.81.5)29301
+Node: Elvis editor31238
+Node: Features(Elvis)31699
+Node: Preparation(Elvis)31908
+Node: Usage(Elvis)32316
+Node: Vim editor35375
+Node: Features(Vim)35741
+Node: Preparation(Vim)36206
+Node: Usage(Vim)36562
+Node: Emacs editor40504
+Node: Features(Emacs)40904
+Node: Preparation(Emacs)41244
+Node: Usage(Emacs)42510
+Node: Gtags-cscope45899
+Node: Web browser46697
+Node: Features(browser)47076
+Node: Preparation(browser)47567
+Node: Usage(browser)48766
+Node: Doxygen documentation system49527
+Node: Other topics50251
+Node: Configuration50566
+Node: Plug-in51282
+Node: Incremental updating52206
+Node: Reference53394
+Node: global54096
+Node: gtags68274
+Node: htags79593
+Node: htags-server90134
+Node: gozilla92404
+Node: gtags-cscope95224
+Node: globash107076
+Node: gtags.conf108315
+Node: Copying This Manual112262
+Node: GNU Free Documentation License112499
+Node: Index134893
 
 End Tag Table
 

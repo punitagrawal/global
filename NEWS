@@ -19,6 +19,51 @@ ___________________________________
 GNU Global NEWS - User visible changes.
 At least, you should search '[INCOMPATIBLE CHANGES]' for each version.
 
+Version 6.6.11 - Novembe 20 2023
+
+[CHANGE IN SUPPORT STATUS]
+Exuberant Ctags as a plug-in parser is no longer supported.
+Please use Universal Ctags 6.0.0 or later instead. The same
+applies to Pygments plug-in parser.
+
+[FIXED BUGS]
+o gtags('pygments-parser.la'): The following setting of Universal Ctags
+  caused no tag output. Same result if the value is not 'no'.
+
+        [$HOME/.config/conf.ctags]
+        +---------------------------
+        |--tag-relative=always
+
+  Now it works.
+
+Version 6.6.10 - May 9 2023
+
+[INCOMPATIBLE CHANGES]
+o configure: Auto-detection of python in the config stage is no longer done.
+  '$datadir/gtags/script/pygments_parser.py' will have '#!/usr/bin/env python' by default.
+  You can specify the path using the following option:
+  (Assuming python is located in /usr/local3/bin)
+
+	./configure --with-python-interpreter=/usr/local3/bin/python
+
+o configure: The --with-pread-pwrite option no longer exists.
+  Now configure automatically uses pread(2) and pwrite(2) if they are available.
+
+[FIXED BUGS]
+o gtags(C++ parser): did not recognize 'namespace name1::name2::name3' syntax.
+  Now it picks up 'name2' and 'name3' in addition to 'name1' in the next example:
+
+	namespace name1::name2::name3 { /*...*/ }
+
+o gtags('universal-ctags.la'): The following setting of Universal Ctags caused no tag output.
+  Same result if the value is not 'no'.
+
+	[$HOME/.config/conf.ctags]
+	+---------------------------
+	|--tag-relative=always
+
+  Now it works. This fix applies to 'exuberant-ctags.la' as well.
+
 Version 6.6.9 - December 12 2022
 
 [FIXED BUGS]

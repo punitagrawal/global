@@ -244,6 +244,23 @@
 		@br
 		Skip list is also effective when you use the @option{-f} or @file{gtags.files}.
 	@end_itemize
+@EXAMPLES
+	@begin_verbatim
+	#
+	# There are several ways to use Universal Ctags plug-in parser.
+	#
+	$ gtags --gtagsconf=/usr/local/share/gtags/gtags.conf --gtagslabel=universal-ctags
+	$ gtags --explain
+	or
+	$ export GTAGSCONF=/usr/local/share/gtags/gtags.conf
+	$ export GTAGSLABEL=universal-ctags
+	$ gtags --explain
+	or
+	# In your project
+	$ cp /usr/local/share/gtags/gtags.conf .
+	$ vi gtags.conf		# default:tc=native => default:tc=universal-ctags
+	$ gtags --explain
+	@end_verbatim
 @DIAGNOSTICS
 	@name{Gtags} exits with a non-0 value if an error occurred, 0 otherwise.
 

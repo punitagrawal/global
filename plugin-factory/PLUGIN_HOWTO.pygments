@@ -19,13 +19,14 @@ ___________________________________
 How to use Pygments Plug-in Parser
 
 Pygments is a generic syntax highlighter for wide variety of
-programming languages. This plug-in use Pygments and Exuberant
+programming languages. This plug-in use Pygments and Universal
 Ctags as a parser to treat both definitions and references.
+Exuberant Ctags is no longer supported.
 
 You need the following software:
 o Python 2.6 or later (3 is also supported)
 o Pygments python package 1.6 or later
-o Exuberant Ctags 5.5 or later (optional)
+o Universal Ctags 6.0.0 or later (optional)
 
 [Installation]
 
@@ -72,8 +73,4 @@ File './lib/xmalloc.c' is handled as follows:
                 ----------------------------------
 
 Pygments plug-in parser was written by Yoshitaro MAKISE.
-For detals, please see the following site:
-[https://github.com/yoshizow/global-pygments-plugin]
-
-Though it is considered a separate package, not part of GLOBAL proper,
-we included it for user's convenience.
+Now it is maintained as a part of GNU Global.

@@ -169,13 +169,20 @@ Cpp(const struct parser_param *param)
 			/*
 			 * namespace name = ...;
 			 * namespace [name] { ... }
+			 * namespace name[::name]* { ... }
 			 */
+		cpp_namespace_loop:
 			if ((c = nexttoken(interested, cpp_reserved_word)) == SYMBOL) {
+			cpp_namespace_token_loop:
 				PUT(PARSER_DEF, token, lineno, sp);
 				if ((c = nexttoken(interested, cpp_reserved_word)) == '=') {
 					crflag = 1;
 					break;
 				}
+				if (c == CPP_WCOLON)
+					goto cpp_namespace_loop;
+				if (c == SYMBOL)
+					goto cpp_namespace_token_loop;
 			}
 			/*
 			 * Namespace block doesn't have any influence on level.
