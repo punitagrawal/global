@@ -1,3 +1,9 @@
+global (6.6.11-1) unstable; urgency=medium
+
+  * New upstream version 6.6.11
+
+ -- Punit Agrawal <punit@debian.org>  Sat, 10 Feb 2024 11:11:46 +0000
+
 global (6.6.9-1) unstable; urgency=medium
 
   * New upstream version 6.6.9
