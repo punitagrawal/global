@@ -19,6 +19,36 @@ ___________________________________
 
 ChangeLog about GNU GLOBAL
 
+March 4 2024, Shigio YAMAGUCHI
+
+	Changed the limit values in libutil/xargs.c.
+
+	UNIX: Changed the limit value as follows:
+		if (limit > 20 * 1024)
+			limit = 20 * 1024;
+		|
+		v
+		if (limit > 128 * 1024)
+			limit = 128 * 1024;
+		This value is due to xargs in GNU findutils-4.9.0.
+
+	WIN32: Changed the limit value from 2047 to 8191.
+
+December 14 2023, Shigo YAMAGUCHI
+
+	Now Pygments plug-in parser uses Universal Ctags instead of Exuberant Ctags.
+	Please note the following descriptions:
+
+	[gtags.conf.in]
+		pygments-parser|Pygments plug-in parser:\
+			...
+			:ctagscom=@UNIVERSAL_CTAGS@:\	<===
+	[plugin-factory/pygments_parser.py.in]
+		UNIVERSAL_CTAGS = "@UNIVERSAL_CTAGS@"	<===
+
+	This means you have to do the following configuration to use Pygments.
+		$ ./configure --with-universal-ctags=...
+
 November 19 2023, Shigo YAMAGUCHI
 
 	[plugin-factory/PLUGIN_HOWTO.pygments]

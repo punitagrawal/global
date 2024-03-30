@@ -61,9 +61,10 @@
 		No command means tag search command.
 		Print tags which match to @arg{pattern}.
 		By default, print definition tags.
-	@item{@option{-c}, @option{--completion} [@arg{prefix}]}
+	@item{@option{-c}, @option{--completion[=@arg{limit}]} [@arg{prefix}]}
 		Print symbols which start with @arg{prefix}.
 		If @arg{prefix} is not given, print all symbols.
+		If @arg{limit} is given, print up to limit lines.
 	@item{@option{-f}, @option{--file} @arg{files}}
 		Print all tags in the @arg{files}.
 		This command implies the @option{-x} option.

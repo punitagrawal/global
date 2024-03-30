@@ -88,8 +88,8 @@ exec_line_limit(int length)
 	 * The reason is unknown but the xargs(1) in GNU findutils
 	 * use this limit.
 	 */
-	if (limit > 20 * 1024)
-		limit = 20 * 1024;
+	if (limit > 128 * 1024)
+		limit = 128 * 1024;
 	/*
 	 * Add the command line length.
 	 * We estimates additional 80 bytes for popen(3).
@@ -109,7 +109,7 @@ exec_line_limit(int length)
 	 * characters on Windows 2000 or 8191 characters on Windows XP
 	 * and later. The 80 below is for safety.
 	 */
-	limit = 2047 - length - 80;
+	limit = 8191 - length - 80;
 #endif
 	if (limit < 0)
                die("Negative exec line limit = %ld", limit);

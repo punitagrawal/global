@@ -39,9 +39,10 @@ The following commands are available:
 No command means tag search command.
 Print tags which match to pattern.
 By default, print definition tags.
-@item @samp{-c}, @samp{--completion} [prefix]
+@item @samp{-c}, @samp{--completion[=limit]} [prefix]
 Print symbols which start with prefix.
 If prefix is not given, print all symbols.
+If limit is given, print up to limit lines.
 @item @samp{-f}, @samp{--file} files
 Print all tags in the files.
 This command implies the @samp{-x} option.

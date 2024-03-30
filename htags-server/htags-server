@@ -155,7 +155,7 @@ if ! cd HTML; then
 	echo "Cannot change directory."
 	exit 1
 fi
-if ! [ -f index.html -a -f help.html -a -d cgi-bin -a -d files -a -d defines ]; then
+if ! [ -f index.html -a -f help.html -a -d files -a -d defines ]; then
 	echo "It seems that this hyper-text is broken."
 	exit 1
 fi
@@ -215,10 +215,10 @@ if [ "$use" != 'python' ]; then
 		case `$com --version 2>&1` in
 		*'command not found')
 			echo "$com not found."; exit 1;;
-		ruby' '1.[89]*|ruby' '2.*)
-			ruby_server $com $bind $port; exit 0;;
-		*)
+		ruby' '1.[0-7]*)
 			echo "This version of ruby is not supported."; exit 1;;
+		*)
+			ruby_server $com $bind $port; exit 0;;
 		esac
 	fi
 fi
