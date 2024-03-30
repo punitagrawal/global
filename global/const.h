@@ -13,9 +13,10 @@ const char *help_const = "Commands:\n\
        No command means tag search command.\n\
        Print tags which match to pattern.\n\
        By default, print definition tags.\n\
--c, --completion [prefix]\n\
+-c, --completion[=limit] [prefix]\n\
        Print symbols which start with prefix.\n\
        If prefix is not given, print all symbols.\n\
+       If limit is given, print up to limit lines.\n\
 -f, --file files\n\
        Print all tags in the files.\n\
        This command implies the -x option.\n\

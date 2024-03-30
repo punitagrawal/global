@@ -19,7 +19,25 @@ ___________________________________
 GNU Global NEWS - User visible changes.
 At least, you should search '[INCOMPATIBLE CHANGES]' for each version.
 
-Version 6.6.11 - Novembe 20 2023
+Version 6.6.12 - March 5 2024
+
+[CHANGES]
+global: Added new option 'limit' for the --completion command.
+  If limit option is given, print up to the limit lines.
+	$ global --completion=100 -P lib
+
+[FIXED BUGS]
+o global: The -c command with the --from-here option brings segmentation fault.
+	$ global -c --from-here='158:libutil/find.c'
+  Now it works (--from-here is ignored).
+
+o htags: If the environment happens to be large, it fails with an obscure
+  error message:
+	$ htags ...
+	htags: Negative exec line limit = -80951
+  Now it mostly works since the limit has been loosened.
+
+Version 6.6.11 - November 20 2023
 
 [CHANGE IN SUPPORT STATUS]
 Exuberant Ctags as a plug-in parser is no longer supported.

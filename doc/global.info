@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU Global source code tagging system
 *************************************
 
-This manual documents version 6.6.11 of the GNU Global source code
+This manual documents version 6.6.12 of the GNU Global source code
 tagging system.
 
 * Menu:
@@ -1690,9 +1690,9 @@ The following commands are available:
 <no command> pattern
      No command means tag search command.  Print tags which match to
      pattern.  By default, print definition tags.
-‘-c’, ‘--completion’ [prefix]
+‘-c’, ‘--completion[=limit]’ [prefix]
      Print symbols which start with prefix.  If prefix is not given,
-     print all symbols.
+     print all symbols.  If limit is given, print up to limit lines.
 ‘-f’, ‘--file’ files
      Print all tags in the files.  This command implies the ‘-x’ option.
 ‘-g’, ‘--grep’ pattern [files]
@@ -3875,16 +3875,16 @@ Node: Plug-in51282
 Node: Incremental updating52206
 Node: Reference53394
 Node: global54096
-Node: gtags68274
-Node: htags79593
-Node: htags-server90134
-Node: gozilla92404
-Node: gtags-cscope95224
-Node: globash107076
-Node: gtags.conf108315
-Node: Copying This Manual112262
-Node: GNU Free Documentation License112499
-Node: Index134893
+Node: gtags68327
+Node: htags79646
+Node: htags-server90187
+Node: gozilla92457
+Node: gtags-cscope95277
+Node: globash107129
+Node: gtags.conf108368
+Node: Copying This Manual112315
+Node: GNU Free Documentation License112552
+Node: Index134946
 
 End Tag Table
 

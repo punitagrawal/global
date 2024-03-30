@@ -127,6 +127,9 @@ case $1 in
 	./configure CFLAGS='-g -O2 -Wall'
 	make -s
 	;;
+--universal)
+	./configure CFLAGS='-arch x86_64 -arch arm64' LDFLAGS='-arch x86_64 -arch arm64'
+	;;
 -c|--configure|--make|--install)
 	./configure
 	;;

@@ -369,7 +369,7 @@ universal-ctags|setting to use Universal Ctags plug-in parser:\
 #
 pygments-parser|Pygments plug-in parser:\
 	:tc=common:\
-	:ctagscom=@EXUBERANT_CTAGS@:\
+	:ctagscom=@UNIVERSAL_CTAGS@:\
 	:pygmentslib=$libdir/gtags/pygments-parser.la:\
 	:langmap=ABAP\:.abap:\
 	:langmap=ANTLR\:.G.g:\

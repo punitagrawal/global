@@ -136,6 +136,7 @@ int type;				/**< path conversion type */
 int match_part;				/**< match part only	*/
 int abslib;				/**< absolute path only in library project */
 int use_color;				/**< coloring */
+int limit;				/**< limit of completion lines */
 const char *cwd;			/**< current directory	*/
 const char *root;			/**< root of source tree	*/
 const char *dbpath;			/**< dbpath directory	*/
@@ -191,7 +192,7 @@ const char *short_options = "acC:de:EifFgGIlL:MnNoOpPqrsS:tTuvVx";
 struct option const long_options[] = {
 	{"absolute", no_argument, NULL, 'a'},
 	{"directory", required_argument, NULL, 'C'},
-	{"completion", no_argument, NULL, 'c'},
+	{"completion", optional_argument, NULL, 'c'},
 	{"definition", no_argument, NULL, 'd'},
 	{"extended-regexp", no_argument, NULL, 'E'},
 	{"regexp", required_argument, NULL, 'e'},
@@ -427,6 +428,8 @@ main(int argc, char **argv)
 		case 'c':
 			cflag++;
 			setcom(optchar);
+			if (optarg)
+				limit = atoi(optarg);
 			break;
 		case 'd':
 			dflag++;
@@ -798,6 +801,8 @@ main(int argc, char **argv)
 	}
 	if (cflag && match_part == 0)
 		match_part = MATCH_PART_ALL;
+	if (cflag && context_file)
+		context_file = NULL;
 	/*
 	 * remove leading blanks.
 	 */
@@ -856,7 +861,7 @@ main(int argc, char **argv)
 	/*
 	 * decide tag type.
 	 */
-	if (context_file) {
+	if (context_file && av) {
 		if (!literal && isregex(av))
 			die_with_code(2, "regular expression is not allowed with the --from-here option.");
 		db = decide_tag_by_context(av, context_file, atoi(context_lineno));
@@ -1027,6 +1032,8 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 	if (iflag)
 		flags |= GTOP_IGNORECASE;
 	for (gtp = gtags_first(gtop, prefix, flags); gtp; gtp = gtags_next(gtop)) {
+		if (limit && count >= limit)
+			break;
 		fputs(gtp->tag, stdout);
 		fputc(newline, stdout);
 		count++;
@@ -1081,6 +1088,8 @@ completion(const char *dbpath, const char *root, const char *prefix, int db)
 			total += count;
 			if (count > 0 && !Tflag)
 				break;
+			if (total >= limit)
+				break;
 		}
 		strbuf_close(sb);
 	}
@@ -1101,6 +1110,7 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 	char *lid = usable("lid");
 	char *line, *p;
 	char *argv[10];
+	int count = 0;
 	int i = 0;
 
 	if (prefix && *prefix == 0)	/* In the case global -c '' */
@@ -1167,6 +1177,8 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 		die("cannot execute '%s'.", lid);
 #endif
 	while ((line = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
+		if (limit && count >= limit)
+			break;
 		for (p = line; *p && *p != ' '; p++)
 			;
 		if (*p == '\0') {
@@ -1176,6 +1188,7 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 		*p = '\0';
 		fputs(line, stdout);
 		fputc(newline, stdout);
+		count++;
 	}
 #if (defined(_WIN32) && !defined(__CYGWIN__)) || defined(__DJGPP__)
 	if (pclose(ip) != 0)
@@ -1202,6 +1215,7 @@ completion_path(const char *dbpath, const char *prefix)
 	int prefix_length;
 	int target = GPATH_SOURCE;
 	int flags = (match_part == MATCH_PART_LAST) ? MATCH_LAST : MATCH_FIRST;
+	int count = 0;
 
 	if (dbop == NULL)
 		die("cannot open temporary file.");
@@ -1239,8 +1253,11 @@ completion_path(const char *dbpath, const char *prefix)
 	}
 	gfind_close(gp);
 	for (path = dbop_first(dbop, NULL, NULL, DBOP_KEY); path != NULL; path = dbop_next(dbop)) {
+		if (limit && count >= limit)
+			break;
 		fputs(path, stdout);
 		fputc(newline, stdout);
+		count++;
 	}
 	dbop_close(dbop);
 }
