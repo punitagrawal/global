@@ -1,3 +1,10 @@
+global (6.6.13-1) unstable; urgency=medium
+
+  * New upstream version 6.6.13
+  * Fixes CVE-2024-38448 (Closes: #1074535)
+
+ -- Punit Agrawal <punit@debian.org>  Sat, 27 Jul 2024 06:32:54 +0100
+
 global (6.6.12-1) unstable; urgency=medium
 
   * New upstream version 6.6.12
