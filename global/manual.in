@@ -27,7 +27,7 @@
 @NAME	global - print locations of given symbols
 @SYNOPSIS
 	@name{global} [-adEFGilMnNqrstTvx][-S dir][-e] @arg{pattern}
-	@name{global} -c[dFiIMoOPrsT] @arg{prefix}
+	@name{global} -c[dFiIMoOPqrsTv] @arg{prefix}
 	@name{global} -f[adlnqrstvx][-L file-list][-S dir] @arg{files}
 	@name{global} -g[aEGilMnoOqtvVx][-L file-list][-S dir][-e] @arg{pattern} [@arg{files}]
 	@name{global} -I[ailMnqtvx][-S dir][-e] @arg{pattern}

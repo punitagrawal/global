@@ -19,6 +19,42 @@ ___________________________________
 GNU Global NEWS - User visible changes.
 At least, you should search '[INCOMPATIBLE CHANGES]' for each version.
 
+Version 6.6.13 - July 2 2024
+
+[FIXED BUGS]
+o htags: took the input provided in the dbpath option (-d) and
+  appended it to a command string that will later be executed by
+  system() function, without any escaping, leading to a command
+  injection vulnerability (CVE-2024-38448).
+
+	$ rm -f /tmp/w
+	$ htags -g -q -d '$(pwd>/tmp/w)'
+	$ cat /tmp/w
+	/tmp/global/htags
+
+  Now it just outputs an error:
+
+	$ rm -f /tmp/w
+	$ htags -g -q -d '$(pwd>/tmp/w)'
+	gtags: directory '/tmp/global/htags/$(pwd>' not found.
+	$ cat /tmp/w
+	cat: /tmp/w: No such file or directory
+
+o gtags: Pygments plug-in parser with Python3 does not work,
+  if 'ctagscom' is not set. If it is not set, default path obtained
+  by configure script should be used.
+        
+	$ cat > gtags.conf
+	default:\
+		:ctagscom=:\
+		:langmap=C\:.c.h:\
+		:gtags_parser=C\:/usr/local/lib/gtags/pygments-parser.la:
+	$ gtags
+	$ global -x '.*'
+	$ _                             # no tags
+
+	Now it works.
+
 Version 6.6.12 - March 5 2024
 
 [CHANGES]

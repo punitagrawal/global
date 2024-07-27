@@ -19,19 +19,19 @@ plugin_LTLIBRARIES = \
 
 # Exuberant Ctags parser
 exuberant_ctags_la_SOURCES = exuberant-ctags.c
-exuberant_ctags_la_LDFLAGS = -module -avoid-version -no-undefined
+exuberant_ctags_la_LDFLAGS = -module -avoid-version -no-undefined -shared
 # Univercal Ctags parser
 universal_ctags_la_SOURCES = exuberant-ctags.c
 universal_ctags_la_CFLAGS  = -DUSE_EXTRA_FIELDS
-universal_ctags_la_LDFLAGS = -module -avoid-version -no-undefined
+universal_ctags_la_LDFLAGS = -module -avoid-version -no-undefined -shared
 
 # Pygments parser
 pygments_parser_la_SOURCES = pygments-parser.c
-pygments_parser_la_LDFLAGS = -module -avoid-version -no-undefined
+pygments_parser_la_LDFLAGS = -module -avoid-version -no-undefined -shared
 
 # skeleton
 user_custom_la_SOURCES = user-custom.c
-user_custom_la_LDFLAGS = -module -avoid-version -no-undefined
+user_custom_la_LDFLAGS = -module -avoid-version -no-undefined -shared
 
 gtagsdir = ${datadir}/gtags
 gtags_DATA = PLUGIN_HOWTO PLUGIN_HOWTO.pygments PLUGIN_HOWTO.universal-ctags \

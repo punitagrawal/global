@@ -48,6 +48,7 @@ Christoph Conrad	bug report and advice about S.u.S.E Linux 5.1.
 Motoki NODA		bug fix patch for 'global -xsi xxx'.
 Daisuke Kawahara	bug report about redefinition in gtags.el.
 Dan Fandrich		port to Windows 32 environment.
+Daniel Watson		suggestion to add a 'r' prefix to all regular expressions.
 Darryl Okahata		benchmark report about global(1).
 David Aspinwall		port to Cygwin 32 environment.
 David Brownlee		advice about fine coding style of C.
@@ -121,6 +122,7 @@ Marc Herbert		bug fix of libutil/xargs.c.
 Marcello Nuccio		bug report about globash.rc.
 Marco Corvi		advice about Digital Unix 4.0C.
 Marcus Harnisch		suggestion about the --skip-unreadable option of gtags(1).
+			bug report about pygments plug-in parser with python3.
 Marius Gedminas		bug report and fix patch for htags(1).
 Mark Nudelman		Global tag support on less(1).
 Marty Leisner		advice about --version option and some bug reports.

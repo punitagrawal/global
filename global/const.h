@@ -1,7 +1,7 @@
 /* This file is generated automatically by convert.pl from global/manual.in. */
 const char *progname = "global";
 const char *usage_const = "Usage: global [-adEFGilMnNqrstTvx][-S dir][-e] pattern\n\
-       global -c[dFiIMoOPrsT] prefix\n\
+       global -c[dFiIMoOPqrsTv] prefix\n\
        global -f[adlnqrstvx][-L file-list][-S dir] files\n\
        global -g[aEGilMnoOqtvVx][-L file-list][-S dir][-e] pattern [files]\n\
        global -I[ailMnqtvx][-S dir][-e] pattern\n\

@@ -1,6 +1,6 @@
 /* This file is generated automatically by convert.pl from gtags-cscope/manual.in. */
 const char *progname = "gtags-cscope";
-const char *usage_const = "Usage: gtags-cscope [-bCdehLlVv][-F file ][-012345678 pattern][-p n]\n";
+const char *usage_const = "Usage: gtags-cscope [-abCdehilLvV][-F file ][-012345678 pattern][-p n]\n";
 const char *help_const = "Options:\n\
 -h\n\
        View the long usage help display.\n\

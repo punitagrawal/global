@@ -19,6 +19,33 @@ ___________________________________
 
 ChangeLog about GNU GLOBAL
 
+June 6 2024, Shigio YAMAGUCHI
+
+	[plugin-factory/pygments_parser.py.in]
+	All regular expressions using '\' were made literal with 'r' flag.
+		'\s' -> r'\s'
+
+	Python 3.6 and later considers \s an invalid escape sequence
+	(DeprecationWarnings). But DeprecationWarnings are silenced by default.
+	Python 3.12 and later displays it as a SyntaxWarning by default.
+
+	[test.py]
+	+-------------
+	|print('\s')
+	+-------------
+
+	$ python3.11 test.py
+	\s
+	$ python3.12 test.py
+	/***/***/test.py:1: SyntaxWarning: invalid escape sequence '\s'
+	  print('\s') 
+	\s
+
+April 23 2024, Shigio YAMAGUCHI
+
+	[plugin-factory/Makefile.am]
+	Added '-shared' option to XXXX_la_LDFLAGS not to install static library.
+
 March 4 2024, Shigio YAMAGUCHI
 
 	Changed the limit values in libutil/xargs.c.

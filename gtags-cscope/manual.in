@@ -48,7 +48,7 @@
 @HEADER GTAGS-CSCOPE,1,March 2011,GNU Project
 @NAME   gtags-cscope - interactively examine a C program
 @SYNOPSIS
-	@name{gtags-cscope} [-bCdehLlVv][-F file ][-012345678 @arg{pattern}][-p n]
+	@name{gtags-cscope} [-abCdehilLvV][-F file ][-012345678 @arg{pattern}][-p n]
 @DESCRIPTION
 	@name{gtags-cscope} is an interactive, screen-oriented tool that allows the user to
 	browse through source files for specified elements of code.
@@ -276,7 +276,7 @@
 
 	@name{gtags-cscope} will quit when it detects end-of-file, or when the first
 	character of an input line is @kbd{^d} or @kbd{q}.
-@ENVIRONMENT VARIABLES
+@ENVIRONMENT
 	The following environment variables are of @name{cscope} origin.
 
 	@begin_itemize
