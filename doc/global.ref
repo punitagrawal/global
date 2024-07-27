@@ -4,7 +4,7 @@ global - print locations of given symbols
 @unnumberedsubsec SYNOPSIS
 @quotation
 global [-adEFGilMnNqrstTvx][-S dir][-e] pattern@*
-global -c[dFiIMoOPrsT] prefix@*
+global -c[dFiIMoOPqrsTv] prefix@*
 global -f[adlnqrstvx][-L file-list][-S dir] files@*
 global -g[aEGilMnoOqtvVx][-L file-list][-S dir][-e] pattern [files]@*
 global -I[ailMnqtvx][-S dir][-e] pattern@*

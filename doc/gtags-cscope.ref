@@ -3,7 +3,7 @@
 gtags-cscope - interactively examine a C program
 @unnumberedsubsec SYNOPSIS
 @quotation
-gtags-cscope [-bCdehLlVv][-F file ][-012345678 pattern][-p n]@*
+gtags-cscope [-abCdehilLvV][-F file ][-012345678 pattern][-p n]@*
 @end quotation
 @unnumberedsubsec DESCRIPTION
 gtags-cscope is an interactive, screen-oriented tool that allows the user to
@@ -232,7 +232,7 @@ You can use the @kbd{r} command to rebuild the database.
 
 gtags-cscope will quit when it detects end-of-file, or when the first
 character of an input line is @kbd{^d} or @kbd{q}.
-@unnumberedsubsec ENVIRONMENT VARIABLES
+@unnumberedsubsec ENVIRONMENT
 The following environment variables are of cscope origin.
 
 @table @asis

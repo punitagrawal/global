@@ -46,6 +46,7 @@
 #include "global.h"
 #include "anchor.h"
 #include "cache.h"
+#include "char.h"
 #include "common.h"
 #include "htags.h"
 #include "incop.h"
@@ -1333,7 +1334,7 @@ main(int argc, char **argv)
 		*/
 		if (arg_dbpath[0]) {
 			strbuf_putc(sb, ' ');
-			strbuf_puts(sb, arg_dbpath);
+			strbuf_puts(sb, quote_shell(arg_dbpath));
 		}
 		if (system(strbuf_value(sb)))
 			die("cannot execute gtags(1) command.");

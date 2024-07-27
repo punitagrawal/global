@@ -89,7 +89,7 @@ class PygmentsParser:
                     # we can assume index are delivered in ascending order
                     while self.lines_index[cur_line] <= index:
                         cur_line += 1
-                    tag = re.sub('\s+', '', tag)    # remove newline and spaces
+                    tag = re.sub(r'\s+', '', tag)    # remove newline and spaces
                     if self.options.strip_punctuation:
                         tag = tag.strip(PUNCTUATION_CHARACTERS)
                     if tag:
@@ -158,7 +158,7 @@ class CtagsParser:
             line = self.child_stdout.readline()
             if not line or line.startswith(TERMINATOR):
                 break
-            match = re.search(r'(\S+)\s+(\d+)\s+' + re.escape(path) + '\s+(.*)$', line)
+            match = re.search(r'(\S+)\s+(\d+)\s+' + re.escape(path) + r'\s+(.*)$', line)
             if match:
                 (tag, lnum, image) = match.groups()
                 if self.options.strip_punctuation:
@@ -244,7 +244,7 @@ def load_ctags_path():
         if sys.platform == 'win32' and sys.version_info >= (3,):
             path = io.TextIOWrapper(p.stdout, encoding='latin1').readline().rstrip()
         else:
-            path = p.stdout.readline().rstrip()
+            path = p.stdout.readline().rstrip().decode('latin1')
     return path
 
 def main():

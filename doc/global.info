@@ -23,7 +23,7 @@ File: global.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU Global source code tagging system
 *************************************
 
-This manual documents version 6.6.12 of the GNU Global source code
+This manual documents version 6.6.13 of the GNU Global source code
 tagging system.
 
 * Menu:
@@ -1655,7 +1655,7 @@ SYNOPSIS
 --------
 
      global [-adEFGilMnNqrstTvx][-S dir][-e] pattern
-     global -c[dFiIMoOPrsT] prefix
+     global -c[dFiIMoOPqrsTv] prefix
      global -f[adlnqrstvx][-L file-list][-S dir] files
      global -g[aEGilMnoOqtvVx][-L file-list][-S dir][-e] pattern [files]
      global -I[ailMnqtvx][-S dir][-e] pattern
@@ -2050,10 +2050,9 @@ The following options are available:
      it on the command line directly.
 ‘--config’[=name]
      Print the value of config variable name.  If name is not specified
-     then print all names and values.  In addition to the variables
-     listed in the ENVIRONMENT section, you can refer to install
-     directories by read only variables: BINDIR, LIBDIR, DATADIR,
-     LOCALSTATEDIR and SYSCONFDIR.
+     then print all names and values.  Additionally, you can refer to
+     the directory name where the system is installed as read only
+     variables: BINDIR, LIBDIR, DATADIR, LOCALSTATEDIR and SYSCONFDIR.
 ‘-d’, ‘--dump’ tag-file
      Dump a tag file as text to the standard output.  Output format is
      'key<tab>data'.  This is for debugging.
@@ -2803,7 +2802,7 @@ gtags-cscope - interactively examine a C program
 SYNOPSIS
 --------
 
-     gtags-cscope [-bCdehLlVv][-F file ][-012345678 pattern][-p n]
+     gtags-cscope [-abCdehilLvV][-F file ][-012345678 pattern][-p n]
 
 DESCRIPTION
 -----------
@@ -3029,8 +3028,8 @@ searching.  (When ignoring letter case, a search for ‘FILE’ will match
    gtags-cscope will quit when it detects end-of-file, or when the first
 character of an input line is ‘^d’ or ‘q’.
 
-ENVIRONMENT VARIABLES
----------------------
+ENVIRONMENT
+-----------
 
 The following environment variables are of cscope origin.
 
@@ -3875,16 +3874,16 @@ Node: Plug-in51282
 Node: Incremental updating52206
 Node: Reference53394
 Node: global54096
-Node: gtags68327
-Node: htags79646
-Node: htags-server90187
-Node: gozilla92457
-Node: gtags-cscope95277
-Node: globash107129
-Node: gtags.conf108368
-Node: Copying This Manual112315
-Node: GNU Free Documentation License112552
-Node: Index134946
+Node: gtags68329
+Node: htags79622
+Node: htags-server90163
+Node: gozilla92433
+Node: gtags-cscope95253
+Node: globash107087
+Node: gtags.conf108326
+Node: Copying This Manual112273
+Node: GNU Free Documentation License112510
+Node: Index134904
 
 End Tag Table
 

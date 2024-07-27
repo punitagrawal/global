@@ -16,8 +16,8 @@ const char *help_const = "Options:\n\
 --config[=name]\n\
        Print the value of config variable name.\n\
        If name is not specified then print all names and values.\n\
-       In addition to the variables listed in the ENVIRONMENT section,\n\
-       you can refer to install directories by read only variables:\n\
+       Additionally, you can refer to the directory name where the system\n\
+       is installed as read only variables:\n\
        bindir, libdir, datadir, localstatedir and sysconfdir.\n\
 -d, --dump tag-file\n\
        Dump a tag file as text to the standard output.\n\
