@@ -16,10 +16,10 @@ package which is being built with distro provided sqlite3.
  1 file changed, 1 insertion(+), 16 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 1552d3f..548d841 100644
+index ef2c9c6..3ce9fd6 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -228,23 +228,8 @@ AC_ARG_WITH(sqlite3,
+@@ -237,23 +237,8 @@ AC_ARG_WITH(sqlite3,
  		AM_CONDITIONAL(USE_SQLITE3, true)
  		case "$withval" in
  		''|yes)
