@@ -65,9 +65,7 @@ static int bt_meta(BTREE *);
  * @return RET_ERROR, RET_SUCCESS
  */
 int
-__bt_close(dbp, abandon)
-	DB *dbp;
-	int abandon;
+__bt_close(DB *dbp, int abandon)
 {
 	BTREE *t;
 	int fd;
@@ -125,9 +123,7 @@ __bt_close(dbp, abandon)
  * @return RET_SUCCESS, RET_ERROR.
  */
 int
-__bt_sync(dbp, flags)
-	const DB *dbp;
-	u_int flags;
+__bt_sync(const DB *dbp, u_int flags)
 {
 	BTREE *t;
 	int status;
@@ -166,8 +162,7 @@ __bt_sync(dbp, flags)
  * @return RET_ERROR, RET_SUCCESS
  */
 static int
-bt_meta(t)
-	BTREE *t;
+bt_meta(BTREE *t)
 {
 	BTMETA m;
 	void *p;

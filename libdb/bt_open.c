@@ -99,10 +99,7 @@ static int tmp(void);
  *
  */
 DB *
-__bt_open(fname, flags, mode, openinfo, dflags)
-	const char *fname;
-	int flags, mode, dflags;
-	const BTREEINFO *openinfo;
+__bt_open(const char *fname, int flags, int mode, const BTREEINFO *openinfo, int dflags)
 {
 	struct stat sb;
 	BTMETA m;
@@ -366,8 +363,7 @@ err:	if (t) {
  * @return RET_ERROR, RET_SUCCESS
  */
 static int
-nroot(t)
-	BTREE *t;
+nroot(BTREE *t)
 {
 	PAGE *meta, *root;
 	pgno_t npg;
@@ -403,32 +399,25 @@ static int
 tmp(void)
 {
 #ifndef _WIN32
-	sigset_t set, oset;
-#endif
+	FILE *fp = tmpfile();
+	return fp ? fileno(fp) : -1;
+#else
 	int fd;
 	char *envtmp;
 	char path[1024];
 
 	envtmp = getenv("TMPDIR");
-#ifdef _WIN32
 	if (envtmp == NULL)
 		envtmp = getenv("TMP");
-#endif
 	if (envtmp && strlen(envtmp) + strlen("/bt.XXXXXX") >= sizeof(path))
 		return -1;
 	(void)snprintf(path, sizeof(path),
 				"%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
 
-#ifndef _WIN32
-	(void)sigfillset(&set);
-	(void)sigprocmask(SIG_BLOCK, &set, &oset);
-#endif
 	if ((fd = mkstemp(path)) != -1)
 		(void)unlink(path);
-#ifndef _WIN32
-	(void)sigprocmask(SIG_SETMASK, &oset, NULL);
-#endif
 	return(fd);
+#endif
 }
 
 static int
@@ -450,8 +439,7 @@ byteorder(void)
 }
 
 int
-__bt_fd(dbp)
-        const DB *dbp;
+__bt_fd(const DB *dbp)
 {
 	BTREE *t;
 

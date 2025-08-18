@@ -56,8 +56,7 @@ static char sccsid[] = "@(#)bt_debug.c	8.5 (Berkeley) 8/17/94";
  *	@param dbp	pointer to the DB
  */
 void
-__bt_dump(dbp)
-	DB *dbp;
+__bt_dump(DB *dbp)
 {
 	BTREE *t;
 	PAGE *h;
@@ -99,8 +98,7 @@ __bt_dump(dbp)
  *	@param h	pointer to the PAGE
  */
 void
-__bt_dmpage(h)
-	PAGE *h;
+__bt_dmpage(PAGE *h)
 {
 	BTMETA *m;
 	char *sep;
@@ -133,9 +131,7 @@ __bt_dmpage(h)
  *	@param pgno	page number to dump.
  */
 void
-__bt_dnpage(dbp, pgno)
-	DB *dbp;
-	pgno_t pgno;
+__bt_dnpage(DB *dbp, pgno_t pgno)
 {
 	BTREE *t;
 	PAGE *h;
@@ -153,8 +149,7 @@ __bt_dnpage(dbp, pgno)
  *	@param h	pointer to the PAGE
  */
 void
-__bt_dpage(h)
-	PAGE *h;
+__bt_dpage(PAGE *h)
 {
 	BINTERNAL *bi;
 	BLEAF *bl;
@@ -246,8 +241,7 @@ __bt_dpage(h)
  *	@param dbp	pointer to the DB
  */
 void
-__bt_stat(dbp)
-	DB *dbp;
+__bt_stat(DB *dbp)
 {
 	extern u_long bt_cache_hit, bt_cache_miss, bt_pfxsaved, bt_rootsplit;
 	extern u_long bt_sortsplit, bt_split;

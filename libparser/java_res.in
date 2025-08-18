@@ -49,6 +49,7 @@ package			word
 private			word
 protected		word
 public			word
+record			word
 return			word
 short			word
 static			word
