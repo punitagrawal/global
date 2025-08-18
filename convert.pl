@@ -67,7 +67,7 @@ sub getvalue {
 	# A value should be defined as:
 	# NAME='VALUE'
 	#
-	my $line=`grep "$name=" configure.ac`;
+	my $line=`grep "^$name=" configure.ac`;
 	($value) = $line =~ /^$name='(.*)'$/;
 	unless ($value) {
 		print STDERR "$name not found.\n";

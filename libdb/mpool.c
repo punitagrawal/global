@@ -74,10 +74,7 @@ static int  mpool_write(MPOOL *, BKT *);
  *	@param maxcache
  */
 MPOOL *
-mpool_open(key, fd, pagesize, maxcache)
-	void *key;
-	int fd;
-	pgno_t pagesize, maxcache;
+mpool_open(void *key, int fd, pgno_t pagesize, pgno_t maxcache)
 {
 	struct stat sb;
 	MPOOL *mp;
@@ -119,11 +116,10 @@ mpool_open(key, fd, pagesize, maxcache)
  *	@param pgcookie
  */
 void
-mpool_filter(mp, pgin, pgout, pgcookie)
-	MPOOL *mp;
-	void (*pgin)(void *, pgno_t, void *);
-	void (*pgout)(void *, pgno_t, void *);
-	void *pgcookie;
+mpool_filter(MPOOL *mp, 
+	void (*pgin)(void *, pgno_t, void *),
+	void (*pgout)(void *, pgno_t, void *),
+	void *pgcookie)
 {
 	mp->pgin = pgin;
 	mp->pgout = pgout;
@@ -138,9 +134,7 @@ mpool_filter(mp, pgin, pgout, pgcookie)
  *	@param pgnoaddr
  */
 void *
-mpool_new(mp, pgnoaddr)
-	MPOOL *mp;
-	pgno_t *pgnoaddr;
+mpool_new(MPOOL *mp, pgno_t *pgnoaddr)
 {
 	struct _hqh *head;
 	BKT *bp;
@@ -177,10 +171,7 @@ mpool_new(mp, pgnoaddr)
  *	@param flags
  */
 void *
-mpool_get(mp, pgno, flags)
-	MPOOL *mp;
-	pgno_t pgno;
-	u_int flags;				/* XXX not used? */
+mpool_get(MPOOL *mp, pgno_t pgno, u_int flags)			/* XXX not used? */
 {
 	struct _hqh *head;
 	BKT *bp;
@@ -292,10 +283,7 @@ mpool_get(mp, pgno, flags)
  *	@param flags
  */
 int
-mpool_put(mp, page, flags)
-	MPOOL *mp;
-	void *page;
-	u_int flags;
+mpool_put(MPOOL *mp, void *page, u_int flags)
 {
 	BKT *bp;
 
@@ -322,8 +310,7 @@ mpool_put(mp, page, flags)
  *	@param mp
  */
 int
-mpool_close(mp)
-	MPOOL *mp;
+mpool_close(MPOOL *mp)
 {
 	BKT *bp;
 
@@ -345,8 +332,7 @@ mpool_close(mp)
  *	@param mp
  */
 int
-mpool_sync(mp)
-	MPOOL *mp;
+mpool_sync(MPOOL *mp)
 {
 	BKT *bp;
 
@@ -368,8 +354,7 @@ mpool_sync(mp)
  *	@param mp
  */
 static BKT *
-mpool_bkt(mp)
-	MPOOL *mp;
+mpool_bkt(MPOOL *mp)
 {
 	struct _hqh *head;
 	BKT *bp;
@@ -429,9 +414,7 @@ new:	if ((bp = (BKT *)malloc(sizeof(BKT) + mp->pagesize)) == NULL)
  *	@param bp
  */
 static int
-mpool_write(mp, bp)
-	MPOOL *mp;
-	BKT *bp;
+mpool_write(MPOOL *mp, BKT *bp)
 {
 	off_t off;
 
@@ -468,9 +451,7 @@ mpool_write(mp, bp)
  *	@param pgno
  */
 static BKT *
-mpool_look(mp, pgno)
-	MPOOL *mp;
-	pgno_t pgno;
+mpool_look(MPOOL *mp, pgno_t pgno)
 {
 	struct _hqh *head;
 	BKT *bp;
@@ -497,8 +478,7 @@ mpool_look(mp, pgno)
  *	@param mp
  */
 void
-mpool_stat(mp)
-	MPOOL *mp;
+mpool_stat(MPOOL *mp)
 {
 	BKT *bp;
 	int cnt;

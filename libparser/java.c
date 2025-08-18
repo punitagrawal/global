@@ -127,6 +127,7 @@ java(const struct parser_param *param)
 		case JAVA_CLASS:
 		case JAVA_INTERFACE:
 		case JAVA_ENUM:
+		case JAVA_RECORD:
 			if ((c = nexttoken(interested, java_reserved_word)) == SYMBOL) {
 				strlimcpy(classname, token, sizeof(classname));
 				startclass = 1;

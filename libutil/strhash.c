@@ -209,7 +209,7 @@ strhash_dump(STRHASH *sh)
 	struct sh_entry *p;
 
 	for (p = strhash_first(sh); p != NULL; p = strhash_next(sh))
-		fprintf(stderr, "%s => %s\n", p->name, p->value);
+		fprintf(stderr, "%s => %s\n", p->name, (char *)p->value);
 }
 /**
  * strhash_close: close hash array.

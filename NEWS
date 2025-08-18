@@ -19,6 +19,12 @@ ___________________________________
 GNU Global NEWS - User visible changes.
 At least, you should search '[INCOMPATIBLE CHANGES]' for each version.
 
+Version 6.6.14 -  December 11, 2024
+
+[CHANGES]
+New functions:
+o gtags: Added support for 'record' (java).
+
 Version 6.6.13 - July 2 2024
 
 [FIXED BUGS]

@@ -1,6 +1,6 @@
 /* ANSI-C code produced by gperf version 3.1 */
 /* Command-line: gperf --language=ANSI-C --struct-type --slot-name=name --hash-fn-name=java_hash --lookup-fn-name=java_lookup  */
-/* Computed positions: -k'1-2' */
+/* Computed positions: -k'1,3' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
       && ('%' == 37) && ('&' == 38) && ('\'' == 39) && ('(' == 40) \
@@ -76,32 +76,33 @@
 #define JAVA_PRIVATE	2034
 #define JAVA_PROTECTED	2035
 #define JAVA_PUBLIC	2036
-#define JAVA_RETURN	2037
-#define JAVA_SHORT	2038
-#define JAVA_STATIC	2039
-#define JAVA_STRICTFP	2040
-#define JAVA_SUPER	2041
-#define JAVA_SWITCH	2042
-#define JAVA_SYNCHRONIZED	2043
-#define JAVA_THIS	2044
-#define JAVA_THROW	2045
-#define JAVA_THROWS	2046
-#define JAVA_UNION	2047
-#define JAVA_TRANSIENT	2048
-#define JAVA_TRUE	2049
-#define JAVA_TRY	2050
-#define JAVA_VOID	2051
-#define JAVA_VOLATILE	2052
-#define JAVA_WHILE	2053
-#define JAVA_WIDEFP	2054
+#define JAVA_RECORD	2037
+#define JAVA_RETURN	2038
+#define JAVA_SHORT	2039
+#define JAVA_STATIC	2040
+#define JAVA_STRICTFP	2041
+#define JAVA_SUPER	2042
+#define JAVA_SWITCH	2043
+#define JAVA_SYNCHRONIZED	2044
+#define JAVA_THIS	2045
+#define JAVA_THROW	2046
+#define JAVA_THROWS	2047
+#define JAVA_UNION	2048
+#define JAVA_TRANSIENT	2049
+#define JAVA_TRUE	2050
+#define JAVA_TRY	2051
+#define JAVA_VOID	2052
+#define JAVA_VOLATILE	2053
+#define JAVA_WHILE	2054
+#define JAVA_WIDEFP	2055
 struct keyword { char *name; int token; };
 
-#define TOTAL_KEYWORDS 54
+#define TOTAL_KEYWORDS 55
 #define MIN_WORD_LENGTH 2
 #define MAX_WORD_LENGTH 12
-#define MIN_HASH_VALUE 4
-#define MAX_HASH_VALUE 82
-/* maximum key range = 79, duplicates = 0 */
+#define MIN_HASH_VALUE 2
+#define MAX_HASH_VALUE 112
+/* maximum key range = 111, duplicates = 0 */
 
 #ifdef __GNUC__
 __inline
@@ -115,34 +116,46 @@ java_hash (register const char *str, register size_t len)
 {
   static unsigned char asso_values[] =
     {
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 25, 15, 30,
-      50, 25, 20, 35,  0, 10, 83, 83, 40, 50,
-      10,  5, 10, 83,  5,  5,  0,  5, 55, 40,
-      15, 35, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83, 83, 83, 83, 83,
-      83, 83, 83, 83, 83, 83
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113,  20,   5,  15,
+        0,  60,  35,  35, 113,  15,  25, 113,   0,  45,
+       30,  10,   0,  55,  10,   0,  30,  45,   0,  40,
+       15, 113,  10, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+      113, 113, 113, 113, 113, 113, 113
     };
-  return len + asso_values[(unsigned char)str[1]] + asso_values[(unsigned char)str[0]];
+  register unsigned int hval = len;
+
+  switch (hval)
+    {
+      default:
+        hval += asso_values[(unsigned char)str[2]+1];
+      /*FALLTHROUGH*/
+      case 2:
+      case 1:
+        hval += asso_values[(unsigned char)str[0]];
+        break;
+    }
+  return hval;
 }
 
 struct keyword *
@@ -150,75 +163,84 @@ java_lookup (register const char *str, register size_t len)
 {
   static struct keyword wordlist[] =
     {
-      {""}, {""}, {""}, {""},
-      {"this", JAVA_THIS},
+      {""}, {""},
+      {"do", JAVA_DO},
+      {""}, {""},
+      {"short", JAVA_SHORT},
+      {"double", JAVA_DOUBLE},
+      {"package", JAVA_PACKAGE},
+      {"strictfp", JAVA_STRICTFP},
+      {"protected", JAVA_PROTECTED},
+      {""},
+      {"static", JAVA_STATIC},
+      {"boolean", JAVA_BOOLEAN},
+      {""},
+      {"long", JAVA_LONG},
+      {""},
+      {"record", JAVA_RECORD},
+      {"if", JAVA_IF},
+      {""}, {""}, {""},
+      {"public", JAVA_PUBLIC},
+      {"synchronized", JAVA_SYNCHRONIZED},
+      {""},
+      {"char", JAVA_CHAR},
+      {"class", JAVA_CLASS},
+      {""}, {""}, {""},
+      {"void", JAVA_VOID},
+      {"const", JAVA_CONST},
+      {"switch", JAVA_SWITCH},
+      {"private", JAVA_PRIVATE},
+      {"continue", JAVA_CONTINUE},
+      {"true", JAVA_TRUE},
       {"throw", JAVA_THROW},
       {"throws", JAVA_THROWS},
       {""},
-      {"try", JAVA_TRY},
-      {"true", JAVA_TRUE},
-      {"short", JAVA_SHORT},
-      {"static", JAVA_STATIC},
-      {""},
-      {"strictfp", JAVA_STRICTFP},
-      {"transient", JAVA_TRANSIENT},
-      {"super", JAVA_SUPER},
-      {""}, {""}, {""},
-      {"null", JAVA_NULL},
-      {"union", JAVA_UNION},
-      {"public", JAVA_PUBLIC},
-      {"private", JAVA_PRIVATE},
-      {"int", JAVA_INT},
-      {"protected", JAVA_PROTECTED},
-      {"break", JAVA_BREAK},
-      {""},
-      {"boolean", JAVA_BOOLEAN},
       {"for", JAVA_FOR},
-      {"interface", JAVA_INTERFACE},
-      {"instanceof", JAVA_INSTANCEOF},
       {""},
-      {"if", JAVA_IF},
-      {""},
-      {"char", JAVA_CHAR},
-      {"final", JAVA_FINAL},
-      {"return", JAVA_RETURN},
-      {"finally", JAVA_FINALLY},
-      {"new", JAVA_NEW},
-      {"enum", JAVA_ENUM},
-      {"const", JAVA_CONST},
-      {"native", JAVA_NATIVE},
-      {"package", JAVA_PACKAGE},
-      {"continue", JAVA_CONTINUE},
-      {"goto", JAVA_GOTO},
-      {"while", JAVA_WHILE},
-      {""},
-      {"extends", JAVA_EXTENDS},
-      {"abstract", JAVA_ABSTRACT},
-      {"long", JAVA_LONG},
-      {"false", JAVA_FALSE},
-      {"switch", JAVA_SWITCH},
-      {"synchronized", JAVA_SYNCHRONIZED},
-      {""},
-      {"byte", JAVA_BYTE},
-      {""},
-      {"widefp", JAVA_WIDEFP},
-      {"do", JAVA_DO},
-      {""},
-      {"case", JAVA_CASE},
-      {"catch", JAVA_CATCH},
-      {"double", JAVA_DOUBLE},
-      {""}, {""},
-      {"void", JAVA_VOID},
       {"float", JAVA_FLOAT},
-      {"import", JAVA_IMPORT},
       {""},
+      {"default", JAVA_DEFAULT},
+      {"try", JAVA_TRY},
+      {"transient", JAVA_TRANSIENT},
+      {"break", JAVA_BREAK},
+      {""}, {""},
+      {"new", JAVA_NEW},
+      {"case", JAVA_CASE},
+      {"final", JAVA_FINAL},
+      {""},
+      {"finally", JAVA_FINALLY},
       {"volatile", JAVA_VOLATILE},
-      {"else", JAVA_ELSE},
-      {"implements", JAVA_IMPLEMENTS},
+      {"byte", JAVA_BYTE},
+      {"instanceof", JAVA_INSTANCEOF},
+      {""}, {""},
+      {"abstract", JAVA_ABSTRACT},
+      {"this", JAVA_THIS},
+      {"super", JAVA_SUPER},
+      {"return", JAVA_RETURN},
+      {""},
+      {"int", JAVA_INT},
+      {"enum", JAVA_ENUM},
+      {"catch", JAVA_CATCH},
+      {""}, {""}, {""},
+      {"interface", JAVA_INTERFACE},
+      {"while", JAVA_WHILE},
       {""}, {""}, {""}, {""},
-      {"class", JAVA_CLASS},
-      {""}, {""}, {""}, {""}, {""}, {""},
-      {"default", JAVA_DEFAULT}
+      {"union", JAVA_UNION},
+      {"import", JAVA_IMPORT},
+      {""}, {""},
+      {"null", JAVA_NULL},
+      {"implements", JAVA_IMPLEMENTS},
+      {"native", JAVA_NATIVE},
+      {""}, {""},
+      {"goto", JAVA_GOTO},
+      {"false", JAVA_FALSE},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {"else", JAVA_ELSE},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+      {""}, {""},
+      {"widefp", JAVA_WIDEFP},
+      {""}, {""}, {""}, {""}, {""},
+      {"extends", JAVA_EXTENDS}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

@@ -86,6 +86,7 @@ Hirohito Kato		bug fix patch for gtags-parser to pick up objects in extern "C" {
 Hiroyuki KOBAYASHI	bug report and fix patch for gtags-parser(1).
 Ingmar Sittl		bug report of the shebang of pygments_parser.py.
 James Ahlborn		bug fix patch for the java parser of gtags(1) to skip annotations.
+			patch for support of java 1.4 record.
 Jason Hood		port to DJGPP and Mingw32, and many important bug reports & fixes.
 			He also contributed to much of the --color and --literal option of global(1).
 			He also done many bug fixes and improvements of the C++ parser of gtags(1).
